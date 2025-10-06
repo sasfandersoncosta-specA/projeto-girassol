@@ -1,0 +1,357 @@
+/* --- Reset Básico e Fontes Globais --- */
+body { margin: 0; font-family: 'Montserrat Alternates', sans-serif; background-color: #fdfaf6; }
+h1, h2, h3, h4, h5, h6 { font-family: 'Josefin Sans', sans-serif; }
+
+/* --- Estilos do Cabeçalho --- */
+header {
+    background-color: #1B4332;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px;
+    position: fixed; /* <-- A PROPRIEDADE MÁGICA QUE FAZ GRUDAR */
+    top: 0;          /* <-- DIZENDO PARA GRUDAR NO TOPO (distância 0 do topo) */
+    width: 100%;
+    z-index: 1000;   /* Garante que ele fique na camada de cima de todo o conteúdo */
+    transition: background-color 0.3s ease, color 0.3s ease;
+    box-sizing: border-box;
+    
+}
+.logo { display: flex; align-items: center; text-decoration: none; color: white; z-index: 10; }
+.logo img { height: 40px; width: auto; margin-right: 8px; filter: brightness(0) invert(1); }
+.menu-hamburguer { display: flex; flex-direction: column; justify-content: space-around; width: 30px; height: 25px; background: transparent; border: none; cursor: pointer; padding: 0; z-index: 10; }
+.menu-hamburguer .barra { width: 100%; height: 3px; background-color: white; border-radius: 2px; }
+.container-navegacao { display: none; flex-direction: column; align-items: center; background-color: #1B4332; position: absolute; top: 0; left: 0; width: 100%; height: 100vh; padding-top: 80px; }
+.container-navegacao.ativo { display: flex; }
+nav ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; align-items: center; gap: 25px; width: 100%; }
+nav a { text-decoration: none; color: white; font-size: 20px; }
+nav a:hover { opacity: 0.8; }
+.botoes-acao { display: flex; flex-direction: column; gap: 10px; margin-top: 30px; width: 80%; }
+.btn { padding: 10px 20px; border-radius: 25px; text-decoration: none; font-weight: bold; font-size: 18px; text-align: center; border: 2px solid transparent; transition: all 0.3s ease; }
+.btn-outline { border-color: white; color: white; }
+.btn-outline:hover { background-color: rgba(255, 255, 255, 0.1); }
+.btn-solid { background-color: white; color: #1B4332; border-color: white; }
+.btn-solid:hover { opacity: 0.9; }
+
+.header-rolagem {
+  background-color: white !important;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+}
+header.header-rolagem .logo, header.header-rolagem nav a, header.header-rolagem .btn-outline { color: #333; }
+header.header-rolagem .logo img { filter: none; }
+header.header-rolagem .btn-outline { border-color: #333; }
+header.header-rolagem .btn-solid { background-color: #1B4332; color: white; border-color: #1B4332; }
+header.header-rolagem .menu-hamburguer .barra { background-color: #333; }
+
+/* --- Seções --- */
+.hero { padding: 100px 60px 120px 60px; text-align: center; background-color: #1B4332; position: relative; }
+.hero-texto h1 { font-size: 56px; color: white; margin-bottom: 10px; }
+.hero-texto p { font-size: 22px; color: white; margin-bottom: 40px; }
+.btn-cta-principal { display: inline-block; background-color: white; color: #1B4332; font-size: 22px; font-weight: bold; padding: 15px 30px; border-radius: 30px; text-decoration: none; margin-top: 0px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.btn-cta-principal:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); }
+
+.wave-divider { position: absolute; bottom: 0; left: 0; width: 100%; overflow: hidden; line-height: 0; }
+.wave-divider svg { position: relative; display: block; width: calc(100% + 1.3px); height: 80px; }
+
+.secao-terapeutas { padding: 80px 20px 120px 20px; overflow: hidden; transition: opacity 1s ease-out, transform 0.8s ease-out; position: relative; background-color: #fdfaf6; }
+.secao-conteudo { display: grid; grid-template-columns: 1fr; gap: 40px; max-width: 1100px; margin: 0 auto; align-items: center; }
+.texto-terapeutas h2 { font-size: 36px; color: #1B4332; margin-top: 0; line-height: 1.2; }
+.texto-terapeutas p { font-size: 18px; line-height: 1.6; color: #333; }
+.btn-verde { display: inline-block; background-color: #5a8a6f; color: white; padding: 12px 25px; border-radius: 25px; text-decoration: none; font-weight: bold; margin-top: 20px; transition: background-color 0.3s ease; }
+.btn-verde:hover { background-color: #4a755e; }
+.imagens-terapeutas { position: relative; min-height: 400px; }
+.foto-terapeuta { position: absolute; border-radius: 12px; border: 4px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+.foto-1 { width: 45%; top: 0; left: 10%; }
+.foto-2 { width: 35%; top: 20%; right: 5%; }
+.foto-3 { width: 30%; top: 55%; left: 0; }
+.foto-4 { width: 50%; top: 60%; right: 15%; }
+
+.como-funciona { padding: 80px 20px; background-color: white; transition: opacity 1s ease-out, transform 0.8s ease-out; position: relative; }
+.titulo-secao { text-align: center; font-size: 42px; color: #333; margin-bottom: 60px; }
+.passo { display: grid; grid-template-columns: 1fr; gap: 50px; align-items: center; max-width: 1100px; margin: 0 auto; }
+.passo-texto h3 { font-size: 32px; color: #1B4332; line-height: 1.3; margin-top: 0; }
+.passo-texto p { font-size: 18px; line-height: 1.6; color: #333; }
+.passo-imagens { position: relative; min-height: 450px; }
+.passo-foto, .passo-ilustracao, .forma { position: absolute; border-radius: 16px; }
+.passo-foto { border: 4px solid white; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+.foto-passo1-1 { width: 40%; top: 0; left: 15%; }
+.foto-passo1-2 { width: 35%; top: 40%; right: 10%; }
+.forma-circulo { width: 80px; height: 80px; background-color: #D4E2D4; border-radius: 50%; top: 65%; right: 5%; z-index: -1; }
+.forma-meia-lua { width: 100px; height: 50px; background-color: #E8D8C2; border-radius: 50px 50px 0 0; top: 10%; left: 5%; z-index: -1; }
+
+.faq-secao { padding: 80px 20px; background-color: #fdfaf6; transition: opacity 1s ease-out, transform 0.8s ease-out; position: relative; }
+.acordeao-container { max-width: 600px; margin: 0 auto; }
+.acordeao-item { border-bottom: 1px solid #ddd; }
+.acordeao-titulo { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 20px 0; background: none; border: none; cursor: pointer; text-align: left; font-size: 15px; font-weight: 500; color: #333; }
+.acordeao-titulo::after { content: '▼'; font-size: 10px; transition: transform 0.3s ease; }
+.acordeao-titulo.ativo::after { transform: rotate(180deg); }
+.acordeao-conteudo { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
+.acordeao-conteudo p { padding: 0 10px 20px 10px; margin: 0; font-size: 15px; line-height: 1.6; color: #555; }
+
+.aviso-crise { padding: 40px 20px 120px 20px; background-color: #fdfaf6; border-top: 1px solid #e9ecef; transition: opacity 1s ease-out, transform 0.8s ease-out; position: relative; }
+.aviso-conteudo { max-width: 1100px; margin: 0 auto; text-align: center; }
+.aviso-texto p { margin: 5px 0; color: #555; }
+.aviso-texto a { color: #007bff; text-decoration: underline; }
+.aviso-ssl { margin-top: 20px; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: #6c757d; }
+
+/* --- ESTILOS DO RODAPÉ (VERSÃO FINAL) --- */
+.rodape-principal {
+    background-color: #1B4332;
+    color: #adb5bd;
+    padding: 60px 40px;
+    position: relative;
+}
+.rodape-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column; /* Empilha os blocos do rodapé verticalmente */
+    gap: 30px; /* Espaço entre os blocos */
+}
+
+/* Bloco 1: Nav e Social */
+.rodape-bloco-superior {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+.rodape-nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 25px;
+}
+.rodape-nav a { color: #e9ecef; text-decoration: none; font-size: 16px; }
+.rodape-nav a:hover { text-decoration: underline; }
+.rodape-social { display: flex; gap: 15px; }
+.rodape-social a { display: flex; justify-content: center; align-items: center; width: 40px; height: 40px; border: 1px solid #495057; border-radius: 50%; color: white; text-decoration: none; }
+
+/* Bloco 2: Responsável Técnico */
+.rodape-bloco-rt {
+    text-align: center; /* Centraliza o texto */
+}
+.rodape-bloco-rt p {
+    font-size: 14px;
+    color: #adb5bd;
+    margin: 0;
+}
+
+/* Linha Divisória */
+.rodape-divisor {
+    border: none;
+    height: 1px;
+    background-color: #495057;
+    width: 100%;
+    margin: 0;
+}
+
+/* Bloco 3: Base */
+.rodape-base {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    font-size: 14px;
+}
+.rodape-links-legais { display: flex; flex-wrap: wrap; gap: 20px; }
+.rodape-links-legais a { color: #adb5bd; text-decoration: none; }
+.rodape-links-legais a:hover { text-decoration: underline; }
+.rodape-copyright p { margin: 0; }
+.hidden { opacity: 0; transform: translateY(50px); }
+/* --- FILTRO DE RUÍDO (NOISE TEXTURE) --- */
+.ruido::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    /* Esta linha garante que a camada de ruído seja "fantasma" e não atrapalhe os cliques */
+    pointer-events: none;
+    
+    /* MUDANÇA PRINCIPAL AQUI: */
+    /* Um z-index alto garante que a camada de ruído fique na FRENTE de outros elementos, como a onda */
+    z-index: 5;
+
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 600 600' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    
+    /* Aumentei um pouco a opacidade para o efeito ficar mais perceptível sobre a onda */
+    opacity: 0.08;
+}
+@media (min-width: 768px) {
+    .secao-conteudo, .passo { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 820px) {
+    .rodape-topo, .rodape-base { flex-direction: column; align-items: center; text-align: center; }
+    .rodape-nav ul { flex-direction: column; align-items: center; }
+    .rodape-nav { order: 2; margin-top: 20px; }
+    .rodape-social { order: 1; }
+    .rodape-links-legais { order: 2; margin-top: 15px; }
+    .rodape-copyright { order: 1; }
+}
+/* --- RESPONSIVIDADE FINAL --- */
+
+/* Regras para telas de Tablet para Cima (Desktop) */
+@media (min-width: 992px) {
+    
+    /* --- CABEÇALHO EM DESKTOP --- */
+    .menu-hamburguer {
+        display: none; /* Esconde o ícone de hambúrguer */
+    }
+
+    .container-navegacao {
+        display: flex; /* Mostra o menu de navegação completo */
+        position: static;
+        flex-direction: row;
+        height: auto;
+        width: auto;
+        background-color: transparent;
+        padding-top: 0;
+    }
+
+    nav ul {
+        flex-direction: row;
+        gap: 30px;
+    }
+    
+    nav a {
+        font-size: 16px;
+    }
+
+    .botoes-acao {
+        flex-direction: row;
+        gap: 10px;
+        margin-top: 0;
+        margin-left: 30px;
+        width: auto;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+
+    /* --- LAYOUT DAS SEÇÕES EM DESKTOP --- */
+    .secao-conteudo, .passo {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Regras para o Rodapé em Telas Pequenas (Mobile) */
+@media (max-width: 820px) {
+    .rodape-topo, .rodape-base {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .rodape-nav ul {
+        flex-direction: column;
+        align-items: center;
+    }
+    .rodape-nav { order: 2; margin-top: 20px; }
+    .rodape-social { order: 1; }
+    .rodape-links-legais { order: 2; margin-top: 15px; }
+    .rodape-copyright { order: 1; }
+}
+.wave-faq {
+  position: relative;
+  width: 100%;
+  line-height: 0;
+  overflow: hidden;
+}
+
+.wave-faq svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.onda-faq-topo,
+.onda-faq-final {
+  position: relative;
+  width: 100%;
+  line-height: 0;
+  overflow: hidden;
+}
+
+.onda-faq-topo svg,
+.onda-faq-final svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* Evita texto escuro no menu mobile ao rolar */
+@media (max-width: 992px) {
+  header.header-rolagem {
+    background-color: #1B4332 !important;
+    color: #fff !important;
+  }
+
+  header.header-rolagem nav a,
+  header.header-rolagem .logo,
+  header.header-rolagem .btn-outline {
+    color: #fff !important;
+  }
+
+  header.header-rolagem .btn-outline {
+    border-color: #fff !important;
+  }
+
+  header.header-rolagem .btn-solid {
+    background-color: #fff !important;
+    color: #1B4332 !important;
+    border-color: #fff !important;
+  }
+
+  header.header-rolagem .menu-hamburguer .barra {
+    background-color: #fff !important;
+  }
+}
+.social-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.social-title {
+  font-size: 14px;
+  color: #ffffff;
+  margin-bottom: 16px;
+  font-weight: 400;
+}
+
+.social-icons {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.social-icons a {
+  font-size: 22px;
+  color: #ffffff;
+  text-decoration: none;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.social-icons a:hover {
+  opacity: 0.7;
+}
+/* --- Estilos para Páginas de Conteúdo Genéricas --- */
+.conteudo-pagina {
+    padding: 100px 20px 120px 20px; /* Adicionado padding-bottom de 120px para a onda */
+    text-align: center;
+    position: relative; /* ESSENCIAL para a onda se posicionar corretamente */
+    background-color: white; /* Fundo branco padrão para páginas de conteúdo */
+}
+/* Encontre esta regra e altere o valor do GAP */
+.info-principal {
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Aumentei de 25px para 35px. Sinta-se à vontade para ajustar se quiser mais ou menos. */
+}
