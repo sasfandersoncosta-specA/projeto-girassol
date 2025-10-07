@@ -1,6 +1,9 @@
 /* --- Reset Básico e Fontes Globais --- */
 body { margin: 0; font-family: 'Montserrat Alternates', sans-serif; background-color: #fdfaf6; }
 h1, h2, h3, h4, h5, h6 { font-family: 'Josefin Sans', sans-serif; }
+p, li {
+    text-align: justify;
+}
 
 /* --- Estilos do Cabeçalho --- */
 header {
@@ -76,6 +79,15 @@ header.header-rolagem .menu-hamburguer .barra { background-color: #333; }
 
 .como-funciona { padding: 80px 20px; background-color: white; transition: opacity 1s ease-out, transform 0.8s ease-out; position: relative; }
 .titulo-secao { text-align: center; font-size: 42px; color: #333; margin-bottom: 60px; }
+/* Novo estilo para o subtítulo da seção, garantindo a centralização */
+.subtitulo-secao {
+    text-align: center;
+    font-size: 18px;
+    line-height: 1.7;
+    color: #555;
+    max-width: 700px;
+    margin: 0 auto 50px auto;
+}
 .passo { display: grid; grid-template-columns: 1fr; gap: 50px; align-items: center; max-width: 1100px; margin: 0 auto; }
 .passo-texto h3 { font-size: 32px; color: #1B4332; line-height: 1.3; margin-top: 0; }
 .passo-texto p { font-size: 18px; line-height: 1.6; color: #333; }
@@ -191,6 +203,150 @@ header.header-rolagem .menu-hamburguer .barra { background-color: #333; }
     
     /* Aumentei um pouco a opacidade para o efeito ficar mais perceptível sobre a onda */
     opacity: 0.08;
+}
+/* --- ESTILOS DA SEÇÃO DE PLANOS (VERSÃO CORRIGIDA) --- */
+.secao-planos {
+    background-color: #EBF1EE; /* Fundo verde clarinho */
+}
+
+.planos-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+    margin-top: 60px;
+    align-items: stretch; /* FIX 1: Força todos os cards a terem a mesma altura */
+}
+
+.plano-card {
+    background-color: white;
+    border: 1px solid #ddeedd;
+    border-radius: 16px;
+    padding: 40px 30px 30px 30px; /* Aumenta o espaço no topo para o selo */
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    position: relative;
+}
+
+.plano-destaque {
+    border: 2px solid #457B9D;
+}
+
+.badge-popular {
+    position: absolute;
+    top: -15px; /* Puxa o selo para fora do card */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #457B9D;
+    color: white;
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.plano-card h3 {
+    font-size: 22px;
+    color: #1D3557;
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+.plano-subtitulo {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 20px;
+    min-height: 30px;
+}
+
+.plano-preco {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 42px;
+    font-weight: 700;
+    color: #1D3557;
+    margin: 15px 0;
+}
+
+.plano-preco span {
+    font-size: 16px;
+    font-family: 'Montserrat Alternates', sans-serif;
+    color: #555;
+}
+
+.plano-features {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+    text-align: left;
+    flex-grow: 1; 
+}
+
+.plano-features li {
+    display: flex;
+    align-items: flex-start; /* Alinha o check com o topo do texto de múltiplas linhas */
+    gap: 10px;
+    margin-bottom: 15px;
+    font-size: 16px;
+    color: #333;
+    text-align: left; /* Garante alinhamento à esquerda para o texto */
+}
+
+.plano-features li::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23457B9D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 11.08V12a10 10 0 1 1-5.93-9.14'%3E%3C/path%3E%3Cpolyline points='22 4 12 14.01 9 11.01'%3E%3C/polyline%3E%3C/svg%3E");
+    background-size: contain;
+    margin-top: 2px; /* Pequeno ajuste de alinhamento vertical */
+}
+
+.btn-plano {
+    display: block;
+    width: 60%;
+    padding: 15px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+    margin-top: auto;
+    transition: all 0.3s ease;
+    border: 1px solid #A8DADC;
+    background-color: #F1FAEE;
+    color: #1D3557;
+}
+
+.btn-plano:hover {
+    background-color: #A8DADC;
+    border-color: #A8DADC;
+
+}
+
+.btn-plano-destaque {
+    background-color: #457B9D;
+    border-color: #457B9D;
+    color: white;
+}
+
+.btn-plano-destaque:hover {
+    background-color: #1D3557;
+    border-color: #1D3557;
+}
+
+/* Adiciona a responsividade para os planos em desktop */
+@media (min-width: 992px) {
+    .planos-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Adiciona a responsividade para os planos em desktop */
+@media (min-width: 992px) {
+    .planos-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 @media (min-width: 768px) {
     .secao-conteudo, .passo { grid-template-columns: 1fr 1fr; }
@@ -523,4 +679,233 @@ header.header-rolagem .menu-hamburguer .barra { background-color: #333; }
 
 .rodape-social a:hover svg {
     fill: white; /* Cor que o ícone terá ao passar o mouse por cima */
+}
+ /* --- AJUSTES FINOS DO RODAPÉ PARA MOBILE (VERSÃO FINAL) --- */
+@media (max-width: 768px) {
+    /* Ajusta o container principal */
+    .rodape-container {
+        gap: 25px;
+        text-align: center;
+    }
+
+    /* Empilha o menu e os ícones sociais */
+    .rodape-bloco-superior {
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    /* Empilha e centraliza os links do menu principal */
+    .rodape-nav ul {
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    /* Empilha os links legais e o copyright */
+    .rodape-base {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    /* Centraliza os links de Termos, Política... */
+    .rodape-links-legais {
+        justify-content: center;
+    }
+
+    /* Quebra a linha do Responsável Técnico */
+    .rodape-bloco-rt span {
+        display: block;
+    }
+
+    /* Quebra a linha do Copyright */
+    .rodape-copyright span {
+        display: block;
+    }
+}/* --- ESTILOS DA PÁGINA 'PARA PROFISSIONAIS' --- */
+
+.hero-profissionais {
+    padding: 120px 20px;
+    text-align: center;
+    background-color: #1B4332;
+    position: relative;
+}
+
+.hero-profissionais h1 {
+    color: white;
+    font-size: 48px;
+    max-width: 800px;
+    margin: 0 auto 20px auto;
+}
+
+.hero-profissionais p {
+    color: #eee;
+    font-size: 20px;
+    max-width: 700px;
+    margin: 0 auto 40px auto;
+    line-height: 1.6;
+}
+
+/* Reutilizando o botão da home, mas com texto diferente */
+.hero-profissionais .btn-cta-principal {
+    font-size: 18px;
+}
+
+/* Seções genéricas de conteúdo para esta página */
+.secao-conteudo-pro {
+    padding: 80px 20px 120px 20px;
+    position: relative;
+}
+
+.secao-conteudo-pro .container {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.secao-conteudo-pro h2 {
+    font-size: 42px;
+    color: #1B4332;
+    margin-bottom: 20px;
+}
+
+/* Encontre e substitua esta regra */
+.secao-conteudo-pro > .container > p {
+    font-size: 18px;
+    line-height: 1.7;
+    color: #555;
+    max-width: 700px;
+    margin: 0 auto 50px auto;
+    text-align: center; /* <-- LINHA ADICIONADA PARA CENTRALIZAR */
+}
+
+/* Estilo para listas com ícones */
+.lista-com-icones {
+    list-style: none;
+    padding: 0;
+    text-align: left;
+    max-width: 600px;
+    margin: 40px auto;
+}
+
+.lista-com-icones li {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    font-size: 17px;
+    line-height: 1.6;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.lista-com-icones li::before {
+    content: '✓'; /* Ícone de check. Poderíamos usar um SVG aqui */
+    color: #5a8a6f;
+    font-weight: bold;
+    font-size: 20px;
+    line-height: 1.5;
+}
+
+/* Layout em 3 colunas para a Solução */
+.layout-3-colunas {
+    display: grid;
+    grid-template-columns: 1fr; /* 1 coluna no mobile */
+    gap: 40px;
+    text-align: left;
+    margin-top: 60px;
+}
+
+.coluna-item h3 {
+    font-size: 24px;
+    color: #1B4332;
+    margin-top: 0;
+}
+
+/* Layout em 2x2 para os Benefícios */
+.layout-2-colunas {
+    display: grid;
+    grid-template-columns: 1fr; /* 1 coluna no mobile */
+    gap: 40px;
+    text-align: left;
+    margin-top: 60px;
+}
+
+/* Seção especial 'Em Breve' (fundo escuro) */
+.secao-em-breve {
+    background-color: #2a624d;
+    color: #FFFFFF; /* Mude para branco puro para o parágrafo principal */
+}
+
+.secao-em-breve h2, .secao-em-breve h3 {
+    color: white;
+}
+
+.secao-em-breve .lista-com-icones li {
+    color: #FFFFFF; /* Mude para branco puro também para os itens da lista */
+}
+.secao-em-breve .lista-com-icones li::before {
+    color: #fdfaf6;
+}
+
+/* Seção de CTA Final */
+.cta-final {
+    background-color: #1B4332;
+    color: white;
+}
+.cta-final h2 {
+    color: white;
+    font-size: 36px;
+}
+.cta-final p {
+    color: #eee;
+}
+/* Correção de contraste para parágrafos em seções escuras */
+.secao-em-breve .container > p,
+.cta-final .container > p {
+    color: #f0f0f0; /* Usando um branco um pouco mais suave para leitura */
+}
+
+/* Estilos para o Acordeão (FAQ) */
+/* Já temos estes estilos, mas garantimos que funcionem aqui também */
+.faq-pro {
+    background-color: #fdfaf6;
+}
+
+@media (min-width: 768px) {
+    .layout-3-colunas {
+        grid-template-columns: repeat(3, 1fr); /* 3 colunas no desktop */
+    }
+    .layout-2-colunas {
+        grid-template-columns: repeat(2, 1fr); /* 2 colunas no desktop */
+    }
+}.lista-numerada {
+    list-style: none;
+    counter-reset: lista-contador;
+    padding: 0;
+    text-align: left;
+    max-width: 600px;
+    margin: 40px auto;
+}
+
+.lista-numerada li {
+    counter-increment: lista-contador;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    font-size: 17px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.lista-numerada li::before {
+    content: counter(lista-contador);
+    background-color: #5a8a6f;
+    color: white;
+    font-weight: bold;
+    border-radius: 50%;
+    min-width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Josefin Sans', sans-serif;
 }
