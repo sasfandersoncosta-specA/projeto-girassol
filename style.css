@@ -1,8 +1,17 @@
 /* --- Reset Básico e Fontes Globais --- */
 body { margin: 0; font-family: 'Montserrat Alternates', sans-serif; background-color: #fdfaf6; }
-h1, h2, h3, h4, h5, h6 { font-family: 'Josefin Sans', sans-serif; }
-p, li {
-    text-align: justify;
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'New Kansas', serif; /* <-- APLICA A FONTE QUE DECLARAMOS */
+    font-weight: 700;
+}
+/* --- DECLARAÇÃO DA FONTE CUSTOMIZADA (NEW KANSAS) --- */
+@font-face {
+    font-family: 'New Kansas'; /* O nome que vamos usar no CSS */
+    src: url('assets/fonts/NewKansas-Bold.woff2') format('woff2'),
+         url('assets/fonts/NewKansas-Bold.woff') format('woff');
+    font-weight: 700; /* '700' é o valor para 'bold' */
+    font-style: normal;
+    font-display: swap;
 }
 
 /* --- Estilos do Cabeçalho --- */
