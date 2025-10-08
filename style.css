@@ -219,7 +219,12 @@ header.header-rolagem .menu-hamburguer .barra { background-color: #333; }
 .rodape-nav a { color: #e9ecef; text-decoration: none; font-size: 16px; }
 .rodape-nav a:hover { text-decoration: underline; }
 .rodape-social { display: flex; gap: 15px; }
-.rodape-social a { display: flex; justify-content: center; align-items: center; width: 40px; height: 40px; border: 1px solid #495057; border-radius: 50%; color: white; text-decoration: none; }
+.rodape-social a { display: flex; justify-content: center; align-items: center; width: 40px; height: 40px; border-radius: 50%; color: white; text-decoration: none; }
+.rodape-social img {
+    width: 70%; /* Faz a imagem ocupar 60% do espaço do círculo */
+    height: 70%;
+    object-fit: contain; /* Garante que a imagem caiba dentro do espaço sem distorcer */
+}
 
 /* Bloco 2: Responsável Técnico */
 .rodape-bloco-rt {
@@ -1294,3 +1299,78 @@ header.header-rolagem nav a:hover {
         grid-template-columns: repeat(3, 1fr);
     }
 }
+/* --- ESTILOS DO DASHBOARD ADMIN (VERSÃO FINAL) --- */
+body.pagina-dashboard {
+    padding-top: 0;
+    background-color: #f8f9fa;
+}
+
+.dashboard-container {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+}
+
+.dashboard-sidebar {
+    background-color: var(--verde-escuro);
+    color: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-logo { text-align: center; padding: 20px 0; }
+.sidebar-logo img { height: 35px; }
+.sidebar-nav { margin-top: 30px; }
+.sidebar-nav ul { list-style: none; padding: 0; margin: 0; }
+.sidebar-nav li a { display: block; color: #adb5bd; text-decoration: none; padding: 15px; border-radius: 8px; margin-bottom: 5px; font-weight: 500; transition: all 0.2s ease-in-out; }
+.sidebar-nav li.ativo a, .sidebar-nav li a:hover { background-color: rgba(255, 255, 255, 0.1); color: white; }
+
+.dashboard-main { padding: 30px 40px; overflow-y: auto; }
+.dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+.header-titulo h1 { margin: 0; font-size: 32px; color: #333; }
+.header-titulo p { margin: 5px 0 0 0; color: var(--cinza-texto); text-align: left; }
+.header-acoes { display: flex; align-items: center; gap: 15px; }
+.btn-icone { background: none; border: none; cursor: pointer; padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background-color 0.2s ease; }
+.btn-icone:hover { background-color: #eee; }
+.btn-icone svg { color: #555; width: 24px; height: 24px; }
+
+.dashboard-content { display: flex; flex-direction: column; gap: 30px; }
+.stat-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+.card-stat { background-color: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 25px rgba(0,0,0,0.05); }
+.card-stat h4 { margin: 0 0 10px 0; font-size: 16px; color: var(--cinza-texto); }
+.card-stat p { margin: 0; font-size: 36px; font-weight: 700; color: var(--verde-escuro); text-align: left; }
+.admin-widget { background-color: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 25px rgba(0,0,0,0.05); }
+.admin-widget h2 { margin-top: 0; }
+.widget-subtitulo { font-size: 16px; color: var(--cinza-texto); margin-top: -15px; margin-bottom: 30px; }
+.tabela-wrapper { overflow-x: auto; }
+.tabela-gerenciamento { width: 100%; border-collapse: collapse; margin-top: 20px; }
+.tabela-gerenciamento th, .tabela-gerenciamento td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; white-space: nowrap; }
+.tabela-gerenciamento th { font-family: 'Montserrat', sans-serif; font-size: 14px; color: #888; text-transform: uppercase; }
+.status { padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 12px; }
+.status.ativo { background-color: #D4EDDA; color: #155724; }
+.status.pendente { background-color: #FFF3CD; color: #856404; }
+.status.suspenso { background-color: #E2E3E5; color: #383D41; }
+.btn-tabela { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-right: 5px; }
+.btn-tabela.aprovar { background-color: #D4EDDA; color: #155724; }
+.btn-tabela.reprovar, .btn-tabela.excluir { background-color: #F8D7DA; color: #721C24; }
+.btn-tabela.suspender { background-color: #FFF3CD; color: #856404; }
+
+/* --- Estilos do Modal (Pop-up) --- */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; }
+.modal-overlay.visivel { display: flex; }
+.modal-conteudo { background-color: white; padding: 30px; border-radius: 16px; width: 90%; max-width: 900px; max-height: 90vh; position: relative; display: flex; flex-direction: column; }
+.modal-fechar { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 30px; cursor: pointer; color: #aaa; }
+.modal-conteudo h2 { margin-top: 0; }
+.inbox-container { display: grid; grid-template-columns: 250px 1fr; gap: 20px; border: 1px solid #eee; border-radius: 8px; height: 60vh; margin-top: 20px; }
+.lista-mensagens { border-right: 1px solid #eee; padding: 10px; overflow-y: auto; }
+.mensagem-preview { padding: 15px; border-radius: 6px; cursor: pointer; }
+.mensagem-preview.ativa, .mensagem-preview:hover { background-color: #f8f9fa; }
+.mensagem-preview p { margin: 5px 0 0 0; font-size: 14px; text-align: left; }
+.mensagem-preview span { font-size: 12px; color: #999; }
+.visualizacao-mensagem { padding: 20px; display: flex; flex-direction: column; }
+.visualizacao-mensagem textarea { margin-top: 20px; padding: 10px; border: 1px solid #ccc; border-radius: 8px; flex-grow: 1; resize: none; font-family: 'Inter', sans-serif; }
