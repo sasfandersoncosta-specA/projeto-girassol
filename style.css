@@ -218,12 +218,28 @@ header.header-rolagem .menu-hamburguer .barra { background-color: #333; }
 }
 .rodape-nav a { color: #e9ecef; text-decoration: none; font-size: 16px; }
 .rodape-nav a:hover { text-decoration: underline; }
-.rodape-social { display: flex; gap: 15px; }
-.rodape-social a { display: flex; justify-content: center; align-items: center; width: 40px; height: 40px; border-radius: 50%; color: white; text-decoration: none; }
-.rodape-social img {
-    width: 70%; /* Faz a imagem ocupar 60% do espaço do círculo */
-    height: 70%;
-    object-fit: contain; /* Garante que a imagem caiba dentro do espaço sem distorcer */
+.rodape-social {
+    display: flex;
+    gap: 25px; /* Aumenta o espaço entre os ícones */
+    align-items: center;
+}
+
+.rodape-social a {
+    color: #adb5bd; /* Cor cinza padrão para o ícone */
+    text-decoration: none;
+    display: flex; /* Garante o alinhamento do ícone dentro do link */
+    align-items: center;
+}
+
+.rodape-social svg {
+    width: 24px;  /* Tamanho um pouco maior para os ícones */
+    height: 24px;
+    fill: currentColor; /* Usa a cor definida no 'a' (elemento pai) */
+    transition: fill 0.3s ease;
+}
+
+.rodape-social a:hover {
+    color: white; /* Cor do ícone ao passar o mouse */
 }
 
 /* Bloco 2: Responsável Técnico */
