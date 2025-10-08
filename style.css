@@ -173,11 +173,11 @@ header.header-rolagem .menu-hamburguer .barra { background-color: #333; }
 }
 .acordeao-container { max-width: 600px; margin: 0 auto; }
 .acordeao-item { border-bottom: 1px solid #ddd; }
-.acordeao-titulo { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 20px 0; background: none; border: none; cursor: pointer; text-align: left; font-size: 15px; font-weight: 500; color: #333; }
+.acordeao-titulo { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 20px 0; background: none; border: none; cursor: pointer; text-align: center; font-size: 15px; font-weight: 500; color: #333; }
 .acordeao-titulo::after { content: '▼'; font-size: 10px; transition: transform 0.3s ease; }
 .acordeao-titulo.ativo::after { transform: rotate(180deg); }
 .acordeao-conteudo { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
-.acordeao-conteudo p { padding: 0 10px 20px 10px; margin: 0; font-size: 15px; line-height: 1.6; color: #555; }
+.acordeao-conteudo p { padding: 0 10px 20px 10px; margin: 0; font-size: 15px; line-height: 1.6; color: #555; text-align: justify; }
 
 .aviso-crise { padding: 40px 20px 120px 20px; background-color: #fdfaf6; border-top: 1px solid #e9ecef; transition: opacity 1s ease-out, transform 0.8s ease-out; position: relative; }
 .aviso-conteudo { max-width: 1100px; margin: 0 auto; text-align: center; }
@@ -869,7 +869,7 @@ header.header-rolagem .menu-hamburguer .barra { background-color: #333; }
 
 .lista-com-icones li::before {
     content: '✓';
-    color: var(--cor-girassol); /* Cor do ícone de check */
+    color: var(--verde-escuro); /* Cor do ícone de check */
     font-weight: bold;
     font-size: 20px;
     line-height: 1.5;
@@ -978,4 +978,319 @@ header.header-rolagem nav a:hover {
 /* Efeito hover amarelo nos links do rodapé */
 .rodape-nav a:hover, .rodape-links-legais a:hover {
     color: var(--cor-girassol);
+}
+/* --- ESTILOS DA PÁGINA 'SOBRE NÓS' --- */
+
+.secao-conteudo-pagina {
+    padding: 80px 20px 120px 20px;
+    position: relative;
+}
+
+.container-sobre {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.sobre-intro {
+    text-align: center;
+    margin-bottom: 80px;
+}
+
+.sobre-foto {
+    margin-bottom: 30px;
+}
+
+.sobre-foto img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    /* box-shadow: 0 4px 20px rgba(0,0,0,0.1); */ /* REMOVIDO */
+    border: 4px solid var(--cor-girassol); /* Adiciona um anel amarelo */
+    padding: 5px; /* Espaçamento interno para o anel */
+}
+
+.sobre-missao h1 {
+    font-size: 48px;
+    color: var(--verde-escuro);
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.sobre-missao .texto-destaque {
+    font-size: 20px;
+    line-height: 1.6;
+    color: var(--cinza-texto);
+}
+
+.sobre-historia, .sobre-pilares {
+    margin-bottom: 80px;
+    text-align: center;
+}
+
+.sobre-historia h2, .sobre-pilares h2 {
+    font-size: 42px;
+    color: var(--verde-escuro);
+    margin-bottom: 40px;
+}
+
+.sobre-historia p {
+    font-size: 18px;
+    line-height: 1.8;
+    margin-bottom: 20px;
+}
+
+.sobre-pilares .layout-3-colunas {
+    margin-top: 20px;
+}
+/* Estilo para o bloco de encerramento da página Sobre */
+.sobre-encerramento {
+    text-align: center;
+    padding: 60px 20px 0 20px; /* Adiciona espaçamento acima */
+}
+.sobre-encerramento p {
+    max-width: 500px;
+    margin: 20px auto 40px auto;
+    color: var(--cinza-texto);
+    font-size: 18px;
+    line-height: 1.7;
+}
+/* --- ESTILOS DA PÁGINA DE FAQ --- */
+
+.faq-hero {
+    padding: 60px 20px;
+    text-align: center;
+    background-color: var(--verde-escuro);
+    color: white;
+}
+
+.faq-hero h1 {
+    font-size: 56px;
+    margin-top: 0;
+}
+
+.faq-hero .subtitulo-secao {
+    color: #eee;
+    margin-bottom: 40px;
+}
+
+.faq-busca-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+#faq-busca {
+    width: 100%;
+    padding: 15px 20px;
+    font-size: 16px;
+    border-radius: 30px;
+    border: 2px solid transparent;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+#faq-busca:focus {
+    outline: none;
+    border-color: var(--cor-girassol);
+}
+
+.faq-categoria {
+    margin-bottom: 60px;
+}
+
+.titulo-secao-menor {
+    font-size: 32px;
+    color: var(--verde-escuro);
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.faq-cta {
+    text-align: center;
+    background-color: #f8f9fa;
+    padding: 40px;
+    border-radius: 16px;
+    margin-top: 80px;
+}
+.faq-cta h3 {
+    margin-top: 0;
+}/* --- ESTILOS DA PÁGINA DE CONTATO --- */
+.contato-container {
+    display: grid;
+    grid-template-columns: 1fr; /* 1 coluna no mobile */
+    gap: 50px;
+    text-align: left;
+}
+
+@media (min-width: 768px) {
+    .contato-container {
+        grid-template-columns: 1fr 1.5fr; /* 2 colunas no desktop */
+    }
+}
+
+.info-contato h3 {
+    margin-top: 0;
+    color: var(--verde-escuro);
+}
+
+.info-contato p {
+    line-height: 1.7;
+}
+
+.info-contato ul {
+    list-style: none;
+    padding: 0;
+}
+
+.info-contato li {
+    font-size: 16px;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.form-contato {
+    background-color: #f8f9fa;
+    padding: 30px;
+    border-radius: 16px;
+}
+
+.form-contato .form-group {
+    margin-bottom: 20px;
+}
+
+/* Reutilizando estilos do formulário de login */
+.form-contato label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+.form-contato input,
+.form-contato select,
+.form-contato textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+}
+
+.form-contato textarea {
+    resize: vertical; /* Permite que o usuário redimensione a altura */
+}
+
+/* Reutilizando o botão de login */
+.form-contato .btn-login {
+    width: 100%;
+}
+/* --- ESTILOS DA PÁGINA DE BLOG --- */
+
+.container-blog {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.post-destaque {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+    align-items: center;
+    margin-bottom: 80px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.post-destaque img {
+    width: 100%;
+    border-radius: 16px;
+    object-fit: cover;
+    height: 300px;
+}
+
+.post-destaque-texto span {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--verde-escuro);
+    margin-bottom: 10px;
+    display: block;
+}
+
+.post-destaque-texto h2 {
+    font-size: 36px;
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.post-destaque-texto p {
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--cinza-texto);
+}
+
+.post-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+}
+
+.post-card {
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.post-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+}
+
+.post-card a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.post-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover; /* Garante que a imagem preencha o espaço sem distorcer */
+}
+
+.post-card-conteudo {
+    padding: 25px;
+}
+
+.post-card-conteudo h3 {
+    margin-top: 0;
+    font-size: 22px;
+    color: #333;
+}
+
+.post-card-conteudo p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--cinza-texto);
+}
+
+@media (min-width: 768px) {
+    .post-destaque {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .post-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 992px) {
+    .post-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }

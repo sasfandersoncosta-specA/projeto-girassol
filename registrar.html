@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crie sua Conta - Projeto Girassol</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body class="pagina-login">
+
+    <div id="header-placeholder"></div>
+
+    <main class="login-main ruido">
+        <div class="login-container">
+            <h1 class="login-titulo">Crie sua conta</h1>
+            <form class="login-form">
+                <div class="form-group">
+                    <label for="nome-completo">Nome completo</label>
+                    <input type="text" id="nome-completo" name="nome-completo" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="senha">Crie uma senha</label>
+                    <input type="password" id="senha" name="senha" required>
+                </div>
+                 <div class="form-group">
+                    <label for="confirmar-senha">Confirme sua senha</label>
+                    <input type="password" id="confirmar-senha" name="confirmar-senha" required>
+                </div>
+                <button type="submit" class="btn-login">Criar Conta</button>
+            </form>
+            <div class="login-links">
+                <a href="login.html">Já tem uma conta? <strong>Faça login</strong></a>
+            </div>
+        </div>
+        <div class="wave-divider">
+            <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" class="shape-fill" style="fill:#1B4332;"></path>
+            </svg>
+        </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="script.js"></script>
+    </body>
+</html>

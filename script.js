@@ -2,8 +2,6 @@
 
 /**
  * Carrega um componente HTML de uma URL e o insere em um elemento da página.
- * @param {string} url - O caminho para o arquivo HTML a ser carregado (ex: 'header.html').
- * @param {string} elementoId - O ID do elemento onde o HTML será inserido (ex: 'header-placeholder').
  */
 function carregarComponente(url, elementoId) {
     return fetch(url)
@@ -55,37 +53,97 @@ function inicializarScripts() {
         entradas.forEach((entrada) => {
             if (entrada.isIntersecting) {
                 entrada.target.classList.remove('hidden');
-                observador.unobserve(entrada.target); // Opcional: faz a animação rodar só uma vez por elemento
+                observador.unobserve(entrada.target);
             }
         });
     });
     elementosOcultos.forEach((el) => observador.observe(el));
 
-    // --- LÓGICA PARA O ACORDEÃO (FAQ) ---
-    const titulosAcordeao = document.querySelectorAll('.acordeao-titulo');
-    titulosAcordeao.forEach(titulo => {
-        titulo.addEventListener('click', () => {
-            titulo.classList.toggle('ativo');
-            const conteudo = titulo.nextElementSibling;
-            if (conteudo.style.maxHeight) {
-                conteudo.style.maxHeight = null;
+    // --- LÓGICA PARA O ACORDEÃO 'INTELIGENTE' (SÓ UM ABERTO POR VEZ) ---
+const titulosAcordeao = document.querySelectorAll('.acordeao-titulo');
+titulosAcordeao.forEach(tituloClicado => {
+    tituloClicado.addEventListener('click', () => {
+        // Fecha todos os outros itens antes de abrir o novo
+        titulosAcordeao.forEach(outroTitulo => {
+            if (outroTitulo !== tituloClicado) {
+                outroTitulo.classList.remove('ativo');
+                outroTitulo.nextElementSibling.style.maxHeight = null;
+            }
+        });
+
+        // Abre ou fecha o item que foi clicado
+        tituloClicado.classList.toggle('ativo');
+        const conteudo = tituloClicado.nextElementSibling;
+        if (conteudo.style.maxHeight) {
+            conteudo.style.maxHeight = null;
+        } else {
+            conteudo.style.maxHeight = conteudo.scrollHeight + "px";
+        } 
+    });
+});
+
+    // --- LÓGICA PARA A BUSCA NA PÁGINA FAQ ---
+   // --- LÓGICA PARA A BUSCA 'LIMPA' NA PÁGINA FAQ ---
+const campoBusca = document.getElementById('faq-busca');
+if (campoBusca) {
+    const todosItens = document.querySelectorAll('.faq-categoria .acordeao-item');
+    const todosTitulosCategoria = document.querySelectorAll('.faq-categoria .titulo-secao-menor');
+
+    campoBusca.addEventListener('input', () => {
+        const termoBusca = campoBusca.value.toLowerCase().trim();
+
+        // Esconde ou mostra os títulos das categorias
+        todosTitulosCategoria.forEach(titulo => {
+            titulo.style.display = termoBusca.length > 0 ? 'none' : 'block';
+        });
+
+        // Filtra as perguntas e respostas
+        todosItens.forEach(item => {
+            const textoPergunta = item.querySelector('.acordeao-titulo').textContent.toLowerCase();
+            const textoResposta = item.querySelector('.acordeao-conteudo p').textContent.toLowerCase();
+
+            if (textoPergunta.includes(termoBusca) || textoResposta.includes(termoBusca)) {
+                item.style.display = 'block';
             } else {
-                conteudo.style.maxHeight = conteudo.scrollHeight + "px";
-            } 
+                item.style.display = 'none';
+            }
         });
     });
-}
+    // --- LÓGICA PARA VALIDAR SENHA NA PÁGINA DE REGISTRO ---
+    const campoSenha = document.getElementById('senha');
+    const campoConfirmarSenha = document.getElementById('confirmar-senha');
+
+    if (campoSenha && campoConfirmarSenha) {
+        const form = document.querySelector('.login-form');
+        
+        form.addEventListener('submit', (evento) => {
+            if (campoSenha.value !== campoConfirmarSenha.value) {
+                // Impede o formulário de ser enviado
+                evento.preventDefault(); 
+                
+                // Avisa o usuário
+                alert('As senhas não conferem. Por favor, digite novamente.');
+
+                // Limpa os campos de senha
+                campoSenha.value = '';
+                campoConfirmarSenha.value = '';
+                campoSenha.focus(); // Coloca o cursor no primeiro campo de senha
+            }
+        });
+    }
+
+} // Esta é a chave de fechamento da função inicializarScripts()}
+
+} // Fim da função inicializarScripts()
+
 
 // --- PONTO DE ENTRADA PRINCIPAL ---
-// Espera a estrutura inicial da página (DOM) ser carregada
 document.addEventListener("DOMContentLoaded", () => {
-    // Tenta carregar o header e o footer ao mesmo tempo
     Promise.all([
         carregarComponente('header.html', 'header-placeholder'),
         carregarComponente('footer.html', 'footer-placeholder')
     ]).then(() => {
-        // SOMENTE DEPOIS que ambos forem carregados com sucesso,
-        // a função para inicializar os scripts (menus, animações, etc.) é chamada.
         inicializarScripts();
+        
     });
 });
