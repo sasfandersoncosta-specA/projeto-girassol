@@ -784,7 +784,13 @@ header.header-rolagem .menu-hamburguer .barra { background-color: #333; }
         gap: 25px;
         text-align: center;
     }
-
+    @media (max-width: 768px) {
+  .rodape-social svg,
+  .rodape-social img {
+    width: 20px !important;
+    height: 20px !important;
+  }
+}
     /* Empilha o menu e os ícones sociais */
     .rodape-bloco-superior {
         flex-direction: column;
