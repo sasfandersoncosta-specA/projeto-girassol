@@ -1,3 +1,12 @@
+/* Adicione este bloco no topo do seu style.css */
+
+:root {
+    --verde-escuro: #1B4332;
+    --cor-girassol: #FFEE8C;
+    --branco-puro: #FFFFFF;
+    --off-white: #fdfaf6;
+    --cinza-texto: #555;
+}
 /* --- Reset Básico e Fontes Globais --- */
 body { margin: 0; font-family: 'Montserrat Alternates', sans-serif; background-color: #fdfaf6; }
 h1, h2, h3, h4, h5, h6 {
@@ -30,8 +39,45 @@ header {
     box-sizing: border-box;
     
 }
-.logo { display: flex; align-items: center; text-decoration: none; color: white; z-index: 10; }
-.logo img { height: 40px; width: auto; margin-right: 8px; filter: brightness(0) invert(1); }
+/* --- ESTILOS DA LOGO DINÂMICA --- */
+.logo {
+    /* Adicionamos position relative para empilhar as logos e definimos um tamanho */
+    position: relative;
+    display: block;
+    width: 150px; /* Ajuste a largura conforme o tamanho da sua imagem */
+    height: 40px; /* Mantenha a altura do header */
+}
+
+.logo img {
+    height: 100%;
+    width: auto;
+    /* A mágica do empilhamento e transição */
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: opacity 0.4s ease-in-out;
+}
+
+/* ESTADO INICIAL (Topo da página, header escuro) */
+.logo .logo-escura {
+    opacity: 0; /* Logo escura começa invisível */
+}
+.logo .logo-branca {
+    opacity: 1; /* Logo branca começa visível */
+}
+
+/* ESTADO DE ROLAGEM (Header branco) */
+header.header-rolagem .logo .logo-escura {
+    opacity: 1; /* Logo escura fica visível */
+}
+header.header-rolagem .logo .logo-branca {
+    opacity: 0; /* Logo branca fica invisível */
+}
+
+/* Limpeza: remova o filter da regra antiga se ainda existir */
+header.header-rolagem .logo img {
+    filter: none;
+}
 .menu-hamburguer { display: flex; flex-direction: column; justify-content: space-around; width: 30px; height: 25px; background: transparent; border: none; cursor: pointer; padding: 0; z-index: 10; }
 .menu-hamburguer .barra { width: 100%; height: 3px; background-color: white; border-radius: 2px; }
 .container-navegacao { display: none; flex-direction: column; align-items: center; background-color: #1B4332; position: absolute; top: 0; left: 0; width: 100%; height: 100vh; padding-top: 80px; }
@@ -43,7 +89,7 @@ nav a:hover { opacity: 0.8; }
 .btn { padding: 10px 20px; border-radius: 25px; text-decoration: none; font-weight: bold; font-size: 18px; text-align: center; border: 2px solid transparent; transition: all 0.3s ease; }
 .btn-outline { border-color: white; color: white; }
 .btn-outline:hover { background-color: rgba(255, 255, 255, 0.1); }
-.btn-solid { background-color: white; color: #1B4332; border-color: white; }
+.btn-solid { background-color: #ffffff; color: #1B4332; border-color: white; }
 .btn-solid:hover { opacity: 0.9; }
 
 .header-rolagem {
@@ -60,7 +106,19 @@ header.header-rolagem .menu-hamburguer .barra { background-color: #333; }
 .hero { padding: 100px 60px 120px 60px; text-align: center; background-color: #1B4332; position: relative; }
 .hero-texto h1 { font-size: 56px; color: white; margin-bottom: 10px; }
 .hero-texto p { font-size: 22px; color: white; margin-bottom: 40px; }
-.btn-cta-principal { display: inline-block; background-color: white; color: #1B4332; font-size: 22px; font-weight: bold; padding: 15px 30px; border-radius: 30px; text-decoration: none; margin-top: 0px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.btn-cta-principal {
+    display: inline-block;
+    background-color: var(--cor-girassol);
+    color: var(--verde-escuro);
+    font-size: 22px;
+    font-weight: bold;
+    padding: 18px 40px;
+    border-radius: 30px;
+    text-decoration: none;
+    margin-top: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
 .btn-cta-principal:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); }
 
 .wave-divider { position: absolute; bottom: 0; left: 0; width: 100%; overflow: hidden; line-height: 0; }
@@ -72,7 +130,6 @@ header.header-rolagem .menu-hamburguer .barra { background-color: #333; }
     height: 80px;
     top: 2px;
 }
-
 .secao-terapeutas { padding: 80px 20px 120px 20px; overflow: hidden; transition: opacity 1s ease-out, transform 0.8s ease-out; position: relative; background-color: #fdfaf6; }
 .secao-conteudo { display: grid; grid-template-columns: 1fr; gap: 40px; max-width: 1100px; margin: 0 auto; align-items: center; }
 .texto-terapeutas h2 { font-size: 36px; color: #1B4332; margin-top: 0; line-height: 1.2; }
@@ -108,7 +165,12 @@ header.header-rolagem .menu-hamburguer .barra { background-color: #333; }
 .forma-circulo { width: 80px; height: 80px; background-color: #D4E2D4; border-radius: 50%; top: 65%; right: 5%; z-index: -1; }
 .forma-meia-lua { width: 100px; height: 50px; background-color: #E8D8C2; border-radius: 50px 50px 0 0; top: 10%; left: 5%; z-index: -1; }
 
-.faq-secao { padding: 80px 20px; background-color: #fdfaf6; transition: opacity 1s ease-out, transform 0.8s ease-out; position: relative; }
+.faq-secao {
+    padding: 80px 20px 120px 20px; /* Adicionado padding-bottom para a onda */
+    background-color: #fdfaf6;
+    transition: opacity 1s ease-out, transform 0.8s ease-out;
+    position: relative;
+}
 .acordeao-container { max-width: 600px; margin: 0 auto; }
 .acordeao-item { border-bottom: 1px solid #ddd; }
 .acordeao-titulo { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 20px 0; background: none; border: none; cursor: pointer; text-align: left; font-size: 15px; font-weight: 500; color: #333; }
@@ -161,7 +223,7 @@ header.header-rolagem .menu-hamburguer .barra { background-color: #333; }
 
 /* Bloco 2: Responsável Técnico */
 .rodape-bloco-rt {
-    text-align: center; /* Centraliza o texto */
+    text-align: left; /* Alinha o texto à esquerda */
 }
 .rodape-bloco-rt p {
     font-size: 14px;
@@ -777,7 +839,6 @@ header.header-rolagem .menu-hamburguer .barra { background-color: #333; }
     margin-bottom: 20px;
 }
 
-/* Encontre e substitua esta regra */
 .secao-conteudo-pro > .container > p {
     font-size: 18px;
     line-height: 1.7;
@@ -807,13 +868,12 @@ header.header-rolagem .menu-hamburguer .barra { background-color: #333; }
 }
 
 .lista-com-icones li::before {
-    content: '✓'; /* Ícone de check. Poderíamos usar um SVG aqui */
-    color: #5a8a6f;
+    content: '✓';
+    color: var(--cor-girassol); /* Cor do ícone de check */
     font-weight: bold;
     font-size: 20px;
     line-height: 1.5;
 }
-
 /* Layout em 3 colunas para a Solução */
 .layout-3-colunas {
     display: grid;
@@ -856,21 +916,13 @@ header.header-rolagem .menu-hamburguer .barra { background-color: #333; }
 }
 
 /* Seção de CTA Final */
-.cta-final {
-    background-color: #1B4332;
-    color: white;
-}
-.cta-final h2 {
-    color: white;
-    font-size: 36px;
-}
-.cta-final p {
-    color: #eee;
-}
+.cta-final { background-color: var(-off-white); color: var(--branco-puro); padding: 80px 20px; position: relative; text-align: center; }
+.cta-final h2 { color: var(--verde-escuro); font-size: 36px; }
+.cta-final .container > p { color: #f0f0f0; }
 /* Correção de contraste para parágrafos em seções escuras */
 .secao-em-breve .container > p,
 .cta-final .container > p {
-    color: #f0f0f0; /* Usando um branco um pouco mais suave para leitura */
+    color: #2a624d; /* Usando um branco um pouco mais suave para leitura */
 }
 
 /* Estilos para o Acordeão (FAQ) */
@@ -917,4 +969,13 @@ header.header-rolagem .menu-hamburguer .barra { background-color: #333; }
     align-items: center;
     justify-content: center;
     font-family: 'Josefin Sans', sans-serif;
+}
+/* Efeito hover amarelo nos links do menu (quando o header é branco) */
+header.header-rolagem nav a:hover {
+    color: var(--cor-girassol);
+}
+
+/* Efeito hover amarelo nos links do rodapé */
+.rodape-nav a:hover, .rodape-links-legais a:hover {
+    color: var(--cor-girassol);
 }
