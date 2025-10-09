@@ -1636,7 +1636,51 @@ body.pagina-dashboard {
     }
 }
 
-/* --- OCULTA OS ÍCONES SOCIAIS NO RODAPÉ --- */
+
+/* Arquivo: style.css */
+
+/* --- Estilização do Bloco Superior do Rodapé --- */
+/* Este é o container principal que controla a posição da navegação e dos ícones */
+.rodape-bloco-superior {
+    display: flex;
+    align-items: center;
+    width: 100%;
+
+    /* ESTILO PADRÃO (MOBILE): Itens empilhados e centralizados */
+    flex-direction: column;
+    gap: 30px; /* Espaço entre a navegação (em cima) e os ícones (em baixo) */
+    margin-bottom: 20px;
+}
+
+/* --- Estilização dos Ícones Sociais --- */
+/* Este é o container específico dos ícones */
 .rodape-social {
-    display: none !important;
+    display: flex;
+    gap: 25px; /* Espaço entre cada ícone */
+}
+
+.rodape-social a {
+    display: inline-block;
+    transition: transform 0.2s ease-in-out; /* Efeito suave ao passar o mouse */
+}
+
+.rodape-social a:hover {
+    transform: scale(1.15); /* Aumenta o ícone para dar feedback visual */
+}
+
+.rodape-social img {
+    width: 28px; /* Tamanho padrão dos ícones. Ajuste se precisar. */
+    height: auto;
+}
+
+
+/* --- MEDIA QUERY PARA DESKTOP --- */
+/* Regras aplicadas apenas em telas com 768px de largura ou mais */
+@media (min-width: 768px) {
+
+    .rodape-bloco-superior {
+        /* ESTILO DESKTOP: Itens lado a lado */
+        flex-direction: row;
+        justify-content: space-between; /* Mágica: empurra a nav para a esquerda e os ícones para a direita */
+    }
 }
