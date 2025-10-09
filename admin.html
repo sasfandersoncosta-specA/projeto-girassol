@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Projeto Girassol</title>
+    <link rel="stylesheet" href="admin.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="dashboard-sidebar">
+            <div class="sidebar-header">
+                <h2>Girassol // Admin</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active"><a href="#">Visão Geral</a></li>
+                    <li><a href="#">Profissionais</a></li>
+                    <li><a href="#">Usuários</a></li>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#">Financeiro</a></li>
+                    <li><a href="#">Configurações</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <p>Anderson Costa</p>
+                <a href="#">Sair</a>
+            </div>
+        </aside>
+
+        <main class="dashboard-main">
+            <header class="main-header">
+                <h1>Visão Geral</h1>
+                <button class="btn-rapido">Ação Rápida +</button>
+            </header>
+
+            <section class="kpi-grid">
+                <div class="kpi-card">
+                    <h4>Total de Usuários</h4>
+                    <p class="kpi-numero">1,254</p>
+                    <span class="kpi-delta">+5%</span>
+                </div>
+                <div class="kpi-card">
+                    <h4>Profissionais Ativos</h4>
+                    <p class="kpi-numero">78</p>
+                    <span class="kpi-delta">+2</span>
+                </div>
+                <div class="kpi-card">
+                    <h4>Pendentes de Aprovação</h4>
+                    <p class="kpi-numero">3</p>
+                    <span class="kpi-delta-negativo">URGENTE</span>
+                </div>
+                <div class="kpi-card">
+                    <h4>Sessões (Mês)</h4>
+                    <p class="kpi-numero">432</p>
+                    <span class="kpi-delta">+12%</span>
+                </div>
+            </section>
+
+            <section class="main-widgets">
+                <div class="widget-grafico">
+                    <h3>Atividade de Cadastros (Últimos 30 dias)</h3>
+                    <canvas id="graficoNovosCadastros"></canvas>
+                </div>
+                <div class="widget-atividades">
+                    <h3>Atividades Recentes</h3>
+                    <ul>
+                        <li><span>[APROVAR]</span> Psicóloga <strong>Maria Silva</strong> completou o cadastro.</li>
+                        <li><span>[POST]</span> Novo artigo "5 dicas para ansiedade" publicado no blog.</li>
+                        <li><span>[SESSÃO]</span> Usuário <strong>Carlos Pereira</strong> agendou nova sessão.</li>
+                        <li><span>[CADASTRO]</span> Novo usuário <strong>Juliana Reis</strong> se cadastrou.</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
