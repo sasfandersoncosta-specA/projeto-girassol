@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Projeto Girassol</title>
-    
+    <title>Admin Dashboard - Projeto Girassol</title>    
+    <link rel="stylesheet" href="style.css">    
     <link rel="stylesheet" href="admin.css">
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-
-    </head>
+</head>
 <body class="pagina-dashboard">
 
     <div class="dashboard-container">
@@ -19,16 +17,16 @@
             <div class="sidebar-header">
                 
             <nav class="sidebar-nav">
-                <ul>
-                    <li class="active"><a href="#">Visão Geral</a></li>
-                    <li><a href="#">Profissionais</a></li>
-                    <li><a href="#">Análise do Marketplace</a></li>
-                    <li><a href="#">Gestão da Lista de Espera</a></li>
-                    <li><a href="#">Financeiro</a></li>
-                    <li><a href="#">Gestão de Conteúdo</a></li>
-                    <li><a href="#">Logs do Sistema</a></li>
-                </ul>
-            </nav>
+    <ul>
+        <li class="active" data-page="admin_visao_geral.html"><a href="#">Visão Geral</a></li>
+        <li data-page="admin_gerenciar_psicologos.html"><a href="#">Gerenciamento de Usuários</a></li>
+        <li data-page="admin_analise_marketplace.html"><a href="#">Análise do Marketplace</a></li>
+        <li data-page="admin_gestao_lista_espera.html"><a href="#">Gestão da Lista de Espera</a></li>
+        <li data-page="admin_financeiro.html"><a href="#">Financeiro</a></li>
+        <li data-page="admin_gestao_conteudo.html"><a href="#">Gestão de Conteúdo</a></li>
+        <li data-page="admin_logs.html"><a href="#">Logs do Sistema</a></li>
+    </ul>
+</nav>
             <div class="sidebar-footer">
                 <p>Anderson Costa</p>
                 <a href="#">Sair</a>
@@ -66,12 +64,6 @@
                 </div>
             </section>
         </main>
-    </div>
-    <script>
-  function toggleMenu() {
-    document.querySelector('.dashboard-sidebar').classList.toggle('ativo');
-  }
-</script>
-
+    <script src="admin.js"></script>
 </body>
 </html>

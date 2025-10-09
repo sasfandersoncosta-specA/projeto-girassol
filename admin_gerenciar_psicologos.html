@@ -1,0 +1,79 @@
+<header class="main-header">
+    <h1>Gerenciamento de Psicólogos</h1>
+    <p>Visualize, filtre e gerencie todos os profissionais da plataforma.</p>
+</header>
+
+<section class="admin-widget">
+    <div class="filtros-container">
+        <input type="search" class="campo-busca" placeholder="Buscar por nome, e-mail ou CRP...">
+        <select class="filtro-select">
+            <option>Filtrar por Status</option>
+            <option>Ativo</option>
+            <option>Inativo</option>
+            <option>Pendente</option>
+        </select>
+        <select class="filtro-select">
+            <option>Filtrar por Plano</option>
+            <option>Semente</option>
+            <option>Luz</option>
+            <option>Sol</option>
+        </select>
+    </div>
+
+    <div class="tabela-wrapper">
+        <table class="tabela-gerenciamento">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>E-mail</th>
+                    <th>CRP</th>
+                    <th>Plano</th>
+                    <th>Cliques (Usados/Limite)</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Dra. Beatriz Lima</td>
+                    <td>beatriz.lima@email.com</td>
+                    <td>06/00003</td>
+                    <td>Sol</td>
+                    <td>18 / 30</td>
+                    <td><span class="status ativo">Ativo</span></td>
+                    <td>
+                        <button class="btn-tabela-acao ver">Ver Detalhes</button>
+                        <button class="btn-tabela-acao editar">Editar Plano</button>
+                        <button class="btn-tabela-acao suspender">Suspender</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Dr. Carlos Andrade</td>
+                    <td>carlos.andrade@email.com</td>
+                    <td>06/00004</td>
+                    <td>Luz</td>
+                    <td>15 / 15</td>
+                    <td><span class="status suspenso">Suspenso</span></td>
+                    <td>
+                        <button class="btn-tabela-acao ver">Ver Detalhes</button>
+                        <button class="btn-tabela-acao editar">Editar Plano</button>
+                        <button class="btn-tabela-acao aprovar">Reativar</button>
+                    </td>
+                </tr>
+                 <tr>
+                    <td>Dra. Helena Souza</td>
+                    <td>helena.souza@email.com</td>
+                    <td>06/00001</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td><span class="status pendente">Pendente</span></td>
+                    <td>
+                        <button class="btn-tabela-acao ver">Ver Detalhes</button>
+                        <button class="btn-tabela-acao aprovar">Verificar CRP</button>
+                        <button class="btn-tabela-acao excluir">Excluir</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
