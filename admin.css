@@ -1,0 +1,185 @@
+/* --- ESTILOS DO DASHBOARD ADMIN (VERSÃO FINAL E CORRIGIDA) --- */
+
+/* --- Configurações Globais --- */
+:root {
+    --verde-escuro: #1B4332;
+    --cor-girassol: #FFEE8C;
+    --branco-puro: #FFFFFF;
+    --off-white: #fdfaf6;
+    --cinza-texto: #555;
+    --cinza-fundo: #f8f9fa;
+}
+
+@font-face {
+    font-family: 'New Kansas';
+    src: url('assets/fonts/NewKansas-Bold.woff2') format('woff2'),
+         url('assets/fonts/NewKansas-Bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* --- Reset Básico e Padrões do Dashboard --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--cinza-fundo);
+    color: #333;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'New Kansas', serif;
+    font-weight: 700;
+}
+
+/* --- Estrutura Principal --- */
+.dashboard-container {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    min-height: 100vh;
+}
+
+/* --- Sidebar (Menu Lateral) --- */
+.dashboard-sidebar {
+    background-color: var(--verde-escuro);
+    color: var(--branco-puro);
+    display: flex;
+    flex-direction: column;
+    padding: 25px;
+}
+.sidebar-header h2 { text-align: center; margin-bottom: 40px; }
+.sidebar-nav { flex-grow: 1; }
+.sidebar-nav ul { list-style: none; }
+.sidebar-nav li a {
+    display: block;
+    color: #adb5bd;
+    text-decoration: none;
+    padding: 15px;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+    font-weight: 500;
+}
+.sidebar-nav li.active a, .sidebar-nav li a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--branco-puro);
+}
+.sidebar-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding-top: 20px;
+    text-align: center;
+    font-size: 14px;
+}
+.sidebar-footer a { color: var(--cor-girassol); text-decoration: none; font-weight: bold; }
+
+/* --- Conteúdo Principal --- */
+.dashboard-main {
+    padding: 40px;
+    overflow-y: auto;
+}
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+.main-header h1 { color: var(--verde-escuro); }
+.btn-rapido {
+    background-color: var(--cor-girassol);
+    color: var(--verde-escuro);
+    border: none;
+    padding: 12px 22px;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-rapido:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+
+/* --- Cartões de KPI --- */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+.kpi-card {
+    background-color: var(--branco-puro);
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    border-left: 5px solid var(--verde-escuro);
+    max-width: 100%; /* 🔧 Garante que não ultrapasse o grid */
+    box-sizing: border-box;
+}
+.kpi-card h4 {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    color: var(--cinza-texto);
+    margin-bottom: 10px;
+    font-weight: 400;
+}
+.kpi-numero {
+    font-family: 'New Kansas', serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--verde-escuro);
+}
+.kpi-delta { color: #28a745; font-weight: bold; }
+.kpi-delta-negativo { color: var(--coral-quente); font-weight: bold; }
+
+/* --- Widgets --- */
+.main-widgets {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 25px;
+}
+.widget-atividades {
+    background-color: var(--branco-puro);
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    max-width: 100%; /* 🔧 Garante que os widgets não quebrem o grid */
+    box-sizing: border-box;
+}
+.widget-atividades h3 { font-family: 'New Kansas', serif; }
+.widget-atividades ul { list-style: none; margin-top: 20px; padding: 0; }
+.widget-atividades li {
+    padding: 15px 5px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 15px;
+}
+.widget-atividades li:last-child { border-bottom: none; }
+.widget-atividades li span { font-weight: bold; color: var(--verde-escuro); margin-right: 8px; }
+
+/* --- Responsividade do Dashboard --- */
+@media (max-width: 992px) {
+    .dashboard-container {
+        grid-template-columns: 1fr; /* Coluna única em telas menores */
+    }
+    /* 🔧 Em vez de remover a sidebar, apenas a recolhe */
+    .dashboard-sidebar {
+        position: fixed;
+        left: -250px;
+        top: 0;
+        height: 100vh;
+        width: 250px;
+        transition: left 0.3s ease;
+        z-index: 999;
+    }
+    .dashboard-sidebar.ativo {
+        left: 0;
+    }
+    .dashboard-main {
+        padding: 20px;
+    }
+}

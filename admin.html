@@ -4,18 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Projeto Girassol</title>
-    <link rel="stylesheet" href="style.css">
+    
+    <link rel="stylesheet" href="admin.css">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
-</head>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+
+    </head>
 <body class="pagina-dashboard">
 
     <div class="dashboard-container">
         <aside class="dashboard-sidebar">
             <div class="sidebar-header">
-                <h2>Girassol // Admin</h2>
-            </div>
+                
             <nav class="sidebar-nav">
                 <ul>
                     <li class="active"><a href="#">Visão Geral</a></li>
@@ -65,5 +67,11 @@
             </section>
         </main>
     </div>
+    <script>
+  function toggleMenu() {
+    document.querySelector('.dashboard-sidebar').classList.toggle('ativo');
+  }
+</script>
+
 </body>
 </html>
