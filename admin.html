@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Projeto Girassol</title>
-    <link rel="stylesheet" href="admin.css">
-
+    <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="pagina-dashboard">
+
     <div class="dashboard-container">
         <aside class="dashboard-sidebar">
             <div class="sidebar-header">
@@ -20,10 +20,11 @@
                 <ul>
                     <li class="active"><a href="#">Visão Geral</a></li>
                     <li><a href="#">Profissionais</a></li>
-                    <li><a href="#">Usuários</a></li>
-                    <li><a href="#">Blog</a></li>
+                    <li><a href="#">Análise do Marketplace</a></li>
+                    <li><a href="#">Gestão da Lista de Espera</a></li>
                     <li><a href="#">Financeiro</a></li>
-                    <li><a href="#">Configurações</a></li>
+                    <li><a href="#">Gestão de Conteúdo</a></li>
+                    <li><a href="#">Logs do Sistema</a></li>
                 </ul>
             </nav>
             <div class="sidebar-footer">
@@ -35,51 +36,34 @@
         <main class="dashboard-main">
             <header class="main-header">
                 <h1>Visão Geral</h1>
-                <button class="btn-rapido">Ação Rápida +</button>
+                <p>Resumo vital da saúde da plataforma em tempo real.</p>
             </header>
 
             <section class="kpi-grid">
-                <div class="kpi-card">
-                    <h4>Total de Usuários</h4>
-                    <p class="kpi-numero">1,254</p>
-                    <span class="kpi-delta">+5%</span>
-                </div>
-                <div class="kpi-card">
-                    <h4>Profissionais Ativos</h4>
-                    <p class="kpi-numero">78</p>
-                    <span class="kpi-delta">+2</span>
-                </div>
-                <div class="kpi-card">
-                    <h4>Pendentes de Aprovação</h4>
-                    <p class="kpi-numero">3</p>
-                    <span class="kpi-delta-negativo">URGENTE</span>
-                </div>
-                <div class="kpi-card">
-                    <h4>Sessões (Mês)</h4>
-                    <p class="kpi-numero">432</p>
-                    <span class="kpi-delta">+12%</span>
-                </div>
+                <div class="kpi-card"><h4>Receita Recorrente Mensal (MRR)</h4><p class="kpi-numero">R$ 7.722,00</p></div>
+                <div class="kpi-card"><h4>Novos Pacientes (30d)</h4><p class="kpi-numero">128</p></div>
+                <div class="kpi-card"><h4>Novos Psicólogos (30d)</h4><p class="kpi-numero">12</p></div>
+                <div class="kpi-card"><h4>Questionários (Hoje)</h4><p class="kpi-numero">35</p></div>
             </section>
 
             <section class="main-widgets">
-                <div class="widget-grafico">
-                    <h3>Atividade de Cadastros (Últimos 30 dias)</h3>
-                    <canvas id="graficoNovosCadastros"></canvas>
+                <div class="widget">
+                    <h3>Alertas e Ações Rápidas</h3>
+                    <ul class="lista-alertas">
+                        <li><span class="alerta-numero">3</span> Verificações de CRP Pendentes <a href="#">Validar Agora &rarr;</a></li>
+                        <li><span class="alerta-numero">8</span> Avaliações para Moderação <a href="#">Revisar &rarr;</a></li>
+                        <li><span class="alerta-numero">1</span> Nova Disputa Registrada <a href="#">Ver &rarr;</a></li>
+                    </ul>
                 </div>
-                <div class="widget-atividades">
-                    <h3>Atividades Recentes</h3>
-                    <ul>
-                        <li><span>[APROVAR]</span> Psicóloga <strong>Maria Silva</strong> completou o cadastro.</li>
-                        <li><span>[POST]</span> Novo artigo "5 dicas para ansiedade" publicado no blog.</li>
-                        <li><span>[SESSÃO]</span> Usuário <strong>Carlos Pereira</strong> agendou nova sessão.</li>
-                        <li><span>[CADASTRO]</span> Novo usuário <strong>Juliana Reis</strong> se cadastrou.</li>
+                <div class="widget">
+                    <h3>Saúde do Marketplace</h3>
+                    <ul class="lista-saude">
+                        <li>Taxa de "Match" com Sucesso: <span class="delta-positivo">92%</span></li>
+                        <li>Taxa de "Match" com Zero Resultados: <span class="delta-negativo">8%</span></li>
                     </ul>
                 </div>
             </section>
         </main>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="admin.js"></script>
 </body>
 </html>
