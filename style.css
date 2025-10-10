@@ -1688,3 +1688,16 @@ body.pagina-dashboard {
         justify-content: space-between; /* Mágica: empurra a nav para a esquerda e os ícones para a direita */
     }
 }
+@media (max-width: 768px) {
+    .rodape-principal .rodape-base {
+        display: flex;
+        flex-direction: column-reverse !important;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .rodape-principal .rodape-social {
+        order: -1 !important; /* sobe os ícones acima dos links */
+        margin-bottom: 10px;
+    }
+}
