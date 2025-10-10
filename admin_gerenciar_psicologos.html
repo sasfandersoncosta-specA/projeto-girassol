@@ -1,25 +1,24 @@
-<header class="main-header">
-    <h1>Gerenciamento de Psicólogos</h1>
-    <p>Visualize, filtre e gerencie todos os profissionais da plataforma.</p>
-</header>
+<section class="filtros-container">
+    <input type="text" class="campo-busca" placeholder="Buscar por nome, e-mail ou CRP...">
+    <select class="filtro-select">
+        <option value="">Filtrar por Status</option>
+        <option value="ativo">Ativo</option>
+        <option value="pendente">Pendente</option>
+        <option value="inativo">Inativo</option>
+    </select>
+    <select class="filtro-select">
+        <option value="">Filtrar por Plano</option>
+        <option value="semente">Semente</option>
+        <option value="luz">Luz</option>
+        <option value="sol">Sol</option>
+    </select>
+    <button class="btn-primario">Adicionar Psicólogo</button>
+</section>
 
-<section class="admin-widget">
-    <div class="filtros-container">
-        <input type="search" class="campo-busca" placeholder="Buscar por nome, e-mail ou CRP...">
-        <select class="filtro-select">
-            <option>Filtrar por Status</option>
-            <option>Ativo</option>
-            <option>Inativo</option>
-            <option>Pendente</option>
-        </select>
-        <select class="filtro-select">
-            <option>Filtrar por Plano</option>
-            <option>Semente</option>
-            <option>Luz</option>
-            <option>Sol</option>
-        </select>
-    </div>
-
+<section class="tabela-container">
+    <h3>Gerenciamento de Psicólogos</h3>
+    <p class="subtitulo-secao">Visualize, filtre e gerencie todos os profissionais da plataforma.</p>
+    
     <div class="tabela-wrapper">
         <table class="tabela-gerenciamento">
             <thead>
@@ -40,11 +39,11 @@
                     <td>06/00003</td>
                     <td>Sol</td>
                     <td>18 / 30</td>
-                    <td><span class="status ativo">Ativo</span></td>
+                    <td><span class="status status-ativo">Ativo</span></td>
                     <td>
-                        <button class="btn-tabela-acao ver">Ver Detalhes</button>
-                        <button class="btn-tabela-acao editar">Editar Plano</button>
-                        <button class="btn-tabela-acao suspender">Suspender</button>
+                        <button class="btn-tabela">Ver Detalhes</button>
+                        <button class="btn-tabela">Editar Plano</button>
+                        <button class="btn-tabela">Suspender</button>
                     </td>
                 </tr>
                 <tr>
@@ -53,24 +52,23 @@
                     <td>06/00004</td>
                     <td>Luz</td>
                     <td>15 / 15</td>
-                    <td><span class="status suspenso">Suspenso</span></td>
+                    <td><span class="status status-pendente">Pendente</span></td>
                     <td>
-                        <button class="btn-tabela-acao ver">Ver Detalhes</button>
-                        <button class="btn-tabela-acao editar">Editar Plano</button>
-                        <button class="btn-tabela-acao aprovar">Reativar</button>
+                        <button class="btn-tabela">Ver Detalhes</button>
+                        <button class="btn-tabela">Editar Plano</button>
+                        <button class="btn-tabela">Reativar</button>
                     </td>
                 </tr>
-                 <tr>
+                <tr>
                     <td>Dra. Helena Souza</td>
                     <td>helena.souza@email.com</td>
                     <td>06/00001</td>
                     <td>-</td>
-                    <td>-</td>
-                    <td><span class="status pendente">Pendente</span></td>
+                    <td>- / -</td>
+                    <td><span class="status status-inativo">Pendente CRP</span></td>
                     <td>
-                        <button class="btn-tabela-acao ver">Ver Detalhes</button>
-                        <button class="btn-tabela-acao aprovar">Verificar CRP</button>
-                        <button class="btn-tabela-acao excluir">Excluir</button>
+                        <button class="btn-tabela">Verificar CRP</button>
+                        <button class="btn-tabela">Excluir</button>
                     </td>
                 </tr>
             </tbody>

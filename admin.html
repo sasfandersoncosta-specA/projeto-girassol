@@ -3,67 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Projeto Girassol</title>    
-    <link rel="stylesheet" href="style.css">    
-    <link rel="stylesheet" href="admin.css">
+    <title>Admin Dashboard - Projeto Girassol</title>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="admin.css">
 </head>
 <body class="pagina-dashboard">
 
     <div class="dashboard-container">
-        <aside class="dashboard-sidebar">
+        <aside class="dashboard-sidebar ruido">
             <div class="sidebar-header">
-                
+                <a href="index.html" class="sidebar-logo">
+                    <img src="assets/logos/logo_duplo.png" alt="Logo Girassol">
+                </a>
+            </div>
+            
             <nav class="sidebar-nav">
-    <ul>
-        <li class="active" data-page="admin_visao_geral.html"><a href="#">Visão Geral</a></li>
-        <li data-page="admin_gerenciar_psicologos.html"><a href="#">Gerenciamento de Usuários</a></li>
-        <li data-page="admin_analise_marketplace.html"><a href="#">Análise do Marketplace</a></li>
-        <li data-page="admin_gestao_lista_espera.html"><a href="#">Gestão da Lista de Espera</a></li>
-        <li data-page="admin_financeiro.html"><a href="#">Financeiro</a></li>
-        <li data-page="admin_gestao_conteudo.html"><a href="#">Gestão de Conteúdo</a></li>
-        <li data-page="admin_logs.html"><a href="#">Logs do Sistema</a></li>
-    </ul>
-</nav>
+                <ul>
+                    <li class="active" data-page="admin_visao_geral.html"><a href="#">Visão Geral</a></li>
+                    <li data-page="admin_caixa_entrada.html"><a href="#">Caixa de Entrada</a></li>
+                    <li data-page="admin_gerenciar_psicologos.html"><a href="#">Gerenciar Psicólogos</a></li>
+                    <li data-page="admin_gerenciar_pacientes.html"><a href="#">Gerenciar Pacientes</a></li>
+                    <li data-page="admin_financeiro.html"><a href="#">Financeiro</a></li>
+                    <li data-page="admin_gestao_conteudo.html"><a href="#">Gestão de Conteúdo</a></li>
+                    <li data-page="admin_logs_sistema.html"><a href="#">Logs do Sistema</a></li>
+                </ul>
+            </nav>
+            
             <div class="sidebar-footer">
-                <p>Anderson Costa</p>
-                <a href="#">Sair</a>
+                <p class="nome-admin">Anderson Costa</p>
+                <a href="#" class="btn-sair">Sair</a>
             </div>
         </aside>
 
         <main class="dashboard-main">
             <header class="main-header">
-                <h1>Visão Geral</h1>
-                <p>Resumo vital da saúde da plataforma em tempo real.</p>
+                <div class="header-content">
+                    <button class="btn-toggle-sidebar" id="toggleSidebar">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    <div class="titulo-pagina">
+                        <h1 id="pageTitle">Visão Geral</h1>
+                        <p id="pageSubtitle">Resumo vital da saúde da plataforma em tempo real.</p>
+                    </div>
+                </div>
             </header>
 
-            <section class="kpi-grid">
-                <div class="kpi-card"><h4>Receita Recorrente Mensal (MRR)</h4><p class="kpi-numero">R$ 7.722,00</p></div>
-                <div class="kpi-card"><h4>Novos Pacientes (30d)</h4><p class="kpi-numero">128</p></div>
-                <div class="kpi-card"><h4>Novos Psicólogos (30d)</h4><p class="kpi-numero">12</p></div>
-                <div class="kpi-card"><h4>Questionários (Hoje)</h4><p class="kpi-numero">35</p></div>
-            </section>
-
-            <section class="main-widgets">
-                <div class="widget">
-                    <h3>Alertas e Ações Rápidas</h3>
-                    <ul class="lista-alertas">
-                        <li><span class="alerta-numero">3</span> Verificações de CRP Pendentes <a href="#">Validar Agora &rarr;</a></li>
-                        <li><span class="alerta-numero">8</span> Avaliações para Moderação <a href="#">Revisar &rarr;</a></li>
-                        <li><span class="alerta-numero">1</span> Nova Disputa Registrada <a href="#">Ver &rarr;</a></li>
-                    </ul>
+            <div id="main-content">
                 </div>
-                <div class="widget">
-                    <h3>Saúde do Marketplace</h3>
-                    <ul class="lista-saude">
-                        <li>Taxa de "Match" com Sucesso: <span class="delta-positivo">92%</span></li>
-                        <li>Taxa de "Match" com Zero Resultados: <span class="delta-negativo">8%</span></li>
-                    </ul>
-                </div>
-            </section>
         </main>
+    </div>
+
     <script src="admin.js"></script>
 </body>
 </html>
