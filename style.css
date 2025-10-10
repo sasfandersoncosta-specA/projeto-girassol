@@ -1625,14 +1625,11 @@ body.pagina-dashboard {
         align-items: center;
         gap: 5px;
     }
-    .rodape-base {
-  /* A MÁGICA ACONTECE AQUI: Inverte a ordem de empilhamento */
-  flex-direction: column-reverse; 
+    .rodape-principal .rodape-base {
+  /* Tornamos a regra mais específica adicionando o pai '.rodape-principal' */
+  flex-direction: column-reverse !important; /* O !important força a aplicação desta regra */
 
-  /* Garante que ambos os blocos fiquem centralizados horizontalmente */
   align-items: center;
-
-  /* Aumentei o gap para dar um respiro melhor no empilhamento vertical */
   gap: 25px; 
 }
     .rodape-links-legais {
