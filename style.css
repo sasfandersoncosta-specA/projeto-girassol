@@ -528,10 +528,11 @@ header.header-rolagem nav a:hover {
 .rodape-base {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: space-between; /* Empurra os itens para as extremidades */
     align-items: center;
-    gap: 40px;
+    gap: 20px; /* Um gap menor pode funcionar melhor com space-between */
     font-size: 14px;
+    width: 100%; /* Garante que o container ocupe todo o espaço disponível */
 }
 .rodape-links-legais {
     display: flex;
@@ -1625,9 +1626,15 @@ body.pagina-dashboard {
         gap: 5px;
     }
     .rodape-base {
-        flex-direction: column;
-        gap: 5px;
-    }
+  /* A MÁGICA ACONTECE AQUI: Inverte a ordem de empilhamento */
+  flex-direction: column-reverse; 
+
+  /* Garante que ambos os blocos fiquem centralizados horizontalmente */
+  align-items: center;
+
+  /* Aumentei o gap para dar um respiro melhor no empilhamento vertical */
+  gap: 25px; 
+}
     .rodape-links-legais {
         justify-content: center;
     }
