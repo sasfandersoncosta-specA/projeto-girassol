@@ -1,0 +1,595 @@
+:root {
+    --verde-escuro: #1B4332;
+    --cor-girassol: #FFEE8C;
+    --branco-puro: #FFFFFF;
+    --cinza-fundo: #f8f9fa;
+    --cinza-borda: #e9ecef;
+    --cinza-texto-claro: #6c757d;
+}
+
+@font-face {
+    font-family: 'New Kansas';
+    src: url('assets/fonts/NewKansas-Bold.woff2') format('woff2'),
+         url('assets/fonts/NewKansas-Bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+body.pagina-dashboard {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--cinza-fundo);
+    color: #333;
+    margin: 0;
+    padding-top: 0;
+}
+
+.pagina-dashboard h1, .pagina-dashboard h2, .pagina-dashboard h3, .pagina-dashboard h4 {
+    font-family: 'New Kansas', serif;
+}
+
+.dashboard-container { display: flex; min-height: 100vh; }
+.dashboard-sidebar { width: 250px; background-color: var(--verde-escuro); color: var(--branco-puro); display: flex; flex-direction: column; padding: 20px; flex-shrink: 0; }
+.sidebar-header { text-align: center; padding: 15px 0; margin-bottom: 30px; }
+.sidebar-nav { flex-grow: 1; }
+.sidebar-nav ul { list-style: none; padding: 0; }
+.sidebar-nav li a { display: flex; justify-content: space-between; align-items: center; color: #adb5bd; text-decoration: none; padding: 15px; border-radius: 8px; transition: all 0.2s ease-in-out; font-weight: 500; }
+.sidebar-nav li.active a, .sidebar-nav li a:hover { background-color: rgba(255, 255, 255, 0.1); color: var(--branco-puro); }
+.sidebar-footer { border-top: 1px solid rgba(255, 255, 255, 0.2); padding-top: 20px; text-align: center; font-size: 14px; }
+.sidebar-footer a { color: var(--cor-girassol); text-decoration: none; font-weight: bold; }
+.notificacao { background-color: #E63946; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; display: inline-flex; justify-content: center; align-items: center; }
+.badge-breve { background-color: #457B9D; border-radius: 10px; font-size: 10px; padding: 3px 6px; text-transform: uppercase; }
+
+.dashboard-main { flex-grow: 1; padding: 40px; overflow-y: auto; }
+.main-header { margin-bottom: 40px; }
+.main-header h1 { color: var(--verde-escuro); }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; }
+.kpi-card { background-color: var(--branco-puro); padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+.kpi-card h4 { font-family: 'Inter', sans-serif; font-size: 16px; color: var(--cinza-texto); margin-top: 0; margin-bottom: 20px; font-weight: 500; }
+.kpi-main { display: flex; align-items: flex-end; gap: 10px; }
+.kpi-numero { font-family: 'New Kansas', serif; font-size: 36px; font-weight: 700; color: var(--verde-escuro); line-height: 1; }
+.kpi-numero span { font-family: 'Inter', sans-serif; font-size: 18px; color: var(--cinza-texto-claro); font-weight: 400; }
+.kpi-texto-apoio { font-size: 14px; color: var(--cinza-texto-claro); margin-top: 15px; line-height: 1.5; }
+.kpi-grafico-barra { width: 100%; height: 8px; background-color: var(--cinza-borda); border-radius: 4px; overflow: hidden; }
+.kpi-progresso { height: 100%; background-color: var(--verde-escuro); border-radius: 4px; }
+
+/* --- ESTILOS PARA A PÁGINA DE PERFIL DO PROFISSIONAL --- */
+
+/* --- ESTRUTURA DAS SEÇÕES/WIDGETS --- */
+.admin-widget {
+    /* Esta classe pode ser usada para espaçamento geral se necessário */
+}
+
+.form-secao {
+    background-color: var(--branco-puro);
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+}
+
+.form-secao h2 {
+    font-family: 'Montserrat', sans-serif;
+    color: var(--verde-escuro);
+    margin-bottom: 25px;
+    border-bottom: 1px solid var(--cinza-borda);
+    padding-bottom: 15px;
+}
+
+/* --- GRIDS PARA ORGANIZAÇÃO DOS CAMPOS --- */
+.form-grid-2col {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+}
+
+.form-grid-credenciais {
+    display: flex;
+    flex-wrap: wrap; /* Permite que os itens quebrem para a linha de baixo em telas pequenas */
+    gap: 25px;
+    align-items: flex-end; /* Alinha os campos pela base */
+}
+
+/* --- GRUPOS DE FORMULÁRIO E CAMPOS --- */
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label, .form-group-upload label {
+    font-weight: 500;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: var(--cinza-texto);
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="tel"],
+.form-group input[type="number"],
+.form-group textarea,
+.filtro-select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: 'Inter', sans-serif;
+    background-color: #f8f9fa; /* Um fundo sutil para os campos */
+}
+
+/* --- COMPONENTES ESPECÍFICOS --- */
+
+/* Upload de Arquivo */
+.form-group-upload {
+    display: flex;
+    flex-direction: column;
+}
+.upload-area {
+    display: flex;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 5px;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #f8f9fa;
+}
+.upload-area input[type="file"] {
+    display: none; /* Esconde o input de arquivo padrão */
+}
+.upload-area span {
+    padding-left: 10px;
+    color: var(--cinza-texto);
+}
+/* Reutilizando a classe .btn-rapido para o botão de anexo, mas com ajustes */
+.upload-area + .btn-rapido, 
+.upload-area label { /* Caso use label */
+    background-color: var(--cinza-fundo);
+    color: var(--cinza-texto);
+    font-weight: 500;
+    cursor: pointer;
+    padding: 8px 15px;
+    border-radius: 6px;
+}
+
+/* Status de Validação */
+.status-validacao {
+    font-size: 12px;
+    margin-top: 8px;
+    font-weight: bold;
+}
+.status-validacao.pendente {
+    color: #856404; /* Cor para texto "Pendente" */
+}
+
+/* --- BOTÕES MODERNOS (RADIO & CHECKBOX) --- */
+.radio-group-moderno, .checkbox-group-moderno {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.radio-group-moderno label, .checkbox-group-moderno label {
+    display: inline-block; /* Importante para o layout funcionar */
+}
+.radio-group-moderno input, .checkbox-group-moderno input {
+    display: none; /* Esconde o input real */
+}
+.radio-group-moderno span, .checkbox-group-moderno span {
+    display: block;
+    padding: 10px 20px;
+    border: 1px solid #ced4da;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+/* Estilo ATIVO para os botões */
+.radio-group-moderno input:checked + span, 
+.checkbox-group-moderno input:checked + span {
+    background-color: var(--verde-escuro);
+    color: var(--branco-puro);
+    border-color: var(--verde-escuro);
+}
+
+/* --- BOTÃO FINAL DE AÇÕES --- */
+.form-acoes {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+/* Usando a classe .btn-rapido que você definiu no HTML */
+.btn-rapido {
+    background-color: var(--verde-escuro);
+    color: var(--branco-puro);
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 16px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+.btn-rapido:hover {
+    transform: scale(1.05);
+}
+
+/* --- ESTILOS PARA GERENCIAMENTO DE ESTADO DO FORMULÁRIO --- */
+
+/* Estilo para dar um feedback visual de que os campos estão bloqueados */
+fieldset:disabled .form-group input,
+fieldset:disabled .form-group select,
+fieldset:disabled .form-group textarea {
+    background-color: #e9ecef; /* Um cinza mais claro */
+    cursor: not-allowed;
+}
+fieldset:disabled .toggle-btn {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* Botão secundário para a ação de "Alterar" e "salvar"*/
+.btn-secundario, .btn-salvar {
+    background-color: transparent;
+    color: var(--verde-escuro);
+    border: 2px solid var(--verde-escuro);
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 16px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Efeito hover para ambos */
+.btn-secundario:hover, .btn-salvar:hover {
+    background-color: rgba(27, 67, 50, 0.1); /* Preenchimento sutil */
+    transform: scale(1.05); /* Efeito de zoom */
+}
+
+/* Classe utilitária para esconder/mostrar elementos */
+.hidden {
+    display: none !important;
+}
+/* --- ESTILOS PARA A PÁGINA DE ASSINATURA E PAGAMENTOS --- */
+
+/* Card do Plano Atual */
+.plano-atual-card {
+    background-color: var(--branco-puro);
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    margin-bottom: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 5px solid var(--cor-girassol);
+}
+.plano-atual-card h3 {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--cinza-texto);
+}
+.plano-atual-card .plano-nome {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 24px;
+    color: var(--verde-escuro);
+    margin: 5px 0;
+}
+.plano-atual-card .plano-data {
+    font-size: 14px;
+}
+.plano-acoes {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+.plano-acoes a {
+    color: var(--verde-escuro);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+/* Grid dos Planos */
+.planos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+.plano-card {
+    background-color: var(--branco-puro);
+    border: 2px solid var(--cinza-borda);
+    padding: 30px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+}
+.plano-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+}
+
+/* Destaque do Plano Ativo */
+.plano-card--ativo {
+    border-color: var(--verde-escuro);
+    position: relative;
+    transform: scale(1.03); /* Levemente maior para destaque */
+}
+.selo-plano-atual {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--verde-escuro);
+    color: var(--branco-puro);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* Conteúdo dos Cards de Plano */
+.plano-card h2 {
+    font-family: 'Montserrat', sans-serif;
+    text-align: center;
+    color: var(--verde-escuro);
+}
+.plano-card .preco {
+    font-size: 38px;
+    font-weight: 700;
+    text-align: center;
+    margin: 20px 0;
+    color: var(--cinza-texto);
+}
+.plano-card .preco span {
+    font-size: 16px;
+    font-weight: 400;
+}
+.beneficios-lista {
+    list-style: none;
+    padding-left: 0;
+    flex-grow: 1; /* Faz a lista crescer para alinhar os botões */
+}
+.beneficios-lista li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--cinza-borda);
+    padding-left: 25px;
+    position: relative;
+}
+.beneficios-lista li::before {
+    content: '✓';
+    color: var(--verde-escuro);
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+}
+
+/* Botões de Ação dos Cards */
+.plano-cta {
+    margin-top: 20px;
+}
+.plano-cta button {
+    width: 100%;
+    padding: 15px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+}
+.plano-cta button:disabled {
+    background-color: var(--cinza-fundo);
+    color: var(--cinza-texto);
+    cursor: not-allowed;
+}
+.btn-mudar-plano {
+    background-color: transparent;
+    border: 2px solid var(--verde-escuro);
+    color: var(--verde-escuro);
+}
+.btn-mudar-plano.btn-upgrade {
+    background-color: var(--verde-escuro);
+    color: var(--branco-puro);
+}
+/* --- ESTILO PARA O SELO DE NOTIFICAÇÃO --- */
+.sidebar-nav a {
+    position: relative; /* Necessário para posicionar o selo */
+}
+
+.notification-badge {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background-color: #dc3545; /* Vermelho para alerta */
+    color: var(--branco-puro);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+/* --- ESTILOS PARA A CAIXA DE ENTRADA --- */
+
+.inbox-container {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 30px;
+    height: calc(100vh - 200px); /* Ajuste a altura conforme necessário */
+}
+
+/* Coluna da Lista de Mensagens */
+.inbox-sidebar {
+    background-color: var(--branco-puro);
+    border-radius: 16px;
+    padding: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    overflow-y: auto;
+}
+.message-list {
+    list-style: none;
+}
+.message-item {
+    padding: 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--cinza-borda);
+}
+.message-item:hover {
+    background-color: var(--cinza-fundo);
+}
+.message-item.active {
+    background-color: var(--cor-girassol);
+}
+.message-item.unread .message-subject {
+    font-weight: bold;
+    color: var(--verde-escuro);
+}
+.message-item .message-sender {
+    font-size: 14px;
+    font-weight: 500;
+}
+.message-item .message-subject {
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.message-item .message-date {
+    font-size: 12px;
+    color: var(--cinza-texto);
+    text-align: right;
+}
+
+/* Coluna do Conteúdo da Mensagem */
+.inbox-content {
+    background-color: var(--branco-puro);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    overflow-y: auto;
+}
+.message-header {
+    border-bottom: 1px solid var(--cinza-borda);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+.message-header h2 {
+    font-family: 'Montserrat', sans-serif;
+}
+.message-body p {
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+
+/* --- ESTILOS PARA A JANELA (MODAL) DE FEEDBACK --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.modal-content {
+    background-color: var(--branco-puro);
+    padding: 40px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+}
+.modal-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+}
+.modal-content h2 {
+    font-family: 'Montserrat', sans-serif;
+    margin-bottom: 10px;
+}
+.modal-content textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 20px 0;
+    border: 1px solid var(--cinza-borda);
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+}
+/* --- ESTILOS PARA PÁGINA "EM BREVE" (COMUNIDADE) --- */
+
+.coming-soon-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px;
+    min-height: calc(100vh - 200px); /* Garante que ocupe a altura da tela */
+    background-color: var(--branco-puro);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.coming-soon-icon {
+    color: var(--cor-girassol);
+    margin-bottom: 20px;
+}
+
+.coming-soon-subtitle {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    color: var(--cinza-texto);
+    margin-bottom: 10px;
+}
+
+.coming-soon-title {
+    font-family: 'Montserrat', sans-serif;
+    color: var(--verde-escuro);
+    font-size: 2.5rem; /* Título grande e de impacto */
+    max-width: 600px;
+    margin-bottom: 20px;
+}
+
+.coming-soon-text {
+    max-width: 650px;
+    line-height: 1.7;
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+}
+
+/* --- ESTILO PARA O SELO "EM BREVE" NA SIDEBAR --- */
+
+.sidebar-nav a {
+    display: flex; /* Alinha o texto e o selo */
+    justify-content: space-between;
+    align-items: center;
+}
+
+.badge-em-breve {
+    background-color: var(--cor-girassol);
+    color: var(--verde-escuro);
+    font-size: 10px;
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+}

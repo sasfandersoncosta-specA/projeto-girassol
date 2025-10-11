@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Dashboard - Projeto Girassol</title>
+    
+    <link rel="stylesheet" href="psi_dashboard.css"> 
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+</head>
+<body class="pagina-dashboard">
+    <div class="dashboard-container">
+        <aside class="dashboard-sidebar">
+            <div class="sidebar-header">
+                <img src="../assets/logos/logo-girassol.svg" alt="Logo Girassol" style="width: 150px; margin-bottom: 20px;">
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li data-page="psi_visao_geral.html" class="active"><a href="#">Visão Geral</a></li>
+                    <li data-page="psi_meu_perfil.html"><a href="#">Meu Perfil</a></li>
+                    <li data-page="psi_assinatura.html"><a href="#">Assinatura e Pagamentos</a></li>
+                    <li data-page="psi_caixa_de_entrada.html"><a href="#">Caixa de Entrada<span class="notification-badge">3</span></a></li>
+                    <li data-page="psi_comunidade.html"><a href="#">Comunidade<span class="badge-em-breve">Em Breve</span></a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <p>Dr(a). Anderson Costa</p>
+                <a href="../index.html">Sair</a>
+            </div>
+        </aside>
+
+        <main class="dashboard-main" id="main-content">
+            </main>
+    </div>
+
+    <script src="https://unpkg.com/imask"></script>
+    <script src="psi_dashboard.js"></script>
+</body>
+</html>

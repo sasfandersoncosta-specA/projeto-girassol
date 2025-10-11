@@ -667,7 +667,6 @@ header.header-rolagem nav a:hover {
 .btn-social.apple:hover { background-color: #333; }
 .btn-social svg { width: 20px; height: 20px; }
 
-
 /* --- 2. REGRAS PARA TELAS MENORES (ATÉ 767px) --- */
 
 @media (max-width: 767px) {
@@ -1130,4 +1129,151 @@ header.header-rolagem nav a:hover {
     .post-grid {
         grid-template-columns: repeat(3, 1fr);
     }
+}
+/* --- ESTILOS GERAIS PARA SEÇÕES DE CONTEÚDO --- */
+
+/* O container que centraliza o conteúdo dentro de cada seção */
+.container {
+    max-width: 900px; /* Largura máxima para boa legibilidade */
+    margin: 0 auto; /* Truque clássico para centralizar */
+    padding: 80px 20px; /* Espaçamento interno (vertical, horizontal) */
+    text-align: center; /* Centraliza o texto dentro do container */
+}
+
+/* Títulos principais de cada seção */
+.secao-conteudo-pro h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 2.5rem;
+    color: var(--verde-escuro);
+    margin-bottom: 15px;
+}
+
+/* Subtítulos/parágrafos de apoio de cada seção */
+.subtitulo-secao {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    color: var(--cinza-texto);
+    max-width: 700px;
+    margin: 0 auto 40px auto; /* Centraliza o subtítulo também */
+}
+
+
+/* --- SEÇÃO HERO --- */
+.hero-profissionais {
+    /* Seu CSS de hero provavelmente já existe, estes são ajustes */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 100px 20px;
+}
+
+.hero-profissionais .hero-texto {
+    max-width: 800px;
+}
+
+/* Ajuste no botão CTA principal, caso precise */
+.btn-cta-principal {
+    display: inline-block;
+    background-color: var(--cor-girassol);
+    color: var(--verde-escuro);
+    padding: 15px 35px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: bold;
+    font-family: 'Inter', sans-serif;
+    transition: transform 0.2s ease;
+    margin-top: 20px;
+}
+.btn-cta-principal:hover {
+    transform: scale(1.05);
+}
+
+
+/* --- LISTA COM ÍCONES PERSONALIZADOS --- */
+.lista-com-icones {
+    list-style: none; /* Remove o marcador padrão */
+    padding-left: 0;
+    text-align: left; /* Alinha o texto da lista à esquerda */
+    max-width: 600px;
+    margin: 0 auto; /* Centraliza o bloco da lista */
+}
+
+.lista-com-icones li {
+    padding-left: 35px; /* Espaço para o ícone */
+    position: relative;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    margin-bottom: 20px;
+}
+
+/* Adiciona um ícone de "check" estilizado antes de cada item */
+.lista-com-icones li::before {
+    content: '✓'; /* Você pode usar qualquer ícone ou imagem aqui */
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--verde-escuro);
+    background-color: var(--cor-girassol);
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    text-align: center;
+    line-height: 25px;
+    font-weight: bold;
+}
+
+
+/* --- LAYOUT DE 3 COLUNAS --- */
+.layout-3-colunas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    text-align: left; /* Alinha o texto dentro de cada coluna à esquerda */
+    margin-top: 50px;
+}
+
+.coluna-item h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.4rem;
+    color: var(--verde-escuro);
+    margin-bottom: 10px;
+}
+
+.coluna-item p {
+    line-height: 1.6;
+}
+
+
+/* --- SEÇÃO CTA FINAL --- */
+.cta-final .container {
+    padding-top: 60px;
+    padding-bottom: 120px; /* Mais espaço antes do footer */
+}
+
+/* --- AJUSTES GERAIS --- */
+/* Garante que os divisores de onda ocupem toda a largura */
+.wave-divider {
+    width: 100%;
+    line-height: 0; /* Remove espaço extra abaixo do SVG */
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+/* Cada seção precisa de position: relative para o divisor funcionar */
+.hero-profissionais, .secao-conteudo-pro, .faq-secao {
+    position: relative;
+    padding-bottom: 120px; /* Espaço para o divisor não sobrepor o conteúdo */
+}
+/* --- CORREÇÃO DE COR: TÍTULO DA PÁGINA PROFISSIONAIS --- */
+
+/* Alvo: O H1 dentro da seção hero-profissionais */
+.hero-profissionais .hero-texto h1 {
+    color: var(--verde-escuro); /* Define a cor do título principal para verde */
+}
+
+/* Alvo: O parágrafo dentro da seção hero-profissionais */
+.hero-profissionais .hero-texto p {
+    color: var(--cinza-texto);  /* Define a cor do texto de apoio para um cinza escuro legível */
 }

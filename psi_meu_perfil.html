@@ -1,0 +1,78 @@
+<main class="dashboard-main">
+    <header class="main-header">
+        <h1>Gerencie seu Perfil</h1>
+            </header>
+
+    <section class="admin-widget">
+        <form id="perfil-form">
+            <fieldset id="form-fieldset" disabled>
+                <div class="form-secao">
+                    <h2>Dados Pessoais e Contato</h2>
+                    <div class="form-grid-2col">
+                        <div class="form-group">
+                            <label for="nome-completo">Nome Completo</label>
+                            <input type="text" id="nome-completo" value="Dr(a). Anderson Costa">
+                        </div>
+                        <div class="form-group">
+                            <label for="cpf">CPF</label>
+                            <input type="text" id="cpf" placeholder="000.000.000-00">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">E-mail de Contato</label>
+                            <input type="email" id="email" value="anderson.costa@email.com" placeholder="seu@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="whatsapp">WhatsApp</label>
+                            <input type="tel" id="whatsapp" placeholder="(11) 99999-9999">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-secao">
+                    <h2>Credenciais e Formação</h2>
+                    <div class="form-grid-2col">
+                        <div class="form-group">
+                           <label for="nivel-formacao">Nível</label>
+                           <select id="nivel-formacao">
+                               <option>Selecione o nível</option>
+                               <option>Graduação</option>
+                               <option>Pós-graduação</option>
+                               <option>Mestrado</option>
+                               <option>Doutorado</option>
+                           </select>
+                       </div>
+                       <div class="form-group">
+                           <label for="curso-formacao">Curso e Instituição</label>
+                           <input type="text" id="curso-formacao" placeholder="Psicologia pela Universidade Nove de Julho">
+                       </div>
+                   </div>
+                    <div class="form-group">
+                        <label for="biografia">Biografia</label>
+                        <textarea id="biografia" rows="6">Psicólogo com foco em Saúde Pública e Atenção Psicossocial, atuando com famílias em vulnerabilidade...</textarea>
+                    </div>
+                </div>
+
+                <div class="form-secao">
+                    <h2>Critérios de "Match"</h2>
+                    <div class="form-group">
+                        <label>Abordagem Terapêutica</label>
+                        <div class="radio-group-moderno">
+                            <label><input type="radio" name="abordagem"><span>Psicanálise</span></label>
+                            <label><input type="radio" name="abordagem"><span>TCC</span></label>
+                            <label><input type="radio" name="abordagem"><span>Humanista</span></label>
+                            <label><input type="radio" name="abordagem"><span>Fenomenologia</span></label>
+                            <label><input type="radio" name="abordagem"><span>Comportamental</span></label>
+                            <label><input type="radio" name="abordagem"><span>Outra</span></label>
+                        </div>
+                    </div>
+                    </div>
+            </fieldset>
+
+            <div class="form-acoes">
+                 <button type="button" id="btn-alterar" class="btn-secundario">Alterar</button>
+                 <button type="submit" id="btn-salvar" class="btn-salvar hidden">Salvar Alterações</button>
+            </div>
+        </form>
+    </section>
+</main>
+    </section>
