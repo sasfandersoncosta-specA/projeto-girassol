@@ -60,55 +60,87 @@ function inicializarScripts() {
     elementosOcultos.forEach((el) => observador.observe(el));
 
     // --- LÓGICA PARA O ACORDEÃO 'INTELIGENTE' (SÓ UM ABERTO POR VEZ) ---
-const titulosAcordeao = document.querySelectorAll('.acordeao-titulo');
-titulosAcordeao.forEach(tituloClicado => {
-    tituloClicado.addEventListener('click', () => {
-        // Fecha todos os outros itens antes de abrir o novo
-        titulosAcordeao.forEach(outroTitulo => {
-            if (outroTitulo !== tituloClicado) {
-                outroTitulo.classList.remove('ativo');
-                outroTitulo.nextElementSibling.style.maxHeight = null;
-            }
-        });
+    const titulosAcordeao = document.querySelectorAll('.acordeao-titulo');
+    titulosAcordeao.forEach(tituloClicado => {
+        tituloClicado.addEventListener('click', () => {
+            // Fecha todos os outros itens antes de abrir o novo
+            titulosAcordeao.forEach(outroTitulo => {
+                if (outroTitulo !== tituloClicado) {
+                    outroTitulo.classList.remove('ativo');
+                    outroTitulo.nextElementSibling.style.maxHeight = null;
+                }
+            });
 
-        // Abre ou fecha o item que foi clicado
-        tituloClicado.classList.toggle('ativo');
-        const conteudo = tituloClicado.nextElementSibling;
-        if (conteudo.style.maxHeight) {
-            conteudo.style.maxHeight = null;
-        } else {
-            conteudo.style.maxHeight = conteudo.scrollHeight + "px";
-        } 
+            // Abre ou fecha o item que foi clicado
+            tituloClicado.classList.toggle('ativo');
+            const conteudo = tituloClicado.nextElementSibling;
+            if (conteudo.style.maxHeight) {
+                conteudo.style.maxHeight = null;
+            } else {
+                conteudo.style.maxHeight = conteudo.scrollHeight + "px";
+            } 
+        });
     });
-});
 
     // --- LÓGICA PARA A BUSCA 'LIMPA' NA PÁGINA FAQ ---
-const campoBusca = document.getElementById('faq-busca');
-if (campoBusca) {
-    const todosItens = document.querySelectorAll('.faq-categoria .acordeao-item');
-    const todosTitulosCategoria = document.querySelectorAll('.faq-categoria .titulo-secao-menor');
+    const campoBusca = document.getElementById('faq-busca');
+    if (campoBusca) {
+        const todosItens = document.querySelectorAll('.faq-categoria .acordeao-item');
+        const todosTitulosCategoria = document.querySelectorAll('.faq-categoria .titulo-secao-menor');
 
-    campoBusca.addEventListener('input', () => {
-        const termoBusca = campoBusca.value.toLowerCase().trim();
+        campoBusca.addEventListener('input', () => {
+            const termoBusca = campoBusca.value.toLowerCase().trim();
 
-        // Esconde ou mostra os títulos das categorias
-        todosTitulosCategoria.forEach(titulo => {
-            titulo.style.display = termoBusca.length > 0 ? 'none' : 'block';
+            todosTitulosCategoria.forEach(titulo => {
+                titulo.style.display = termoBusca.length > 0 ? 'none' : 'block';
+            });
+
+            todosItens.forEach(item => {
+                const textoPergunta = item.querySelector('.acordeao-titulo').textContent.toLowerCase();
+                const textoResposta = item.querySelector('.acordeao-conteudo p').textContent.toLowerCase();
+
+                if (textoPergunta.includes(termoBusca) || textoResposta.includes(termoBusca)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
         });
-
-        // Filtra as perguntas e respostas
-        todosItens.forEach(item => {
-            const textoPergunta = item.querySelector('.acordeao-titulo').textContent.toLowerCase();
-            const textoResposta = item.querySelector('.acordeao-conteudo p').textContent.toLowerCase();
-
-            if (textoPergunta.includes(termoBusca) || textoResposta.includes(termoBusca)) {
-                item.style.display = 'block';
-            } else {
-                item.style.display = 'none';
+    }
+    
+    // --- LÓGICA PARA VALIDAR SENHA NA PÁGINA DE REGISTRO ---
+    const campoSenha = document.getElementById('senha');
+    const campoConfirmarSenha = document.getElementById('confirmar-senha');
+    if (campoSenha && campoConfirmarSenha) {
+        const form = document.querySelector('.login-form');
+        form.addEventListener('submit', (evento) => {
+            if (campoSenha.value !== campoConfirmarSenha.value) {
+                evento.preventDefault(); 
+                alert('As senhas não conferem. Por favor, digite novamente.');
+                campoSenha.value = '';
+                campoConfirmarSenha.value = '';
+                campoSenha.focus();
             }
         });
-    });
-}
+    }
+
+    // --- LÓGICA PARA O MODAL (POP-UP) DA CAIXA DE ENTRADA ---
+    const btnInbox = document.getElementById('btn-inbox');
+    const modalInbox = document.getElementById('modal-inbox');
+    const btnFecharModal = document.getElementById('fechar-modal');
+    if (btnInbox && modalInbox && btnFecharModal) {
+        btnInbox.addEventListener('click', () => {
+            modalInbox.classList.add('visivel');
+        });
+        btnFecharModal.addEventListener('click', () => {
+            modalInbox.classList.remove('visivel');
+        });
+        modalInbox.addEventListener('click', (evento) => {
+            if (evento.target === modalInbox) {
+                modalInbox.classList.remove('visivel');
+            }
+        });
+    }
 
 } // Fim da função inicializarScripts()
 
@@ -122,30 +154,3 @@ document.addEventListener("DOMContentLoaded", () => {
         inicializarScripts();
     });
 });
-
-// (o código da busca do FAQ termina aqui)
-
-    // --- LÓGICA PARA VALIDAR SENHA NA PÁGINA DE REGISTRO ---
-    const campoSenha = document.getElementById('senha');
-    const campoConfirmarSenha = document.getElementById('confirmar-senha');
-
-    if (campoSenha && campoConfirmarSenha) {
-        const form = document.querySelector('.login-form');
-        
-        form.addEventListener('submit', (evento) => {
-            if (campoSenha.value !== campoConfirmarSenha.value) {
-                // Impede o formulário de ser enviado
-                evento.preventDefault(); 
-                
-                // Avisa o usuário
-                alert('As senhas não conferem. Por favor, digite novamente.');
-
-                // Limpa os campos de senha
-                campoSenha.value = '';
-                campoConfirmarSenha.value = '';
-                campoSenha.focus(); // Coloca o cursor no primeiro campo de senha
-            }
-        });
-    }
-
-} // Esta é a chave de fechamento da função inicializarScripts()
