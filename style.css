@@ -1481,3 +1481,365 @@ header.header-rolagem nav a:hover {
     opacity: 1;
     transform: translateY(0);
 }
+/* ==========================================================================
+   PÁGINA DO QUESTIONÁRIO
+   ========================================================================== */
+
+.pagina-questionario {
+    background-color: var(--verde-escuro);
+    color: var(--off-white);
+    font-family: 'Inter', sans-serif;
+    overflow: hidden; /* Impede o scroll da página principal */
+}
+
+.questionario-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+.progress-bar-fill {
+    width: 0%;
+    height: 100%;
+    background-color: var(--cor-girassol);
+    transition: width 0.4s ease-in-out;
+}
+
+.slides-container {
+    position: relative;
+    flex-grow: 1;
+    width: 100%;
+}
+
+.slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    
+    /* Animação */
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+}
+.slide.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.slide h1, .slide h2 {
+    font-family: 'New Kansas', serif;
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    max-width: 800px;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+.slide p, .slide .subtitle {
+    max-width: 600px;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin-bottom: 40px;
+}
+
+/* --- Estilo dos Controles --- */
+.text-input {
+    background: none;
+    border: none;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+    color: var(--branco-puro);
+    font-size: 2rem;
+    text-align: center;
+    width: 80%;
+    max-width: 500px;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+.text-input:focus {
+    outline: none;
+    border-bottom-color: var(--cor-girassol);
+}
+
+.choices-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    max-width: 500px;
+}
+.choice-button {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--off-white);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 20px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+.choice-button:hover {
+    background-color: var(--cor-girassol);
+    border-color: var(--cor-girassol);
+    color: var(--verde-escuro);
+}
+.choice-button.selected {
+    background-color: var(--cor-girassol);
+    border-color: var(--cor-girassol);
+    color: var(--verde-escuro);
+}
+
+.cta-button {
+    background-color: var(--cor-girassol);
+    color: var(--verde-escuro);
+    border: none;
+    padding: 15px 40px;
+    border-radius: 30px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px;
+}
+/* ==========================================================================
+   ATUALIZAÇÕES DO QUESTIONÁRIO
+   ========================================================================== */
+
+/* 1. Wrapper para o conteúdo do slide, resolvendo o layout do desktop */
+.slide-content {
+    width: 100%;
+    max-width: 700px; /* Limita a largura dos botões e textos em telas grandes */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 2. Estilo para o botão "Voltar" */
+.back-button {
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 10px;
+    transition: color 0.2s ease;
+}
+.back-button:hover {
+    color: rgba(255, 255, 255, 1);
+}
+
+/* 3. Estilo para as mensagens de apoio (microcopy) */
+.microcopy {
+    font-size: 1rem !important;
+    opacity: 0.8;
+    margin-top: -10px !important;
+    margin-bottom: 30px !important;
+    max-width: 500px !important;
+}
+/* ==========================================================================
+   OTIMIZAÇÃO MOBILE - QUESTIONÁRIO (AJUSTES FINOS)
+   ========================================================================== */
+
+@media (max-width: 480px) {
+
+    /* Ajusta o padding geral do slide para dar mais espaço */
+    .slide {
+        padding: 15px;
+    }
+
+    /* Diminui um pouco os títulos principais em telas muito pequenas */
+    .slide h1, .slide h2 {
+        font-size: 1.7rem; /* Um pouco menor para caber melhor */
+    }
+
+    /* Ajusta o tamanho dos textos de apoio e opções */
+    .slide p, .slide .subtitle, .microcopy {
+        font-size: 1rem;
+        margin-bottom: 25px; /* Menos espaço vertical */
+    }
+
+    /* Diminui o padding dos botões de escolha para não parecerem tão grandes */
+    .choice-button {
+        padding: 15px;
+        font-size: 1rem;
+    }
+
+    /* Ajusta o tamanho da fonte do campo de texto */
+    .text-input {
+        font-size: 1.8rem;
+    }
+
+    /* Reposiciona o botão de voltar para ficar mais acessível */
+    .back-button {
+        bottom: 60px;
+        left: 20px;
+    }
+
+}
+/* --- MELHORIA PARA LISTAS LONGAS NO QUESTIONÁRIO --- */
+
+.choices-container.scrollable {
+    max-height: 35vh; /* Limita a altura da lista de opções */
+    overflow-y: auto; /* Adiciona uma barra de rolagem se necessário */
+    padding-right: 10px; /* Espaço para a barra de rolagem */
+}
+/* ==========================================================================
+   REFINAMENTOS FINAIS DO QUESTIONÁRIO
+   ========================================================================== */
+
+/* 1. Estilização da Barra de Rolagem em listas longas */
+.choices-container.scrollable::-webkit-scrollbar {
+    width: 8px;
+}
+.choices-container.scrollable::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+.choices-container.scrollable::-webkit-scrollbar-thumb {
+    background: var(--cor-girassol);
+    border-radius: 10px;
+}
+.choices-container.scrollable::-webkit-scrollbar-thumb:hover {
+    background: #FFD700; /* Um amarelo um pouco mais escuro no hover */
+}
+
+/* 2. Diminui o tamanho das opções APENAS em listas com scroll */
+.choices-container.scrollable .choice-button {
+    padding: 15px;      /* Menos padding vertical */
+    font-size: 1rem;    /* Fonte um pouco menor */
+}
+/* ==========================================================================
+   REFINAMENTOS FINAIS 2 - QUESTIONÁRIO (MOBILE E BARRA DE PROGRESSO)
+   ========================================================================== */
+
+/* --- 1. Torna a Barra de Progresso mais visível e a fixa no topo --- */
+.progress-bar {
+    height: 12px; /* Aumenta a espessura da barra para 12px */
+    position: sticky; /* FAZ A BARRA "COLAR" NO TOPO DA TELA */
+    top: 0;
+    left: 0;
+    z-index: 10; /* Garante que ela fique acima do conteúdo dos slides */
+}
+
+/* --- 2. Ajuste do tamanho da fonte do placeholder no mobile --- */
+@media (max-width: 480px) {
+    .text-input::placeholder {
+        font-size: 1.5rem; /* Diminui a fonte do texto de exemplo em telas pequenas */
+    }
+}
+/* --- EFEITO DE FEEDBACK PARA VALIDAÇÃO DO QUESTIONÁRIO --- */
+
+.shake-error {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+}
+/* ==========================================================================
+   PÁGINA DE RESULTADOS
+   ========================================================================== */
+.pagina-resultados { background-color: var(--cinza-fundo); }
+
+/* --- Estado de Carregamento --- */
+#loading-state { text-align: center; padding-top: 100px; }
+#loading-state p { font-size: 1.2rem; color: var(--cinza-texto); font-weight: 500; }
+.loading-animation img { animation: spin 2.5s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* --- Estilos Gerais de Resultados --- */
+.resultados-header h1 { font-family: 'New Kansas', serif; color: var(--verde-escuro); font-size: 2.5rem; text-align: center; }
+.resultados-header p { text-align: center; font-size: 1.2rem; max-width: 600px; margin: 15px auto 40px auto; }
+
+/* --- Card do Profissional (Componente Principal) --- */
+.pro-results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+.pro-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; display: flex; flex-direction: column; }
+.pro-card-img { width: 100%; height: 220px; object-fit: cover; }
+.pro-card-content { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
+.pro-card-content h3 { font-family: 'Montserrat', sans-serif; margin: 0 0 5px 0; }
+.pro-card-content .crp { font-size: 0.9rem; color: var(--cinza-texto); margin-bottom: 10px; }
+.rating { color: #f39c12; margin-bottom: 15px; }
+.compatibility-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+.tag { background-color: var(--cor-girassol); color: var(--verde-escuro); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+.bio-snippet { font-style: italic; color: var(--cinza-texto); flex-grow: 1; }
+.pro-card-actions { margin-top: 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px;}
+.pro-card-actions .btn-principal { background-color: #E63946; padding: 12px 20px; flex-grow: 1; margin: 0; }
+.heart-icon { font-size: 24px; color: var(--cinza-texto); cursor: pointer; }
+
+/* --- Cenário B: Etiqueta de Contexto --- */
+.context-label { background-color: #e9ecef; padding: 15px; margin: -20px -20px 20px -20px; font-size: 0.9rem; font-weight: 500; text-align: center; }
+.context-label strong { color: var(--verde-escuro); }
+
+/* --- Cenário C: Nenhum Resultado --- */
+.no-results-container { text-align: center; }
+.no-results-container .ilustracao { max-width: 300px; margin: 20px auto; }
+.action-box { background: #fff; padding: 30px; border-radius: 16px; margin-top: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+.action-box h3 { margin-top: 0; }
+/* ==========================================================================
+   CORREÇÃO DEFINITIVA DA ONDA DO RODAPÉ
+   ========================================================================== */
+
+/* O container pai ainda precisa disto */
+.resultados-container {
+    position: relative !important;
+    padding-bottom: 150px !important; 
+}
+/* ==========================================================================
+   SOLUÇÃO DEFINITIVA - ONDA DO RODAPÉ (PÁGINA DE RESULTADOS)
+   ========================================================================== */
+
+/* 1. O container principal da página de resultados */
+.resultados-container {
+    position: relative; /* Define o contexto de posicionamento */
+    /* REMOVEMOS o padding-bottom daqui para não interferir com o conteúdo dinâmico */
+}
+
+/* 2. O container da onda - CORREÇÃO APLICADA AQUI */
+.wave-divider {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 80px; /* Altura desejada para a onda */
+    line-height: 0;
+    
+    /* CORREÇÃO: Inverte o container inteiro da onda */
+    transform: scaleY(-1);
+}
+
+/* 3. O SVG dentro do container */
+.wave-divider svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    transform: rotate(180deg); /* Gira a onda para a posição correta */
+}
+
+/* 4. A cor da onda */
+.wave-divider .shape-fill {
+    fill: #1B4332; /* A cor verde do seu rodapé */
+}
+
