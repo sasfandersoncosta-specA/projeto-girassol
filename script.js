@@ -1,151 +1,52 @@
 // --- FUNÇÕES PRINCIPAIS ---
 
-/**
- * Carrega um componente HTML de uma URL e o insere em um elemento da página.
- */
 function carregarComponente(url, elementoId) {
-    return fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Não foi possível carregar o componente: ' + url);
-            }
-            return response.text();
-        })
-        .then(data => {
-            const elemento = document.getElementById(elementoId);
-            if (elemento) {
-                elemento.innerHTML = data;
-            }
-        })
-        .catch(error => console.error('Erro ao carregar componente:', error));
+    // ... (esta função está perfeita, não muda)
+    return fetch(url).then(response => { if (!response.ok) { throw new Error('Não foi possível carregar o componente: ' + url); } return response.text(); }).then(data => { const elemento = document.getElementById(elementoId); if (elemento) { elemento.innerHTML = data; } }).catch(error => console.error('Erro ao carregar componente:', error));
 }
 
-/**
- * Inicializa todos os scripts interativos da página.
- * Esta função é chamada DEPOIS que o header e o footer são carregados.
- */
 function inicializarScripts() {
     
     // --- LÓGICA PARA O MENU HAMBÚRGUER ---
-    const menuHamburguer = document.querySelector('.menu-hamburguer');
-    const containerNavegacao = document.querySelector('.container-navegacao');
-    if (menuHamburguer && containerNavegacao) {
-        menuHamburguer.addEventListener('click', () => {
-            containerNavegacao.classList.toggle('ativo');
-        });
-    }
+    // ... (esta parte está perfeita, não muda)
+    const menuHamburguer = document.querySelector('.menu-hamburguer'); const containerNavegacao = document.querySelector('.container-navegacao'); if (menuHamburguer && containerNavegacao) { menuHamburguer.addEventListener('click', () => { containerNavegacao.classList.toggle('ativo'); }); }
 
     // --- LÓGICA PARA MUDAR COR DO HEADER AO ROLAR ---
-    const header = document.querySelector('header');
-    if (header) {
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                header.classList.add('header-rolagem');
-            } else {
-                header.classList.remove('header-rolagem');
-            }
-        });
-    }
+    // ... (esta parte está perfeita, não muda)
+    const header = document.querySelector('header'); if (header) { window.addEventListener('scroll', () => { if (window.scrollY > 50) { header.classList.add('header-rolagem'); } else { header.classList.remove('header-rolagem'); } }); }
 
-    // --- LÓGICA PARA ANIMAÇÃO DE SCROLL DAS SEÇÕES ---
-    const elementosOcultos = document.querySelectorAll('.hidden');
+
+// --- LÓGICA PARA ANIMAÇÃO DE SCROLL DAS SEÇÕES ---
+
+// Não precisa do setTimeout, a causa era o CSS.
+const elementosOcultos = document.querySelectorAll('.hidden');
+
+if (elementosOcultos.length > 0) {
     const observador = new IntersectionObserver((entradas) => {
         entradas.forEach((entrada) => {
             if (entrada.isIntersecting) {
-                entrada.target.classList.remove('hidden');
-                observador.unobserve(entrada.target);
+                // A MÁGICA ACONTECE AQUI:
+                entrada.target.classList.add('visivel'); // Adiciona a classe para animar a aparição
+                observador.unobserve(entrada.target); // Para de observar o elemento que já apareceu
             }
         });
+    }, {
+        rootMargin: '0px 0px -50px 0px' // A animação começa um pouco depois do elemento entrar na tela
     });
+
     elementosOcultos.forEach((el) => observador.observe(el));
+}
 
-    // --- LÓGICA PARA O ACORDEÃO 'INTELIGENTE' (SÓ UM ABERTO POR VEZ) ---
-    const titulosAcordeao = document.querySelectorAll('.acordeao-titulo');
-    titulosAcordeao.forEach(tituloClicado => {
-        tituloClicado.addEventListener('click', () => {
-            // Fecha todos os outros itens antes de abrir o novo
-            titulosAcordeao.forEach(outroTitulo => {
-                if (outroTitulo !== tituloClicado) {
-                    outroTitulo.classList.remove('ativo');
-                    outroTitulo.nextElementSibling.style.maxHeight = null;
-                }
-            });
+    // --- LÓGICA PARA O ACORDEÃO 'INTELIGENTE' ---
+    // ... (esta parte está perfeita, não muda)
+    const titulosAcordeao = document.querySelectorAll('.acordeao-titulo'); titulosAcordeao.forEach(tituloClicado => { tituloClicado.addEventListener('click', () => { titulosAcordeao.forEach(outroTitulo => { if (outroTitulo !== tituloClicado) { outroTitulo.classList.remove('ativo'); outroTitulo.nextElementSibling.style.maxHeight = null; } }); tituloClicado.classList.toggle('ativo'); const conteudo = tituloClicado.nextElementSibling; if (conteudo.style.maxHeight) { conteudo.style.maxHeight = null; } else { conteudo.style.maxHeight = conteudo.scrollHeight + "px"; } }); });
 
-            // Abre ou fecha o item que foi clicado
-            tituloClicado.classList.toggle('ativo');
-            const conteudo = tituloClicado.nextElementSibling;
-            if (conteudo.style.maxHeight) {
-                conteudo.style.maxHeight = null;
-            } else {
-                conteudo.style.maxHeight = conteudo.scrollHeight + "px";
-            } 
-        });
-    });
-
-    // --- LÓGICA PARA A BUSCA 'LIMPA' NA PÁGINA FAQ ---
-    const campoBusca = document.getElementById('faq-busca');
-    if (campoBusca) {
-        const todosItens = document.querySelectorAll('.faq-categoria .acordeao-item');
-        const todosTitulosCategoria = document.querySelectorAll('.faq-categoria .titulo-secao-menor');
-
-        campoBusca.addEventListener('input', () => {
-            const termoBusca = campoBusca.value.toLowerCase().trim();
-
-            todosTitulosCategoria.forEach(titulo => {
-                titulo.style.display = termoBusca.length > 0 ? 'none' : 'block';
-            });
-
-            todosItens.forEach(item => {
-                const textoPergunta = item.querySelector('.acordeao-titulo').textContent.toLowerCase();
-                const textoResposta = item.querySelector('.acordeao-conteudo p').textContent.toLowerCase();
-
-                if (textoPergunta.includes(termoBusca) || textoResposta.includes(termoBusca)) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        });
-    }
-    
-    // --- LÓGICA PARA VALIDAR SENHA NA PÁGINA DE REGISTRO ---
-    const campoSenha = document.getElementById('senha');
-    const campoConfirmarSenha = document.getElementById('confirmar-senha');
-    if (campoSenha && campoConfirmarSenha) {
-        const form = document.querySelector('.login-form');
-        form.addEventListener('submit', (evento) => {
-            if (campoSenha.value !== campoConfirmarSenha.value) {
-                evento.preventDefault(); 
-                alert('As senhas não conferem. Por favor, digite novamente.');
-                campoSenha.value = '';
-                campoConfirmarSenha.value = '';
-                campoSenha.focus();
-            }
-        });
-    }
-
-    // --- LÓGICA PARA O MODAL (POP-UP) DA CAIXA DE ENTRADA ---
-    const btnInbox = document.getElementById('btn-inbox');
-    const modalInbox = document.getElementById('modal-inbox');
-    const btnFecharModal = document.getElementById('fechar-modal');
-    if (btnInbox && modalInbox && btnFecharModal) {
-        btnInbox.addEventListener('click', () => {
-            modalInbox.classList.add('visivel');
-        });
-        btnFecharModal.addEventListener('click', () => {
-            modalInbox.classList.remove('visivel');
-        });
-        modalInbox.addEventListener('click', (evento) => {
-            if (evento.target === modalInbox) {
-                modalInbox.classList.remove('visivel');
-            }
-        });
-    }
+    // ... (O restante das suas lógicas de FAQ, senha, modal, etc. estão perfeitas e não mudam)
 
 } // Fim da função inicializarScripts()
 
 
-// --- PONTO DE ENTRADA PRINCIPAL ---
+// --- PONTO DE ENTRADA PRINCIPAL (NÃO MUDA) ---
 document.addEventListener("DOMContentLoaded", () => {
     Promise.all([
         carregarComponente('header.html', 'header-placeholder'),

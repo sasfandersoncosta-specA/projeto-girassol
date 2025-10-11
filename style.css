@@ -1361,7 +1361,23 @@ header.header-rolagem nav a:hover {
 .form-group input {width: 100%; padding: 12px; border: 1px solid #ced4da; border-radius: 8px; font-size: 1rem;}
 .form-section-acoes {display: flex; flex-direction: column; gap: 15px; align-items: flex-start;}
 .btn-perigo {background: none; border: none; color: #E63946; font-weight: bold; cursor: pointer; padding: 0;}
-.hidden {display: none;}
+/* ==========================================================================
+   ESTILOS PARA ANIMAÇÃO DE SCROLL (REVELAR AO ROLAR)
+   ========================================================================== */
+
+/* ESTA É A FORMA CORRETA de preparar os elementos para a animação */
+/* O elemento fica transparente e um pouco para baixo, mas ainda ocupa espaço */
+.hidden {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+/* Esta classe será ADICIONADA pelo JavaScript para fazer o elemento aparecer */
+.visivel {
+    opacity: 1;
+    transform: translateY(0);
+}
 /* --- CORREÇÃO E ESTILO DO HEADER DE BOAS-VINDAS --- */
 
 /* --- ESTILO UNIFICADO PARA OS CABEÇALHOS DAS PÁGINAS DO DASHBOARD --- */
@@ -1452,4 +1468,14 @@ header.header-rolagem nav a:hover {
     .menu-toggle {
         display: none;
     }
+}
+/* --- Estilos para Animação de Scroll --- */
+.hidden {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+.visivel {
+    opacity: 1;
+    transform: translateY(0);
 }
