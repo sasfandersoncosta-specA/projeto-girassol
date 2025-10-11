@@ -20,10 +20,11 @@ h1, h2, h3, h4, h5, h6 {
 /* --- DECLARAÇÃO DA FONTE CUSTOMIZADA (NEW KANSAS) --- */
 @font-face {
     font-family: 'New Kansas';
+    /* Caminho relativo a partir da localização do style.css (que está na raiz) */
     src: url('assets/fonts/newkansas-bold.woff2') format('woff2'),
          url('assets/fonts/newkansas-bold.woff') format('woff');
     font-style: normal;
-    font-weight: 700; /* ou o peso correto da fonte */
+    font-weight: 700;
     font-display: swap;
 }
 
