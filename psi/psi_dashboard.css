@@ -593,3 +593,224 @@ fieldset:disabled .toggle-btn {
     border-radius: 10px;
     text-transform: uppercase;
 }
+/* ================================================= */
+/* ESTILOS BASE DO DASHBOARD (DESKTOP-FIRST)         */
+/* ================================================= */
+:root {
+    --verde-escuro: #1B4332;
+    --branco-puro: #FFFFFF;
+    --cinza-claro: #f8f9fa;
+    --texto-claro: #adb5bd;
+}
+
+.pagina-dashboard {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--cinza-claro);
+    color: #555;
+    margin: 0;
+}
+
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.dashboard-sidebar {
+    width: 280px; /* Um pouco mais de espaço */
+    background-color: var(--verde-escuro);
+    color: var(--branco-puro);
+    display: flex;
+    flex-direction: column;
+    padding: 25px;
+    box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+    z-index: 10; /* Garante que a sidebar fique acima do conteúdo principal */
+    transition: transform 0.3s ease-in-out; /* Adiciona transição suave */
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 30px;
+}
+
+.sidebar-nav li a {
+    display: flex; /* Para alinhar o texto e os badges */
+    justify-content: space-between;
+    align-items: center;
+    color: var(--texto-claro);
+    text-decoration: none;
+    padding: 15px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.sidebar-nav li.active a, .sidebar-nav li a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--branco-puro);
+    transform: translateX(5px);
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+}
+
+.sidebar-footer p { margin: 0 0 10px 0; font-weight: 500; }
+.sidebar-footer a { color: #FFEE8C; font-weight: bold; text-decoration: none; }
+
+.dashboard-main {
+    flex-grow: 1;
+    padding: 40px;
+    overflow-y: auto;
+}
+
+/* O botão de menu fica escondido no desktop por padrão */
+.menu-toggle {
+    display: none;
+}
+
+
+/* ================================================= */
+/* REGRAS PARA MOBILE (TELAS ATÉ 992px)              */
+/* ================================================= */
+@media (max-width: 992px) {
+    /* Mostra o botão de menu */
+    .menu-toggle {
+        display: block;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1001; /* Fica acima de tudo */
+        background: var(--branco-puro);
+        border: none;
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    /* Esconde a sidebar fora da tela por padrão */
+    .dashboard-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        transform: translateX(-100%);
+    }
+
+    /* Classe que o JS vai adicionar para mostrar a sidebar */
+    .dashboard-sidebar.is-open {
+        transform: translateX(0);
+    }
+
+    /* Faz o conteúdo principal ocupar toda a largura e adiciona padding no topo */
+    .dashboard-main {
+        width: 100%;
+        padding: 80px 20px 20px 20px;
+    }
+}
+/* ================================================= */
+/* ESTILOS E RESPONSIVIDADE - CAIXA DE ENTRADA       */
+/* ================================================= */
+
+/* --- Base (Desktop) --- */
+.inbox-container {
+    display: flex;
+    gap: 20px;
+    height: calc(100vh - 150px); /* Ocupa a altura disponível */
+    background-color: var(--branco-puro);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.inbox-sidebar {
+    width: 35%;
+    max-width: 350px;
+    border-right: 1px solid #e9ecef;
+    overflow-y: auto;
+}
+
+.message-list { list-style: none; margin: 0; padding: 0; }
+.message-item { padding: 15px; border-bottom: 1px solid #e9ecef; cursor: pointer; }
+.message-item:hover { background-color: var(--cinza-claro); }
+.message-item.active { background-color: #e9f5ff; }
+.message-item.unread .message-sender,
+.message-item.unread .message-subject { font-weight: bold; color: #333; }
+.message-sender { font-size: 1rem; margin-bottom: 5px; }
+.message-subject { font-size: 0.9rem; color: #555; }
+.message-date { font-size: 0.8rem; color: #777; text-align: right; }
+
+.inbox-content {
+    flex-grow: 1;
+    padding: 25px;
+    overflow-y: auto;
+}
+
+.btn-voltar-inbox { display: none; } /* Escondido no desktop */
+
+
+/* --- Regras para Mobile (telas até 768px) --- */
+@media (max-width: 768px) {
+    /* Ajusta o header principal para não quebrar */
+    .main-header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    /* Oculta o conteúdo do e-mail por padrão */
+    .inbox-content {
+        display: none;
+        width: 100%;
+        padding: 15px;
+    }
+
+    /* Mostra a lista de e-mails ocupando toda a largura */
+    .inbox-sidebar {
+        width: 100%;
+        max-width: none;
+        border-right: none;
+    }
+
+    /* Mostra o botão "Voltar" */
+    .btn-voltar-inbox {
+        display: block;
+        background: none;
+        border: 1px solid #ccc;
+        padding: 8px 15px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: 500;
+        margin-bottom: 20px;
+    }
+
+    /* Classe de controle que o JS vai adicionar */
+    .inbox-container.mostrando-conteudo .inbox-sidebar {
+        display: none; /* Esconde a lista */
+    }
+    .inbox-container.mostrando-conteudo .inbox-content {
+        display: block; /* Mostra o conteúdo */
+    }
+}
+/* ================================================= */
+/* CORREÇÃO: COR DOS TÍTULOS EM FUNDOS ESCUROS       */
+/* ================================================= */
+
+/* Força a cor de qualquer título (h1, h2, h3...) para branco quando ele
+   estiver dentro de um elemento com a classe .main-header (o bloco verde).
+*/
+.main-header h1,
+.main-header h2,
+.main-header h3,
+.main-header h4 {
+    color: var(--branco-puro) !important;
+}
+.logo-comunidade {
+    max-width: 150px;
+    height: auto;
+    margin-bottom: 30px;
+}

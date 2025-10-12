@@ -4,53 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Questionário - Projeto Girassol</title>
-    <link rel="stylesheet" href="style.css">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body class="pagina-questionario">
 
     <main class="questionario-container">
-        <div class="progress-bar"><div class="progress-bar-fill" id="progress-fill"></div></div>
+        <div class="progress-bar">
+            <div class="progress-bar-fill"></div>
+        </div>
 
         <div class="slides-container">
-            <div class="slide active" data-step="0"><div class="slide-content"><h1>Vamos encontrar a pessoa certa para te acompanhar nessa jornada.</h1><p>Responda algumas perguntas para começarmos.</p><button class="cta-button" data-action="next">Vamos começar</button></div></div>
-
-            <div class="slide" data-step="1"><div class="slide-content"><h2>Como podemos te chamar?</h2><p class="microcopy">Isso nos ajuda a criar uma experiência mais pessoal para você.</p><input type="text" class="text-input" placeholder="Digite seu nome ou apelido" data-question="nome"><button class="cta-button" data-action="next">Avançar</button></div><button class="back-button" data-action="prev">← Voltar</button></div>
-
-            <div class="slide" data-step="2"><div class="slide-content"><h2>Qual a sua idade?</h2><p class="microcopy">Precisamos confirmar que você é maior de idade para usar a plataforma.</p><div class="choices-container"><button class="choice-button" data-value="Maior de 18 anos">Maior de 18 anos</button><button class="choice-button" data-value="Menor de 18 anos">Menor de 18 anos</button></div></div><button class="back-button" data-action="prev">← Voltar</button></div>
-
-            <div class="slide" data-step="3"><div class="slide-content"><h2>Com qual gênero você se identifica?</h2><p class="microcopy">Sua identidade é importante. Selecione a opção que melhor te representa.</p><div class="choices-container scrollable" data-question="identidade_genero"><button class="choice-button" data-value="Masculino">Masculino</button><button class="choice-button" data-value="Feminino">Feminino</button><button class="choice-button" data-value="Não-binário">Não-binário</button><button class="choice-button" data-value="Agênero">Agênero</button><button class="choice-button" data-value="Bigênero">Bigênero</button><button class="choice-button" data-value="Pangênero">Pangênero</button><button class="choice-button" data-value="Genderqueer">Genderqueer</button><button class="choice-button" data-value="Gênero fluido">Gênero fluido</button><button class="choice-button" data-value="Demigênero">Demigênero</button><button class="choice-button" data-value="Andrógeno">Andrógeno</button><button class="choice-button" data-value="Outro">Outro</button><button class="choice-button" data-value="Prefiro não informar">Prefiro não informar</button></div></div><button class="back-button" data-action="prev">← Voltar</button></div>
-            
-            <div class="slide" data-step="4"><div class="slide-content"><h2>Você tem preferência pelo gênero do(a) profissional?</h2><p class="microcopy">Sua segurança e conforto são nossa prioridade.</p><div class="choices-container scrollable" data-question="pref_genero_prof"><button class="choice-button" data-value="Indiferente">Indiferente</button><button class="choice-button" data-value="Masculino">Masculino</button><button class="choice-button" data-value="Feminino">Feminino</button><button class="choice-button" data-value="Não-binário">Não-binário</button></button></div></div><button class="back-button" data-action="prev">← Voltar</button></div>
-
-            <div class="slide" data-step="5"><div class="slide-content"><h2>O que te motivou a buscar terapia agora?</h2><p class="microcopy">Saber seu ponto de partida nos ajuda a encontrar o melhor caminho.</p><div class="choices-container scrollable" data-question="motivacao"><button class="choice-button multi-choice" data-value="Desafio específico">Estou passando por um desafio específico</button><button class="choice-button multi-choice" data-value="Autoconhecimento">Quero me conhecer melhor</button><button class="choice-button multi-choice" data-value="Recomendação">Recebi uma recomendação</button><button class="choice-button multi-choice" data-value="Sintomas difíceis">Estou lidando com sintomas difíceis (como ansiedade ou tristeza)</button><button class="choice-button multi-choice" data-value="Melhorar relacionamentos">Quero melhorar meus relacionamentos</button><button class="choice-button multi-choice" data-value="Outro">Outro</button><button class="choice-button multi-choice" data-value="Não tenho certeza">Não tenho certeza</button></div><button class="cta-button" data-action="next">Avançar</button></div><button class="back-button" data-action="prev">← Voltar</button></div>
-
-            <div class="slide" data-step="6"><div class="slide-content"><h2>Quais temas ou sentimentos você gostaria de explorar?</h2><p class="microcopy">Selecione os principais. Isso nos ajuda a focar na sua necessidade.</p><div class="choices-container scrollable" data-question="temas"><button class="choice-button multi-choice" data-value="Ansiedade">Ansiedade</button><button class="choice-button multi-choice" data-value="Estresse">Estresse</button><button class="choice-button multi-choice" data-value="Depressão">Depressão</button><button class="choice-button multi-choice" data-value="Relacionamentos">Relacionamentos</button><button class="choice-button multi-choice" data-value="Carreira">Carreira</button></button></div><button class="cta-button" data-action="next">Avançar</button></div><button class="back-button" data-action="prev">← Voltar</button></div>
-
-            <div class="slide" data-step="7"><div class="slide-content"><h2>Você já fez terapia antes?</h2><p class="microcopy">Entender sua trajetória nos ajuda a traçar um novo futuro.</p><div class="choices-container" data-question="terapia_anterior"><button class="choice-button" data-value="Sim, boa experiência">Sim, e foi uma boa experiência</button><button class="choice-button" data-value="Sim, má experiência">Sim, mas não foi uma boa experiência</button><button class="choice-button" data-value="Não">Não, esta é minha primeira vez</button></div></div><button class="back-button" data-action="prev">← Voltar</button></div>
-
-            <div class="slide" data-step="8"><div class="slide-content"><h2>Que tipo de experiência terapêutica você imagina?</h2><p class="microcopy">Isso nos ajuda a alinhar seu estilo com o do profissional.</p><div class="choices-container scrollable" data-question="experiencia_desejada"><button class="choice-button multi-choice" data-value="Escuta e acolhimento">Um espaço de escuta e acolhimento para me encontrar</button><button class="choice-button multi-choice" data-value="Ferramentas práticas">Ferramentas e tarefas práticas para aplicar no dia a dia</button><button class="choice-button multi-choice" data-value="Entender o passado">Entender meu passado e a raiz das minhas emoções</button><button class="choice-button multi-choice" data-value="Foco em soluções">Focar em soluções para problemas específicos</button><button class="choice-button multi-choice" data-value="Indiferente">Não sei / Indiferente</button></div><button class="cta-button" data-action="next">Avançar</button></div><button class="back-button" data-action="prev">← Voltar</button></div>
-
-            <div class="slide" data-step="9"><div class="slide-content"><h2>Existem características importantes para você em um(a) psicólogo(a)?</h2><p class="microcopy">A identidade de quem te escuta pode fazer toda a diferença.</p><div class="choices-container scrollable" data-question="caracteristicas_prof"><button class="choice-button multi-choice" data-value="LGBTQIAPN+">Que faça parte da comunidade LGBTQIAPN+</button><button class="choice-button multi-choice" data-value="Não-branca">Que seja uma pessoa não-branca (racializada) / prática antirracista</button><button class="choice-button multi-choice" data-value="Feminista">Que tenha uma perspectiva feminista</button><button class="choice-button multi-choice" data-value="Neurodiversidade">Que entenda de neurodiversidade (TDAH, Autismo, etc.)</button><button class="choice-button multi-choice" data-value="Indiferente">Indiferente</button></div><button class="cta-button" data-action="next">Avançar</button></div><button class="back-button" data-action="prev">← Voltar</button></div>
-
-            <div class="slide" data-step="10"><div class="slide-content"><h2>Qual faixa de valor você pode investir por sessão?</h2><p class="microcopy">Isso garante que vamos te conectar com profissionais que cabem no seu orçamento.</p><div class="choices-container" data-question="faixa_valor"><button class="choice-button" data-value="Até R$ 50">Até R$ 50</button><button class="choice-button" data-value="R$ 51 - R$ 90">R$ 51 - R$ 90</button><button class="choice-button" data-value="R$ 91 - R$ 150">R$ 91 - R$ 150</button><button class="choice-button" data-value="Acima de R$ 150">Acima de R$ 150</button></div></div><button class="back-button" data-action="prev">← Voltar</button></div>
-
-            <div class="slide" data-step="11"><div class="slide-content"><h2>Qual o seu número de WhatsApp?</h2><p class="microcopy">Fique tranquilo(a), seu número será usado apenas para o contato inicial do profissional e para o envio de mensagens de acompanhamento da Girassol sobre sua experiência.</p><input type="tel" class="text-input" id="whatsapp-input" placeholder="(XX) XXXXX-XXXX" data-question="whatsapp"><button class="cta-button" data-action="finalize">Finalizar e ver meus matches</button></div><button class="back-button" data-action="prev">← Voltar</button></div>
-
-            <div class="slide" id="slide-final"><div class="slide-content"><h1>Tudo pronto!</h1><p>Estamos cruzando suas respostas com os perfis de nossos profissionais para encontrar as conexões mais significativas para você. Em instantes, você verá suas recomendações.</p></div></div>
-            <div class="slide" id="slide-erro-idade">
-                <div class="slide-content">
-                    <h2>Atenção</h2>
-                    <p>A plataforma Girassol é destinada apenas para maiores de 18 anos. Se você está passando por um momento difícil e precisa conversar, por favor, entre em contato com o CVV (Centro de Valorização da Vida) ligando para o número 188. A ligação é gratuita e o serviço é 24h.</p>
-                    
-                    <a href="index.html" class="btn btn-principal large-btn" style="margin-top: 30px;">
-                        Entendi e Sair
-                    </a>
-                </div>
             </div>
-        </div>
     </main>
     
     <script src="https://unpkg.com/imask"></script>

@@ -4,47 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seus Resultados - Projeto Girassol</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    </head>
+</head>
+
 <body class="pagina-resultados">
 
     <div id="header-placeholder"></div>
 
-    <main class="resultados-container">
+    <main class="container">
+
         <div id="loading-state">
             <div class="loading-animation">
                 <img src="assets/logos/logo_sobre.png" alt="Girassol girando">
             </div>
-            <p>Estamos encontrando os profissionais mais compatíveis para você. Só um instante...</p>
+            <h1>Buscando a combinação perfeita...</h1>
+            <p>Nosso algoritmo está analisando suas respostas para encontrar os profissionais mais alinhados ao seu perfil.</p>
         </div>
 
         <div id="results-container" class="hidden">
             </div>
-    <main class="resultados-container">
-        <div id="loading-state">...</div>
-        <div id="results-container" class="hidden">...</div>
 
-
-        <div class="wave-divider">
-    <svg 
-        class="onda-svg" 
-        data-name="Layer 1" 
-        xmlns="http://www.w3.org/2000/svg" 
-        viewBox="0 0 1200 120"
-        
-        /* LINHAS DE CORREÇÃO ADICIONADAS AQUI */
-        width="100%"
-        height="100%"
-        preserveAspectRatio="none"
-    >
-        <path class="shape-fill" d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"></path>
-    </svg>
-</div>
-    </main> <div id="footer-placeholder"></div>
-    </main>
+    </main> <div class="wave-divider-footer">
+        <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" class="shape-fill"></path>
+        </svg>
+    </div>
 
     <div id="footer-placeholder"></div>
     
     <script src="resultados.js"></script>
-    <script src="script.js"></script> </body>
+    <script src="script.js"></script> 
+</body>
 </html>

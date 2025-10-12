@@ -779,3 +779,96 @@ body.pagina-dashboard {
 .widgets-container--vertical {
     grid-template-columns: 1fr; /* Força o grid a ter apenas UMA coluna */
 }
+.main-header p {
+    color: rgba(255, 255, 255, 0.8); /* Branco com leve transparência para um visual mais suave */
+}
+
+/* Garante que os títulos também permaneçam brancos */
+.main-header h1,
+.main-header h2 {
+    color: white !important;
+}
+/* =============================================================
+   CORREÇÃO GLOBAL: ZERAR ESPAÇAMENTOS EM PÁGINAS DE DASHBOARD
+   ============================================================= */
+
+/* Alvo: A tag <body> QUANDO ela tiver a classe .pagina-dashboard.
+   Ação: Remove o padding superior que foi herdado do estilo global. */
+body.pagina-dashboard {
+    padding-top: 0 !important;
+}
+/* =============================================================
+   CORREÇÃO DEFINITIVA: ESCONDER HEADER NA CAIXA DE ENTRADA
+   ============================================================= */
+   
+.dashboard-main.inbox-active .main-header {
+    display: none !important;
+}
+/* ==========================================================================
+   RESPONSIVIDADE DA TABELA DE GERENCIAMENTO
+   ========================================================================== */
+
+/* Regras para telas com 1024px de largura ou menos */
+@media (max-width: 1024px) {
+
+    /* 1. Removemos a largura mínima que forçava a rolagem */
+    .tabela-gerenciamento {
+        min-width: 0;
+    }
+
+    /* 2. Escondemos o cabeçalho original da tabela */
+    .tabela-gerenciamento thead {
+        display: none;
+    }
+
+    /* 3. Transformamos as linhas da tabela em 'cards' empilhados */
+    .tabela-gerenciamento tbody,
+    .tabela-gerenciamento tr,
+    .tabela-gerenciamento td {
+        display: block;
+        width: 100%;
+    }
+
+    .tabela-gerenciamento tr {
+        margin-bottom: 25px;
+        border: 1px solid var(--cinza-borda);
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    /* 4. Removemos a borda inferior das células */
+    .tabela-gerenciamento td {
+        border: none;
+        padding: 8px 0;
+        text-align: right; /* Alinha o conteúdo à direita */
+        white-space: normal; /* Permite que o texto quebre a linha */
+        position: relative;
+        padding-left: 50%; /* Cria espaço à esquerda para o rótulo */
+    }
+
+    /* 5. Criamos os "rótulos" (ex: "Nome:", "E-mail:") usando um pseudo-elemento */
+    .tabela-gerenciamento td::before {
+        content: attr(data-label); /* Pega o texto do atributo 'data-label' */
+        position: absolute;
+        left: 0;
+        width: 45%;
+        padding-right: 10px;
+        font-weight: bold;
+        text-align: left; /* Alinha o rótulo à esquerda */
+        color: var(--verde-escuro);
+    }
+    
+    /* 6. Estilo especial para a coluna de ações */
+    .tabela-gerenciamento td:last-child {
+        padding-top: 15px;
+        text-align: center;
+    }
+    .tabela-gerenciamento td:last-child::before {
+        display: none; /* Esconde o rótulo "Ações" */
+    }
+    .tabela-gerenciamento .btn-tabela {
+        width: calc(33.33% - 10px);
+        margin: 5px;
+    }
+}

@@ -1,15 +1,53 @@
-// Arquivo: psi_dashboard.js (Versão Final com Caixa de Entrada)
+// Arquivo: psi_dashboard.js (Versão Final com Caixa de Entrada e Menu Mobile)
 
 document.addEventListener('DOMContentLoaded', function() {
+    
+    // --- SELETORES GLOBAIS ---
     const mainContent = document.getElementById('main-content');
     const navLinks = document.querySelectorAll('.sidebar-nav li');
+    const menuToggleButton = document.getElementById('menu-toggle');
+    const sidebar = document.querySelector('.dashboard-sidebar');
 
-    // --- FUNÇÕES DE VALIDAÇÃO ---
+    // =====================================================================
+    // LÓGICA DO MENU MOBILE (HAMBÚRGUER)
+    // =====================================================================
+    if (menuToggleButton && sidebar) {
+        menuToggleButton.addEventListener('click', function() {
+            sidebar.classList.toggle('is-open');
+        });
+    }
+
+    // =====================================================================
+    // LÓGICA DA CAIXA DE ENTRADA (INTERAÇÃO MOBILE)
+    // =====================================================================
+    // Usamos "delegação de eventos" no 'mainContent' porque os elementos da
+    // caixa de entrada não existem no início, eles são carregados depois.
+    if (mainContent) {
+        mainContent.addEventListener('click', function(event) {
+            const inboxContainer = event.target.closest('.inbox-container');
+            if (!inboxContainer) return;
+
+            // Lógica para ABRIR uma mensagem
+            if (event.target.closest('.message-item')) {
+                inboxContainer.classList.add('mostrando-conteudo');
+                const clickedItem = event.target.closest('.message-item');
+                inboxContainer.querySelectorAll('.message-item').forEach(item => item.classList.remove('active'));
+                clickedItem.classList.add('active');
+            }
+
+            // Lógica para VOLTAR para a lista
+            if (event.target.closest('.btn-voltar-inbox')) {
+                inboxContainer.classList.remove('mostrando-conteudo');
+            }
+        });
+    }
+
+    // =====================================================================
+    // FUNÇÕES DE VALIDAÇÃO (Reutilizáveis)
+    // =====================================================================
     function validarCPF(cpf) {
         cpf = String(cpf).replace(/[^\d]/g, '');
-        if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) {
-            return false;
-        }
+        if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
         let soma = 0, resto;
         for (let i = 1; i <= 9; i++) soma += parseInt(cpf.substring(i - 1, i)) * (11 - i);
         resto = (soma * 10) % 11;
@@ -28,18 +66,21 @@ document.addEventListener('DOMContentLoaded', function() {
         return re.test(String(email).toLowerCase());
     }
 
-    // --- LÓGICA MODULAR POR PÁGINA ---
-
+    // =====================================================================
+    // LÓGICA MODULAR POR PÁGINA (Funções de Inicialização)
+    // =====================================================================
+    
     // Lógica da Página: MEU PERFIL
     function inicializarLogicaDoPerfil() {
         const form = document.getElementById('perfil-form');
+        if (!form) return;
+
         const fieldset = document.getElementById('form-fieldset');
         const btnAlterar = document.getElementById('btn-alterar');
         const btnSalvar = document.getElementById('btn-salvar');
         const emailInput = document.getElementById('email');
         const cpfInput = document.getElementById('cpf');
-
-        if (!form) return; // Se não encontrou o form, sai da função
+        const whatsappInput = document.getElementById('whatsapp');
 
         btnAlterar.addEventListener('click', () => {
             fieldset.disabled = false;
@@ -51,13 +92,11 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             if (!validarEmail(emailInput.value)) {
                 alert('Por favor, insira um e-mail válido.');
-                emailInput.focus();
-                return;
+                return emailInput.focus();
             }
             if (!validarCPF(cpfInput.value)) {
                 alert('O CPF digitado é inválido. Por favor, verifique.');
-                cpfInput.focus();
-                return;
+                return cpfInput.focus();
             }
             console.log('Dados validados e salvos!');
             fieldset.disabled = true;
@@ -65,14 +104,11 @@ document.addEventListener('DOMContentLoaded', function() {
             btnAlterar.classList.remove('hidden');
         });
 
-        const whatsappInput = document.getElementById('whatsapp');
-        if (cpfInput && whatsappInput) {
-            IMask(cpfInput, { mask: '000.000.000-00' });
-            IMask(whatsappInput, { mask: '(00) 00000-0000' });
-        }
+        if (cpfInput) IMask(cpfInput, { mask: '000.000.000-00' });
+        if (whatsappInput) IMask(whatsappInput, { mask: '(00) 00000-0000' });
     }
 
-    // NOVA FUNÇÃO: Lógica da Página: CAIXA DE ENTRADA
+    // Lógica da Página: CAIXA DE ENTRADA (Modal)
     function inicializarLogicaDaCaixaDeEntrada() {
         const btnAbrirFeedback = document.getElementById('btn-abrir-feedback');
         const modalFeedback = document.getElementById('modal-feedback');
@@ -85,21 +121,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (e.target === modalFeedback) modalFeedback.classList.add('hidden');
             });
         }
-
-        const messageItems = document.querySelectorAll('.message-item');
-        messageItems.forEach(item => {
-            item.addEventListener('click', () => {
-                messageItems.forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-                item.classList.remove('unread');
-                // Futuramente, aqui você carregaria o conteúdo da mensagem via fetch
-            });
-        });
     }
 
-    // --- GERENCIADOR DE CARREGAMENTO DE PÁGINAS ---
+    // =====================================================================
+    // GERENCIADOR DE CARREGAMENTO DE PÁGINAS (Fetch e Roteador)
+    // =====================================================================
     function loadPage(pageUrl) {
         if (!pageUrl) return;
+        mainContent.innerHTML = '<p style="text-align:center; padding: 40px;">Carregando...</p>';
+        
         fetch(pageUrl)
             .then(response => response.ok ? response.text() : Promise.reject(`Arquivo não encontrado: ${pageUrl}`))
             .then(html => {
@@ -111,32 +141,43 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (pageUrl.includes('psi_caixa_de_entrada.html')) {
                     inicializarLogicaDaCaixaDeEntrada();
                 }
-                // Adicione outros 'else if' para as futuras páginas (ex: assinatura)
+                // Adicione outros 'else if' para as futuras páginas aqui
             })
             .catch(error => {
-                mainContent.innerHTML = `<div style="padding: 40px;"><h1>Página em Construção</h1></div>`;
+                mainContent.innerHTML = `<div style="padding: 40px; text-align:center;"><h2>Página em Construção</h2><p>O conteúdo para esta seção estará disponível em breve.</p></div>`;
                 console.error(error);
             });
     }
 
-    // --- CÓDIGO DE INICIALIZAÇÃO ---
+    // =====================================================================
+    // CÓDIGO DE INICIALIZAÇÃO E EVENTOS DE NAVEGAÇÃO
+    // =====================================================================
+    
+    // Carrega a página inicial
     const initialPage = document.querySelector('.sidebar-nav li.active')?.getAttribute('data-page');
     if (initialPage) {
         loadPage(initialPage);
     } else {
         const firstPage = document.querySelector('.sidebar-nav li')?.getAttribute('data-page');
         if (firstPage) {
-            loadPage(firstPage);
             document.querySelector('.sidebar-nav li')?.classList.add('active');
+            loadPage(firstPage);
         }
     }
 
+    // Adiciona evento de clique para os links da navegação principal
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             navLinks.forEach(item => item.classList.remove('active'));
             this.classList.add('active');
             loadPage(this.getAttribute('data-page'));
+
+            // Fecha a sidebar no mobile após clicar em um link
+            if (window.innerWidth <= 992 && sidebar && sidebar.classList.contains('is-open')) {
+                sidebar.classList.remove('is-open');
+            }
         });
     });
+
 });

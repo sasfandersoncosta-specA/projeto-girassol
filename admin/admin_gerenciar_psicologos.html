@@ -1,0 +1,77 @@
+<section class="filtros-container">
+    <input type="text" class="campo-busca" placeholder="Buscar por nome, e-mail ou CRP...">
+    <select class="filtro-select">
+        <option value="">Filtrar por Status</option>
+        <option value="ativo">Ativo</option>
+        <option value="pendente">Pendente</option>
+        <option value="inativo">Inativo</option>
+    </select>
+    <select class="filtro-select">
+        <option value="">Filtrar por Plano</option>
+        <option value="semente">Semente</option>
+        <option value="luz">Luz</option>
+        <option value="sol">Sol</option>
+    </select>
+    <button class="btn-primario">Adicionar Psicólogo</button>
+</section>
+
+<section class="tabela-container">
+    <h3>Gerenciamento de Psicólogos</h3>
+    <p class="subtitulo-secao">Visualize, filtre e gerencie todos os profissionais da plataforma.</p>
+    
+    <div class="tabela-wrapper">
+        <table class="tabela-gerenciamento">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>E-mail</th>
+                    <th>CRP</th>
+                    <th>Plano</th>
+                    <th>Cliques (Usados/Limite)</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+    <tr>
+        <td data-label="Nome">Dra. Beatriz Lima</td>
+        <td data-label="E-mail">beatriz.lima@email.com</td>
+        <td data-label="CRP">06/00003</td>
+        <td data-label="Plano">Sol</td>
+        <td data-label="Cliques">18 / 30</td>
+        <td data-label="Status"><span class="status status-ativo">Ativo</span></td>
+        <td data-label="Ações">
+            <button class="btn-tabela">Ver Detalhes</button>
+            <button class="btn-tabela">Editar Plano</button>
+            <button class="btn-tabela">Suspender</button>
+        </td>
+    </tr>
+    <tr>
+        <td data-label="Nome">Dr. Carlos Andrade</td>
+        <td data-label="E-mail">carlos.andrade@email.com</td>
+        <td data-label="CRP">06/00004</td>
+        <td data-label="Plano">Luz</td>
+        <td data-label="Cliques">15 / 15</td>
+        <td data-label="Status"><span class="status status-pendente">Pendente</span></td>
+        <td data-label="Ações">
+            <button class="btn-tabela">Ver Detalhes</button>
+            <button class="btn-tabela">Editar Plano</button>
+            <button class="btn-tabela">Reativar</button>
+        </td>
+    </tr>
+    <tr>
+        <td data-label="Nome">Dra. Helena Souza</td>
+        <td data-label="E-mail">helena.souza@email.com</td>
+        <td data-label="CRP">06/00001</td>
+        <td data-label="Plano">-</td>
+        <td data-label="Cliques">- / -</td>
+        <td data-label="Status"><span class="status status-inativo">Pendente CRP</span></td>
+        <td data-label="Ações">
+            <button class="btn-tabela">Verificar CRP</button>
+            <button class="btn-tabela">Excluir</button>
+        </td>
+    </tr>
+</tbody>
+        </table>
+    </div>
+</section>

@@ -12,6 +12,7 @@ body {
     margin: 0;
     font-family: 'Montserrat Alternates', sans-serif;
     background-color: #fdfaf6;
+    padding-top: 80px;
 }
 h1, h2, h3, h4, h5, h6 {
     font-family: 'New Kansas', serif;
@@ -37,6 +38,8 @@ header {
     align-items: center;
     padding: 15px 40px;
     position: fixed;
+    top: 0; 
+    left: 0;
     margin-top: 0;         /* ESSENCIAL */
     margin-bottom: 0;      /* ESSENCIAL */
     width: 100%;
@@ -190,6 +193,7 @@ header.header-rolagem nav a:hover {
     text-align: center;
     background-color: #1B4332;
     position: relative;
+    margin-top: -2px;
 }
 .hero-texto h1 {
     font-size: 56px;
@@ -928,11 +932,13 @@ header.header-rolagem nav a:hover {
     text-align: center;
     background-color: var(--verde-escuro);
     color: white;
+    
 }
 
 .faq-hero h1 {
     font-size: 56px;
     margin-top: 0;
+    
 }
 
 .faq-hero .subtitulo-secao {
@@ -982,6 +988,15 @@ header.header-rolagem nav a:hover {
 }
 .faq-cta h3 {
     margin-top: 0;
+}
+/* =============================================================
+   CORREÇÃO FINAL: FUSÃO DO HEADER COM SEÇÕES DE FUNDO ESCURO
+   ============================================================= */
+
+/* Aplica a margem negativa em QUALQUER seção que tenha a classe
+   .hero-fundo-escuro, resolvendo o problema em todas as páginas. */
+.hero-fundo-escuro {
+    margin-top: -5px;
 }
 /* --- ESTILOS DA PÁGINA DE CONTATO --- */
 .contato-container {
@@ -1289,7 +1304,7 @@ header.header-rolagem nav a:hover {
 .dashboard-container {display: flex; min-height: 100vh;}
 .dashboard-sidebar {width: 250px; background-color: #1B4332; color: #FFFFFF; display: flex; flex-direction: column; padding: 25px; box-shadow: 5px 0px 15px rgba(0,0,0,0.1); z-index: 10;}
 .sidebar-nav ul {list-style: none; padding: 0; margin-top: 30px;}
-.sidebar-nav li a {display: block; color: #adb5bd; text-decoration: none; padding: 15px; border-radius: 8px; transition: all 0.2s ease; font-weight: 500;}
+.sidebar-nav li a {display: block; color: #adb5bd; text-decoration: none; padding: 15px; border-radius: 8px; transition: all 0.2s ease; font-weight: 500; text-align: center;}
 .sidebar-nav li.active a, .sidebar-nav li a:hover {background-color: rgba(255, 255, 255, 0.1); color: #FFFFFF; transform: translateX(5px);}
 .sidebar-footer {margin-top: auto; text-align: center;}
 .sidebar-footer a {color: #FFEE8C; font-weight: bold; text-decoration: none;}
@@ -1483,14 +1498,16 @@ header.header-rolagem nav a:hover {
     transform: translateY(0);
 }
 /* ==========================================================================
-   PÁGINA DO QUESTIONÁRIO
+   PÁGINA DO QUESTIONÁRIO (VERSÃO FINAL E DEFINITIVA)
    ========================================================================== */
 
+/* --- ESTRUTURA GERAL --- */
 .pagina-questionario {
     background-color: var(--verde-escuro);
     color: var(--off-white);
     font-family: 'Inter', sans-serif;
-    overflow: hidden; /* Impede o scroll da página principal */
+    overflow: hidden;
+    padding-top: 0 !important; /* Garante que não haja padding global */
 }
 
 .questionario-container {
@@ -1502,15 +1519,17 @@ header.header-rolagem nav a:hover {
 }
 
 .progress-bar {
-    width: 100%;
-    height: 8px;
+    height: 12px;
     background-color: rgba(255, 255, 255, 0.2);
+    width: 100%;
+    z-index: 10;
 }
 .progress-bar-fill {
     width: 0%;
     height: 100%;
     background-color: var(--cor-girassol);
     transition: width 0.4s ease-in-out;
+    border-radius: 0 5px 5px 0;
 }
 
 .slides-container {
@@ -1519,22 +1538,23 @@ header.header-rolagem nav a:hover {
     width: 100%;
 }
 
+/* --- LAYOUT DO SLIDE (CSS GRID) --- */
 .slide {
-    position: absolute;
+    position: absolute; 
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 20px;
+    box-sizing: border-box;
+    padding: 20px 20px 30px 20px;
     
-    /* Animação */
+    display: grid;
+    grid-template-rows: auto 1fr auto; /* Cabeçalho(auto), Corpo(flexível), Navegação(auto) */
+    gap: 15px; /* Espaço entre as 3 áreas */
+    
+    text-align: center;
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px);
     pointer-events: none;
     transition: opacity 0.4s ease-out, transform 0.4s ease-out;
 }
@@ -1544,310 +1564,365 @@ header.header-rolagem nav a:hover {
     pointer-events: auto;
 }
 
-.slide h1, .slide h2 {
-    font-family: 'New Kansas', serif;
-    font-size: clamp(1.8rem, 5vw, 2.8rem);
+/* 1. O CABEÇALHO (PERGUNTA) */
+.slide-header {
+    width: 100%;
     max-width: 800px;
-    margin-bottom: 20px;
-    font-weight: 700;
+    margin: 0 auto;
 }
-.slide p, .slide .subtitle {
+.slide-header h1 {
+    font-family: 'New Kansas', serif;
+    font-size: clamp(2rem, 5vw, 2.8rem);
+    margin: 0 0 15px 0;
+}
+.slide-header p.subtitle {
     max-width: 600px;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     line-height: 1.6;
-    margin-bottom: 40px;
+    margin: 0 auto;
+    color: rgba(255, 255, 255, 0.8);
 }
 
-/* --- Estilo dos Controles --- */
-.text-input {
-    background: none;
-    border: none;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.5);
-    color: var(--branco-puro);
-    font-size: 2rem;
-    text-align: center;
-    width: 80%;
-    max-width: 500px;
-    padding: 10px;
-    margin-bottom: 20px;
-}
-.text-input:focus {
-    outline: none;
-    border-bottom-color: var(--cor-girassol);
-}
-
-.choices-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+/* 2. O CORPO (OPÇÕES) - ROLÁVEL */
+.slide-body {
+    overflow-y: auto;
+    min-height: 0; /* Fix para rolagem funcionar no Grid */
     width: 100%;
-    max-width: 500px;
-}
-.choice-button {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: var(--off-white);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    padding: 20px;
-    border-radius: 8px;
-    font-size: 1.1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: left;
-}
-.choice-button:hover {
-    background-color: var(--cor-girassol);
-    border-color: var(--cor-girassol);
-    color: var(--verde-escuro);
-}
-.choice-button.selected {
-    background-color: var(--cor-girassol);
-    border-color: var(--cor-girassol);
-    color: var(--verde-escuro);
-}
-
-.cta-button {
-    background-color: var(--cor-girassol);
-    color: var(--verde-escuro);
-    border: none;
-    padding: 15px 40px;
-    border-radius: 30px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 20px;
-}
-/* ==========================================================================
-   ATUALIZAÇÕES DO QUESTIONÁRIO
-   ========================================================================== */
-
-/* 1. Wrapper para o conteúdo do slide, resolvendo o layout do desktop */
-.slide-content {
-    width: 100%;
-    max-width: 700px; /* Limita a largura dos botões e textos em telas grandes */
     display: flex;
     flex-direction: column;
     align-items: center;
 }
+.slide-body::-webkit-scrollbar { width: 8px; }
+.slide-body::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.1); border-radius: 10px; }
+.slide-body::-webkit-scrollbar-thumb { background: var(--cor-girassol); border-radius: 10px; }
 
-/* 2. Estilo para o botão "Voltar" */
-.back-button {
-    position: absolute;
-    bottom: 30px;
-    left: 30px;
-    background: none;
-    border: none;
-    color: rgba(255, 255, 255, 0.6);
-    font-family: 'Inter', sans-serif;
-    font-weight: 500;
-    font-size: 1rem;
-    cursor: pointer;
-    padding: 10px;
-    transition: color 0.2s ease;
+/* 3. A NAVEGAÇÃO (BOTÕES) */
+.navigation-buttons {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
-.back-button:hover {
-    color: rgba(255, 255, 255, 1);
+.navigation-buttons.single-button {
+    justify-content: center;
 }
 
-/* 3. Estilo para as mensagens de apoio (microcopy) */
-.microcopy {
-    font-size: 1rem !important;
-    opacity: 0.8;
-    margin-top: -10px !important;
-    margin-bottom: 30px !important;
-    max-width: 500px !important;
+/* --- ELEMENTOS DO QUESTIONÁRIO --- */
+.back-button, .cta-button, .text-input, .choices-container, .choice-button {
+    position: static !important; /* GARANTE A REMOÇÃO DE QUALQUER 'position: absolute' ANTIGO */
 }
-/* ==========================================================================
-   OTIMIZAÇÃO MOBILE - QUESTIONÁRIO (AJUSTES FINOS)
+.back-button {background: none; border: none; color: rgba(255, 255, 255, 0.7); font-family: 'Inter', sans-serif; font-weight: 500; font-size: 1rem; cursor: pointer; padding: 10px; transition: color 0.2s ease;}
+.back-button:hover {color: var(--branco-puro);}
+.cta-button {background-color: var(--cor-girassol); color: var(--verde-escuro); border: none; padding: 15px 40px; border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: transform 0.2s ease;}
+.cta-button:hover {transform: scale(1.05);}
+.text-input, .choices-container {width: 100%; max-width: 500px; margin-top: 20px;}
+.text-input {background: none; border: none; border-bottom: 2px solid rgba(255, 255, 255, 0.5); color: var(--branco-puro); font-size: 1.8rem; text-align: center; padding: 10px;}
+.text-input:focus {outline: none; border-bottom-color: var(--cor-girassol);}
+.choices-container {display: flex; flex-direction: column; gap: 12px;}
+.choice-button {background-color: rgba(255, 255, 255, 0.1); color: var(--off-white); border: 2px solid rgba(255, 255, 255, 0.3); padding: 15px 20px; border-radius: 12px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease; text-align: left;}
+.choice-button:hover, .choice-button.selected {background-color: var(--cor-girassol); border-color: var(--cor-girassol); color: var(--verde-escuro);}
+.shake-error {animation: shake 0.5s ease-in-out;}
+@keyframes shake {0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 50% { transform: translateX(8px); } 75% { transform: translateX(-8px); }}
+/* =====================================================================
+/* PÁGINA DE RESULTADOS (ESTILOS UNIFICADOS)
    ========================================================================== */
 
-@media (max-width: 480px) {
-
-    /* Ajusta o padding geral do slide para dar mais espaço */
-    .slide {
-        padding: 15px;
-    }
-
-    /* Diminui um pouco os títulos principais em telas muito pequenas */
-    .slide h1, .slide h2 {
-        font-size: 1.7rem; /* Um pouco menor para caber melhor */
-    }
-
-    /* Ajusta o tamanho dos textos de apoio e opções */
-    .slide p, .slide .subtitle, .microcopy {
-        font-size: 1rem;
-        margin-bottom: 25px; /* Menos espaço vertical */
-    }
-
-    /* Diminui o padding dos botões de escolha para não parecerem tão grandes */
-    .choice-button {
-        padding: 15px;
-        font-size: 1rem;
-    }
-
-    /* Ajusta o tamanho da fonte do campo de texto */
-    .text-input {
-        font-size: 1.8rem;
-    }
-
-    /* Reposiciona o botão de voltar para ficar mais acessível */
-    .back-button {
-        bottom: 60px;
-        left: 20px;
-    }
-
+.pagina-resultados main.container {
+    padding-top: 60px; /* Reduz o padding-top padrão do body para esta página */
+    padding-bottom: 80px;
 }
-/* --- MELHORIA PARA LISTAS LONGAS NO QUESTIONÁRIO --- */
-
-.choices-container.scrollable {
-    max-height: 35vh; /* Limita a altura da lista de opções */
-    overflow-y: auto; /* Adiciona uma barra de rolagem se necessário */
-    padding-right: 10px; /* Espaço para a barra de rolagem */
-}
-/* ==========================================================================
-   REFINAMENTOS FINAIS DO QUESTIONÁRIO
-   ========================================================================== */
-
-/* 1. Estilização da Barra de Rolagem em listas longas */
-.choices-container.scrollable::-webkit-scrollbar {
-    width: 8px;
-}
-.choices-container.scrollable::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-}
-.choices-container.scrollable::-webkit-scrollbar-thumb {
-    background: var(--cor-girassol);
-    border-radius: 10px;
-}
-.choices-container.scrollable::-webkit-scrollbar-thumb:hover {
-    background: #FFD700; /* Um amarelo um pouco mais escuro no hover */
-}
-
-/* 2. Diminui o tamanho das opções APENAS em listas com scroll */
-.choices-container.scrollable .choice-button {
-    padding: 15px;      /* Menos padding vertical */
-    font-size: 1rem;    /* Fonte um pouco menor */
-}
-/* ==========================================================================
-   REFINAMENTOS FINAIS 2 - QUESTIONÁRIO (MOBILE E BARRA DE PROGRESSO)
-   ========================================================================== */
-
-/* --- 1. Torna a Barra de Progresso mais visível e a fixa no topo --- */
-.progress-bar {
-    height: 12px; /* Aumenta a espessura da barra para 12px */
-    position: sticky; /* FAZ A BARRA "COLAR" NO TOPO DA TELA */
-    top: 0;
-    left: 0;
-    z-index: 10; /* Garante que ela fique acima do conteúdo dos slides */
-}
-
-/* --- 2. Ajuste do tamanho da fonte do placeholder no mobile --- */
-@media (max-width: 480px) {
-    .text-input::placeholder {
-        font-size: 1.5rem; /* Diminui a fonte do texto de exemplo em telas pequenas */
-    }
-}
-/* --- EFEITO DE FEEDBACK PARA VALIDAÇÃO DO QUESTIONÁRIO --- */
-
-.shake-error {
-    animation: shake 0.5s ease-in-out;
-}
-
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    50% { transform: translateX(5px); }
-    75% { transform: translateX(-5px); }
-}
-/* ==========================================================================
-   PÁGINA DE RESULTADOS
-   ========================================================================== */
-.pagina-resultados { background-color: var(--cinza-fundo); }
 
 /* --- Estado de Carregamento --- */
-#loading-state { text-align: center; padding-top: 100px; }
-#loading-state p { font-size: 1.2rem; color: var(--cinza-texto); font-weight: 500; }
-.loading-animation img { animation: spin 2.5s linear infinite; }
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+#loading-state {
+    text-align: center;
+    padding: 40px 0;
+}
+#loading-state h1 {
+    font-family: 'New Kansas', serif;
+    color: var(--verde-escuro);
+    font-size: 2.2rem;
+    margin-top: 20px;
+}
+#loading-state p {
+    font-size: 1.1rem;
+    color: var(--cinza-texto);
+    max-width: 500px;
+    margin: 15px auto 0 auto;
+}
+.loading-animation img {
+    max-width: 80px; /* Controla o tamanho do logo girando */
+    animation: spin 2.5s linear infinite;
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
 
-/* --- Estilos Gerais de Resultados --- */
-.resultados-header h1 { font-family: 'New Kansas', serif; color: var(--verde-escuro); font-size: 2.5rem; text-align: center; }
-.resultados-header p { text-align: center; font-size: 1.2rem; max-width: 600px; margin: 15px auto 40px auto; }
+/* --- Cabeçalho dos Resultados (Dentro do #results-container) --- */
+.resultados-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+.resultados-header h1 {
+    font-family: 'New Kansas', serif;
+    color: var(--verde-escuro);
+    font-size: clamp(2rem, 5vw, 2.8rem); /* Fonte responsiva */
+}
+.resultados-header p {
+    font-size: 1.2rem;
+    color: var(--cinza-texto);
+    max-width: 650px;
+    margin: 15px auto 0 auto;
+}
 
-/* --- Card do Profissional (Componente Principal) --- */
-.pro-results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-.pro-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; display: flex; flex-direction: column; }
-.pro-card-img { width: 100%; height: 220px; object-fit: cover; }
-.pro-card-content { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
-.pro-card-content h3 { font-family: 'Montserrat', sans-serif; margin: 0 0 5px 0; }
-.pro-card-content .crp { font-size: 0.9rem; color: var(--cinza-texto); margin-bottom: 10px; }
-.rating { color: #f39c12; margin-bottom: 15px; }
-.compatibility-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
-.tag { background-color: var(--cor-girassol); color: var(--verde-escuro); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
-.bio-snippet { font-style: italic; color: var(--cinza-texto); flex-grow: 1; }
-.pro-card-actions { margin-top: 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px;}
-.pro-card-actions .btn-principal { background-color: #E63946; padding: 12px 20px; flex-grow: 1; margin: 0; }
-.heart-icon { font-size: 24px; color: var(--cinza-texto); cursor: pointer; }
+/* --- Grid de Cards dos Profissionais --- */
+.pro-results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+}
+.pro-card {
+    background: var(--branco-puro);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.pro-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+.pro-card-img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+}
+.pro-card-content {
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Faz este container crescer para empurrar as ações para baixo */
+}
+.pro-card-content h3 {
+    font-family: 'Montserrat', sans-serif;
+    margin: 0 0 5px 0;
+    color: var(--verde-escuro);
+}
+.pro-card-content .crp {
+    font-size: 0.9rem;
+    color: var(--cinza-texto);
+    margin-bottom: 10px;
+}
+.rating {
+    color: #f39c12;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+.compatibility-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+.tag {
+    background-color: var(--cor-girassol);
+    color: var(--verde-escuro);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+.bio-snippet {
+    font-style: italic;
+    color: var(--cinza-texto);
+    flex-grow: 1; /* Ocupa o espaço restante */
+    margin-bottom: 20px;
+}
+.pro-card-actions {
+    margin-top: auto; /* Empurra para o final do card */
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+.pro-card-actions .btn-principal {
+    flex-grow: 1; /* Faz o botão principal ocupar mais espaço */
+}
+.heart-icon {
+    font-size: 28px;
+    color: #ccc;
+    cursor: pointer;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+.heart-icon:hover {
+    color: #E63946; /* Cor de "favoritado" */
+    transform: scale(1.1);
+}
 
 /* --- Cenário B: Etiqueta de Contexto --- */
-.context-label { background-color: #e9ecef; padding: 15px; margin: -20px -20px 20px -20px; font-size: 0.9rem; font-weight: 500; text-align: center; }
-.context-label strong { color: var(--verde-escuro); }
+.context-label {
+    background-color: #e9ecef;
+    padding: 15px;
+    margin: -25px 0 25px 0; /* Ajuste para encaixar melhor */
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: center;
+}
+.context-label strong {
+    color: var(--verde-escuro);
+}
 
 /* --- Cenário C: Nenhum Resultado --- */
-.no-results-container { text-align: center; }
-.no-results-container .ilustracao { max-width: 300px; margin: 20px auto; }
-.action-box { background: #fff; padding: 30px; border-radius: 16px; margin-top: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-.action-box h3 { margin-top: 0; }
-/* ==========================================================================
-   CORREÇÃO DEFINITIVA DA ONDA DO RODAPÉ
-   ========================================================================== */
-
-/* O container pai ainda precisa disto */
-.resultados-container {
-    position: relative !important;
-    padding-bottom: 150px !important; 
+.no-results-container {
+    text-align: center;
 }
-/* ==========================================================================
-   SOLUÇÃO DEFINITIVA - ONDA DO RODAPÉ (PÁGINA DE RESULTADOS)
-   ========================================================================== */
+.no-results-container .ilustracao {
+    max-width: 100%;
+    width: 300px; /* Define uma largura base */
+    margin: 20px auto 40px auto;
+}
+.action-box {
+    background: var(--branco-puro);
+    padding: 30px;
+    border-radius: 16px;
+    margin-top: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+.action-box h3 {
+    margin-top: 0;
+    font-family: 'New Kansas', serif;
+    color: var(--verde-escuro);
+}
+.action-box .btn {
+    margin-top: 15px;
+}
+/* ================================================= */
+/* CORREÇÃO DEFINITIVA: INTEGRAÇÃO ONDA + RODAPÉ   */
+/* ================================================= */
 
-/* 1. O container principal da página de resultados */
-.resultados-container {
-    position: relative; /* Define o contexto de posicionamento */
-    /* REMOVEMOS o padding-bottom daqui para não interferir com o conteúdo dinâmico */
+/* Garante que o container da onda não tenha margens e se comporte bem */
+.wave-divider-footer {
+    /* O fundo deve ser da mesma cor do conteúdo principal que vem antes dele */
+    background-color: transparent; /* ou var(--off-white) se necessário */
+    line-height: 0; /* Remove espaço vertical extra */
+
+    /* A 'cola' que vai unir as duas partes. Puxa o rodapé 1px para cima. */
+    margin-bottom: -1px; 
 }
 
-/* 2. O container da onda - CORREÇÃO APLICADA AQUI */
-.wave-divider {
-    position: absolute;
-    bottom: 0;
-    left: 0;
+/* Garante que o SVG preencha o container corretamente */
+.wave-divider-footer svg {
+    display: block; /* Remove o espaço que a tag svg tem por padrão */
     width: 100%;
-    height: 80px; /* Altura desejada para a onda */
-    line-height: 0;
-    overflow: hidden; /* Adicione este para garantir que nada saia do container */
-    
-    /* CORREÇÃO: Inverte o container inteiro da onda */
-    transform: scaleY(-1);
+    height: 80px; /* Sua altura definida para a onda */
 }
 
-/* 3. O SVG dentro do container */
-.wave-divider svg {
+/* DEFINE A COR DA ONDA para ser a mesma do rodapé */
+.wave-divider-footer .shape-fill {
+    fill: var(--verde-escuro);
+}
+
+/* Zera qualquer margem superior do rodapé que possa estar causando o espaço */
+.rodape-principal {
+    margin-top: 0;
+}
+/* ================================================= */
+/* CORREÇÃO (RE-ADICIONADA): REMOVER O CONTAINER DE 'LOADING' */
+/* ================================================= */
+
+/* Garante que o container de 'loading' suma completamente do layout
+   quando a classe 'hidden' for adicionada a ele via JavaScript. */
+#loading-state.hidden {
+    display: none !important;
+}
+/* ==========================================================================
+   PÁGINA: PRÉ-CADASTRO DE PSICÓLOGOS (/psi/cadastro)
+   ========================================================================== */
+
+/* --- Ajustes no layout do slide para formulários --- */
+.slide-body {
+    justify-content: flex-start; /* Alinha o conteúdo no topo em vez de no centro */
+    padding-top: 20px;
+}
+
+/* --- Estilo para os grupos de formulário (label + input) --- */
+.form-group-questionario {
+    width: 100%;
+    max-width: 500px; /* Mantém a mesma largura dos botões de escolha */
+    margin-bottom: 25px;
+    text-align: left; /* Alinha o texto dentro do grupo à esquerda */
+}
+
+.form-group-questionario label {
     display: block;
-    width: 100%;
-    height: 100%;
-    transform: rotate(180deg); /* Gira a onda para a posição correta */
-    preserveAspectRatio: none; 
+    font-weight: 500;
+    margin-bottom: 10px;
+    color: rgba(255, 255, 255, 0.9);
 }
 
-/* 4. A cor da onda */
-.wave-divider .shape-fill {
-    fill: #1B4332; /* A cor verde do seu rodapé */
+/* Ajuste fino nos inputs de texto para este formulário */
+.form-group-questionario .text-input {
+    width: 100%;
+    text-align: left; /* Alinha o texto do input à esquerda */
+    font-size: 1.2rem;
+    margin: 0;
+    padding: 12px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5); /* Remove a borda inferior grossa */
 }
-/* Sobrescreve a cor do botão principal APENAS na tela de erro */
-#slide-erro-idade .btn-principal {
-    background-color: #FFEE8C; /* Amarelo desejado */
-    color: #1B4332; /* Cor do texto para contraste */
-    border-color: #FFEE8C;
+
+.form-group-questionario .text-input:focus {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: var(--cor-girassol);
+}
+
+/* --- Estilo para o componente de Upload --- */
+.upload-container {
+    width: 100%;
+    max-width: 600px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 30px;
+    text-align: center;
+}
+
+.upload-container h3 {
+    font-family: 'New Kansas', serif;
+    color: var(--branco-puro);
+    margin-top: 0;
+}
+
+.upload-container p {
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.6;
+}
+
+.upload-label {
+    display: block;
+    margin-top: 20px;
+    padding: 40px 20px;
+    border: 2px dashed rgba(255, 255, 255, 0.4);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.upload-label:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--cor-girassol);
+}
+
+.upload-label span {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+}
+
+/* Esconde o input de arquivo padrão */
+#crp-upload {
+    display: none;
 }
