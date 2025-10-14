@@ -12,7 +12,7 @@ body {
     margin: 0;
     font-family: 'Montserrat Alternates', sans-serif;
     background-color: #fdfaf6;
-    padding-top: 80px;
+    
 }
 h1, h2, h3, h4, h5, h6 {
     font-family: 'New Kansas', serif;
@@ -996,7 +996,7 @@ header.header-rolagem nav a:hover {
 /* Aplica a margem negativa em QUALQUER seção que tenha a classe
    .hero-fundo-escuro, resolvendo o problema em todas as páginas. */
 .hero-fundo-escuro {
-    margin-top: -5px;
+    margin-top: -2px;
 }
 /* --- ESTILOS DA PÁGINA DE CONTATO --- */
 .contato-container {
@@ -1441,6 +1441,7 @@ header.header-rolagem nav a:hover {
 @media (max-width: 992px) {
 
     /* --- Botão do Menu Hambúrguer --- */
+    
     .menu-toggle {
         display: block;
         position: fixed;
@@ -1946,4 +1947,54 @@ header.header-rolagem nav a:hover {
     background-color: white !important;
     color: var(--verde-escuro) !important;
     border-color: white !important;
+}
+/* ================================================= */
+/* CORREÇÃO: GARANTIR EFEITO DE RUÍDO NO MOBILE    */
+/* ================================================= */
+
+/* Garante que o body ocupe a altura total, melhorando a consistência */
+html, body {
+    height: 100%;
+}
+
+/* Regra do ruído, agora mais robusta para mobile */
+body::after {
+    content: "";
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%; /* Mais estável que 100vh em alguns celulares */
+    
+    z-index: 9999; /* Garante que fique acima de quase tudo */
+    pointer-events: none; /* Impede que bloqueie cliques */
+    opacity: 0.05; 
+}
+/* =============================================================
+   SOLUÇÃO ARQUITETURAL: ESPAÇAMENTO DO CABEÇALHO FIXO
+   ============================================================= */
+
+/* Para seções 'hero' com fundo escuro (como na Home e FAQ), 
+   o padding fica dentro do próprio elemento, preenchendo o espaço 
+   com a cor de fundo correta e eliminando a "linha branca".
+*/
+.hero-fundo-escuro {
+    padding-top: 100px; /* Ajuste este valor se necessário */
+}
+
+/* Para páginas de conteúdo geral com fundo claro, como 'Profissionais',
+   'Sobre', etc., aplicamos o padding no container principal da página.
+*/
+.secao-conteudo-pagina {
+    padding-top: 100px; /* Ajuste este valor se necessário */
+}
+
+/* Garante que o questionário e os dashboards, que não têm o header principal,
+   não recebam nenhum espaçamento extra.
+*/
+body.pagina-questionario,
+body.pagina-dashboard {
+    padding-top: 0 !important;
 }
