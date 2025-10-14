@@ -872,3 +872,33 @@ body.pagina-dashboard {
         margin: 5px;
     }
 }
+/* =====================================================================
+   CORREÇÃO FINAL: VISIBILIDADE DO MENU MOBILE (ADMIN)
+   ===================================================================== */
+
+/* As regras abaixo só se aplicam em telas de 992px ou menos */
+@media (max-width: 992px) {
+
+    /* 1. CORRIGE A COR DO ÍCONE HAMBÚRGUER */
+    /* Deixa as barrinhas brancas para contrastar com o fundo verde do header */
+    .main-header .btn-toggle-sidebar span {
+        background-color: var(--branco-puro);
+    }
+
+    /* (Opcional, mas recomendado) Deixa as barrinhas verdes quando o header rolar e ficar branco */
+    .main-header.header-rolagem .btn-toggle-sidebar span {
+        background-color: var(--verde-escuro);
+    }
+
+    /* 2. CORRIGE A SOBREPOSIÇÃO DO MENU (Z-INDEX) */
+    /* Garante que o conteúdo principal fique em uma camada inferior */
+    .dashboard-main {
+        position: relative; /* Necessário para o z-index funcionar corretamente */
+        z-index: 1;
+    }
+
+    /* Garante que a sidebar (que já tem z-index: 1001) fique na camada superior */
+    .dashboard-sidebar {
+        z-index: 1001;
+    }
+}

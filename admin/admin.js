@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const mainContent = document.getElementById('main-content');
     const navLinks = document.querySelectorAll('.sidebar-nav li');
     const sidebar = document.querySelector('.dashboard-sidebar');
-    const toggleButton = document.querySelector('.btn-toggle-sidebar'); // Seletor corrigido para o botão
+    const toggleButton = document.getElementById('toggleSidebar'); // Seletor corrigido para o botão
 
     /**
      * Função principal: busca o conteúdo de um arquivo HTML e o insere na página.
