@@ -1926,3 +1926,24 @@ header.header-rolagem nav a:hover {
 #crp-upload {
     display: none;
 }
+/* =====================================================================
+   CORREÇÃO: FORÇAR ESTILO CLARO NO MENU MOBILE ABERTO
+   ===================================================================== */
+
+/* Alvo: Links de navegação dentro do menu mobile ativo */
+.container-navegacao.ativo nav a {
+    color: white !important;
+}
+
+/* Alvo: Botão de contorno ("Entrar") dentro do menu mobile ativo */
+.container-navegacao.ativo .btn-outline {
+    color: white !important;
+    border-color: white !important;
+}
+
+/* Alvo: Botão sólido ("Registrar") dentro do menu mobile ativo */
+.container-navegacao.ativo .btn-solid {
+    background-color: white !important;
+    color: var(--verde-escuro) !important;
+    border-color: white !important;
+}
