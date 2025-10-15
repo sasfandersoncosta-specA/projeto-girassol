@@ -2012,13 +2012,3 @@ body.pagina-dashboard {
 .slide-header p.subtitle {
     text-align: center !important;
 }
-.questionario-footer {
-    padding: 20px;
-    text-align: center;
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.5);
-}
-.questionario-footer a {
-    color: rgba(255, 255, 255, 0.7);
-    text-decoration: underline;
-}

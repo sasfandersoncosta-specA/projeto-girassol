@@ -1,10 +1,7 @@
-// Arquivo: questionario.js (VERSÃO FINAL COM PERSONALIZAÇÃO)
+// Arquivo: questionario.js (VERSÃO FINAL COM AVANÇO AUTOMÁTICO AJUSTADO)
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // =====================================================================
-    // 1. BANCO DE DADOS DAS PERGUNTAS (COM MARCADORES DE PERSONALIZAÇÃO)
-    // =====================================================================
     const questions = [
         { id: 'boas-vindas', question: "Vamos encontrar a pessoa certa para te acompanhar nessa jornada.", subtitle: "Responda algumas perguntas para começarmos.", type: 'welcome' },
         { id: 'nome', question: "Olá! Para começarmos, como podemos te chamar?", subtitle: "Isso nos ajuda a te entregar uma experiência personalizada.", type: 'text', placeholder: "Digite seu nome ou apelido", required: true },
@@ -28,27 +25,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressBarFill = document.querySelector('.progress-bar-fill');
     const totalQuestions = questions.filter(q => q.type !== 'welcome' && q.type !== 'final' && q.type !== 'error').length;
 
-    // =====================================================================
-    // 2. NOVA FUNÇÃO DE PERSONALIZAÇÃO
-    // =====================================================================
-    /** Procura e substitui o marcador [NOME] em todos os slides */
-    function updateNamePlaceholders(name) {
-        if (!name) return;
-        const allSlides = document.querySelectorAll('.slide');
-        allSlides.forEach(slide => {
-            const title = slide.querySelector('h1');
-            const subtitle = slide.querySelector('p.subtitle');
-            if (title && title.innerHTML.includes('[NOME]')) {
-                title.innerHTML = title.innerHTML.replace(/\[NOME\]/g, name);
-            }
-            if (subtitle && subtitle.innerHTML.includes('[NOME]')) {
-                subtitle.innerHTML = subtitle.innerHTML.replace(/\[NOME\]/g, name);
-            }
-        });
+    function updateNamePlaceholders(name) { if (!name) return; const allSlides = document.querySelectorAll('.slide'); allSlides.forEach(slide => { const title = slide.querySelector('h1'); const subtitle = slide.querySelector('p.subtitle'); if (title && title.innerHTML.includes('[NOME]')) { title.innerHTML = title.innerHTML.replace(/\[NOME\]/g, name); } if (subtitle && subtitle.innerHTML.includes('[NOME]')) { subtitle.innerHTML = subtitle.innerHTML.replace(/\[NOME\]/g, name); } }); }
+    
+    function createSlideHTML(questionData, index) { 
+        let contentHTML = '', navHTML = ''; 
+        const isFirstStep = questions.findIndex(q => q.type !== 'welcome') === index; 
+        switch (questionData.type) { 
+            case 'text': case 'tel': contentHTML = `<input type="${questionData.type}" id="input-${questionData.id}" class="text-input" placeholder="${questionData.placeholder}">`; break; 
+            case 'choice': case 'multiple-choice': 
+                const choicesClass = questionData.scrollable ? 'choices-container scrollable' : 'choices-container'; 
+                const buttonClass = questionData.type === 'multiple-choice' ? 'choice-button multi-choice' : 'choice-button'; 
+                contentHTML = `<div class="${choicesClass}">${questionData.choices.map(choice => `<button class="${buttonClass}" data-value="${choice}">${choice}</button>`).join('')}</div>`; 
+                break; 
+        } 
+        const backButtonHTML = !isFirstStep && !['welcome', 'final', 'error'].includes(questionData.type) ? `<button class="back-button">← Voltar</button>` : ''; 
+        let nextButtonHTML = ''; 
+        if (questionData.type === 'welcome') { 
+            nextButtonHTML = `<button class="cta-button" data-action="next">Vamos começar</button>`; 
+        } 
+        // =====================================================================
+        // ALTERAÇÃO CIRÚRGICA APLICADA AQUI
+        // =====================================================================
+        // O botão "Avançar" agora só é criado para os tipos de pergunta que realmente precisam dele.
+        else if (['text', 'tel', 'multiple-choice'].includes(questionData.type)) { 
+            const buttonText = questionData.type === 'tel' ? "Finalizar" : "Avançar"; 
+            const buttonAction = questionData.type === 'tel' ? "finalize" : "next"; 
+            nextButtonHTML = `<button class="cta-button" data-action="${buttonAction}">${buttonText}</button>`; 
+        } 
+        // =====================================================================
+        else if (questionData.type === 'error') { 
+            navHTML = `<a href="index.html" class="cta-button">${questionData.buttonText}</a>`; 
+        } 
+        const navigationClass = backButtonHTML ? '' : 'single-button'; 
+        if (!navHTML && (backButtonHTML || nextButtonHTML)) { 
+            navHTML = `<div class="navigation-buttons ${navigationClass}">${backButtonHTML}${nextButtonHTML}</div>`; 
+        } 
+        return `<div class="slide" id="slide-${questionData.id}" data-index="${index}"><div class="slide-header"><h1>${questionData.question}</h1><p class="subtitle">${questionData.subtitle || ''}</p></div><div class="slide-body">${contentHTML}</div>${navHTML}</div>`; 
     }
-
-    // --- FUNÇÕES DE LÓGICA DO QUESTIONÁRIO ---
-    function createSlideHTML(questionData, index) { let contentHTML = '', navHTML = ''; const isFirstStep = questions.findIndex(q => q.type !== 'welcome') === index; switch (questionData.type) { case 'text': case 'tel': contentHTML = `<input type="${questionData.type}" id="input-${questionData.id}" class="text-input" placeholder="${questionData.placeholder}">`; break; case 'choice': case 'multiple-choice': const choicesClass = questionData.scrollable ? 'choices-container scrollable' : 'choices-container'; const buttonClass = questionData.type === 'multiple-choice' ? 'choice-button multi-choice' : 'choice-button'; contentHTML = `<div class="${choicesClass}">${questionData.choices.map(choice => `<button class="${buttonClass}" data-value="${choice}">${choice}</button>`).join('')}</div>`; break; } const backButtonHTML = !isFirstStep && !['welcome', 'final', 'error'].includes(questionData.type) ? `<button class="back-button">← Voltar</button>` : ''; let nextButtonHTML = ''; if (questionData.type === 'welcome') { nextButtonHTML = `<button class="cta-button" data-action="next">Vamos começar</button>`; } else if (['text', 'tel', 'choice', 'multiple-choice'].includes(questionData.type)) { const buttonText = questionData.type === 'tel' ? "Finalizar" : "Avançar"; const buttonAction = questionData.type === 'tel' ? "finalize" : "next"; nextButtonHTML = `<button class="cta-button" data-action="${buttonAction}">${buttonText}</button>`; } else if (questionData.type === 'error') { navHTML = `<a href="index.html" class="cta-button">${questionData.buttonText}</a>`; } const navigationClass = backButtonHTML ? '' : 'single-button'; if (!navHTML && (backButtonHTML || nextButtonHTML)) { navHTML = `<div class="navigation-buttons ${navigationClass}">${backButtonHTML}${nextButtonHTML}</div>`; } return `<div class="slide" id="slide-${questionData.id}" data-index="${index}"><div class="slide-header"><h1>${questionData.question}</h1><p class="subtitle">${questionData.subtitle || ''}</p></div><div class="slide-body">${contentHTML}</div>${navHTML}</div>`; }
+    
     function updateProgressBar() { const questionIndex = questions.slice(0, currentStep + 1).filter(q => !['welcome', 'final', 'error'].includes(q.type)).length; const progress = (questionIndex / totalQuestions) * 100; progressBarFill.style.width = `${progress}%`; }
     function goToSlide(index) { const currentSlide = document.querySelector('.slide.active'); if (currentSlide) currentSlide.classList.remove('active'); currentStep = index; const nextSlide = document.querySelector(`[data-index="${currentStep}"]`); if (nextSlide) nextSlide.classList.add('active'); updateProgressBar(); const currentQuestion = questions[currentStep]; if (currentQuestion.type === 'tel') { const phoneInput = document.getElementById(`input-${currentQuestion.id}`); if (phoneInput) IMask(phoneInput, { mask: '(00) 00000-0000' }); } }
     function collectAnswer() { const question = questions[currentStep]; if (!question || !question.id || ['welcome', 'final', 'error'].includes(question.type)) return; let answer; if (['text', 'tel'].includes(question.type)) { answer = document.getElementById(`input-${question.id}`).value; } else if (question.type === 'choice') { const selectedButton = document.querySelector(`#slide-${question.id} .choice-button.selected`); answer = selectedButton ? selectedButton.dataset.value : undefined; } else if (question.type === 'multiple-choice') { const selected = []; document.querySelectorAll(`#slide-${question.id} .choice-button.selected`).forEach(btn => selected.push(btn.dataset.value)); answer = selected; } userAnswers[question.id] = answer; }
@@ -65,15 +79,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (isValid) {
             collectAnswer();
-            
-            // =====================================================================
-            // 3. O GATILHO DA PERSONALIZAÇÃO
-            // =====================================================================
-            // Se a pergunta atual for a do nome, chama a função de atualização
             if (currentQuestion.id === 'nome') {
                 updateNamePlaceholders(userAnswers.nome);
             }
-
             const action = currentSlideEl.querySelector('.cta-button, [data-action="finalize"]')?.dataset.action;
             if (action === 'finalize') {
                 finalize();
