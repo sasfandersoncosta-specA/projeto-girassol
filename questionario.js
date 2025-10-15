@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // =====================================================================
     const questions = [
         { id: 'boas-vindas', question: "Vamos encontrar a pessoa certa para te acompanhar nessa jornada.", subtitle: "Responda algumas perguntas para começarmos.", type: 'welcome' },
-        { id: 'nome', question: "Olá! Para começarmos, como podemos te chamar?", subtitle: "Isso nos ajuda a criar uma experiência mais pessoal para você.", type: 'text', placeholder: "Digite seu nome ou apelido", required: true },
+        { id: 'nome', question: "Olá! Para começarmos, como podemos te chamar?", subtitle: "Isso nos ajuda a te entregar uma experiência personalizada.", type: 'text', placeholder: "Digite seu nome ou apelido", required: true },
         { id: 'idade', question: "Certo, [NOME]. Muito prazer! E qual a sua idade?", subtitle: "Precisamos confirmar que você é maior de idade para usar a plataforma.", type: 'choice', choices: ["Maior de 18 anos", "Menor de 18 anos"], required: true },
         { id: 'identidade_genero', question: "Agora, com qual gênero você se identifica?", subtitle: "Sua identidade é importante. Selecione a opção que melhor te representa.", type: 'choice', scrollable: true, choices: ["Masculino", "Feminino", "Não-binário", "Agênero", "Bigênero", "Pangênero", "Genderqueer", "Gênero fluido", "Demigênero", "Andrógeno", "Outro", "Prefiro não informar"], required: true },
         { id: 'pref_genero_prof', question: "Você tem preferência pelo gênero do(a) profissional?", subtitle: "Sua segurança e conforto são nossa prioridade.", type: 'choice', choices: ["Indiferente", "Masculino", "Feminino", "Não-binário"], required: true },
