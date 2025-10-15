@@ -72,3 +72,19 @@ window.addEventListener('load', setVhVariable);
 
 // Executa uma vez no início para garantir que o valor seja definido
 setVhVariable();
+// =====================================================================
+// CORREÇÃO PARA 100VH NO MOBILE (EXPERIÊNCIA DE APP EM TELA CHEIA)
+// =====================================================================
+function setRealViewportHeight() {
+    // Mede a altura interna da janela e calcula 1% dela
+    let vh = window.innerHeight * 0.01;
+    // Define o valor na variável CSS '--vh' no elemento raiz (<html>)
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+
+// Executa a função sempre que a página carrega ou a tela muda de tamanho
+window.addEventListener('resize', setRealViewportHeight);
+window.addEventListener('load', setRealViewportHeight);
+
+// Executa uma vez no início para garantir a definição do valor
+setRealViewportHeight();
