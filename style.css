@@ -1513,7 +1513,8 @@ header.header-rolagem nav a:hover {
 .questionario-container {
     display: flex;
     flex-direction: column;
-    min-height: 100vh; /* Usa altura MÍNIMA, não fixa */
+    /* Usa a nossa variável customizada '--vh' para uma altura estável */
+    height: calc(var(--vh, 1vh) * 100); /* <--- A SOLUÇÃO ESTÁ AQUI */
     width: 100%;
 }
 
@@ -2001,8 +2002,13 @@ body.pagina-questionario,
 body.pagina-dashboard {
     padding-top: 0 !important;
 }
-.slide p.subtitle {
-    text-align: center !important;
-}.slide-header h1 {
+/* =============================================================
+   CORREÇÃO FINAL: ALINHAMENTO DE TODO O CABEÇALHO DO SLIDE
+   ============================================================= */
+
+/* Alvo: O título (h1) E o subtítulo (p.subtitle) dentro do header do slide,
+   forçando ambos a ficarem centralizados. */
+.slide-header h1,
+.slide-header p.subtitle {
     text-align: center !important;
 }
