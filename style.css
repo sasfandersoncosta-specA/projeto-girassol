@@ -1513,8 +1513,8 @@ header.header-rolagem nav a:hover {
 .questionario-container {
     display: flex;
     flex-direction: column;
-    /* Usa a nossa variável customizada '--vh' para uma altura estável e real */
-    height: calc(var(--vh, 1vh) * 100); /* <-- A SOLUÇÃO */
+    /* Usa a nossa variável customizada '--vh' para uma altura estável */
+    height: calc(var(--vh, 1vh) * 100); /* <--- A SOLUÇÃO ESTÁ AQUI */
     width: 100%;
 }
 
@@ -2011,4 +2011,14 @@ body.pagina-dashboard {
 .slide-header h1,
 .slide-header p.subtitle {
     text-align: center !important;
+}
+.questionario-footer {
+    padding: 20px;
+    text-align: center;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+}
+.questionario-footer a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: underline;
 }
