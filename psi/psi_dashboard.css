@@ -814,3 +814,169 @@ fieldset:disabled .toggle-btn {
     height: auto;
     margin-bottom: 30px;
 }
+/* --- ESTILOS PARA PAINEL DE INSIGHTS (PLANO LUZ) --- */
+.insights-secao {
+    margin-top: 40px;
+    background-color: var(--branco-puro);
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.secao-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--cinza-borda);
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+    gap: 10px;
+}
+
+.secao-header h2 {
+    margin: 0;
+    color: var(--verde-escuro);
+}
+
+.badge-plano-luz {
+    background-color: var(--cor-girassol);
+    color: var(--verde-escuro);
+    font-size: 12px;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 15px;
+}
+
+.insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.insight-card {
+    padding: 20px;
+    border: 1px solid var(--cinza-borda);
+    border-radius: 12px;
+    background-color: var(--cinza-fundo);
+}
+
+.insight-card h4 {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+/* Simulação Gráfico de Barras */
+.grafico-barras-simples .barra-item {
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+.grafico-barras-simples .label {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--cinza-texto);
+    font-size: 13px;
+}
+.grafico-barras-simples .barra {
+    background-color: var(--cinza-borda);
+    border-radius: 4px;
+    height: 22px;
+    position: relative;
+    background-color: #e0f2fa; /* Cor base */
+}
+.grafico-barras-simples .barra small {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--verde-escuro);
+    font-size: 12px;
+    font-weight: bold;
+}
+/* Cores do gráfico (usando o verde da sua paleta) */
+.grafico-barras-simples .barra-item:nth-child(1) .barra { background-color: #1B4332; }
+.grafico-barras-simples .barra-item:nth-child(1) .barra small { color: var(--branco-puro); }
+.grafico-barras-simples .barra-item:nth-child(2) .barra { background-color: #2D6A4F; }
+.grafico-barras-simples .barra-item:nth-child(2) .barra small { color: var(--branco-puro); }
+.grafico-barras-simples .barra-item:nth-child(3) .barra { background-color: #40916C; }
+.grafico-barras-simples .barra-item:nth-child(3) .barra small { color: var(--branco-puro); }
+.grafico-barras-simples .barra-item:nth-child(4) .barra { background-color: #52B788; }
+.grafico-barras-simples .barra-item:nth-child(5) .barra { background-color: #74C69D; }
+
+
+/* Listas simples */
+.lista-simples-insights, .lista-top-insights {
+    padding-left: 20px;
+    font-size: 15px;
+    line-height: 1.6;
+}
+.lista-top-insights li {
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+.lista-simples-insights strong {
+    color: var(--verde-escuro);
+    font-size: 16px;
+}
+
+/* --- ESTILOS PARA WIDGET DE UPSELL (BLOQUEADO) --- */
+.widget-bloqueado {
+    margin-top: 40px;
+    border-radius: 16px;
+    background-color: var(--cinza-fundo);
+    border: 2px dashed #ced4da; /* Borda tracejada para indicar "bloqueio" */
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30px;
+    gap: 30px;
+}
+
+.widget-bloqueado-conteudo {
+    flex: 1;
+    min-width: 300px;
+}
+
+.widget-bloqueado-conteudo .icone-lock {
+    font-size: 24px;
+    display: block;
+    margin-bottom: 10px;
+    color: var(--verde-escuro);
+}
+
+.widget-bloqueado-conteudo h2 {
+    margin: 0 0 10px 0;
+    color: var(--verde-escuro);
+}
+
+.widget-bloqueado-conteudo p {
+    margin: 0;
+    line-height: 1.6;
+    color: var(--cinza-texto-claro);
+}
+.widget-bloqueado-conteudo p strong {
+    color: var(--verde-escuro);
+}
+
+.widget-bloqueado-acao {
+    flex-shrink: 0;
+}
+
+/* Reutilizando classes do psi_assinatura.css */
+.widget-bloqueado-acao .btn-mudar-plano {
+    width: auto;
+    padding: 15px 30px;
+}
+.widget-bloqueado-acao .btn-mudar-plano.btn-upgrade {
+    background-color: var(--verde-escuro);
+    color: var(--branco-puro);
+    transition: all 0.2s ease;
+}
+.widget-bloqueado-acao .btn-mudar-plano.btn-upgrade:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(27, 67, 50, 0.2);
+}
