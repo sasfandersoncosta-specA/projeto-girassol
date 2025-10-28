@@ -2052,3 +2052,36 @@ body.pagina-dashboard {
 .rodape-principal {
     transition: none !important; 
 }
+/* =============================================================
+   CORREÇÃO: ALINHAMENTO DE TEXTO NAS PÁGINAS LEGAIS
+   ============================================================= */
+
+/* Alvo: O container principal dentro das páginas legais */
+.pagina-legal .secao-conteudo-pagina {
+    text-align: left; /* Força o alinhamento padrão à esquerda */
+}
+
+/* Garante que títulos e subtítulos também sigam o alinhamento */
+.pagina-legal .secao-conteudo-pagina h1,
+.pagina-legal .secao-conteudo-pagina h2,
+.pagina-legal .secao-conteudo-pagina h3,
+.pagina-legal .secao-conteudo-pagina p,
+.pagina-legal .secao-conteudo-pagina ul,
+.pagina-legal .secao-conteudo-pagina li {
+    text-align: left; /* Garante alinhamento à esquerda */
+    /* Se preferir justificado: text-align: justify; */
+}
+
+/* Ajusta a margem do subtítulo para o alinhamento esquerdo */
+.pagina-legal .subtitulo-secao {
+    margin-left: 0;
+    margin-right: 0;
+    text-align: left;
+}
+
+/* Ajusta a lista para ter recuo padrão */
+.pagina-legal ul {
+    padding-left: 40px; /* Adiciona recuo padrão da lista */
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
