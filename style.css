@@ -2012,3 +2012,43 @@ body.pagina-dashboard {
 .slide-header p.subtitle {
     text-align: center !important;
 }
+/* Estilo para o Dropdown de Idade */
+.select-input {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--off-white);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 18px 20px; /* Padding um pouco maior para altura */
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    max-width: 500px;
+    text-align: center; /* Centraliza o texto selecionado */
+    -webkit-appearance: none; /* Remove a aparência padrão no Chrome/Safari */
+    -moz-appearance: none; /* Remove a aparência padrão no Firefox */
+    appearance: none; /* Remove a aparência padrão */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23FFEE8C' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E"); /* Adiciona uma seta amarela customizada */
+    background-repeat: no-repeat;
+    background-position: right 20px center;
+    background-size: 16px 16px;
+}
+.select-input:focus {
+    outline: none;
+    border-color: var(--cor-girassol);
+}
+/* Estilo para as opções dentro do dropdown */
+.select-input option {
+    background-color: var(--verde-escuro);
+    color: var(--off-white);
+}
+/* =============================================================
+   CORREÇÃO: REMOVER ANIMAÇÃO INDESEJADA DA ONDA DO RODAPÉ
+   ============================================================= */
+
+/* Remove qualquer transição que possa estar afetando a posição 
+   vertical da onda ou do rodapé, forçando o posicionamento imediato. */
+.wave-divider-footer,
+.rodape-principal {
+    transition: none !important; 
+}

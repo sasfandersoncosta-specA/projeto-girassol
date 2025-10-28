@@ -88,3 +88,16 @@ window.addEventListener('load', setRealViewportHeight);
 
 // Executa uma vez no início para garantir a definição do valor
 setRealViewportHeight();
+// No final do script.js
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // Ajuste '/projeto-girassol/sw.js' conforme o nome do seu repositório/subpasta
+    navigator.serviceWorker.register('/projeto-girassol/sw.js') 
+      .then(registration => {
+        console.log('Service Worker registrado:', registration);
+      })
+      .catch(error => {
+        console.log('Falha ao registrar Service Worker:', error);
+      });
+  });
+}
