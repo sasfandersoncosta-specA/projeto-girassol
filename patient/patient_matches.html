@@ -1,23 +1,12 @@
 <header class="main-header">
     <h1>Suas Conexões</h1>
 </header>
-<div class="matches-grid">
-    <div class="pro-card pro-card--contatado">
-        <div class="selo-contato">Contato Iniciado</div>
-        <img src="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg" alt="Foto da Profissional" class="pro-card-img">
-        <h3>Dr(a). Ana Silva</h3>
-        <p>Psicanálise, Terapia de Casal</p>
-        <div class="pro-card-actions">
-    <a href="#" class="btn btn-secundario">Ver Perfil</a>
-    <a href="#" class="btn btn-secundario">Avaliar</a>
+<div id="matches-grid" class="matches-grid">
+    <!-- O conteúdo de mocks foi removido daqui! 
+         O patient.js buscará os profissionais no backend e injetará os cards aqui dentro. -->
 </div>
-    </div>
-    <div class="pro-card">
-        <img src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg" alt="Foto do Profissional" class="pro-card-img">
-        <h3>Dr. Bruno Costa</h3>
-        <p>TCC, Ansiedade</p>
-        <div class="pro-card-actions">
-    <a href="#" class="btn btn-secundario">Ver Perfil</a>
-</div>
-    </div>
+<div id="favoritos-vazio" class="empty-state hidden">
+    <div class="empty-state-icon">♡</div>
+    <h2>Nenhum Match encontrado.</h2>
+    <p>Estamos trabalhando para encontrar profissionais compatíveis com o seu perfil. Tente novamente mais tarde.</p>
 </div>

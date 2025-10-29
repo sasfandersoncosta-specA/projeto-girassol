@@ -18,7 +18,9 @@
     <main class="login-main ruido">
         <div class="login-container">
             <h1 class="login-titulo">Crie sua conta</h1>
-            <form class="login-form">
+            
+            <!-- EDIÇÃO 1: Adicionado o ID essencial "form-registro" à tag form -->
+            <form class="login-form" id="form-registro">
                 <div class="form-group">
                     <label for="nome-completo">Nome completo</label>
                     <input type="text" id="nome-completo" name="nome-completo" required>
@@ -35,10 +37,14 @@
                     <label for="confirmar-senha">Confirme sua senha</label>
                     <input type="password" id="confirmar-senha" name="confirmar-senha" required>
                 </div>
+
+                <!-- EDIÇÃO 2: Adicionado o local para a mensagem de status (aparecerá abaixo do botão) -->
+                <p id="mensagem-registro" style="text-align: center; margin-top: 15px; font-size: 0.9em;"></p>
+
                 <button type="submit" class="btn-login">Criar Conta</button>
             </form>
             <div class="login-links">
-                <a href="login.html">Já tem uma conta? **Faça login**</a>
+                <a href="login.html">Já tem uma conta? <strong>Faça login</strong></a>
             </div>
         </div>
         <div class="wave-divider">
@@ -50,6 +56,8 @@
 
     <div id="footer-placeholder"></div>
 
-    <script src="script.js"></script>
-    </body>
+    <script src="script.js"></script> 
+    <!-- EDIÇÃO 3: Adicionado o link para o script de registro. -->
+    <script src="registrar.js"></script> 
+</body>
 </html>
