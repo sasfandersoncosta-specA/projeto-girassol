@@ -33,6 +33,28 @@
 
         <main class="dashboard-main" id="patient-main-content"></main>
     </div>
+
+    <!-- ESTRUTURA DO MODAL DE CONFIRMAÇÃO (REUTILIZÁVEL) -->
+    <div class="modal-overlay" id="confirmation-modal" aria-hidden="true">
+        <div class="modal-content" role="dialog" aria-modal="true">
+            <header class="modal-header">
+                <h2 id="modal-title">Título da Confirmação</h2>
+                <button class="modal-close" id="modal-close-btn" aria-label="Fechar">&times;</button>
+            </header>
+            <div class="modal-body" id="modal-body">
+                <p>Mensagem de confirmação aqui.</p>
+                <!-- Opcional: Campo de input, como o de senha -->
+            </div>
+            <footer class="modal-footer">
+                <button class="btn btn-secundario" id="modal-cancel-btn">Cancelar</button>
+                <button class="btn btn-perigo" id="modal-confirm-btn">Confirmar</button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- CONTAINER PARA AS NOTIFICAÇÕES (TOASTS) -->
+    <div id="toast-container" class="toast-container"></div>
+
     <script src="patient.js"></script>
 </body>
 </html>

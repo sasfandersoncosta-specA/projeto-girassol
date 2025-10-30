@@ -2085,3 +2085,92 @@ body.pagina-dashboard {
     margin-top: 15px;
     margin-bottom: 15px;
 }
+
+/* =============================================================
+   MODAL DE CONFIRMAÇÃO
+   ============================================================= */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(27, 67, 50, 0.6); /* Fundo verde translúcido */
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-content {
+    background-color: var(--branco-puro);
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    max-width: 500px;
+    width: 90%;
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.is-visible .modal-content {
+    transform: scale(1);
+}
+
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+.modal-header h2 { margin: 0; font-family: 'New Kansas', serif; color: var(--verde-escuro); }
+.modal-close { background: none; border: none; font-size: 2rem; cursor: pointer; color: #aaa; }
+.modal-body p { line-height: 1.7; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 15px; margin-top: 30px; }
+.btn-perigo { background-color: #E63946; border-color: #E63946; color: white; }
+.btn-perigo:hover { background-color: #c9303c; border-color: #c9303c; }
+
+/* =============================================================
+   NOTIFICAÇÕES (TOAST)
+   ============================================================= */
+
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.toast {
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: translateX(100%);
+    animation: slideIn 0.5s forwards, fadeOut 0.5s 4s forwards;
+}
+
+.toast.toast-success {
+    background-color: var(--verde-escuro);
+}
+
+.toast.toast-error {
+    background-color: #E63946; /* Cor de perigo */
+}
+
+@keyframes slideIn {
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeOut {
+    to { opacity: 0; transform: translateX(100%); }
+}

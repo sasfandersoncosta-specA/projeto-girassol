@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- O título será preenchido dinamicamente -->
+    <title>Perfil do Profissional - Girassol</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="assets/images/favicon.png?v=2" type="image/png">
+    <link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png?v=2">
+
+    <!-- Adiciona um CSS específico para a página de perfil -->
+    <style>
+        .pagina-perfil-pro { background-color: #f8f9fa; }
+        .perfil-container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .perfil-header { display: grid; grid-template-columns: 150px 1fr; gap: 30px; align-items: center; background: white; padding: 30px; border-radius: 16px; margin-bottom: 30px; }
+        .perfil-foto img { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; }
+        .perfil-info h1 { font-family: 'New Kansas', serif; color: var(--verde-escuro); margin: 0 0 5px 0; }
+        .perfil-info .crp { color: var(--cinza-texto); margin-bottom: 15px; }
+        .perfil-acoes { display: flex; gap: 15px; }
+        .perfil-rating { display: flex; align-items: center; gap: 8px; font-size: 1rem; color: var(--cinza-texto); }
+        .perfil-rating .stars { color: #f39c12; font-weight: bold; }
+        .perfil-secao { background: white; padding: 30px; border-radius: 16px; margin-bottom: 30px; }
+        .perfil-secao h2 { font-family: 'Montserrat', sans-serif; color: var(--verde-escuro); border-bottom: 1px solid #eee; padding-bottom: 10px; margin-top: 0; }
+        .perfil-secao p, .perfil-secao li { line-height: 1.8; font-size: 1.1rem; }
+        .tags-container { display: flex; flex-wrap: wrap; gap: 10px; padding-left: 0; list-style: none; }
+        .info-card { background: #f8f9fa; padding: 20px; border-radius: 12px; text-align: center; }
+        .info-card h3 { margin: 0 0 5px 0; font-size: 1rem; color: var(--cinza-texto); }
+        .info-card p { font-size: 1.2rem; font-weight: bold; color: var(--verde-escuro); margin: 0; }
+        @media (max-width: 600px) {
+            .perfil-header { grid-template-columns: 1fr; text-align: center; }
+            .perfil-foto { margin: 0 auto; }
+            .perfil-acoes { justify-content: center; }
+        }
+        /* Estilos para a seção de avaliações */
+        .review-form-container { background: #f8f9fa; padding: 25px; border-radius: 12px; margin-top: 20px; }
+        .star-rating { display: flex; justify-content: center; gap: 5px; font-size: 2rem; cursor: pointer; }
+        .star-rating .star { color: #ccc; transition: color 0.2s; }
+        .star-rating .star:hover, .star-rating .star.selected { color: #f39c12; }
+        #review-comment { width: 100%; min-height: 100px; margin-top: 15px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
+        .review-item { border-bottom: 1px solid #eee; padding: 20px 0; }
+        .review-item:last-child { border-bottom: none; }
+        .review-header { display: flex; justify-content: space-between; align-items: center; }
+        .review-author { font-weight: bold; }
+        .review-date { font-size: 0.9rem; color: #888; }
+    </style>
+</head>
+
+<body class="pagina-perfil-pro">
+
+    <div id="header-placeholder"></div>
+
+    <main id="perfil-main-content">
+        <!-- Feedback de Carregamento -->
+        <div class="perfil-container" id="perfil-loading">
+            <p style="text-align: center; padding: 50px;">Carregando perfil...</p>
+        </div>
+
+        <!-- O conteúdo do perfil será inserido aqui pelo JavaScript -->
+        <div id="profile-content-placeholder"></div>
+        <!-- A seção de avaliações será inserida aqui -->
+        <div id="reviews-content-placeholder"></div>
+
+    </main>
+
+    <div class="wave-divider-footer" style="background-color: #f8f9fa;">
+        <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" class="shape-fill"></path>
+        </svg>
+    </div>
+
+    <!-- CONTAINER PARA AS NOTIFICAÇÕES (TOASTS) -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <div id="footer-placeholder"></div>
+    
+    <!-- Scripts -->
+    <script src="perfil_psicologo.js"></script>
+    <script src="script.js"></script> 
+</body>
+</html>

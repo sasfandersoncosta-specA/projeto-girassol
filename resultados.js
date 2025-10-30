@@ -2,55 +2,46 @@
 document.addEventListener('DOMContentLoaded', () => {
     const loadingState = document.getElementById('loading-state');
     const resultsContainer = document.getElementById('results-container');
-
-    // --- SIMULAÇÃO DE RESPOSTAS DA API ---
-    // (Em um projeto real, você faria uma chamada fetch para seu backend aqui)
-
-    // Cenário A: Matches Ideais
-    const mockResponseIdeal = {
-        matchTier: 'ideal',
-        results: [
-            { id: 1, nome: "Dra. Ana Silva", crp: "06/00001", fotoUrl: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg", rating: 4.8, tags: ["Especialista em Ansiedade", "Ferramentas Práticas"], bio: "Ajudo você a construir ferramentas para uma vida mais leve." },
-            { id: 2, nome: "Dr. Bruno Costa", crp: "06/00002", fotoUrl: "https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg", rating: 4.9, tags: ["Relacionamentos", "Prática Afirmativa LGBTQIAPN+"], bio: "Um espaço seguro para explorar suas conexões e identidade." }
-        ]
-    };
-
-    // Cenário B: Correspondências Aproximadas
-    const mockResponseApproximate = {
-        matchTier: 'near',
-        results: [
-            { id: 3, nome: "Dr. Carlos Lima", crp: "06/00003", fotoUrl: "https://images.pexels.com/photos/1043473/pexels-photo-1043473.jpeg", rating: 4.7, tags: ["Carreira", "Autoestima"], bio: "Apoio para você alcançar seu potencial profissional e pessoal.", compromisedCriteria: ["abordagem"] }
-        ],
-        compromiseText: "Ótima combinação nos <strong>temas de interesse</strong>."
-    };
-
-    // Cenário C: Nenhum Resultado
-    const mockResponseNone = {
-        matchTier: 'none',
-        results: []
-    };
+    const loginUrl = 'http://127.0.0.1:5500/login.html'; // URL para redirecionar se não houver login
 
     // --- FUNÇÃO PARA CRIAR UM CARD DE PROFISSIONAL (REUTILIZÁVEL) ---
     function createProfileCard(profile, tier, compromiseText = "") {
-        const contextLabel = tier === 'near' 
-            ? `<div class="context-label">${compromiseText}</div>` 
+        const contextLabel = tier === 'near' && compromiseText
+            ? `<div class="context-label">${compromiseText}</div>`
             : '';
+
+        // Adaptação para os dados reais da API:
+        const foto = profile.fotoUrl || 'https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'; // Foto padrão
+        const bio = profile.bio || "Profissional dedicado(a) a oferecer um espaço seguro para seu desenvolvimento."; // Bio padrão
+        
+        // Gera tags dinamicamente a partir dos dados do psicólogo
+        const tags = [];
+        if (profile.temas_atuacao && profile.temas_atuacao.length > 0) {
+            tags.push(profile.temas_atuacao[0]); // Pega o primeiro tema como tag principal
+        }
+        if (profile.praticas_vivencias && profile.praticas_vivencias.length > 0) {
+            tags.push(profile.praticas_vivencias[0]); // Pega a primeira prática como tag
+        }
+
+        // Define o ícone e a classe do coração com base no status de favorito
+        const heartIcon = profile.isFavorited ? '♥' : '♡';
+        const heartClass = profile.isFavorited ? 'heart-icon favorited' : 'heart-icon';
 
         return `
             <div class="pro-card">
-                <img src="${profile.fotoUrl}" alt="Foto de ${profile.nome}" class="pro-card-img">
+                <img src="${foto}" alt="Foto de ${profile.nome}" class="pro-card-img">
                 ${contextLabel}
                 <div class="pro-card-content">
                     <h3>${profile.nome}</h3>
                     <p class="crp">CRP ${profile.crp}</p>
-                    <div class="rating">★★★★☆ ${profile.rating}</div>
+                    <div class="rating">★★★★☆ (Novo na plataforma)</div>
                     <div class="compatibility-tags">
-                        ${profile.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        ${tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                     </div>
-                    <p class="bio-snippet">"${profile.bio}"</p>
+                    <p class="bio-snippet">"${bio}"</p>
                     <div class="pro-card-actions">
-                        <a href="#" class="btn btn-principal">Ver Perfil Completo</a>
-                        <span class="heart-icon">♡</span>
+                        <a href="perfil_psicologo.html?id=${profile.id}" class="btn btn-principal">Ver Perfil Completo</a>
+                        <span class="${heartClass}" data-id="${profile.id}" role="button" aria-label="Favoritar">${heartIcon}</span>
                     </div>
                 </div>
             </div>
@@ -112,14 +103,110 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingState.classList.add('hidden');
         resultsContainer.innerHTML = htmlContent;
         resultsContainer.classList.remove('hidden');
+
+        // Adiciona os eventos de clique aos novos ícones de coração
+        setupFavoriteButtons();
     }
 
-    // --- INICIA O PROCESSO ---
-    console.log("Processando resultados...");
-    setTimeout(() => {
-        // MUDE AQUI PARA TESTAR OS 3 CENÁRIOS:
-        // renderResults(mockResponseIdeal);
-        // renderResults(mockResponseApproximate);
-        renderResults(mockResponseNone); 
-    }, 2500); // Simula 2.5 segundos de processamento do algoritmo
+    // --- FUNÇÃO PARA BUSCAR OS DADOS REAIS DA API ---
+    async function fetchAndRenderMatches() {
+        console.log("Buscando recomendações na API...");
+
+        // 1. Pega o token do localStorage
+        const token = localStorage.getItem('girassol_token');
+
+        // 2. Se não houver token, redireciona para o login
+        if (!token) {
+            console.error("Token não encontrado. Redirecionando para login.");
+            window.location.href = loginUrl;
+            return;
+        }
+
+        try {
+            // 3. Faz a chamada para a API, enviando o token
+            const response = await fetch('http://localhost:3001/api/psychologists/matches', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            // 4. Trata a resposta
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Dados recebidos da API:", data);
+                renderResults(data); // Renderiza os resultados reais
+            } else {
+                // Se o token for inválido ou expirado, a API retornará um erro 401
+                console.error("Falha na autenticação ou erro na API:", response.status);
+                localStorage.removeItem('girassol_token'); // Limpa o token inválido
+                window.location.href = loginUrl; // Envia para o login
+            }
+
+        } catch (error) {
+            console.error("Erro de conexão ao buscar matches:", error);
+            // Renderiza o estado de "nenhum resultado" com uma mensagem de erro
+            renderResults({ matchTier: 'none', results: [] });
+        }
+    }
+
+    // --- FUNÇÃO PARA MOSTRAR NOTIFICAÇÕES (TOAST) ---
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+
+        container.appendChild(toast);
+
+        // Remove o toast do DOM após a animação de saída
+        setTimeout(() => {
+            toast.remove();
+        }, 4500);
+    }
+
+    // --- FUNÇÃO PARA CONTROLAR OS BOTÕES DE FAVORITO ---
+    function setupFavoriteButtons() {
+        const favoriteButtons = document.querySelectorAll('.heart-icon');
+        favoriteButtons.forEach(button => {
+            button.addEventListener('click', async () => {
+                const psychologistId = button.dataset.id;
+                const token = localStorage.getItem('girassol_token');
+
+                if (!token) {
+                    window.location.href = loginUrl;
+                    return;
+                }
+
+                try {
+                    const response = await fetch('http://localhost:3001/api/patients/me/favorites', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ psychologistId })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        // Atualiza a UI instantaneamente
+                        button.textContent = data.favorited ? '♥' : '♡';
+                        button.classList.toggle('favorited', data.favorited);
+                        // Mostra a notificação
+                        showToast(data.message, 'success');
+                    }
+                } catch (error) {
+                    console.error("Erro ao favoritar:", error);
+                    showToast("Erro ao salvar favorito.", 'error');
+                }
+            });
+        });
+    }
+
+    // --- INICIA O PROCESSO REAL ---
+    // Substitui o setTimeout e os mocks pela chamada real à API
+    fetchAndRenderMatches();
 });

@@ -14,10 +14,50 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Patient.init({
-    nome: DataTypes.STRING,
-    email: DataTypes.STRING,
-    senha: DataTypes.STRING,
-    telefone: DataTypes.STRING
+    // --- CAMPOS ANTIGOS (Mantidos) ---
+    nome: { // Mapeado do 'nome_completo' do formulário
+      type: DataTypes.STRING,
+      allowNull: false 
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true
+    },
+    senha: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    telefone: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    
+    // --- CAMPOS NOVOS (Do Questionário) ---
+    valor_sessao_faixa: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    temas_buscados: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: true
+    },
+    abordagem_desejada: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    genero_profissional: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    praticas_afirmativas: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: true
+    },
+    disponibilidade_periodo: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: true
+    }
   }, {
     sequelize,
     modelName: 'Patient',

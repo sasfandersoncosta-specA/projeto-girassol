@@ -14,4 +14,22 @@ router.post('/login', patientController.loginPatient);
 // Ele garante que o token JWT seja válido.
 router.get('/me', protect, patientController.getPatientData);
 
+// Rota para ATUALIZAR os dados do paciente (Acesso PRIVADO)
+router.put('/me', protect, patientController.updatePatientDetails);
+
+// Rota para buscar as avaliações do paciente logado (Acesso PRIVADO)
+router.get('/me/reviews', protect, patientController.getPatientReviews);
+
+// Rota para buscar os favoritos do paciente logado (Acesso PRIVADO)
+router.get('/me/favorites', protect, patientController.getFavorites);
+
+// Rota para adicionar/remover um favorito (Acesso PRIVADO)
+router.post('/me/favorites', protect, patientController.toggleFavorite);
+
+// Rota para alterar a senha do paciente (Acesso PRIVADO)
+router.put('/me/password', protect, patientController.updatePatientPassword);
+
+// Rota para EXCLUIR a conta do paciente (Acesso PRIVADO)
+router.delete('/me', protect, patientController.deletePatientAccount);
+
 module.exports = router;
