@@ -9,21 +9,24 @@ const env = process.env.NODE_ENV || 'development';
 const config = require(__dirname + '/../config/config.js')[env];
 const db = {};
 
-// Adiciona opções de SSL para o ambiente de produção (Render)
-if (env === 'production') {
-  config.dialectOptions = {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false
-    }
-  };
-}
+// Cria um objeto de opções de configuração para o Sequelize.
+const sequelizeOptions = { ...config, dialect: 'postgres' };
 
 let sequelize;
 if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], { ...config, dialect: 'postgres' });
+  // Se for produção, adiciona as opções de SSL.
+  if (env === 'production') {
+    sequelizeOptions.dialectOptions = {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false // Necessário para o Render
+      }
+    };
+  }
+  sequelize = new Sequelize(process.env[config.use_env_variable], sequelizeOptions);
 } else {
-  sequelize = new Sequelize({ ...config, dialect: 'postgres' });
+  // A mesma lógica se aplica aqui.
+  sequelize = new Sequelize(sequelizeOptions);
 }
 
 fs
