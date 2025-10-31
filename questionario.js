@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!navHTML && (backButtonHTML || nextButtonHTML)) { 
             navHTML = `<div class="navigation-buttons ${navigationClass}">${backButtonHTML}${nextButtonHTML}</div>`; 
         } 
-        return `<div class="slide" id="slide-${questionData.id}" data-index="${index}"><div class="slide-header"><h1>${questionData.question}</h1><p class="subtitle">${questionData.subtitle || ''}</p></div><div class="slide-body">${contentHTML}</div>${navHTML}</div>`; 
+        return `<div class="slide" id="slide-${questionData.id}" data-index="${index}"><div class="slide-header"><h1>${questionData.question}</h1><p class="subtitle">${questionData.subtitle || ''}</p></div><div class="slide-body ${questionData.scrollable ? 'scrollable' : ''}">${contentHTML}</div>${navHTML}</div>`; 
     }
 
     // =====================================================================

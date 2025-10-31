@@ -112,12 +112,35 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchAndRenderMatches() {
         console.log("Buscando recomendações na API...");
 
+        // SUGESTÃO: Lógica para texto de carregamento dinâmico
+        const loadingMessages = [
+            "Analisando suas respostas...",
+            "Buscando os perfis mais compatíveis...",
+            "Afinando os últimos detalhes...",
+            "Quase lá!"
+        ];
+        let messageIndex = 0;
+        const loadingTextElement = document.querySelector('#loading-state p');
+
+        const messageInterval = setInterval(() => {
+            if (loadingTextElement && messageIndex < loadingMessages.length) {
+                loadingTextElement.textContent = loadingMessages[messageIndex];
+                messageIndex++;
+            } else {
+                clearInterval(messageInterval);
+            }
+        }, 2000); // Muda a mensagem a cada 2 segundos
+
+        // Garante que o intervalo seja limpo quando os resultados chegarem
+        const clearLoadingInterval = () => clearInterval(messageInterval);
+
         // 1. Pega o token do localStorage
         const token = localStorage.getItem('girassol_token');
 
         // 2. Se não houver token, redireciona para o login
         if (!token) {
             console.error("Token não encontrado. Redirecionando para login.");
+            clearLoadingInterval();
             window.location.href = loginUrl;
             return;
         }
@@ -133,17 +156,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 4. Trata a resposta
             if (response.ok) {
+                clearLoadingInterval();
                 const data = await response.json();
                 console.log("Dados recebidos da API:", data);
                 renderResults(data); // Renderiza os resultados reais
             } else {
                 // Se o token for inválido ou expirado, a API retornará um erro 401
+                clearLoadingInterval();
                 console.error("Falha na autenticação ou erro na API:", response.status);
                 localStorage.removeItem('girassol_token'); // Limpa o token inválido
                 window.location.href = loginUrl; // Envia para o login
             }
 
         } catch (error) {
+            clearLoadingInterval();
             console.error("Erro de conexão ao buscar matches:", error);
             // Renderiza o estado de "nenhum resultado" com uma mensagem de erro
             renderResults({ matchTier: 'none', results: [] });

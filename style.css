@@ -1724,6 +1724,21 @@ header.header-rolagem nav a:hover {
     border-radius: 10px;
 }
 
+/* SUGESTÃO: Adiciona um "fade" visual para indicar que a lista é rolável */
+.slide-body {
+    position: relative; /* Necessário para o pseudo-elemento */
+}
+.slide-body.scrollable::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px; /* Altura do gradiente */
+    background: linear-gradient(to top, var(--verde-escuro), transparent);
+    pointer-events: none; /* Garante que o gradiente não bloqueie cliques */
+}
+
 .form-group-questionario {
     position: relative;
     width: 100%;
