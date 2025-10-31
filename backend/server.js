@@ -45,3 +45,4 @@ db.sequelize.sync().then(() => {
 // Se você tiver um reviewRoutes, ele deve ser adicionado aqui:
 // const reviewRoutes = require('./routes/reviewRoutes');
 // app.use('/api/reviews', reviewRoutes);
+// Forcando commit para deploy no Render.
