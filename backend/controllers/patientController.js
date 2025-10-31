@@ -1,30 +1,31 @@
 const db = require('../models');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const { sendPasswordResetEmail } = require('../services/emailService');
 
 // ----------------------------------------------------------------------
-// Função Auxiliar: Gera o Token JWT
+// Função Auxiliar: Gera o Token JWT para Paciente
 // ----------------------------------------------------------------------
 const generateToken = (id) => {
-    // Assina o token com o ID do paciente e o segredo do .env
     return jwt.sign({ id, type: 'patient' }, process.env.JWT_SECRET, {
-        expiresIn: '30d', // O token expira em 30 dias
+        expiresIn: '30d',
     });
 };
 
 // ----------------------------------------------------------------------
 // Rota: POST /api/patients/register
+// DESCRIÇÃO: Registra um novo paciente.
 // ----------------------------------------------------------------------
 exports.registerPatient = async (req, res) => {
     try {
-        // 1. Simplificado para receber apenas os dados do formulário de registro
-        const { nome_completo, email, senha } = req.body;
+        const { nome, email, senha } = req.body;
 
-        if (!nome_completo || !email || !senha) {
+        if (!nome || !email || !senha) {
             return res.status(400).json({ error: 'Nome, email e senha são obrigatórios.' });
         }
 
-        const existingPatient = await db.Patient.findOne({ where: { email: email } });
+        const existingPatient = await db.Patient.findOne({ where: { email } });
         if (existingPatient) {
             return res.status(409).json({ error: 'Este email já está cadastrado.' });
         }
@@ -32,20 +33,18 @@ exports.registerPatient = async (req, res) => {
         const hashedPassword = await bcrypt.hash(senha, 10);
 
         const newPatient = await db.Patient.create({
-            nome: nome_completo,
+            nome,
             email,
             senha: hashedPassword,
-            // Os outros campos serão preenchidos pela rota de respostas do questionário
         });
 
         res.status(201).json({
             id: newPatient.id,
-            nome_completo: newPatient.nome, // Retorna 'nome_completo'
+            nome: newPatient.nome,
             email: newPatient.email,
-            token: generateToken(newPatient.id), // Envia o token no registro
-            message: 'Paciente cadastrado com sucesso!',
+            token: generateToken(newPatient.id),
+            message: 'Cadastro realizado com sucesso!',
         });
-
     } catch (error) {
         console.error('Erro ao registrar paciente:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });
@@ -53,50 +52,71 @@ exports.registerPatient = async (req, res) => {
 };
 
 // ----------------------------------------------------------------------
-// Rota: PUT /api/patients/answers (Rota Protegida)
-// DESCRIÇÃO: Salva ou atualiza as respostas do questionário para o paciente logado.
+// Rota: POST /api/patients/forgot-password
+// DESCRIÇÃO: Inicia o processo de redefinição de senha.
 // ----------------------------------------------------------------------
-exports.updatePatientAnswers = async (req, res) => {
+exports.requestPasswordReset = async (req, res) => {
     try {
-        // O middleware de autenticação já nos deu o paciente em `req.patient`
-        const patient = req.patient;
+        const { email } = req.body;
+        const patient = await db.Patient.findOne({ where: { email } });
 
         if (!patient) {
-            return res.status(404).json({ error: 'Paciente não encontrado ou não autenticado.' });
+            // Resposta genérica para não confirmar se um e-mail existe ou não
+            return res.status(200).json({ message: 'Se um usuário com este e-mail existir, um link de redefinição foi enviado.' });
         }
 
-        // 2. Pega os dados do corpo da requisição (vindos do questionario.js)
-        const {
-            telefone,
-            valor_sessao_faixa,
-            temas_buscados,
-            abordagem_desejada,
-            genero_profissional,
-            praticas_afirmativas,
-            disponibilidade_periodo
-        } = req.body;
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        patient.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+        patient.resetPasswordExpires = Date.now() + 3600000; // 1 hora
 
-        // 3. Atualiza os campos do paciente no banco de dados
-        await patient.update({
-            telefone: telefone || patient.telefone,
-            valor_sessao_faixa: valor_sessao_faixa || patient.valor_sessao_faixa,
-            temas_buscados: temas_buscados || patient.temas_buscados,
-            abordagem_desejada: abordagem_desejada || patient.abordagem_desejada,
-            genero_profissional: genero_profissional || patient.genero_profissional,
-            praticas_afirmativas: praticas_afirmativas || patient.praticas_afirmativas,
-            disponibilidade_periodo: disponibilidade_periodo || patient.disponibilidade_periodo,
-        });
+        await patient.save();
 
-        res.status(200).json({ message: 'Respostas do questionário salvas com sucesso!' });
+        const resetLink = `http://127.0.0.1:5500/redefinir_senha.html?token=${resetToken}&type=patient`;
+        await sendPasswordResetEmail(patient, resetLink);
+
+        res.status(200).json({ message: 'Se um usuário com este e-mail existir, um link de redefinição foi enviado.' });
 
     } catch (error) {
-        console.error('Erro ao atualizar respostas do paciente:', error);
-        res.status(500).json({ error: 'Erro interno no servidor ao salvar respostas.' });
+        console.error('Erro ao solicitar redefinição de senha:', error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
+};
+
+// ----------------------------------------------------------------------
+// Rota: POST /api/patients/reset-password/:token
+// DESCRIÇÃO: Efetivamente redefine a senha.
+// ----------------------------------------------------------------------
+exports.resetPassword = async (req, res) => {
+    try {
+        const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+
+        const patient = await db.Patient.findOne({
+            where: {
+                resetPasswordToken: hashedToken,
+                resetPasswordExpires: { [db.Sequelize.Op.gt]: Date.now() }
+            }
+        });
+
+        if (!patient) {
+            return res.status(400).json({ error: 'Token de redefinição inválido ou expirado.' });
+        }
+
+        patient.senha = await bcrypt.hash(req.body.senha, 10);
+        patient.resetPasswordToken = null;
+        patient.resetPasswordExpires = null;
+        await patient.save();
+
+        res.status(200).json({ message: 'Senha redefinida com sucesso!' });
+
+    } catch (error) {
+        console.error('Erro ao redefinir senha:', error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };
 
 // ----------------------------------------------------------------------
 // Rota: POST /api/patients/login
+// DESCRIÇÃO: Autentica um paciente e retorna um token.
 // ----------------------------------------------------------------------
 exports.loginPatient = async (req, res) => {
     try {
@@ -106,98 +126,170 @@ exports.loginPatient = async (req, res) => {
             return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
         }
 
-        const patient = await db.Patient.findOne({ where: { email: email } });
+        const patient = await db.Patient.findOne({ where: { email } });
 
         if (patient && (await bcrypt.compare(senha, patient.senha))) {
             res.status(200).json({
                 id: patient.id,
-                nome_completo: patient.nome, // Envia a coluna 'nome' como 'nome_completo'
+                nome: patient.nome,
                 email: patient.email,
-                token: generateToken(patient.id) 
+                token: generateToken(patient.id),
             });
         } else {
             res.status(401).json({ error: 'Email ou senha inválidos.' });
         }
     } catch (error) {
-        console.error('Erro no login:', error);
+        console.error('Erro no login do paciente:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };
 
 // ----------------------------------------------------------------------
-// Rota: GET /api/patients/me (Rota Protegida)
+// Rota: GET /api/patients/me
+// DESCRIÇÃO: Busca os dados do paciente logado.
 // ----------------------------------------------------------------------
 exports.getPatientData = async (req, res) => {
+    // O middleware `protect` já anexa `req.patient`
+    if (req.patient) {
+        res.status(200).json(req.patient);
+    } else {
+        res.status(404).json({ error: 'Paciente não encontrado.' });
+    }
+};
+
+// ----------------------------------------------------------------------
+// Rota: PUT /api/patients/answers
+// DESCRIÇÃO: Atualiza o perfil do paciente com as respostas do questionário.
+// ----------------------------------------------------------------------
+exports.updatePatientAnswers = async (req, res) => {
     try {
-        if (req.patient) {
-            const patientData = {
-                id: req.patient.id,
-                nome_completo: req.patient.nome, // Envia a coluna 'nome' como 'nome_completo'
-                email: req.patient.email,
-                telefone: req.patient.telefone,
-                valor_sessao_faixa: req.patient.valor_sessao_faixa,
-                temas_buscados: req.patient.temas_buscados,
-                abordagem_desejada: req.patient.abordagem_desejada,
-                genero_profissional: req.patient.genero_profissional,
-                praticas_afirmativas: req.patient.praticas_afirmativas,
-                disponibilidade_periodo: req.patient.disponibilidade_periodo
-            };
-            res.status(200).json(patientData);
-        } else {
-            res.status(404).json({ error: 'Paciente não encontrado.' });
+        const patient = req.patient;
+        if (!patient) {
+            return res.status(401).json({ error: 'Paciente não autenticado.' });
         }
+
+        const {
+            nome,
+            idade,
+            identidade_genero,
+            pref_genero_prof,
+            motivacao,
+            temas,
+            terapia_anterior,
+            experiencia_desejada,
+            caracteristicas_prof,
+            valor_sessao_faixa,
+            whatsapp,
+            avaliacao_ux
+        } = req.body;
+
+        await patient.update({
+            nome: nome || patient.nome,
+            faixa_etaria: idade,
+            identidade_genero: identidade_genero,
+            genero_profissional: pref_genero_prof,
+            // Os campos 'motivacao', 'terapia_anterior' e 'avaliacao_ux' não existem no modelo Patient, então são ignorados.
+            temas_buscados: temas,
+            abordagem_desejada: experiencia_desejada,
+            praticas_afirmativas: caracteristicas_prof,
+            valor_sessao_faixa,
+            telefone: whatsapp,
+        });
+
+        res.status(200).json({ message: 'Respostas salvas com sucesso!' });
     } catch (error) {
-        console.error('Erro ao buscar dados do paciente:', error);
+        console.error('Erro ao salvar respostas do questionário:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };
 
 // ----------------------------------------------------------------------
-// Rota: GET /api/patients/me/reviews (Rota Protegida)
-// DESCRIÇÃO: Busca todas as avaliações feitas pelo paciente logado.
+// As funções abaixo são placeholders para as rotas que você já criou.
+// Elas podem ser implementadas posteriormente.
 // ----------------------------------------------------------------------
-exports.getPatientReviews = async (req, res) => {
-    try {
-        const patientId = req.patient.id;
 
-        const reviews = await db.Review.findAll({
-            where: { patientId },
-            // Inclui os dados do psicólogo que foi avaliado
-            include: [{
-                model: db.Psychologist,
-                as: 'psychologist',
-                attributes: ['nome', 'crp', 'fotoUrl'] // Pega apenas os dados necessários
-            }],
-            order: [['createdAt', 'DESC']] // Ordena da mais recente para a mais antiga
+exports.updatePatientDetails = async (req, res) => {
+    try {
+        const patient = req.patient;
+        const { nome, email } = req.body;
+
+        if (!nome || !email) {
+            return res.status(400).json({ error: 'Nome e email são obrigatórios.' });
+        }
+
+        // Verifica se o novo email já está em uso por outro paciente
+        if (email.toLowerCase() !== patient.email.toLowerCase()) {
+            const existingEmail = await db.Patient.findOne({ where: { email } });
+            if (existingEmail) {
+                return res.status(409).json({ error: 'Este email já está em uso por outra conta.' });
+            }
+        }
+
+        // Atualiza os dados no banco
+        patient.nome = nome;
+        patient.email = email;
+        await patient.save();
+
+        res.status(200).json({ 
+            message: 'Dados atualizados com sucesso!',
+            patient: {
+                id: patient.id,
+                nome: patient.nome,
+                email: patient.email
+            }
         });
 
-        res.status(200).json(reviews);
+    } catch (error) {
+        console.error('Erro ao atualizar detalhes do paciente:', error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
+};
 
+exports.getPatientReviews = async (req, res) => {
+    try {
+        const reviews = await db.Review.findAll({
+            where: { patientId: req.patient.id },
+            include: {
+                model: db.Psychologist,
+                as: 'psychologist',
+                attributes: ['nome', 'fotoUrl']
+            },
+            order: [['createdAt', 'DESC']]
+        });
+        res.status(200).json(reviews);
     } catch (error) {
         console.error('Erro ao buscar avaliações do paciente:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };
 
-// ----------------------------------------------------------------------
-// Rota: POST /api/patients/me/favorites (Rota Protegida)
-// DESCRIÇÃO: Adiciona ou remove um psicólogo dos favoritos do paciente.
-// ----------------------------------------------------------------------
+exports.getFavorites = async (req, res) => {
+    try {
+        const patient = await db.Patient.findByPk(req.patient.id, {
+            include: {
+                model: db.Psychologist,
+                as: 'favorites',
+                attributes: ['id', 'nome', 'crp', 'fotoUrl'],
+                through: { attributes: [] } // Não traz a tabela de junção
+            }
+        });
+        res.status(200).json(patient.favorites);
+    } catch (error) {
+        console.error('Erro ao buscar favoritos:', error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
+};
+
 exports.toggleFavorite = async (req, res) => {
     try {
-        const patient = req.patient;
         const { psychologistId } = req.body;
-
-        if (!psychologistId) {
-            return res.status(400).json({ error: 'ID do psicólogo é obrigatório.' });
-        }
-
+        const patient = req.patient;
         const psychologist = await db.Psychologist.findByPk(psychologistId);
+
         if (!psychologist) {
             return res.status(404).json({ error: 'Psicólogo não encontrado.' });
         }
 
-        // O Sequelize nos dá métodos mágicos como `hasPsychologist` e `removePsychologist`
         const isFavorited = await patient.hasFavorite(psychologist);
 
         if (isFavorited) {
@@ -205,67 +297,14 @@ exports.toggleFavorite = async (req, res) => {
             res.status(200).json({ message: 'Profissional removido dos favoritos.', favorited: false });
         } else {
             await patient.addFavorite(psychologist);
-            res.status(200).json({ message: 'Profissional adicionado aos favoritos.', favorited: true });
+            res.status(200).json({ message: 'Profissional adicionado aos favoritos!', favorited: true });
         }
-
     } catch (error) {
         console.error('Erro ao alternar favorito:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };
 
-// ----------------------------------------------------------------------
-// Rota: GET /api/patients/me/favorites (Rota Protegida)
-// DESCRIÇÃO: Busca a lista de psicólogos favoritos do paciente logado.
-// ----------------------------------------------------------------------
-exports.getFavorites = async (req, res) => {
-    try {
-        const patient = req.patient;
-        const favorites = await patient.getFavorites({ attributes: { exclude: ['senha'] } });
-        res.status(200).json(favorites);
-    } catch (error) {
-        console.error('Erro ao buscar favoritos:', error);
-        res.status(500).json({ error: 'Erro interno no servidor.' });
-    }
-};
-
-// ----------------------------------------------------------------------
-// Rota: PUT /api/patients/me (Rota Protegida)
-// DESCRIÇÃO: Atualiza os dados pessoais (nome, email) do paciente logado.
-// ----------------------------------------------------------------------
-exports.updatePatientDetails = async (req, res) => {
-    try {
-        const patient = req.patient;
-        const { nome_completo, email } = req.body;
-
-        if (!nome_completo || !email) {
-            return res.status(400).json({ error: 'Nome e email são obrigatórios.' });
-        }
-
-        // Verifica se o novo email já está em uso por outro usuário
-        if (email.toLowerCase() !== patient.email.toLowerCase()) {
-            const existingPatient = await db.Patient.findOne({ where: { email } });
-            if (existingPatient) {
-                return res.status(409).json({ error: 'Este email já está em uso por outra conta.' });
-            }
-        }
-
-        patient.nome = nome_completo;
-        patient.email = email;
-        await patient.save();
-
-        res.status(200).json({ message: 'Dados atualizados com sucesso!' });
-
-    } catch (error) {
-        console.error('Erro ao atualizar dados do paciente:', error);
-        res.status(500).json({ error: 'Erro interno no servidor.' });
-    }
-};
-
-// ----------------------------------------------------------------------
-// Rota: PUT /api/patients/me/password (Rota Protegida)
-// DESCRIÇÃO: Atualiza a senha do paciente logado.
-// ----------------------------------------------------------------------
 exports.updatePatientPassword = async (req, res) => {
     try {
         const { senha_atual, nova_senha } = req.body;
@@ -274,7 +313,7 @@ exports.updatePatientPassword = async (req, res) => {
             return res.status(400).json({ error: 'Todos os campos de senha são obrigatórios.' });
         }
 
-        // O middleware nos dá `req.patient` sem a senha. Precisamos buscar o usuário novamente.
+        // Busca o paciente novamente para ter acesso ao hash da senha
         const patientWithPassword = await db.Patient.findByPk(req.patient.id);
 
         const isMatch = await bcrypt.compare(senha_atual, patientWithPassword.senha);
@@ -287,15 +326,11 @@ exports.updatePatientPassword = async (req, res) => {
 
         res.status(200).json({ message: 'Senha alterada com sucesso!' });
     } catch (error) {
-        console.error('Erro ao alterar senha:', error);
+        console.error('Erro ao alterar senha do paciente:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };
 
-// ----------------------------------------------------------------------
-// Rota: DELETE /api/patients/me (Rota Protegida)
-// DESCRIÇÃO: Exclui a conta do paciente logado após confirmar a senha.
-// ----------------------------------------------------------------------
 exports.deletePatientAccount = async (req, res) => {
     try {
         const { senha } = req.body;
@@ -304,19 +339,14 @@ exports.deletePatientAccount = async (req, res) => {
             return res.status(400).json({ error: 'A senha é obrigatória para excluir a conta.' });
         }
 
-        // Busca o paciente novamente para ter acesso ao hash da senha
         const patientWithPassword = await db.Patient.findByPk(req.patient.id);
-
         const isMatch = await bcrypt.compare(senha, patientWithPassword.senha);
         if (!isMatch) {
             return res.status(401).json({ error: 'Senha incorreta. A conta não foi excluída.' });
         }
 
-        // Se a senha estiver correta, exclui o paciente
         await patientWithPassword.destroy();
-
         res.status(200).json({ message: 'Sua conta foi excluída com sucesso.' });
-
     } catch (error) {
         console.error('Erro ao excluir conta do paciente:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });

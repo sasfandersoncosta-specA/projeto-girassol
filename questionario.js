@@ -75,12 +75,30 @@ document.addEventListener('DOMContentLoaded', () => {
         } 
         return `<div class="slide" id="slide-${questionData.id}" data-index="${index}"><div class="slide-header"><h1>${questionData.question}</h1><p class="subtitle">${questionData.subtitle || ''}</p></div><div class="slide-body">${contentHTML}</div>${navHTML}</div>`; 
     }
+
+    // =====================================================================
+    // FUNÇÃO FINALIZE (IMPLEMENTADA)
+    // =====================================================================
+    function finalize() {
+        // 1. Coleta a última resposta
+        collectAnswer();
+
+        // 2. Mostra a tela de "final"
+        goToSlide(questions.findIndex(q => q.id === 'final'));
+
+        // 3. Salva as respostas no localStorage para serem usadas após o login
+        localStorage.setItem('girassol_questionario_respostas', JSON.stringify(userAnswers));
+
+        // 4. Após um breve momento, redireciona para a página de login/registro
+        setTimeout(() => {
+            window.location.href = 'login.html'; // Direciona para a página de login
+        }, 2500); // Aguarda 2.5 segundos na tela final
+    }
     
     // --- O RESTO DO CÓDIGO CONTINUA O MESMO ---
     function updateProgressBar() { const questionIndex = questions.slice(0, currentStep + 1).filter(q => !['welcome', 'final', 'error', 'thank-you'].includes(q.type)).length; const progress = Math.max(0, (questionIndex / totalQuestions) * 100); progressBarFill.style.width = `${progress}%`; }
     function goToSlide(index) { const currentSlide = document.querySelector('.slide.active'); if (currentSlide) currentSlide.classList.remove('active'); currentStep = index; const nextSlide = document.querySelector(`[data-index="${currentStep}"]`); if (nextSlide) nextSlide.classList.add('active'); else console.error(`Slide com index ${index} não encontrado.`); updateProgressBar(); const currentQuestion = questions[currentStep]; if (currentQuestion && currentQuestion.type === 'tel') { const phoneInput = document.getElementById(`input-${currentQuestion.id}`); if (phoneInput) IMask(phoneInput, { mask: '(00) 00000-0000' }); } }
     function collectAnswer() { const question = questions[currentStep]; if (!question || !question.id || ['welcome', 'final', 'error', 'thank-you'].includes(question.type)) return; let answer; if (['text', 'tel'].includes(question.type)) { answer = document.getElementById(`input-${question.id}`)?.value || ''; } else if (question.type === 'choice') { const selectedButton = document.querySelector(`#slide-${question.id} .choice-button.selected`); answer = selectedButton ? selectedButton.dataset.value : undefined; } else if (question.type === 'multiple-choice') { const selected = []; document.querySelectorAll(`#slide-${question.id} .choice-button.selected`).forEach(btn => selected.push(btn.dataset.value)); answer = selected; } userAnswers[question.id] = answer; }
-    function finalize() { updateNamePlaceholders(userAnswers.nome); goToSlide(questions.findIndex(q => q.id === 'final')); console.log("DADOS FINAIS PARA ENVIAR AO BACKEND:", userAnswers); setTimeout(() => { window.location.href = 'resultados.html'; }, 3000); }
     function validateAndAdvance() { const currentQuestion = questions[currentStep]; const currentSlideEl = document.querySelector('.slide.active'); if (!currentQuestion.required) { collectAnswer(); goToSlide(currentStep + 1); return; } let isValid = true; if (['text', 'tel'].includes(currentQuestion.type)) { const input = document.getElementById(`input-${currentQuestion.id}`); if (input.value.trim() === '') { input.classList.add('shake-error'); setTimeout(() => input.classList.remove('shake-error'), 500); isValid = false; } if (currentQuestion.type === 'tel' && input.value.length < 15) { input.classList.add('shake-error'); setTimeout(() => input.classList.remove('shake-error'), 500); isValid = false; } } else if (['choice', 'multiple-choice'].includes(currentQuestion.type)) { if (currentSlideEl.querySelectorAll('.choice-button.selected').length === 0) { const btnToShake = currentSlideEl.querySelector('.cta-button') || currentSlideEl.querySelector('.choices-container'); btnToShake.classList.add('shake-error'); setTimeout(() => btnToShake.classList.remove('shake-error'), 500); isValid = false; } } if (isValid) { collectAnswer(); if (currentQuestion.id === 'nome') { updateNamePlaceholders(userAnswers.nome); } const actionButton = currentSlideEl.querySelector('.cta-button'); const action = actionButton ? actionButton.dataset.action : null; if (action === 'finalize') { finalize(); } else { goToSlide(currentStep + 1); } } }
     function initializeQuiz() { try { slidesContainer.innerHTML = questions.map((q, i) => createSlideHTML(q, i)).join(''); } catch (error) { console.error("Erro ao gerar o HTML dos slides:", error); slidesContainer.innerHTML = "<p style='color:red; text-align:center; padding: 40px;'>Ocorreu um erro ao carregar o questionário. Tente recarregar a página.</p>"; return; } slidesContainer.addEventListener('click', (e) => { const target = e.target; const currentQuestion = questions[currentStep]; if (target.matches('[data-action="next"], [data-action="finalize"]')) { validateAndAdvance(); } if (target.matches('.back-button')) { goToSlide(currentStep - 1); } if (target.matches('.choice-button')) { const isMulti = target.classList.contains('multi-choice'); if (isMulti) { target.classList.toggle('selected'); } else { const parent = target.closest('.choices-container'); parent.querySelectorAll('.choice-button').forEach(btn => btn.classList.remove('selected')); target.classList.add('selected'); collectAnswer(); if (currentQuestion.id === 'idade' && target.dataset.value === 'Menor de 18 anos') { goToSlide(questions.findIndex(q => q.id === 'erro-idade')); } else if (currentQuestion.id === 'avaliacao_ux') { updateNamePlaceholders(userAnswers.nome); goToSlide(questions.findIndex(q => q.id === 'agradecimento')); setTimeout(finalize, 1500); } else { setTimeout(() => goToSlide(currentStep + 1), 250); } } } }); slidesContainer.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.matches('.text-input')) { e.preventDefault(); validateAndAdvance(); } }); if (document.querySelector(`[data-index="0"]`)) { goToSlide(0); } else { console.error("Erro: Slide inicial não encontrado."); } }
     initializeQuiz();

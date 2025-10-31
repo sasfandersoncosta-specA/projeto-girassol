@@ -10,9 +10,9 @@ const db = require('./models');
 // Importa os arquivos de rota
 const patientRoutes = require('./routes/patientRoutes');
 const psychologistRoutes = require('./routes/psychologistRoutes');
+const messageRoutes = require('./routes/messageRoutes'); // Adicionado
 
 const app = express();
-const PORT = process.env.PORT || 3000; 
 
 // Middlewares (Configurações essenciais)
 app.use(cors()); // Permite requisições de origens diferentes (seu frontend)
@@ -27,16 +27,21 @@ app.get('/', (req, res) => {
 // Futuras Rotas da API
 app.use('/api/patients', patientRoutes); // Todas as rotas de Pacientes (Registro, Login, Dados Pessoais)
 app.use('/api/psychologists', psychologistRoutes); // Todas as rotas de Profissionais (Registro, Login, etc)
+app.use('/api/messaging', messageRoutes); // Adicionado
 
 // Sincronização com o Banco
 // db.sequelize.sync() lê os modelos e cria/atualiza as tabelas se necessário
+const PORT = process.env.PORT || 3001;
+
 db.sequelize.sync().then(() => {
-    console.log("Banco de dados sincronizado com sucesso.");
+    app.listen(PORT, () => {
+        console.log(`Servidor rodando na porta ${PORT}. Banco de dados sincronizado.`);
+    });
 }).catch(err => {
-    // Se o banco falhar (geralmente por senha ou host incorreto), o servidor morre aqui
-    console.error("Falha ao sincronizar o banco de dados: " + err.message);
+    console.error('Não foi possível conectar ao banco de dados:', err);
 });
 
-app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}. Acesse http://localhost:${PORT}`);
-});
+// Removida a rota de reviews duplicada, se houver.
+// Se você tiver um reviewRoutes, ele deve ser adicionado aqui:
+// const reviewRoutes = require('./routes/reviewRoutes');
+// app.use('/api/reviews', reviewRoutes);

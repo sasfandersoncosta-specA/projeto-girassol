@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Psicólogo - Girassol</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="assets/images/favicon.png?v=2" type="image/png">
+    <link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png?v=2">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body class="pagina-registro">
+    <div class="container-auth">
+        <div class="card-auth">
+            <img src="assets/logos/logo_completo.png" alt="Logo Girassol" class="logo-auth">
+            <h2>Registro de Psicólogo</h2>
+            <form id="form-registro-psi">
+                <div class="form-group">
+                    <label for="nome-completo">Nome Completo</label>
+                    <input type="text" id="nome-completo" name="nome-completo" required>
+                </div>
+                <div class="form-group">
+                    <label for="crp">Número do CRP</label>
+                    <input type="text" id="crp" name="crp" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" name="senha" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmar-senha">Confirmar Senha</label>
+                    <input type="password" id="confirmar-senha" name="confirmar-senha" required>
+                </div>
+                <!-- Campo de aceite dos Termos e Condições -->
+                <div class="form-group-checkbox">
+                    <input type="checkbox" id="termos-aceite" name="termos-aceite" required>
+                    <label for="termos-aceite">Eu li e aceito os <a href="termos.html" target="_blank">Termos e Condições</a> da plataforma.</label>
+                </div>
+                <button type="submit" class="btn btn-principal">Registrar</button>
+            </form>
+            <p id="mensagem-registro-psi" class="mensagem-oculta"></p>
+            <p class="link-auth">Já tem uma conta? <a href="login.html">Faça login aqui</a></p>
+        </div>
+    </div>
+
+    <script src="psi_registro.js"></script>
+</body>
+</html>

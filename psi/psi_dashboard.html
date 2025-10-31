@@ -14,7 +14,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
 </head>
 <body class="pagina-dashboard">
-    <body class="pagina-dashboard">
     <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu">
         <svg viewBox="0 0 100 80" width="24" height="24" fill="#1B4332">
             <rect width="100" height="15" rx="8"></rect>
@@ -23,7 +22,7 @@
         </svg>
     </button>
     
-    <div class="dashboard-container">
+    <div class="dashboard-container" id="dashboard-container" style="display: none;">
     <aside class="dashboard-sidebar">
             <div class="sidebar-header">
                 <img src="../assets/logos/logo_duplo_branco.png" alt="Logo Girassol" style="width: 150px; margin-bottom: 20px;">
@@ -31,15 +30,19 @@
             <nav class="sidebar-nav">
                 <ul>
                     <li data-page="psi_visao_geral.html" class="active"><a href="#">Visão Geral</a></li>
-                    <li data-page="psi_meu_perfil.html"><a href="#">Meu Perfil</a></li>
-                    <li data-page="psi_assinatura.html"><a href="#">Assinatura e Pagamentos</a></li>
-                    <li data-page="psi_caixa_de_entrada.html"><a href="#">Caixa de Entrada<span class="notification-badge">3</span></a></li>
-                    <li data-page="psi_comunidade.html"><a href="#">Comunidade<span class="badge-em-breve">Em Breve</span></a></li>
+                    <li data-page="psi_meu_perfil.html"><a href="/psi/psi_meu_perfil.html">Meu Perfil</a></li>
+                    <li data-page="psi_assinatura.html"><a href="/psi/psi_assinatura.html">Assinatura e Pagamentos</a></li>
+                    <li data-page="psi_caixa_de_entrada.html"><a href="/psi/psi_caixa_de_entrada.html">Caixa de Entrada<span id="unread-count-badge" class="notification-badge">0</span></a></li>
+                    <li data-page="psi_lista_espera.html"><a href="/psi/psi_lista_espera.html">Lista de Espera</a></li>
+                    <li data-page="psi_comunidade.html"><a href="/psi/psi_comunidade.html">Comunidade<span class="badge-em-breve">Em Breve</span></a></li>
                 </ul>
             </nav>
             <div class="sidebar-footer">
-                <p>Dr(a). Anderson Costa</p>
-                <a href="../index.html">Sair</a>
+                <div class="sidebar-profile">
+                    <img src="https://placehold.co/40x40" alt="Foto do perfil" id="psi-sidebar-photo">
+                    <p id="psi-sidebar-name">Carregando...</p>
+                </div>
+                <a href="../login.html" class="sidebar-logout">Sair</a>
             </div>
         </aside>
 
@@ -47,7 +50,31 @@
             </main>
     </div>
 
+    <!-- ===================================================================== -->
+    <!-- ELEMENTOS GLOBAIS (MODAL E TOASTS) -->
+    <!-- ===================================================================== -->
+
+    <!-- Container para notificações (toasts) -->
+    <div id="toast-container"></div>
+
+    <!-- Modal de Confirmação Genérico -->
+    <div id="confirmation-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <h2 class="modal-title">Confirmar Ação</h2>
+            <div class="modal-body">
+                <p>Você tem certeza que deseja prosseguir?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secundario modal-cancel">Cancelar</button>
+                <button class="btn btn-primario modal-confirm">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+
     <script src="https://unpkg.com/imask"></script>
+    <!-- Adiciona o script que controla o dashboard -->
     <script src="psi_dashboard.js"></script>
 </body>
 </html>

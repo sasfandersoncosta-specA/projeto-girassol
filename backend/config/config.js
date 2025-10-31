@@ -1,8 +1,6 @@
 // backend/config/config.js
 
-// Carrega as variáveis de ambiente do .env
-// (Temos que dizer a ele para procurar o .env um nível acima, na pasta 'backend/')
-require('dotenv').config();
+// As variáveis de ambiente agora são carregadas apenas no server.js
 
 module.exports = {
   // Configuração de DESENVOLVIMENTO (o que você está usando agora)

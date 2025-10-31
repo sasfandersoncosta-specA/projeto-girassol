@@ -674,6 +674,66 @@ header.header-rolagem nav a:hover {
 .btn-social.apple:hover { background-color: #333; }
 .btn-social svg { width: 20px; height: 20px; }
 
+/* --- Estilo para o Checkbox de Termos --- */
+.form-group-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+.form-group-checkbox input[type="checkbox"] {
+    width: auto; /* Reseta a largura padrão dos inputs */
+    margin: 0;
+    flex-shrink: 0; /* Impede que o checkbox encolha */
+}
+.form-group-checkbox label {
+    font-weight: normal;
+    color: var(--cinza-texto);
+    font-size: 14px;
+    margin-bottom: 0;
+    line-height: 1.4;
+}
+.form-group-checkbox a { color: var(--verde-escuro); text-decoration: underline; font-weight: bold; }
+
+/* --- Estilo para o Seletor de Tipo de Usuário --- */
+.form-group-radio {
+    display: flex;
+    background-color: #f0f0f0;
+    background-color: var(--verde-escuro);
+    border-radius: 8px;
+    padding: 5px;
+    margin-bottom: 25px;
+}
+
+.radio-label {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    position: relative;
+}
+
+.radio-label span {
+    font-weight: bold;
+    color: var(--cinza-texto);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Esconde o input de rádio original */
+.radio-label input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+}
+
+/* Estilo do item selecionado */
+.radio-label input[type="radio"]:checked + span {
+    color: var(--verde-escuro);
+    color: var(--branco-puro);
+}
+
 /* --- 2. REGRAS PARA TELAS MENORES (ATÉ 767px) --- */
 
 @media (max-width: 767px) {
@@ -1307,7 +1367,24 @@ header.header-rolagem nav a:hover {
 .sidebar-nav li a {display: block; color: #adb5bd; text-decoration: none; padding: 15px; border-radius: 8px; transition: all 0.2s ease; font-weight: 500; text-align: center;}
 .sidebar-nav li.active a, .sidebar-nav li a:hover {background-color: rgba(255, 255, 255, 0.1); color: #FFFFFF; transform: translateX(5px);}
 .sidebar-footer {margin-top: auto; text-align: center;}
-.sidebar-footer a {color: #FFEE8C; font-weight: bold; text-decoration: none;}
+.sidebar-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    margin-top: 20px;
+}
+.sidebar-profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.sidebar-profile p {
+    margin: 0;
+}
+.sidebar-logout {color: #FFEE8C; font-weight: bold; text-decoration: none; display: block; margin-top: 10px;}
 .dashboard-main {flex-grow: 1; padding: 40px; overflow-y: auto;}
 
 /* --- ESTILOS GERAIS DE COMPONENTES --- */
@@ -1627,6 +1704,60 @@ header.header-rolagem nav a:hover {
 .text-input:focus {outline: none; border-bottom-color: var(--cor-girassol);}
 .choices-container {display: flex; flex-direction: column; gap: 12px;}
 .choice-button {background-color: rgba(255, 255, 255, 0.1); color: var(--off-white); border: 2px solid rgba(255, 255, 255, 0.3); padding: 15px 20px; border-radius: 12px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease; text-align: center;}
+
+/* AUMENTA A ALTURA DO CONTAINER DE OPÇÕES ROLÁVEIS */
+.choices-container.scrollable {
+    max-height: 300px; /* Aumenta a altura máxima para mostrar mais opções */
+    overflow-y: auto;  /* Garante que a barra de rolagem apareça quando necessário */
+}
+
+/* ESTILO DA BARRA DE ROLAGEM PARA O CONTAINER DE OPÇÕES */
+.choices-container.scrollable::-webkit-scrollbar {
+    width: 8px;
+}
+.choices-container.scrollable::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+.choices-container.scrollable::-webkit-scrollbar-thumb {
+    background-color: var(--cor-girassol);
+    border-radius: 10px;
+}
+
+.form-group-questionario {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    margin-top: 20px;
+}
+
+.input-label {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.7);
+    pointer-events: none;
+    transition: all 0.2s ease-out;
+    background-color: transparent;
+    padding: 0 5px;
+}
+
+/* Efeito de label flutuante */
+.text-input:focus + .input-label,
+.text-input:not(:placeholder-shown) + .input-label {
+    top: 0;
+    font-size: 0.8rem;
+    color: var(--cor-girassol);
+    background-color: var(--verde-escuro); /* Cor de fundo do questionário escuro */
+}
+
+/* --- VARIAÇÃO PARA O QUESTIONÁRIO CLARO --- */
+.questionario-em-fundo-claro .text-input:focus + .input-label,
+.questionario-em-fundo-claro .text-input:not(:placeholder-shown) + .input-label {
+    background-color: var(--off-white); /* Cor de fundo do questionário claro */
+}
+
 .choice-button:hover, .choice-button.selected {background-color: var(--cor-girassol); border-color: var(--cor-girassol); color: var(--verde-escuro);}
 .shake-error {animation: shake 0.5s ease-in-out;}
 @keyframes shake {0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 50% { transform: translateX(8px); } 75% { transform: translateX(-8px); }}
@@ -1930,6 +2061,52 @@ header.header-rolagem nav a:hover {
 /* Esconde o input de arquivo padrão */
 #crp-upload {
     display: none;
+}
+
+/* ==========================================================================
+   VARIAÇÃO DO QUESTIONÁRIO PARA FUNDO CLARO (PÁGINA PROFISSIONAIS)
+   ========================================================================== */
+
+/* Container principal da variação */
+.questionario-em-fundo-claro {
+    color: var(--cinza-texto); /* Cor do texto padrão para cinza escuro */
+}
+
+/* Títulos e subtítulos */
+.questionario-em-fundo-claro .slide-header h1 {
+    color: var(--verde-escuro);
+}
+.questionario-em-fundo-claro .slide-header p.subtitle {
+    color: var(--cinza-texto);
+}
+
+/* Inputs de texto */
+.questionario-em-fundo-claro .text-input {
+    color: var(--verde-escuro); /* Cor do texto digitado */
+    border-color: rgba(0, 0, 0, 0.2);
+    background-color: transparent;
+}
+.questionario-em-fundo-claro .input-label {
+    color: var(--cinza-texto); /* Cor do placeholder */
+}
+.questionario-em-fundo-claro .text-input:focus {
+    border-color: var(--verde-escuro);
+}
+.questionario-em-fundo-claro .text-input:focus + .input-label {
+    color: var(--verde-escuro); /* Cor do label quando focado */
+}
+
+/* Botões de escolha */
+.questionario-em-fundo-claro .choice-button {
+    background-color: rgba(27, 67, 50, 0.05); /* Verde bem clarinho */
+    border-color: rgba(27, 67, 50, 0.2);
+    color: var(--verde-escuro);
+}
+.questionario-em-fundo-claro .choice-button:hover,
+.questionario-em-fundo-claro .choice-button.selected {
+    background-color: var(--verde-escuro);
+    border-color: var(--verde-escuro);
+    color: var(--branco-puro);
 }
 /* =====================================================================
    CORREÇÃO: FORÇAR ESTILO CLARO NO MENU MOBILE ABERTO

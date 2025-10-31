@@ -27,17 +27,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const email = emailInput.value;
             const senha = senhaInput.value;
+            const userType = document.querySelector('input[name="user-type"]:checked').value;
 
             // Limpa mensagens anteriores
             mensagemEl.textContent = '';
             mensagemEl.classList.add('mensagem-oculta');
 
+            // Define o endpoint da API e o caminho do dashboard com base no tipo de usuário
+            const apiUrl = userType === 'patient'
+                ? 'http://localhost:3001/api/patients/login'
+                : 'http://localhost:3001/api/psychologists/login';
+
+            const dashboardPath = userType === 'patient'
+                ? '/patient/patient_dashboard.html'
+                : '/psi/psi_dashboard.html';
+
             // Prepara os dados para o backend
             const payload = JSON.stringify({ email, senha });
 
             try {
-                // 3. Chamada à API de Login
-                const response = await fetch('http://localhost:3001/api/patients/login', {
+                // 3. Chamada à API de Login (agora dinâmica)
+                const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -55,11 +65,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     // SALVA O TOKEN JWT NO LOCALSTORAGE
                     localStorage.setItem('girassol_token', data.token);
 
-                    // REDIRECIONAMENTO CORRIGIDO PARA A URL ABSOLUTA DO LIVE SERVER
-                    setTimeout(() => {
-                        window.location.href = 'http://127.0.0.1:5500/patient/patient_dashboard.html'; 
-                    }, 500); // Redireciona um pouco mais rápido
+                    // Se for um psicólogo, redireciona diretamente para o dashboard dele.
+                    if (userType === 'psychologist') {
+                        window.location.href = window.location.origin + dashboardPath;
+                        return; // Encerra a execução aqui.
+                    }
 
+                    // Se for um paciente, verifica se há respostas do questionário para salvar.
+                    const savedAnswers = localStorage.getItem('girassol_questionario_respostas');
+                    if (savedAnswers) {
+                        window.location.href = 'resultados.html';
+                    } else {
+                        window.location.href = window.location.origin + dashboardPath;
+                    }
                 } else {
                     // Erro de Login (Email/Senha inválidos, etc.)
                     const errorMessage = data.error || 'Email ou senha inválidos. Tente novamente.';

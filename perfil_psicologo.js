@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span><strong>${profile.average_rating || 'N/A'}</strong> (${profile.review_count || 0} avaliações)</span>
                         </div>
                         <div class="perfil-acoes">
-                            <a href="#" class="btn btn-principal">Iniciar Conversa</a>
+                            <a href="https://wa.me/55${profile.telefone ? profile.telefone.replace(/\D/g, '') : ''}" target="_blank" class="btn btn-principal">Iniciar Conversa</a>
                             <span class="${heartClass}" data-id="${profile.id}" role="button" aria-label="Favoritar">${heartIcon}</span>
                         </div>
                     </div>
@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 try {
                     const response = await fetch('http://localhost:3001/api/patients/me/favorites', {
-                        method: 'POST',
+                        method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${token}`

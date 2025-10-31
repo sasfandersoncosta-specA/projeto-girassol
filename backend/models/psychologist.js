@@ -10,7 +10,17 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      // Um Psicólogo pode ter muitas Avaliações (Reviews)
+      this.hasMany(models.Review, {
+        foreignKey: 'psychologistId',
+        as: 'reviews'
+      });
+
+      // Um Psicólogo pode ser favoritado por muitos Pacientes (relação N:M)
+      this.belongsToMany(models.Patient, {
+        through: 'PatientFavorites', // Mesmo nome da tabela de junção
+        as: 'favoritedBy'
+      });
     }
   }
   Psychologist.init({
@@ -32,6 +42,14 @@ module.exports = (sequelize, DataTypes) => {
     senha: {
       type: DataTypes.STRING,
       allowNull: false
+    },
+    telefone: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    fotoUrl: {
+      type: DataTypes.STRING,
+      allowNull: true
     },
 
     // --- CAMPOS NOVOS (Do Questionário) ---

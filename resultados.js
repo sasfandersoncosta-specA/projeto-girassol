@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 try {
                     const response = await fetch('http://localhost:3001/api/patients/me/favorites', {
-                        method: 'POST',
+                        method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${token}`

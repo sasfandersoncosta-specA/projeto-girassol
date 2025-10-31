@@ -51,10 +51,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // -----------------------------------------------------
 
     function inicializarVisaoGeral() {
-        const nomeUsuarioEl = document.getElementById('nome-usuario');
-        // CORREÇÃO: O backend (patientController) agora envia 'nome_completo'
-        if (nomeUsuarioEl && patientData && patientData.nome_completo) { 
-            nomeUsuarioEl.textContent = patientData.nome_completo.split(' ')[0]; 
+        const welcomeHeader = document.querySelector('.welcome-header h1');
+        if (welcomeHeader && patientData) {
+            const nomeCurto = patientData.nome.split(' ')[0];
+            let saudacao = 'Boas-vindas'; // Padrão neutro
+
+            // Lógica para definir a saudação com base no gênero
+            if (patientData.identidade_genero === 'Masculino') {
+                saudacao = 'Bem-vindo';
+            } else if (patientData.identidade_genero === 'Feminino') {
+                saudacao = 'Bem-vinda';
+            }
+
+            // Atualiza o conteúdo do H1 com a saudação e o nome
+            welcomeHeader.innerHTML = `${saudacao} à sua jornada, <span id="nome-usuario">${nomeCurto}</span>!`;
+        } else {
+            const nomeUsuarioEl = document.getElementById('nome-usuario');
+            if (nomeUsuarioEl && patientData && patientData.nome) nomeUsuarioEl.textContent = patientData.nome.split(' ')[0];
         }
 
         const statusPaciente = 'novo'; 
@@ -74,6 +87,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     <a href="#" class="btn btn-principal" data-target="patient_matches.html">Avaliar Profissional</a>
                 `;
             }
+
+            // Adiciona o evento de clique para o botão "Ver meus Matches"
+            const verMatchesBtn = cardPassosEl.querySelector('[data-target="patient_matches.html"]');
+            if (verMatchesBtn) {
+                verMatchesBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    // Encontra o link correspondente na barra lateral e simula um clique
+                    const matchesLink = document.querySelector('.sidebar-nav li[data-page="patient_matches.html"]');
+                    if (matchesLink) {
+                        matchesLink.click();
+                    }
+                });
+            }
         }
     }
     
@@ -87,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const token = localStorage.getItem('girassol_token');
             
-            const response = await fetch('http://localhost:3001/api/psychologists', {
+            const response = await fetch('http://localhost:3001/api/psychologists/matches', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}` 
@@ -100,45 +126,47 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const responseData = await response.json();
-            const psychologists = responseData.psychologists || []; 
+            const psychologists = responseData.results || []; 
             
             if (psychologists.length === 0) {
-                document.getElementById('favoritos-vazio').classList.remove('hidden');
+                const emptyState = document.getElementById('favoritos-vazio');
+                if (emptyState) emptyState.classList.remove('hidden');
                 matchesGrid.innerHTML = '';
                 return;
             }
 
-            document.getElementById('favoritos-vazio').classList.add('hidden');
+            const emptyState = document.getElementById('favoritos-vazio');
+            if (emptyState) emptyState.classList.add('hidden');
 
-            // --- CORREÇÃO CRÍTICA NA RENDERIZAÇÃO ---
-            // Usando os campos corretos (abordagens_tecnicas, temas_atuacao)
-            // e formatando-os com .join()
             matchesGrid.innerHTML = psychologists.map(pro => `
                 <div class="pro-card">
-                    <img src="https://placehold.co/400x400/1B4332/FFFFFF?text=CRP" alt="Foto do Profissional" class="pro-card-img">
-                    <span class="pro-crp">CRP ${pro.crp}</span>
-                    <h3>Dr(a). ${pro.nome}</h3>
-                    
-                    <!-- CORRIGIDO -->
-                    <p class="pro-abordagem">
-                        <strong>Abordagens:</strong> ${pro.abordagens_tecnicas && pro.abordagens_tecnicas.length > 0 ? pro.abordagens_tecnicas.join(', ') : 'Não informado'}
-                    </p>
-                    <p class="pro-especialidades">
-                        <strong>Temas:</strong> ${pro.temas_atuacao && pro.temas_atuacao.length > 0 ? pro.temas_atuacao.join(', ') : 'Não informado'}
-                    </p>
-                    <p class="pro-valor">
-                        <strong>Valor:</strong> R$ ${pro.valor_sessao_numero ? pro.valor_sessao_numero.toFixed(2).replace('.', ',') : 'Não informado'}
-                    </p>
+                    <img src="${pro.fotoUrl || 'https://placehold.co/400x400/1B4332/FFFFFF?text=CRP'}" alt="Foto de ${pro.nome}" class="pro-card-img">
+                    <div class="pro-card-content" style="padding: 15px;">
+                        <span class="pro-crp">CRP ${pro.crp}</span>
+                        <h3>${pro.nome}</h3>
+                        
+                        <p class="pro-abordagem">
+                            <strong>Abordagens:</strong> ${pro.abordagens_tecnicas && pro.abordagens_tecnicas.length > 0 ? pro.abordagens_tecnicas.join(', ') : 'Não informado'}
+                        </p>
+                        <p class="pro-especialidades">
+                            <strong>Temas:</strong> ${pro.temas_atuacao && pro.temas_atuacao.length > 0 ? pro.temas_atuacao.join(', ') : 'Não informado'}
+                        </p>
+                        <p class="pro-valor">
+                            <strong>Valor:</strong> R$ ${pro.valor_sessao_numero ? pro.valor_sessao_numero.toFixed(2).replace('.', ',') : 'Não informado'}
+                        </p>
+                    </div>
                     
                     <div class="pro-card-actions">
-                        <a href="#" class="btn btn-principal">Iniciar Conversa</a>
+                        <a href="../perfil_psicologo.html?id=${pro.id}" class="btn btn-principal">Ver Perfil</a>
                         <button class="btn-favorito" data-id="${pro.id}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
                         </button>
                     </div>
                 </div>
             `).join('');
-            // --- FIM DA CORREÇÃO ---
+
+            // ADICIONADO: Conecta a função de favoritar aos novos botões criados
+            setupFavoriteButtonsInDashboard(inicializarMatches);
 
         } catch (error) {
             console.error('Erro fatal ao buscar matches:', error);
@@ -175,11 +203,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 favoritosGrid.innerHTML = favorites.map(pro => `
                     <div class="pro-card">
                         <img src="${pro.fotoUrl || 'https://placehold.co/400x400/1B4332/FFFFFF?text=CRP'}" alt="Foto de ${pro.nome}" class="pro-card-img">
-                        <h3>${pro.nome}</h3>
-                        <p class="crp">CRP ${pro.crp}</p>
+                        <div class="pro-card-content" style="padding: 15px; flex-grow: 1;">
+                            <h3>${pro.nome}</h3>
+                            <p class="crp">CRP ${pro.crp}</p>
+                        </div>
                         <div class="pro-card-actions">
                             <a href="../perfil_psicologo.html?id=${pro.id}" class="btn btn-principal">Ver Perfil</a>
-                            <span class="heart-icon favorited" data-id="${pro.id}" role="button" aria-label="Desfavoritar">♥</span>
+                            <button class="btn-favorito favorited" data-id="${pro.id}" aria-label="Desfavoritar">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                            </button>
                         </div>
                     </div>
                 `).join('');
@@ -247,7 +279,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Função de favoritar específica para o dashboard, que recarrega a lista
     function setupFavoriteButtonsInDashboard(callbackOnSuccess) {
-        const favoriteButtons = document.querySelectorAll('.heart-icon');
+        // CORREÇÃO: O seletor correto para o botão é '.btn-favorito'
+        const favoriteButtons = document.querySelectorAll('.btn-favorito');
         favoriteButtons.forEach(button => {
             button.addEventListener('click', async () => {
                 const psychologistId = button.dataset.id;
@@ -255,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 try {
                     const response = await fetch('http://localhost:3001/api/patients/me/favorites', {
-                        method: 'POST',
+                        method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${token}`
@@ -266,6 +299,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (response.ok) {
                         const data = await response.json();
                         showToast(data.message, 'success');
+
+                        // Atualiza a UI do botão clicado
+                        button.classList.toggle('favorited', data.favorited);
 
                         // Se a operação foi bem-sucedida (ex: desfavoritou),
                         // chama a função de callback para recarregar a lista.
@@ -310,8 +346,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Preenche os campos com os dados atuais do paciente
         const nomeInput = document.getElementById('nome-paciente');
         const emailInput = document.getElementById('email-paciente');
-        if (patientData) {
-            nomeInput.value = patientData.nome_completo;
+        if (patientData && patientData.nome) {
+            nomeInput.value = patientData.nome;
             emailInput.value = patientData.email;
         }
 
@@ -328,7 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        nome_completo: nomeInput.value,
+                        nome: nomeInput.value,
                         email: emailInput.value
                     })
                 });
@@ -337,7 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (response.ok) {
                     showToast(result.message, 'success');
                     // Atualiza os dados locais para refletir a mudança
-                    patientData.nome_completo = nomeInput.value;
+                    patientData.nome = nomeInput.value;
                     patientData.email = emailInput.value;
                 } else {
                     throw new Error(result.error);
@@ -525,14 +561,23 @@ document.addEventListener('DOMContentLoaded', () => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
                 
+                const page = this.getAttribute('data-page');
+
+                // Se for um link externo (como o do questionário), navega para a URL do 'href'
+                if (!page) {
+                    const externalLink = this.querySelector('a');
+                    if (externalLink && externalLink.href) {
+                        window.location.href = externalLink.href;
+                    }
+                    return;
+                }
+
                 if (sidebar.classList.contains('is-open')) {
                     sidebar.classList.remove('is-open');
                 }
 
                 navLinks.forEach(item => item.classList.remove('active'));
                 this.classList.add('active');
-                
-                const page = './' + this.getAttribute('data-page'); 
                 loadPage(page);
             });
         });

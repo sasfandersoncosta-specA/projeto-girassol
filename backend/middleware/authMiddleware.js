@@ -4,47 +4,45 @@ const jwt = require('jsonwebtoken');
 const db = require('../models');
 
 // O Middleware de proteção principal
-exports.protect = async (req, res, next) => {
+const protect = async (req, res, next) => {
     let token;
 
-    // 1. Tenta pegar o token do header de autorização (Bearer Token)
-    // O frontend envia: Authorization: Bearer <token_aqui>
-    if (
-        req.headers.authorization &&
-        req.headers.authorization.startsWith('Bearer')
-    ) {
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         try {
-            // Pega o token da string (remove 'Bearer ')
+            // 1. Extrai o token do cabeçalho (formato "Bearer TOKEN")
             token = req.headers.authorization.split(' ')[1];
 
-            // 2. Verifica (Decodifica) o token usando a mesma chave secreta usada para criá-lo
+            // 2. Verifica e decodifica o token
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-            // 3. Busca o paciente no banco pelo ID do token
-            // Usando .select('-senha') para não retornar a senha
-            const patient = await db.Patient.findByPk(decoded.id, {
-                attributes: { exclude: ['senha'] } // Exclui o campo 'senha'
-            });
-
-            if (!patient) {
-                return res.status(401).json({ error: 'Paciente não encontrado.' });
+            // 3. Anexa o usuário à requisição com base no tipo
+            if (decoded.type === 'patient') {
+                // Busca o paciente pelo ID do token, excluindo a senha
+                req.patient = await db.Patient.findByPk(decoded.id, {
+                    attributes: { exclude: ['senha'] }
+                });
+            } else if (decoded.type === 'psychologist') {
+                // Busca o psicólogo pelo ID do token, excluindo a senha
+                req.psychologist = await db.Psychologist.findByPk(decoded.id, {
+                    attributes: { exclude: ['senha'] }
+                });
             }
 
-            // 4. Anexa o objeto paciente na requisição (req) para que a próxima função (o Controller) possa usá-lo
-            req.patient = patient; 
+            if (!req.patient && !req.psychologist) {
+                 return res.status(401).json({ error: 'Não autorizado, usuário não encontrado.' });
+            }
 
-            // Passa para o próximo middleware/controller
-            next();
+            next(); // Continua para a próxima função (o controller da rota)
 
         } catch (error) {
-            console.error('Erro de Autenticação/Token inválido:', error.message);
-            // 401 Unauthorized (Não autorizado)
-            res.status(401).json({ error: 'Não autorizado, token falhou ou expirou.' });
+            console.error(error);
+            return res.status(401).json({ error: 'Não autorizado, token inválido.' });
         }
     }
 
     if (!token) {
-        // Se não houver token no header
-        res.status(401).json({ error: 'Não autorizado, nenhum token fornecido.' });
+        return res.status(401).json({ error: 'Não autorizado, nenhum token fornecido.' });
     }
 };
+
+module.exports = { protect };

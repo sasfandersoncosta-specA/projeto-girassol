@@ -31,6 +31,8 @@ fs
     db[model.name] = model;
   });
 
+// AQUI ESTÁ A CORREÇÃO: Este bloco percorre todos os modelos
+// e chama a função 'associate' se ela existir, criando as relações.
 Object.keys(db).forEach(modelName => {
   if (db[modelName].associate) {
     db[modelName].associate(db);

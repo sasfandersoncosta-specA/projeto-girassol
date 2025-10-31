@@ -1,78 +1,102 @@
-<main class="dashboard-main">
-    <header class="main-header">
-        <h1>Gerencie seu Perfil</h1>
-            </header>
+<div class="main-header">
+    <h1>Meu Perfil</h1>
+    <p>Gerencie suas informações pessoais e profissionais.</p>
+</div>
 
-    <section class="admin-widget">
-        <form id="perfil-form">
-            <fieldset id="form-fieldset" disabled>
-                <div class="form-secao">
-                    <h2>Dados Pessoais e Contato</h2>
-                    <div class="form-grid-2col">
-                        <div class="form-group">
-                            <label for="nome-completo">Nome Completo</label>
-                            <input type="text" id="nome-completo" value="Dr(a). Anderson Costa">
-                        </div>
-                        <div class="form-group">
-                            <label for="cpf">CPF</label>
-                            <input type="text" id="cpf" placeholder="000.000.000-00">
-                        </div>
-                        <div class="form-group">
-                            <label for="email">E-mail de Contato</label>
-                            <input type="email" id="email" value="anderson.costa@email.com" placeholder="seu@email.com">
-                        </div>
-                        <div class="form-group">
-                            <label for="whatsapp">WhatsApp</label>
-                            <input type="tel" id="whatsapp" placeholder="(11) 99999-9999">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-secao">
-                    <h2>Credenciais e Formação</h2>
-                    <div class="form-grid-2col">
-                        <div class="form-group">
-                           <label for="nivel-formacao">Nível</label>
-                           <select id="nivel-formacao">
-                               <option>Selecione o nível</option>
-                               <option>Graduação</option>
-                               <option>Pós-graduação</option>
-                               <option>Mestrado</option>
-                               <option>Doutorado</option>
-                           </select>
-                       </div>
-                       <div class="form-group">
-                           <label for="curso-formacao">Curso e Instituição</label>
-                           <input type="text" id="curso-formacao" placeholder="Psicologia pela Universidade Nove de Julho">
-                       </div>
-                   </div>
-                    <div class="form-group">
-                        <label for="biografia">Biografia</label>
-                        <textarea id="biografia" rows="6">Psicólogo com foco em Saúde Pública e Atenção Psicossocial, atuando com famílias em vulnerabilidade...</textarea>
-                    </div>
-                </div>
-
-                <div class="form-secao">
-                    <h2>Critérios de "Match"</h2>
-                    <div class="form-group">
-                        <label>Abordagem Terapêutica</label>
-                        <div class="radio-group-moderno">
-                            <label><input type="radio" name="abordagem"><span>Psicanálise</span></label>
-                            <label><input type="radio" name="abordagem"><span>TCC</span></label>
-                            <label><input type="radio" name="abordagem"><span>Humanista</span></label>
-                            <label><input type="radio" name="abordagem"><span>Fenomenologia</span></label>
-                            <label><input type="radio" name="abordagem"><span>Comportamental</span></label>
-                            <label><input type="radio" name="abordagem"><span>Outra</span></label>
-                        </div>
-                    </div>
-                    </div>
-            </fieldset>
-
-            <div class="form-acoes">
-                 <button type="button" id="btn-alterar" class="btn-secundario">Alterar</button>
-                 <button type="submit" id="btn-salvar" class="btn-salvar hidden">Salvar Alterações</button>
+<div class="widget">
+    <h3>Informações do Perfil</h3>
+    <form id="perfil-form">
+        <fieldset id="form-fieldset" disabled>
+            <div class="form-group">
+                <label for="nome">Nome Completo</label>
+                <input type="text" id="nome" name="nome" required>
             </div>
-        </form>
-    </section>
-</main>
-    </section>
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="crp">Número do CRP</label>
+                <input type="text" id="crp" name="crp" required>
+            </div>
+            <div class="form-group">
+                <label for="telefone">Telefone (WhatsApp)</label>
+                <input type="tel" id="telefone" name="telefone">
+            </div>
+            <div class="form-group">
+                <label for="bio">Biografia</label>
+                <textarea id="bio" name="bio" rows="5"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="fotoUrl">URL da Foto de Perfil</label>
+                <input type="url" id="fotoUrl" name="fotoUrl">
+            </div>
+            <div class="form-group">
+                <label for="valor_sessao_numero">Valor da Sessão (R$)</label>
+                <input type="number" id="valor_sessao_numero" name="valor_sessao_numero" step="0.01">
+            </div>
+            <div class="form-group">
+                <label for="temas_atuacao">Temas de Atuação (separados por vírgula)</label>
+                <input type="text" id="temas_atuacao" name="temas_atuacao">
+            </div>
+            <div class="form-group">
+                <label for="abordagens_tecnicas">Abordagens e Técnicas (separadas por vírgula)</label>
+                <input type="text" id="abordagens_tecnicas" name="abordagens_tecnicas">
+            </div>
+            <div class="form-group">
+                <label for="genero_identidade">Gênero de Identidade</label>
+                <select id="genero_identidade" name="genero_identidade">
+                    <option value="">Selecione</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Feminino">Feminino</option>
+                    <option value="Não-binário">Não-binário</option>
+                    <option value="Outro">Outro</option>
+                    <option value="Prefiro não informar">Prefiro não informar</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="praticas_vivencias">Práticas e Vivências (separadas por vírgula)</label>
+                <input type="text" id="praticas_vivencias" name="praticas_vivencias">
+            </div>
+            <div class="form-group">
+                <label for="disponibilidade_periodo">Disponibilidade (separadas por vírgula)</label>
+                <input type="text" id="disponibilidade_periodo" name="disponibilidade_periodo">
+            </div>
+        </fieldset>
+        <div class="form-actions">
+            <button type="button" id="btn-alterar" class="btn btn-primario">Alterar Dados</button>
+            <button type="submit" id="btn-salvar" class="btn btn-primario hidden">Salvar Alterações</button>
+        </div>
+    </form>
+</div>
+
+<div class="widget" style="margin-top: 20px;">
+    <h3>Alterar Senha</h3>
+    <form id="password-form">
+        <div class="form-group">
+            <label for="senha_atual">Senha Atual</label>
+            <input type="password" id="senha_atual" name="senha_atual" required>
+        </div>
+        <div class="form-group">
+            <label for="nova_senha">Nova Senha</label>
+            <input type="password" id="nova_senha" name="nova_senha" required>
+        </div>
+        <div class="form-group">
+            <label for="confirmar_nova_senha">Confirmar Nova Senha</label>
+            <input type="password" id="confirmar_nova_senha" name="confirmar_nova_senha" required>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primario">Alterar Senha</button>
+        </div>
+    </form>
+</div>
+
+<div class="widget" style="margin-top: 20px;">
+    <h3>Excluir Conta</h3>
+    <p>Esta ação é irreversível. Todos os seus dados serão permanentemente removidos.</p>
+    <button type="button" id="btn-excluir-conta" class="btn btn-perigo">Excluir Minha Conta</button>
+</div>
+
+<!-- Modal de Confirmação (já existe no psi_dashboard.html) -->
+
+<!-- Toast Container (já existe no psi_dashboard.html) -->

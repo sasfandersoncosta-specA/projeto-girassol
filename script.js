@@ -58,23 +58,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // =====================================================================
 // CORREÇÃO PARA 100VH NO MOBILE (EXPERIÊNCIA DE APP)
 // =====================================================================
-
-// Esta função mede a altura real da janela e a salva em uma variável CSS '--vh'
-function setVhVariable() {
-    // Multiplicamos por 0.01 para obter o valor de 1% da altura da janela
-    let vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty('--vh', `${vh}px`);
-}
-
-// Executa a função sempre que a página for carregada ou redimensionada (ex: virar o celular)
-window.addEventListener('resize', setVhVariable);
-window.addEventListener('load', setVhVariable);
-
-// Executa uma vez no início para garantir que o valor seja definido
-setVhVariable();
-// =====================================================================
-// CORREÇÃO PARA 100VH NO MOBILE (EXPERIÊNCIA DE APP EM TELA CHEIA)
-// =====================================================================
 function setRealViewportHeight() {
     // Mede a altura interna da janela e calcula 1% dela
     let vh = window.innerHeight * 0.01;
@@ -82,12 +65,10 @@ function setRealViewportHeight() {
     document.documentElement.style.setProperty('--vh', `${vh}px`);
 }
 
-// Executa a função sempre que a página carrega ou a tela muda de tamanho
+// Executa a função quando a página carrega e sempre que a tela muda de tamanho
 window.addEventListener('resize', setRealViewportHeight);
 window.addEventListener('load', setRealViewportHeight);
 
-// Executa uma vez no início para garantir a definição do valor
-setRealViewportHeight();
 // No final do script.js
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
