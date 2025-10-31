@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: true })); // Permite entender dados de fo
 
 // Rota de Teste Simples
 app.get('/', (req, res) => {
-    res.json({ message: 'Bem-vindo à API Girassol! Status: OK' });
+    res.json({ message: 'Bem-vindo à API Jano! Status: OK' });
 });
 
 // Futuras Rotas da API

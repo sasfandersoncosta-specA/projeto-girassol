@@ -72,8 +72,8 @@ window.addEventListener('load', setRealViewportHeight);
 // No final do script.js
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    // Ajuste '/projeto-girassol/sw.js' conforme o nome do seu repositório/subpasta
-    navigator.serviceWorker.register('/projeto-girassol/sw.js') 
+    // Ajuste '/jano-web/sw.js' conforme o nome do seu repositório/subpasta
+    navigator.serviceWorker.register('/jano-web/sw.js') 
       .then(registration => {
         console.log('Service Worker registrado:', registration);
       })
