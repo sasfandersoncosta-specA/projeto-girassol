@@ -2,13 +2,17 @@ require('dotenv').config({ path: '../.env' }); // Carrega as variáveis de ambie
 const db = require('../models');
 const bcrypt = require('bcryptjs');
 
+// Função Auxiliar para gerar slugs, garantindo consistência
+const generateSlug = (name) => {
+    return name
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-');
+};
+
 async function seedTestData() {
     try {
-        // A opção { force: true } apaga todas as tabelas e as recria do zero.
-        // Isso resolve o problema de conversão de tipo de coluna. Use apenas em desenvolvimento.
-        await db.sequelize.sync({ force: true });
-        console.log("Banco de dados sincronizado.");
-
         // --- 1. Criar um Paciente de Teste ---
         const patientPassword = await bcrypt.hash('password123', 10);
         const patientData = {
@@ -24,52 +28,43 @@ async function seedTestData() {
             disponibilidade_periodo: ["Manhã", "Noite"]
         };
 
-        let patient = await db.Patient.findOne({ where: { email: patientData.email } });
-        if (patient) {
-            await patient.update(patientData);
-            console.log("Paciente de teste atualizado:", patient.email);
-        } else {
-            patient = await db.Patient.create(patientData);
-            console.log("Paciente de teste criado:", patient.email);
-        }
+        await db.Patient.create(patientData);
+        console.log("Paciente de teste criado:", patientData.email);
 
         // --- 2. Criar um Psicólogo de Teste ---
         const psychologistPassword = await bcrypt.hash('password123', 10);
         const psychologistData = {
             nome: "Dra. Ana Psicóloga",
             crp: "06/123456",
-            email: "ana.psicologa@jano.com",
+            email: "ana.psicologa@girassol.com",
             senha: psychologistPassword,
             telefone: "11999998888", // CAMPO ADICIONADO
+            slug: generateSlug("Dra. Ana Psicóloga"),
             valor_sessao_numero: 120.00, // Dentro da faixa do paciente
             temas_atuacao: ["Ansiedade", "Estresse", "Depressão", "Relacionamentos"], // Inclui temas do paciente
-            abordagens_tecnicas: ["Psicanálise", "Terapia Humanista", "Terapia Cognitivo-Comportamental"], // Inclui abordagens do paciente
+            abordagens_tecnicas: "Psicanálise", // CORRIGIDO: Agora é uma string única
             genero_identidade: "Feminino", // Corresponde ao gênero preferido do paciente
             praticas_vivencias: ["Feminista", "LGBTQIAPN+ friendly", "Antirracista"], // Inclui práticas do paciente
+            status: 'active', // Garante que o perfil seja público e encontrável
             disponibilidade_periodo: ["Manhã", "Tarde", "Noite"],
             bio: "Psicóloga com foco em terapia individual para adultos, oferecendo um espaço de escuta e acolhimento.",
             fotoUrl: "https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
         };
 
-        let psychologist = await db.Psychologist.findOne({ where: { email: psychologistData.email } });
-        if (psychologist) {
-            await psychologist.update(psychologistData);
-            console.log("Psicólogo de teste atualizado:", psychologist.email);
-        } else {
-            psychologist = await db.Psychologist.create(psychologistData);
-            console.log("Psicólogo de teste criado:", psychologist.email);
-        }
+        await db.Psychologist.create(psychologistData);
+        console.log("Psicólogo de teste criado:", psychologistData.email);
 
         // --- 3. Criar um segundo Psicólogo (menos compatível) ---
         const psychologist2Data = {
             nome: "Dr. Carlos Terapeuta",
             crp: "06/654321",
-            email: "carlos.terapeuta@jano.com",
+            email: "carlos.terapeuta@girassol.com",
             senha: await bcrypt.hash('password123', 10),
             telefone: "11977776666", // CAMPO ADICIONADO
+            slug: generateSlug("Dr. Carlos Terapeuta"),
             valor_sessao_numero: 70.00, // Fora da faixa principal do paciente, mas pode ser um "near match"
             temas_atuacao: ["Carreira", "Estresse"], // Apenas um tema em comum
-            abordagens_tecnicas: ["Terapia Cognitivo-Comportamental"], // Nenhuma abordagem em comum com o paciente
+            abordagens_tecnicas: "Terapia Cognitivo-Comportamental", // CORRIGIDO: Agora é uma string única
             genero_identidade: "Masculino", // Não corresponde ao gênero preferido
             praticas_vivencias: [], // Nenhuma prática afirmativa em comum
             disponibilidade_periodo: ["Tarde"],
@@ -77,14 +72,8 @@ async function seedTestData() {
             fotoUrl: "https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
         };
 
-        let psychologist2 = await db.Psychologist.findOne({ where: { email: psychologist2Data.email } });
-        if (psychologist2) {
-            await psychologist2.update(psychologist2Data);
-            console.log("Segundo psicólogo de teste atualizado:", psychologist2.email);
-        } else {
-            psychologist2 = await db.Psychologist.create(psychologist2Data);
-            console.log("Segundo psicólogo de teste criado:", psychologist2.email);
-        }
+        await db.Psychologist.create(psychologist2Data);
+        console.log("Segundo psicólogo de teste criado:", psychologist2Data.email);
 
         console.log("Dados de teste criados/atualizados com sucesso!");
 
@@ -93,4 +82,4 @@ async function seedTestData() {
     }
 }
 
-seedTestData();
+module.exports = seedTestData;

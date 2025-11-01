@@ -19,17 +19,11 @@
     <main class="login-main ruido">
         <div class="login-container">
             <h1 class="login-titulo">Acesse sua conta</h1>
-            <form class="login-form" id="form-login">
-                <!-- NOVO: Seletor de tipo de usuário -->
-                <div class="form-group-radio">
-                    <label class="radio-label">
-                        <input type="radio" name="user-type" value="patient" checked>
-                        <span>Sou Paciente</span>
-                    </label>
-                    <label class="radio-label">
-                        <input type="radio" name="user-type" value="psychologist">
-                        <span>Sou Psicólogo(a)</span>
-                    </label>
+            <form class="login-form" id="form-login">                
+                <!-- NOVO SELETOR DE PERFIL COM BOTÕES -->
+                <div class="role-selector">
+                    <button type="button" class="role-btn active" id="btnPaciente">Sou Paciente</button>
+                    <button type="button" class="role-btn" id="btnPsicologo">Sou Psicólogo(a)</button>
                 </div>
                 <p id="mensagem-login" class="mensagem-oculta"></p>
                 <div class="form-group">

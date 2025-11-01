@@ -34,6 +34,10 @@ module.exports = (sequelize, DataTypes) => {
     temas_atuacao: {
       type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: true
+    },
+    genero_identidade: {
+      type: DataTypes.STRING,
+      allowNull: true
     }
   }, {
     sequelize,

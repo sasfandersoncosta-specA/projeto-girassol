@@ -190,48 +190,148 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => toast.remove(), 4000);
         }
 
-        // Função para carregar os dados do psicólogo
-        async function loadPsychologistData() {
-            const token = localStorage.getItem('girassol_token');
-            if (!token) {
-                showToast('Você precisa estar logado para ver seu perfil.', 'error');
-                window.location.href = '../psi_login.html'; // Redireciona para o login do psicólogo
-                return;
-            }
+        // --- NOVAS FUNÇÕES PARA ERROS DE CAMPO ---
 
-            try {
-                const response = await fetch('http://localhost:3001/api/psychologists/me', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+        // Mostra uma mensagem de erro abaixo de um campo específico
+        function showFieldError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            if (!field) return;
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Falha ao carregar dados do perfil.');
-                }
+            // Remove qualquer erro antigo do campo
+            clearFieldError(field);
 
-                const data = await response.json();
-                // Preenche o formulário com os dados recebidos
-                document.getElementById('nome').value = data.nome || '';
-                document.getElementById('email').value = data.email || '';
-                document.getElementById('crp').value = data.crp || '';
-                document.getElementById('telefone').value = data.telefone || '';
-                document.getElementById('bio').value = data.bio || '';
-                document.getElementById('fotoUrl').value = data.fotoUrl || '';
-                document.getElementById('valor_sessao_numero').value = data.valor_sessao_numero || '';
-                document.getElementById('temas_atuacao').value = (data.temas_atuacao || []).join(', ');
-                document.getElementById('abordagens_tecnicas').value = (data.abordagens_tecnicas || []).join(', ');
-                document.getElementById('genero_identidade').value = data.genero_identidade || '';
-                document.getElementById('praticas_vivencias').value = (data.praticas_vivencias || []).join(', ');
-                document.getElementById('disponibilidade_periodo').value = (data.disponibilidade_periodo || []).join(', ');
+            field.classList.add('input-error');
+            const errorElement = document.createElement('p');
+            errorElement.className = 'form-error-message';
+            errorElement.textContent = message;
+            field.parentNode.appendChild(errorElement);
+        }
 
-                // Aplica máscaras
-                // IMask(document.getElementById('telefone'), { mask: '(00) 00000-0000' });
-
-            } catch (error) {
-                console.error('Erro ao carregar perfil:', error);
-                showToast(error.message, 'error');
+        // Limpa o erro de um campo específico
+        function clearFieldError(field) {
+            field.classList.remove('input-error');
+            const parent = field.parentNode;
+            const error = parent.querySelector('.form-error-message');
+            if (error) {
+                parent.removeChild(error);
             }
         }
+
+        // --- LÓGICA PARA O COMPONENTE MULTI-SELECT COM TAGS ---
+        function initializeMultiSelect(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const display = container.querySelector('.multiselect-display');
+            const optionsContainer = container.querySelector('.multiselect-options');
+            let selectedValues = [];
+            const isSingleSelect = container.dataset.singleSelect === 'true';
+
+            display.addEventListener('click', () => container.classList.toggle('open'));
+
+            optionsContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('option')) {
+                    const value = e.target.dataset.value;
+
+                    if (isSingleSelect) {
+                        // Limpa seleções anteriores
+                        selectedValues = [];
+                        display.innerHTML = '';
+                        optionsContainer.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+                    }
+
+                    if (!selectedValues.includes(value)) {
+                        selectedValues.push(value);
+                        addTag(value);
+                        e.target.classList.add('selected');
+                    }
+                }
+            });
+
+            function addTag(value) {
+                const tag = document.createElement('div');
+                tag.className = 'tag-item';
+                tag.dataset.value = value;
+                tag.innerHTML = `<span>${value}</span><span class="remove-tag">&times;</span>`;
+                
+                tag.querySelector('.remove-tag').addEventListener('click', (e) => {
+                    e.stopPropagation(); // Impede que o clique abra o dropdown
+                    
+                    if (isSingleSelect) {
+                        return; // Não permite remover a tag em modo de seleção única
+                    }
+
+                    const valToRemove = tag.dataset.value;
+                    selectedValues = selectedValues.filter(v => v !== valToRemove);
+                    optionsContainer.querySelector(`.option[data-value="${valToRemove}"]`).classList.remove('selected');
+                    tag.remove();
+                });
+
+                display.appendChild(tag);
+            }
+
+            // Função para definir valores programaticamente (ao carregar dados)
+            container.setValues = (values) => {
+                selectedValues = [];
+                display.innerHTML = '';
+                optionsContainer.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+
+                if (values && Array.isArray(values)) {
+                    values.slice(0, isSingleSelect ? 1 : values.length).forEach(value => {
+                        const option = optionsContainer.querySelector(`.option[data-value="${value}"]`);
+                        if (option) {
+                            selectedValues.push(value);
+                            addTag(value);
+                            option.classList.add('selected');
+                        }
+                    });
+                }
+            };
+
+            // Função para obter os valores selecionados
+            container.getValues = () => isSingleSelect ? (selectedValues[0] || null) : selectedValues;
+        }
+
+        // Inicializa os componentes de multi-seleção assim que a página é carregada
+        initializeMultiSelect('temas_atuacao_multiselect');
+        initializeMultiSelect('abordagens_tecnicas_multiselect');
+        initializeMultiSelect('genero_identidade_multiselect');
+        initializeMultiSelect('praticas_vivencias_multiselect');
+        initializeMultiSelect('disponibilidade_periodo_multiselect');
+
+        // Preenche os componentes com os dados carregados
+        // Esta função agora usa a variável global 'psychologistData'
+        if (psychologistData) {
+            document.getElementById('nome').value = psychologistData.nome || '';
+            document.getElementById('email').value = psychologistData.email || '';
+            document.getElementById('cpf').value = psychologistData.cpf || '';
+            document.getElementById('crp').value = psychologistData.crp || '';
+            document.getElementById('telefone').value = psychologistData.telefone || '';
+            document.getElementById('bio').value = psychologistData.bio || '';
+            document.getElementById('valor_sessao_numero').value = psychologistData.valor_sessao_numero || '';
+            document.getElementById('temas_atuacao_multiselect').setValues(psychologistData.temas_atuacao);
+            document.getElementById('abordagens_tecnicas_multiselect').setValues(psychologistData.abordagens_tecnicas ? [psychologistData.abordagens_tecnicas] : []);
+            document.getElementById('genero_identidade_multiselect').setValues(psychologistData.genero_identidade ? [psychologistData.genero_identidade] : []);
+            document.getElementById('praticas_vivencias_multiselect').setValues(psychologistData.praticas_vivencias);
+            document.getElementById('disponibilidade_periodo_multiselect').setValues(psychologistData.disponibilidade_periodo);
+        }
+
+        // Função para gerar e atualizar o link do perfil público
+        function updatePublicProfileLink() {
+            const viewProfileLink = document.getElementById('view-public-profile-link');
+            if (viewProfileLink && psychologistData) {
+                // Normaliza o nome para remover acentos, converte para minúsculas e substitui espaços por hífens
+                const slug = psychologistData.nome
+                    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Remove acentos
+                    .toLowerCase()
+                    .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres não alfanuméricos
+                    .replace(/\s+/g, '-');
+                viewProfileLink.href = `http://localhost:3001/${slug}`;
+                viewProfileLink.style.display = 'inline-block';
+            }
+        }
+
+        updatePublicProfileLink(); // Chama a função ao carregar a página
 
         // Evento para habilitar a edição do formulário
         btnAlterar.addEventListener('click', () => {
@@ -240,12 +340,24 @@ document.addEventListener('DOMContentLoaded', function() {
             btnSalvar.classList.remove('hidden');
         });
 
-        // Evento para salvar as alterações do perfil
+        // Evento para salvar o formulário
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const token = localStorage.getItem('girassol_token');
-            if (!token) { showToast('Você precisa estar logado.', 'error'); return; }
+            if (!token) {
+                showToast('Você precisa estar logado.', 'error');
+                return;
+            }
+
+            // Limpa erros antigos antes de validar novamente
+            form.querySelectorAll('input, textarea').forEach(field => clearFieldError(field));
+
+            const cpfValue = document.getElementById('cpf').value;
+            // Valida o CPF apenas se o campo estiver preenchido
+            if (cpfValue && !validarCPF(cpfValue)) {
+                showFieldError('cpf', 'O CPF inserido é inválido. Por favor, verifique.');
+                return;
+            }
 
             const payload = {
                 nome: document.getElementById('nome').value,
@@ -253,13 +365,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 crp: document.getElementById('crp').value,
                 telefone: document.getElementById('telefone').value,
                 bio: document.getElementById('bio').value,
-                fotoUrl: document.getElementById('fotoUrl').value,
                 valor_sessao_numero: parseFloat(document.getElementById('valor_sessao_numero').value),
-                temas_atuacao: document.getElementById('temas_atuacao').value.split(',').map(s => s.trim()).filter(Boolean),
-                abordagens_tecnicas: document.getElementById('abordagens_tecnicas').value.split(',').map(s => s.trim()).filter(Boolean),
-                genero_identidade: document.getElementById('genero_identidade').value,
-                praticas_vivencias: document.getElementById('praticas_vivencias').value.split(',').map(s => s.trim()).filter(Boolean),
-                disponibilidade_periodo: document.getElementById('disponibilidade_periodo').value.split(',').map(s => s.trim()).filter(Boolean),
+                cpf: cpfValue,
+                temas_atuacao: document.getElementById('temas_atuacao_multiselect').getValues(),
+                abordagens_tecnicas: document.getElementById('abordagens_tecnicas_multiselect').getValues(),
+                genero_identidade: document.getElementById('genero_identidade_multiselect').getValues(),
+                praticas_vivencias: document.getElementById('praticas_vivencias_multiselect').getValues(),
+                disponibilidade_periodo: document.getElementById('disponibilidade_periodo_multiselect').getValues(),
             };
 
             try {
@@ -267,10 +379,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     method: 'PUT',
                     body: payload
                 });
-
                 const result = await response.json();
                 if (response.ok) {
                     showToast(result.message, 'success');
+                    psychologistData = result.psychologist; // Atualiza os dados locais com a resposta da API
+                    updatePublicProfileLink(); // Atualiza o link do perfil público com o novo nome
                     fieldset.disabled = true;
                     btnSalvar.classList.add('hidden');
                     btnAlterar.classList.remove('hidden');
@@ -279,11 +392,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } catch (error) {
                 console.error('Erro ao salvar perfil:', error);
-                showToast('Erro de conexão ao salvar perfil.', 'error');
+                showToast('Erro de conexão ao salvar o perfil.', 'error');
             }
         });
 
-        // Evento para alterar a senha
         if (passwordForm) {
             passwordForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -381,17 +493,24 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Carrega os dados do psicólogo ao inicializar a página
-        loadPsychologistData();
+        // Fechar dropdowns abertos ao clicar fora
+        document.addEventListener('click', function(e) {
+            document.querySelectorAll('.multiselect-tag.open').forEach(multiselect => {
+                if (!multiselect.contains(e.target)) {
+                    multiselect.classList.remove('open');
+                }
+            });
+        });
 
-        // Máscaras de input (já existentes)
+        // Aplica as máscaras de formatação para os campos de telefone e CRP
         const telefoneInput = document.getElementById('telefone');
-        // if (telefoneInput) IMask(telefoneInput, { mask: '(00) 00000-0000' });
+        if (telefoneInput) IMask(telefoneInput, { mask: '(00) 00000-0000' });
 
-        // Removido: CPF não é um campo do psicólogo no modelo atual
-        // const cpfInput = document.getElementById('cpf');
-        // if (cpfInput) IMask(cpfInput, { mask: '000.000.000-00' });
+        const cpfInput = document.getElementById('cpf');
+        if (cpfInput) IMask(cpfInput, { mask: '000.000.000-00' });
 
+        const crpInput = document.getElementById('crp');
+        if (crpInput) IMask(crpInput, { mask: '00/000000' });
         // Removido: Validação de CPF e Email aqui, pois a validação deve ser feita no backend
         // e o email já é validado pelo navegador.
         // if (!validarEmail(emailInput.value)) { /* ... */ }
@@ -593,8 +712,31 @@ document.addEventListener('DOMContentLoaded', function() {
         const sidebarPhotoEl = document.getElementById('psi-sidebar-photo');
         const sidebarNameEl = document.getElementById('psi-sidebar-name');
         if (sidebarNameEl && sidebarPhotoEl && psychologistData) {
-            sidebarNameEl.textContent = `Dr(a). ${psychologistData.nome.split(' ')[0]}`;
+            sidebarNameEl.textContent = psychologistData.nome; // Exibe o nome completo
             sidebarPhotoEl.src = psychologistData.fotoUrl || 'https://placehold.co/40x40/1B4332/FFFFFF?text=Psi';
+        }
+
+        // --- LÓGICA PARA TROCA DE FOTO DE PERFIL ---
+        const photoUploadInput = document.getElementById('profile-photo-upload');
+        if (photoUploadInput && sidebarPhotoEl) {
+            photoUploadInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    // Cria uma URL temporária para o arquivo selecionado
+                    const newPhotoURL = URL.createObjectURL(file);
+                    // Atualiza a imagem na tela imediatamente
+                    sidebarPhotoEl.src = newPhotoURL;
+
+                    // TODO: Implementar a lógica de upload real para o backend
+                    // Exemplo:
+                    // const formData = new FormData();
+                    // formData.append('profilePhoto', file);
+                    // apiFetch('http://localhost:3001/api/psychologists/me/photo', {
+                    //     method: 'PUT',
+                    //     body: formData // Não defina Content-Type, o browser faz isso
+                    // }).then(...);
+                }
+            });
         }
 
         // Busca a contagem de mensagens não lidas

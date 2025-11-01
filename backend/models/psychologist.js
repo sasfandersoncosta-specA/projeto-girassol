@@ -52,6 +52,20 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true
     },
 
+    cpf: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true
+    },
+    bio: {
+      type: DataTypes.TEXT, // Usar TEXT para biografias mais longas
+      allowNull: true
+    },
+    slug: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true
+    },
     // --- CAMPOS NOVOS (Do Questionário) ---
     // (Os campos 'abordagem', 'especialidades', 'cidade', 'online' foram removidos)
     valor_sessao_numero: {
@@ -63,7 +77,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true
     },
     abordagens_tecnicas: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
+      type: DataTypes.STRING,
       allowNull: true
     },
     genero_identidade: {

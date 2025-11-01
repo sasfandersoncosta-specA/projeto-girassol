@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { sendPasswordResetEmail } = require('../services/emailService');
+const { findMatches } = require('../services/matchService'); // Importa o novo serviço de match
 
 // ----------------------------------------------------------------------
 // Função Auxiliar: Gera o Token JWT para Psicólogo
@@ -13,29 +14,14 @@ const generateToken = (id) => {
         expiresIn: '30d', // O token expira em 30 dias
     });
 };
-// Helper function to parse price range string to min/max values
-const parsePriceRange = (rangeString) => {
-    if (!rangeString) return { min: 0, max: Infinity };
-    if (rangeString === "Até R$ 50") return { min: 0, max: 50 };
-    if (rangeString === "R$ 51 - R$ 90") return { min: 51, max: 90 };
-    if (rangeString === "R$ 91 - R$ 150") return { min: 91, max: 150 };
-    if (rangeString === "Acima de R$ 150") return { min: 151, max: Infinity };
-    return { min: 0, max: Infinity }; // Default if not matched
-};
 
-// Helper function to map patient's affirmative practices to psychologist's practices_vivencias
-const mapPatientPracticesToPsychologist = (patientPractices) => {
-    if (!patientPractices || patientPractices.length === 0) return [];
-
-    const mapping = {
-        "Que faça parte da comunidade LGBTQIAPN+": "LGBTQIAPN+ friendly",
-        "Que seja uma pessoa não-branca (racializada) / prática antirracista": "Antirracista",
-        "Que tenha uma perspectiva feminista": "Feminista",
-        "Que entenda de neurodiversidade (TDAH, Autismo, etc.)": "Neurodiversidade",
-    };
-
-    // Mapeia as preferências do paciente para os valores do psicólogo, ignorando "Indiferente"
-    return patientPractices.map(p => mapping[p]).filter(p => p); // Filtra valores nulos ou indefinidos
+// Função Auxiliar: Gera um slug a partir de um nome
+const generateSlug = (name) => {
+    return name
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Remove acentos
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres não alfanuméricos
+        .replace(/\s+/g, '-');
 };
 
 // ----------------------------------------------------------------------
@@ -84,6 +70,7 @@ exports.registerPsychologist = async (req, res) => {
             email,
             senha: hashedPassword,
             crp,
+            slug: generateSlug(nome), // Gera o slug no registro
             // Os outros campos serão preenchidos posteriormente no perfil do psicólogo
         });
 
@@ -226,10 +213,10 @@ exports.getPsychologistData = async (req, res) => {
 // ----------------------------------------------------------------------
 exports.checkDemand = async (req, res) => {    
     try {
-        const { nome, email, crp, valor_sessao_faixa, temas_atuacao, praticas_afirmativas, abordagens_tecnicas } = req.body;
+        const { nome, email, crp, genero_identidade, valor_sessao_faixa, temas_atuacao, praticas_afirmativas, abordagens_tecnicas } = req.body;
 
         // Validação básica dos dados recebidos
-        if (!email || !crp || !valor_sessao_faixa || !temas_atuacao || !praticas_afirmativas) {
+        if (!email || !crp || !genero_identidade || !valor_sessao_faixa || !temas_atuacao || !praticas_afirmativas) {
             return res.status(400).json({ error: 'Dados insuficientes para verificar a demanda.' });
         }
 
@@ -240,6 +227,7 @@ exports.checkDemand = async (req, res) => {
         // A cláusula `where` irá procurar por psicólogos que correspondam a TODOS os critérios.
         const whereClause = {
             status: 'active', // Considera apenas psicólogos ativos
+            genero_identidade: genero_identidade,
             valor_sessao_faixa: valor_sessao_faixa,
             temas_atuacao: {
                 [Op.contains]: temas_atuacao // Psicólogo deve ter TODOS os temas informados
@@ -267,6 +255,7 @@ exports.checkDemand = async (req, res) => {
                     nome, 
                     email, 
                     crp, 
+                    genero_identidade,
                     valor_sessao_faixa, 
                     temas_atuacao, 
                     praticas_afirmativas, // O campo no modelo é 'praticas_afirmativas'
@@ -314,7 +303,7 @@ exports.updatePsychologistProfile = async (req, res) => {
         }
 
         const {
-            nome, email, crp, telefone, bio, fotoUrl,
+            nome, email, crp, cpf, telefone, bio, fotoUrl,
             valor_sessao_numero, temas_atuacao, abordagens_tecnicas,
             genero_identidade, praticas_vivencias, disponibilidade_periodo
         } = req.body;
@@ -332,10 +321,20 @@ exports.updatePsychologistProfile = async (req, res) => {
             }
         }
 
+        // Verifica se o novo CPF já está em uso por outro psicólogo
+        if (cpf && cpf !== psychologist.cpf) {
+            const existingCpf = await db.Psychologist.findOne({ where: { cpf } });
+            if (existingCpf) {
+                return res.status(409).json({ error: 'Este CPF já está em uso por outra conta.' });
+            }
+        }
+
         await psychologist.update({
-            nome, email, crp, telefone, bio, fotoUrl,
+            nome, email, crp, cpf, telefone, bio,
             valor_sessao_numero, temas_atuacao, abordagens_tecnicas,
-            genero_identidade, praticas_vivencias, disponibilidade_periodo
+            genero_identidade, praticas_vivencias, disponibilidade_periodo,
+            slug: generateSlug(nome), // Atualiza o slug se o nome mudar
+            status: 'active' // Garante que o perfil se torne ativo após a primeira edição
         });
 
         res.status(200).json({ message: 'Perfil atualizado com sucesso!', psychologist });
@@ -639,6 +638,39 @@ exports.getPatientMatches = async (req, res) => {
 };
 
 // ----------------------------------------------------------------------
+// Rota: POST /api/psychologists/match (Endpoint Público)
+// DESCRIÇÃO: Recebe as respostas do questionário de um usuário anônimo e retorna os matches.
+// ----------------------------------------------------------------------
+exports.getAnonymousMatches = async (req, res) => {
+    try {
+        const patientAnswers = req.body;
+
+        // Validação mínima das respostas recebidas
+        if (!patientAnswers || !patientAnswers.faixa_valor || !patientAnswers.temas) {
+            return res.status(400).json({ error: 'Dados do questionário insuficientes para realizar o match.' });
+        }
+
+        // Mapeia as respostas do frontend para a estrutura de preferências do backend
+        const patientPreferences = {
+            valor_sessao_faixa: patientAnswers.faixa_valor,
+            temas_buscados: patientAnswers.temas || [],
+            abordagem_desejada: patientAnswers.experiencia_desejada || [],
+            genero_profissional: patientAnswers.pref_genero_prof,
+            praticas_afirmativas: patientAnswers.caracteristicas_prof || [],
+        };
+
+        // Chama o serviço de match com as preferências mapeadas
+        const matchResult = await findMatches(patientPreferences);
+
+        res.status(200).json(matchResult);
+
+    } catch (error) {
+        console.error('Erro ao processar match anônimo:', error);
+        res.status(500).json({ error: 'Erro interno no servidor ao buscar recomendações.' });
+    }
+};
+
+// ----------------------------------------------------------------------
 // Rota: GET /api/psychologists/:id
 // DESCRIÇÃO: Busca o perfil de um psicólogo específico.
 // ----------------------------------------------------------------------
@@ -680,6 +712,32 @@ exports.getPsychologistProfile = async (req, res) => {
     } catch (error) {
         console.error('Erro ao buscar perfil do psicólogo:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
+};
+
+// ----------------------------------------------------------------------
+// Rota: GET /:slug
+// DESCRIÇÃO: Busca um perfil por um "slug" (nome amigável) e redireciona.
+// ----------------------------------------------------------------------
+exports.getProfileBySlug = async (req, res) => {
+    try {
+        const { slug } = req.params;
+
+        const psychologist = await db.Psychologist.findOne({
+            where: {
+                slug: slug, // Busca diretamente pelo slug
+                status: 'active' // Garante que apenas perfis ativos sejam encontrados
+            }
+        });
+
+        if (psychologist) {
+            // Redireciona para a página de perfil correta com o ID
+            res.redirect(`/perfil_psicologo.html?id=${psychologist.id}`);
+        } else {
+            res.status(404).send('Perfil não encontrado');
+        }
+    } catch (error) {
+        res.status(500).send('Erro no servidor');
     }
 };
 

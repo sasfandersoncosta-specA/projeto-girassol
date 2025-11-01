@@ -78,21 +78,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // =====================================================================
     // FUNÇÃO FINALIZE (IMPLEMENTADA)
+    // AGORA ELA CHAMA A API DE MATCH E REDIRECIONA PARA OS RESULTADOS
     // =====================================================================
-    function finalize() {
-        // 1. Coleta a última resposta
+    async function finalize() {
+        // 1. Garante que a última resposta foi coletada
         collectAnswer();
 
-        // 2. Mostra a tela de "final"
+        // 2. Mostra a tela de "final" enquanto processa
         goToSlide(questions.findIndex(q => q.id === 'final'));
 
-        // 3. Salva as respostas no localStorage para serem usadas após o login
-        localStorage.setItem('girassol_questionario_respostas', JSON.stringify(userAnswers));
+        try {
+            // 3. Envia as respostas para o novo endpoint de match
+            const response = await fetch('http://localhost:3001/api/psychologists/match', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userAnswers),
+            });
 
-        // 4. Após um breve momento, redireciona para a página de login/registro
-        setTimeout(() => {
-            window.location.href = 'login.html'; // Direciona para a página de login
-        }, 2500); // Aguarda 2.5 segundos na tela final
+            if (!response.ok) {
+                throw new Error('Falha ao buscar recomendações da API.');
+            }
+
+            const matchData = await response.json();
+
+            // 4. Armazena os resultados no sessionStorage para a próxima página
+            sessionStorage.setItem('matchResults', JSON.stringify(matchData));
+
+            // 5. Redireciona para a página de resultados
+            window.location.href = 'resultados.html';
+
+        } catch (error) {
+            console.error("Erro ao finalizar o questionário e buscar matches:", error);
+            // Em caso de erro, redireciona para a página de resultados com estado de erro
+            sessionStorage.setItem('matchResults', JSON.stringify({ matchTier: 'none', results: [] }));
+            window.location.href = 'resultados.html';
+        }
     }
     
     // --- O RESTO DO CÓDIGO CONTINUA O MESMO ---

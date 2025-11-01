@@ -7,6 +7,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const senhaInput = document.getElementById('senha-login');
     const mensagemEl = document.getElementById('mensagem-login');
 
+    // --- LÓGICA PARA O NOVO SELETOR DE PERFIL ---
+    const btnPaciente = document.getElementById('btnPaciente');
+    const btnPsicologo = document.getElementById('btnPsicologo');
+    let selectedRole = 'patient'; // Valor padrão
+
+    if (btnPaciente && btnPsicologo) {
+        // Adiciona um campo oculto para guardar o valor do papel selecionado
+        let roleInput = loginForm.querySelector('input[name="role"]');
+        if (!roleInput) {
+            roleInput = document.createElement('input');
+            roleInput.type = 'hidden';
+            roleInput.name = 'role';
+            loginForm.appendChild(roleInput);
+        }
+        roleInput.value = selectedRole; // Define o valor inicial
+
+        btnPaciente.addEventListener('click', () => {
+            btnPaciente.classList.add('active');
+            btnPsicologo.classList.remove('active');
+            selectedRole = 'patient';
+            roleInput.value = selectedRole;
+        });
+
+        btnPsicologo.addEventListener('click', () => {
+            btnPsicologo.classList.add('active');
+            btnPaciente.classList.remove('active');
+            selectedRole = 'psychologist';
+            roleInput.value = selectedRole;
+        });
+    }
+
     // Função para exibir mensagens (Sucesso ou Erro)
     function showMessage(text, isError = false) {
         mensagemEl.textContent = text;
@@ -27,18 +58,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const email = emailInput.value;
             const senha = senhaInput.value;
-            const userType = document.querySelector('input[name="user-type"]:checked').value;
 
             // Limpa mensagens anteriores
             mensagemEl.textContent = '';
             mensagemEl.classList.add('mensagem-oculta');
 
             // Define o endpoint da API e o caminho do dashboard com base no tipo de usuário
-            const apiUrl = userType === 'patient'
+            const apiUrl = selectedRole === 'patient'
                 ? 'http://localhost:3001/api/patients/login'
                 : 'http://localhost:3001/api/psychologists/login';
 
-            const dashboardPath = userType === 'patient'
+            const dashboardPath = selectedRole === 'patient'
                 ? '/patient/patient_dashboard.html'
                 : '/psi/psi_dashboard.html';
 
@@ -60,24 +90,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 4. Tratamento da Resposta
                 if (response.ok) {
                     // Login Bem-Sucedido
-                    showMessage('Login bem-sucedido! Redirecionando...', false);
+                    showMessage('Login bem-sucedido! Redirecionando...', false); // Mostra a mensagem
+                    localStorage.setItem('girassol_token', data.token); // Salva o token
 
-                    // SALVA O TOKEN JWT NO LOCALSTORAGE
-                    localStorage.setItem('girassol_token', data.token);
+                    // Adiciona uma pequena pausa antes de redirecionar para garantir que a mensagem seja vista
+                    // e para evitar que o setTimeout da mensagem interfira com o redirecionamento.
+                    setTimeout(() => {
+                        // Se for um psicólogo, redireciona diretamente para o dashboard dele.
+                        if (selectedRole === 'psychologist') {
+                            window.location.href = window.location.origin + dashboardPath;
+                            return;
+                        }
 
-                    // Se for um psicólogo, redireciona diretamente para o dashboard dele.
-                    if (userType === 'psychologist') {
-                        window.location.href = window.location.origin + dashboardPath;
-                        return; // Encerra a execução aqui.
-                    }
-
-                    // Se for um paciente, verifica se há respostas do questionário para salvar.
-                    const savedAnswers = localStorage.getItem('girassol_questionario_respostas');
-                    if (savedAnswers) {
-                        window.location.href = 'resultados.html';
-                    } else {
-                        window.location.href = window.location.origin + dashboardPath;
-                    }
+                        // Se for um paciente, verifica se há respostas do questionário para salvar.
+                        const savedAnswers = localStorage.getItem('girassol_questionario_respostas');
+                        if (savedAnswers) {
+                            window.location.href = 'resultados.html';
+                        } else {
+                            window.location.href = window.location.origin + dashboardPath;
+                        }
+                    }, 500); // Meio segundo de espera
                 } else {
                     // Erro de Login (Email/Senha inválidos, etc.)
                     const errorMessage = data.error || 'Email ou senha inválidos. Tente novamente.';

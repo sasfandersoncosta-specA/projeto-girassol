@@ -11,15 +11,11 @@ router.post('/login', psychologistController.loginPsychologist);
 // Rota para o pré-cadastro e verificação de demanda
 router.post('/check-demand', psychologistController.checkDemand);
 
-// Rota para buscar psicólogos compatíveis com o paciente logado (deve vir antes de /:id)
-router.get('/matches', protect, psychologistController.getPatientMatches);
-
-// Rotas públicas (não exigem autenticação)
-router.get('/:id', psychologistController.getPsychologistProfile);
-router.get('/:id/reviews', psychologistController.getPsychologistReviews);
-
 // Rotas protegidas (exigem autenticação)
 router.use(protect); // Aplica o middleware a todas as rotas abaixo
+
+// Rotas para buscar dados (devem vir antes de /:id para evitar conflito)
+router.get('/matches', psychologistController.getPatientMatches);
 
 // Rotas para o perfil do psicólogo logado
 router.get('/me', psychologistController.getPsychologistData);
@@ -39,5 +35,9 @@ router.put('/me/password', psychologistController.updatePsychologistPassword);
 
 // Rota para EXCLUIR a conta do psicólogo (Acesso PRIVADO)
 router.delete('/me', psychologistController.deletePsychologistAccount);
+
+// Rotas públicas com parâmetro (devem vir por último)
+router.get('/:id', psychologistController.getPsychologistProfile);
+router.get('/:id/reviews', psychologistController.getPsychologistReviews);
 
 module.exports = router;

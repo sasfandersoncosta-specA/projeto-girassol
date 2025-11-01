@@ -108,8 +108,28 @@ document.addEventListener('DOMContentLoaded', () => {
         setupFavoriteButtons();
     }
 
+    // --- FUNÇÃO DE INICIALIZAÇÃO DA PÁGINA ---
+    function initializePage() {
+        // 1. Verifica se há resultados do questionário no sessionStorage
+        const storedResults = sessionStorage.getItem('matchResults');
+
+        if (storedResults) {
+            console.log("Resultados encontrados no sessionStorage. Renderizando...");
+            const matchData = JSON.parse(storedResults);
+            renderResults(matchData);
+
+            // Limpa o sessionStorage para não usar os mesmos dados em uma visita futura
+            sessionStorage.removeItem('matchResults');
+        } else {
+            // 2. Se não houver, executa o fluxo para usuário logado
+            console.log("Nenhum resultado no sessionStorage. Buscando para usuário logado...");
+            fetchAndRenderMatches();
+        }
+    }
+
     // --- FUNÇÃO PARA BUSCAR OS DADOS REAIS DA API ---
     async function fetchAndRenderMatches() {
+        // Esta função agora é o "fallback" para usuários já logados
         console.log("Buscando recomendações na API...");
 
         // SUGESTÃO: Lógica para texto de carregamento dinâmico
@@ -233,6 +253,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- INICIA O PROCESSO REAL ---
-    // Substitui o setTimeout e os mocks pela chamada real à API
-    fetchAndRenderMatches();
+    initializePage();
 });

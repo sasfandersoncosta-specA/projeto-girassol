@@ -12,6 +12,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+
+    <!-- Biblioteca Choices.js para dropdowns aprimorados -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js" defer></script>
 </head>
 <body class="pagina-dashboard">
     <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu">
@@ -24,26 +28,30 @@
     
     <div class="dashboard-container" id="dashboard-container" style="display: none;">
     <aside class="dashboard-sidebar">
-            <div class="sidebar-header">
-                <img src="../assets/logos/logo_duplo_branco.png" alt="Logo Girassol" style="width: 150px; margin-bottom: 20px;">
+            <div class="sidebar-header"> <!-- Bloco de perfil movido para cá -->
+                <img src="../assets/logos/logo_duplo_branco.png" alt="Logo Girassol" class="sidebar-logo">
+                <div class="sidebar-user-block">
+                    <label for="profile-photo-upload" class="profile-photo-label">
+                        <img src="https://placehold.co/90x90" alt="Foto do perfil" id="psi-sidebar-photo">
+                    </label>
+                    <input type="file" id="profile-photo-upload" accept="image/*" hidden>
+                    <div class="user-info">
+                        <p id="psi-sidebar-name">Carregando...</p>
+                        <a href="../login.html" class="sidebar-logout">Sair</a>
+                    </div>
+                </div>
             </div>
             <nav class="sidebar-nav">
                 <ul>
-                    <li data-page="psi_visao_geral.html" class="active"><a href="#">Visão Geral</a></li>
-                    <li data-page="psi_meu_perfil.html"><a href="/psi/psi_meu_perfil.html">Meu Perfil</a></li>
-                    <li data-page="psi_assinatura.html"><a href="/psi/psi_assinatura.html">Assinatura e Pagamentos</a></li>
-                    <li data-page="psi_caixa_de_entrada.html"><a href="/psi/psi_caixa_de_entrada.html">Caixa de Entrada<span id="unread-count-badge" class="notification-badge">0</span></a></li>
-                    <li data-page="psi_lista_espera.html"><a href="/psi/psi_lista_espera.html">Lista de Espera</a></li>
-                    <li data-page="psi_comunidade.html"><a href="/psi/psi_comunidade.html">Comunidade<span class="badge-em-breve">Em Breve</span></a></li>
+                    <li data-page="psi_visao_geral.html" class="active"><a href="#"><span>Visão Geral</span></a></li>
+                    <li data-page="psi_meu_perfil.html"><a href="/psi/psi_meu_perfil.html"><span>Meu Perfil</span></a></li>
+                    <li data-page="psi_assinatura.html"><a href="/psi/psi_assinatura.html"><span>Assinatura e Pagamentos</span></a></li>
+                    <li data-page="psi_caixa_de_entrada.html"><a href="/psi/psi_caixa_de_entrada.html"><span>Caixa de Entrada</span><span id="unread-count-badge" class="notification-badge">0</span></a></li>
+                    <li data-page="psi_lista_espera.html"><a href="/psi/psi_lista_espera.html"><span>Lista de Espera</span></a></li>
+                    <li data-page="psi_comunidade.html"><a href="/psi/psi_comunidade.html"><span>Comunidade</span><span class="badge-em-breve">Em Breve</span></a></li>
                 </ul>
             </nav>
-            <div class="sidebar-footer">
-                <div class="sidebar-profile">
-                    <img src="https://placehold.co/40x40" alt="Foto do perfil" id="psi-sidebar-photo">
-                    <p id="psi-sidebar-name">Carregando...</p>
-                </div>
-                <a href="../login.html" class="sidebar-logout">Sair</a>
-            </div>
+            <!-- O footer foi removido pois seu conteúdo subiu -->
         </aside>
 
         <main class="dashboard-main" id="main-content">

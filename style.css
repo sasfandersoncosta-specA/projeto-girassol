@@ -11,6 +11,7 @@
 body {
     margin: 0;
     font-family: 'Montserrat Alternates', sans-serif;
+    font-size: 15px; /* Reduzido de 16px (padrão) para uma base mais compacta */
     background-color: #fdfaf6;
     
 }
@@ -36,7 +37,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 40px;
+    padding: 12px 30px; /* Espaçamento reduzido */
     position: fixed;
     top: 0; 
     left: 0;
@@ -125,7 +126,7 @@ nav ul {
 nav a {
     text-decoration: none;
     color: white;
-    font-size: 20px;
+    font-size: 18px; /* Fonte do menu reduzida */
 }
 nav a:hover {
     opacity: 0.8;
@@ -138,11 +139,11 @@ nav a:hover {
     width: 80%;
 }
 .btn {
-    padding: 10px 20px;
+    padding: 8px 18px; /* Botões mais compactos */
     border-radius: 25px;
     text-decoration: none;
     font-weight: bold;
-    font-size: 18px;
+    font-size: 15px; /* Fonte do botão reduzida */
     text-align: center;
     border: 2px solid transparent;
     transition: all 0.3s ease;
@@ -189,19 +190,19 @@ header.header-rolagem nav a:hover {
 
 /* --- Seções --- */
 .hero {
-    padding: 100px 60px 120px 60px;
+    padding: 80px 50px 100px 50px; /* Padding reduzido */
     text-align: center;
     background-color: #1B4332;
     position: relative;
     margin-top: -2px;
 }
 .hero-texto h1 {
-    font-size: 56px;
+    font-size: 48px; /* Título principal reduzido */
     color: white;
     margin-bottom: 10px;
 }
 .hero-texto p {
-    font-size: 22px;
+    font-size: 19px; /* Subtítulo reduzido */
     color: white;
     margin-bottom: 40px;
 }
@@ -209,9 +210,9 @@ header.header-rolagem nav a:hover {
     display: inline-block;
     background-color: var(--cor-girassol);
     color: var(--verde-escuro);
-    font-size: 22px;
+    font-size: 18px; /* Fonte do CTA reduzida */
     font-weight: bold;
-    padding: 18px 40px;
+    padding: 15px 35px; /* Padding do CTA reduzido */
     border-radius: 30px;
     text-decoration: none;
     margin-top: 30px;
@@ -238,7 +239,7 @@ header.header-rolagem nav a:hover {
     top: -1px;
 }
 .secao-terapeutas {
-    padding: 80px 20px 120px 20px;
+    padding: 70px 20px 100px 20px; /* Padding reduzido */
     overflow: hidden;
     transition: opacity 1s ease-out, transform 0.8s ease-out;
     position: relative;
@@ -253,13 +254,13 @@ header.header-rolagem nav a:hover {
     align-items: center;
 }
 .texto-terapeutas h2 {
-    font-size: 36px;
+    font-size: 32px; /* Título reduzido */
     color: #1B4332;
     margin-top: 0;
     line-height: 1.2;
 }
 .texto-terapeutas p {
-    font-size: 18px;
+    font-size: 16px; /* Texto reduzido */
     line-height: 1.6;
     color: #333;
 }
@@ -267,7 +268,7 @@ header.header-rolagem nav a:hover {
     display: inline-block;
     background-color: #5a8a6f;
     color: white;
-    padding: 12px 25px;
+    padding: 10px 22px; /* Padding reduzido */
     border-radius: 25px;
     text-decoration: none;
     font-weight: bold;
@@ -308,20 +309,20 @@ header.header-rolagem nav a:hover {
     right: 15%;
 }
 .como-funciona {
-    padding: 80px 20px;
+    padding: 70px 20px; /* Padding reduzido */
     background-color: white;
     transition: opacity 1s ease-out, transform 0.8s ease-out;
     position: relative;
 }
 .titulo-secao {
     text-align: center;
-    font-size: 42px;
+    font-size: 36px; /* Título reduzido */
     color: #333;
     margin-bottom: 60px;
 }
 .subtitulo-secao {
     text-align: center;
-    font-size: 18px;
+    font-size: 16px; /* Subtítulo reduzido */
     line-height: 1.7;
     color: #555;
     max-width: 700px;
@@ -336,13 +337,13 @@ header.header-rolagem nav a:hover {
     margin: 0 auto;
 }
 .passo-texto h3 {
-    font-size: 32px;
+    font-size: 28px; /* Título reduzido */
     color: #1B4332;
     line-height: 1.3;
     margin-top: 0;
 }
 .passo-texto p {
-    font-size: 18px;
+    font-size: 16px; /* Texto reduzido */
     line-height: 1.6;
     color: #333;
 }
@@ -387,7 +388,7 @@ header.header-rolagem nav a:hover {
     z-index: -1;
 }
 .faq-secao {
-    padding: 80px 20px 120px 20px;
+    padding: 70px 20px 100px 20px; /* Padding reduzido */
     background-color: #fdfaf6;
     transition: opacity 1s ease-out, transform 0.8s ease-out;
     position: relative;
@@ -409,7 +410,7 @@ header.header-rolagem nav a:hover {
     border: none;
     cursor: pointer;
     text-align: center; /* Mude de 'left' para 'center' */
-    font-size: 20px;
+    font-size: 18px; /* Fonte reduzida */
     font-weight: 500;
     color: #333;
 }
@@ -429,7 +430,7 @@ header.header-rolagem nav a:hover {
 .acordeao-conteudo p {
     padding: 0 10px 20px 10px;
     margin: 0;
-    font-size: 15px;
+    font-size: 14px; /* Texto reduzido */
     line-height: 1.6;
     color: #555;
     text-align: justify;
@@ -552,7 +553,7 @@ header.header-rolagem nav a:hover {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 100px 20px; /* Aumenta o espaçamento vertical */
+    padding: 80px 20px; /* Padding reduzido */
     background-color: var(--off-white);
     position: relative;
     min-height: calc(100vh - 160px); /* Ocupa a altura da tela menos o header/footer */
@@ -561,7 +562,7 @@ header.header-rolagem nav a:hover {
 
 .login-container {
     background-color: var(--branco-puro);
-    padding: 40px;
+    padding: 35px; /* Padding reduzido */
     border-radius: 16px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     width: 100%;
@@ -589,17 +590,17 @@ header.header-rolagem nav a:hover {
 
 .form-group input {
     width: 100%;
-    padding: 12px;
+    padding: 11px; /* Padding reduzido */
     border: 1px solid #ccc;
     border-radius: 8px;
     box-sizing: border-box;
     font-family: 'Lato', sans-serif;
-    font-size: 16px;
+    font-size: 15px; /* Fonte reduzida */
 }
 
 .btn-login {
     width: 100%;
-    padding: 15px;
+    padding: 12px; /* Padding reduzido */
     background-color: var(--verde-escuro);
     color: var(--branco-puro);
     border: none;
@@ -659,11 +660,11 @@ header.header-rolagem nav a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 12px;
+    padding: 10px; /* Padding reduzido */
     border-radius: 8px;
     border: 1px solid #ccc;
     text-decoration: none;
-    font-size: 16px;
+    font-size: 15px; /* Fonte reduzida */
     font-weight: bold;
     transition: background-color 0.3s ease;
     gap: 10px;
@@ -690,48 +691,48 @@ header.header-rolagem nav a:hover {
 .form-group-checkbox label {
     font-weight: normal;
     color: var(--cinza-texto);
-    font-size: 14px;
+    font-size: 13px; /* Fonte reduzida */
     margin-bottom: 0;
     line-height: 1.4;
 }
 .form-group-checkbox a { color: var(--verde-escuro); text-decoration: underline; font-weight: bold; }
 
 /* --- Estilo para o Seletor de Tipo de Usuário --- */
-.form-group-radio {
-    display: flex;
-    background-color: #f0f0f0;
-    background-color: var(--verde-escuro);
-    border-radius: 8px;
-    padding: 5px;
-    margin-bottom: 25px;
+/* Container para os botões */
+.role-selector {
+  display: flex;
+  gap: 10px; /* Espaçamento entre os botões */
+  margin-bottom: 20px;
 }
 
-.radio-label {
-    flex: 1;
-    text-align: center;
-    padding: 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    position: relative;
+/* Estilo base para ambos os botões */
+.role-btn {
+  flex: 1; /* Faz com que ambos ocupem o mesmo espaço */
+  padding: 10px; /* Padding reduzido */
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 15px; /* Fonte reduzida */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid #1B4332; /* Verde Floresta (usando a variável do projeto) */
 }
 
-.radio-label span {
-    font-weight: bold;
-    color: var(--cinza-texto);
-    color: rgba(255, 255, 255, 0.7);
+/* Estilo do botão INATIVO (estilo "outline") */
+.role-btn {
+  background-color: #FFFFFF; /* Fundo branco */
+  color: #1B4332; /* Texto Verde Floresta */
 }
 
-/* Esconde o input de rádio original */
-.radio-label input[type="radio"] {
-    position: absolute;
-    opacity: 0;
+/* Estilo do botão ATIVO */
+.role-btn.active {
+  background-color: #1B4332; /* Fundo Verde Floresta */
+  color: #FFFFFF; /* Texto branco */
 }
 
-/* Estilo do item selecionado */
-.radio-label input[type="radio"]:checked + span {
-    color: var(--verde-escuro);
-    color: var(--branco-puro);
+/* Efeito Hover para o botão INATIVO */
+.role-btn:not(.active):hover {
+  background-color: #F8F9FA; /* Nosso Branco-Nuvem, um cinza bem claro */
 }
 
 /* --- 2. REGRAS PARA TELAS MENORES (ATÉ 767px) --- */
@@ -817,7 +818,7 @@ header.header-rolagem nav a:hover {
     }
 
     header nav a {
-        font-size: 16px;
+        font-size: 15px; /* Fonte reduzida */
     }
 
     /* 4. Garante que os botões de ação fiquem em linha */
@@ -830,8 +831,8 @@ header.header-rolagem nav a:hover {
     }
 
     .btn {
-        padding: 10px 20px;
-        font-size: 16px;
+        padding: 8px 18px; /* Padding reduzido */
+        font-size: 15px; /* Fonte reduzida */
     }
 }
 /* ==========================================================================
@@ -1393,7 +1394,7 @@ header.header-rolagem nav a:hover {
 .card p {line-height: 1.7; font-size: 1.1rem; color: #555;}
 .btn {
     display: inline-block;
-    padding: 12px 25px; /* Define um padding único e padrão */
+    padding: 10px 22px; /* Padding reduzido */
     border-radius: 25px;
     text-decoration: none;
     font-weight: 700;
@@ -1654,7 +1655,7 @@ header.header-rolagem nav a:hover {
 }
 .slide-header h1 {
     font-family: 'New Kansas', serif;
-    font-size: clamp(2rem, 5vw, 2.8rem);
+    font-size: clamp(1.8rem, 5vw, 2.5rem); /* Título reduzido */
     margin: 0 0 15px 0;
 }
 .slide-header p.subtitle {
@@ -1700,10 +1701,10 @@ header.header-rolagem nav a:hover {
 .cta-button {background-color: var(--cor-girassol); color: var(--verde-escuro); border: none; padding: 15px 40px; border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: transform 0.2s ease;}
 .cta-button:hover {transform: scale(1.05);}
 .text-input, .choices-container {width: 100%; max-width: 500px; margin-top: 20px;}
-.text-input {background: none; border: none; border-bottom: 2px solid rgba(255, 255, 255, 0.5); color: var(--branco-puro); font-size: 1.8rem; text-align: center; padding: 10px;}
+.text-input {background: none; border: none; border-bottom: 2px solid rgba(255, 255, 255, 0.5); color: var(--branco-puro); font-size: 1.6rem; text-align: center; padding: 10px;} /* Fonte reduzida */
 .text-input:focus {outline: none; border-bottom-color: var(--cor-girassol);}
 .choices-container {display: flex; flex-direction: column; gap: 12px;}
-.choice-button {background-color: rgba(255, 255, 255, 0.1); color: var(--off-white); border: 2px solid rgba(255, 255, 255, 0.3); padding: 15px 20px; border-radius: 12px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease; text-align: center;}
+.choice-button {background-color: rgba(255, 255, 255, 0.1); color: var(--off-white); border: 2px solid rgba(255, 255, 255, 0.3); padding: 14px 18px; border-radius: 12px; font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease; text-align: center;} /* Botão mais compacto */
 
 /* AUMENTA A ALTURA DO CONTAINER DE OPÇÕES ROLÁVEIS */
 .choices-container.scrollable {
@@ -1793,11 +1794,11 @@ header.header-rolagem nav a:hover {
 #loading-state h1 {
     font-family: 'New Kansas', serif;
     color: var(--verde-escuro);
-    font-size: 2.2rem;
+    font-size: 2rem; /* Título reduzido */
     margin-top: 20px;
 }
 #loading-state p {
-    font-size: 1.1rem;
+    font-size: 1rem; /* Texto reduzido */
     color: var(--cinza-texto);
     max-width: 500px;
     margin: 15px auto 0 auto;
@@ -1819,10 +1820,10 @@ header.header-rolagem nav a:hover {
 .resultados-header h1 {
     font-family: 'New Kansas', serif;
     color: var(--verde-escuro);
-    font-size: clamp(2rem, 5vw, 2.8rem); /* Fonte responsiva */
+    font-size: clamp(1.8rem, 5vw, 2.5rem); /* Fonte responsiva reduzida */
 }
 .resultados-header p {
-    font-size: 1.2rem;
+    font-size: 1.1rem; /* Texto reduzido */
     color: var(--cinza-texto);
     max-width: 650px;
     margin: 15px auto 0 auto;
@@ -1853,7 +1854,7 @@ header.header-rolagem nav a:hover {
     object-fit: cover;
 }
 .pro-card-content {
-    padding: 25px;
+    padding: 20px; /* Padding reduzido */
     display: flex;
     flex-direction: column;
     flex-grow: 1; /* Faz este container crescer para empurrar as ações para baixo */
@@ -1882,7 +1883,7 @@ header.header-rolagem nav a:hover {
 .tag {
     background-color: var(--cor-girassol);
     color: var(--verde-escuro);
-    padding: 5px 12px;
+    padding: 4px 10px; /* Tag mais compacta */
     border-radius: 20px;
     font-size: 0.8rem;
     font-weight: bold;
@@ -1916,7 +1917,7 @@ header.header-rolagem nav a:hover {
 /* --- Cenário B: Etiqueta de Contexto --- */
 .context-label {
     background-color: #e9ecef;
-    padding: 15px;
+    padding: 12px; /* Padding reduzido */
     margin: -25px 0 25px 0; /* Ajuste para encaixar melhor */
     font-size: 0.9rem;
     font-weight: 500;
@@ -2209,9 +2210,9 @@ body.pagina-dashboard {
     background-color: rgba(255, 255, 255, 0.1);
     color: var(--off-white);
     border: 2px solid rgba(255, 255, 255, 0.3);
-    padding: 18px 20px; /* Padding um pouco maior para altura */
+    padding: 15px 20px; /* Padding reduzido */
     border-radius: 12px;
-    font-size: 1.1rem;
+    font-size: 1rem; /* Fonte reduzida */
     font-weight: 500;
     cursor: pointer;
     width: 100%;
@@ -2332,7 +2333,7 @@ body.pagina-dashboard {
    ============================================================= */
 
 .toast-container {
-    position: fixed;
+    position: absolute; /* Altera de 'fixed' para 'absolute' */
     top: 20px;
     right: 20px;
     z-index: 3000;

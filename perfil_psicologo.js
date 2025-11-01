@@ -98,6 +98,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h3 style="margin-top: 20px;">Temas de Atuação</h3>
                     <ul class="tags-container">${createTags(profile.temas_atuacao)}</ul>
 
+                    <h3 style="margin-top: 20px;">Disponibilidade</h3>
+                    <ul class="tags-container">${createTags(profile.disponibilidade_periodo)}</ul>
+
+                    <h3 style="margin-top: 20px;">Gênero</h3>
+                    <p>${profile.genero_identidade || 'Não informado'}</p>
+
                     <h3 style="margin-top: 20px;">Práticas e Vivências</h3>
                     <ul class="tags-container">${createTags(profile.praticas_vivencias)}</ul>
                 </section>
