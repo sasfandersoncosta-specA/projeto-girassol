@@ -10,37 +10,29 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // Uma Avaliação (Review) pertence a um Paciente
-      this.belongsTo(models.Patient, {
-        foreignKey: 'patientId',
-        as: 'patient'
-      });
-      // Uma Avaliação (Review) pertence a um Psicólogo
-      this.belongsTo(models.Psychologist, {
-        foreignKey: 'psychologistId',
-        as: 'psychologist'
-      });
+      // define association here
+      this.belongsTo(models.Patient, { as: 'patient', foreignKey: 'patientId' });
+      this.belongsTo(models.Psychologist, { as: 'psychologist', foreignKey: 'psychologistId' });
     }
   }
   Review.init({
-    rating: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      validate: {
-        min: 1,
-        max: 5
-      }
-    },
-    comment: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
-    patientId: { // Chave estrangeira para o Paciente que fez a avaliação
+    patientId: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    psychologistId: { // Chave estrangeira para o Psicólogo avaliado
+    psychologistId: {
       type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    rating: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: { min: 1, max: 5 }
+    },
+    comment: DataTypes.TEXT,
+    status: {
+      type: DataTypes.STRING,
+      defaultValue: 'pending', // 'pending', 'approved', 'rejected'
       allowNull: false
     }
   }, {

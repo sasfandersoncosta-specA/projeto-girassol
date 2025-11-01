@@ -26,6 +26,10 @@ router.get('/patients', adminController.getAllPatients);
 
 // Rota para buscar todas as avaliações (reviews)
 router.get('/reviews', adminController.getAllReviews);
+// Novas rotas para moderação de avaliações
+router.get('/reviews/pending', adminController.getPendingReviews);
+router.put('/reviews/:id/moderate', adminController.moderateReview);
+
 
 // Rota para buscar os logs do sistema
 router.get('/logs', adminController.getSystemLogs);
@@ -41,5 +45,18 @@ router.post('/reply', adminController.sendReply);
 
 // Rota para deletar uma conversa
 router.delete('/conversations/:id', adminController.deleteConversation);
+
+// Rota para buscar as conversas do admin
+router.get('/conversations', adminController.getConversations);
+
+// Rotas para Notas Internas
+router.get('/conversations/:id/notes', adminController.getInternalNotesForConversation);
+router.post('/conversations/:id/notes', adminController.addInternalNote);
+
+// Rota para buscar as mensagens de uma conversa específica
+router.get('/conversations/:id/messages', adminController.getConversationMessages);
+
+// Rota para dados de gráficos
+router.get('/charts/new-users', adminController.getNewUsersPerMonth);
 
 module.exports = router;

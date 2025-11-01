@@ -2,6 +2,8 @@
 
 require('dotenv').config();
 const express = require('express');
+const http = require('http'); // 1. Importa o módulo http
+const { initSocket } = require('./config/socket'); // 2. Importa nosso inicializador de socket
 const cors = require('cors');
 
 // Carrega o arquivo 'index.js' de dentro da pasta 'models/' para gerenciar o banco
@@ -17,6 +19,9 @@ const psychologistController = require('./controllers/psychologistController');
 const seedTestData = require('./controllers/seed_test_data'); // Caminho corrigido
 
 const app = express();
+const server = http.createServer(app); // 3. Cria um servidor http a partir do app express
+
+initSocket(server); // 4. Inicializa o Socket.IO com o servidor http
 
 // Middlewares (Configurações essenciais)
 app.use(cors()); // Permite requisições de origens diferentes (seu frontend)
@@ -55,7 +60,7 @@ const startServer = async () => {
         await seedTestData();
     }
 
-    app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}.`));
+    server.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}.`)); // 5. Inicia o servidor http
 };
 
 startServer().catch(err => console.error('Falha ao iniciar o servidor:', err));

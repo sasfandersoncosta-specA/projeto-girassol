@@ -8,6 +8,7 @@ router.use(protect);
 
 router.get('/conversations', messageController.getConversations);
 router.get('/conversations/:conversationId', messageController.getMessages);
+router.put('/conversations/:conversationId/read', messageController.markConversationAsRead);
 router.post('/messages', messageController.sendMessage);
 
 module.exports = router;

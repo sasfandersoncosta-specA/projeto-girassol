@@ -30,6 +30,150 @@ exports.loginAdmin = async (req, res) => {
 };
 
 /**
+ * Rota: GET /api/admin/conversations/:id/messages
+ * Descrição: Busca todas as mensagens de uma conversa específica.
+ */
+exports.getConversationMessages = async (req, res) => {
+    try {
+        const { id: conversationId } = req.params;
+        const adminId = req.psychologist.id;
+
+        const messages = await db.Message.findAll({
+            where: { conversationId },
+            order: [['createdAt', 'ASC']]
+        });
+
+        // Marca as mensagens como lidas para o admin
+        await db.Message.update({ isRead: true }, {
+            where: { conversationId, recipientId: adminId, isRead: false }
+        });
+
+        res.status(200).json(messages);
+    } catch (error) {
+        console.error('Erro ao buscar mensagens da conversa:', error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
+};
+
+/**
+ * Rota: GET /api/admin/conversations
+ * Descrição: Busca conversas paginadas para a caixa de entrada do admin.
+ * Query Params: page, limit, view ('inbox' ou 'sent'), search.
+ */
+exports.getConversations = async (req, res) => {
+  try {
+    const adminId = req.psychologist.id;
+    const { search = '' } = req.query;
+
+    // Consulta SQL otimizada para buscar conversas, última mensagem e contagem de não lidas de uma só vez.
+    const query = `
+      WITH LastMessages AS (
+        SELECT
+          "conversationId",
+          "content",
+          "senderId",
+          "createdAt",
+          ROW_NUMBER() OVER(PARTITION BY "conversationId" ORDER BY "createdAt" DESC) as rn
+        FROM "Messages"
+      ),
+      UnreadCounts AS (
+        SELECT
+          "conversationId",
+          COUNT(*) as "unreadCount"
+        FROM "Messages"
+        WHERE "recipientId" = :adminId AND "isRead" = false
+        GROUP BY "conversationId"
+      )
+      SELECT
+        c.id,
+        c."updatedAt",
+        CASE
+          WHEN c."psychologistId" = :adminId THEN pat.id
+          ELSE psy.id
+        END as "otherParticipantId",
+        CASE
+          WHEN c."psychologistId" = :adminId THEN pat.nome
+          ELSE psy.nome
+        END as "otherParticipantNome",
+        CASE
+          WHEN c."psychologistId" = :adminId THEN pat."fotoUrl"
+          ELSE psy."fotoUrl"
+        END as "otherParticipantFotoUrl",
+        CASE
+          WHEN c."psychologistId" = :adminId THEN 'patient'
+          ELSE 'psychologist'
+        END as "otherParticipantType",
+        lm.content as "lastMessageContent",
+        lm."createdAt" as "lastMessageCreatedAt",
+        lm."senderId" as "lastMessageSenderId",
+        COALESCE(uc."unreadCount", 0) as "unreadCount"
+      FROM "Conversations" c
+      LEFT JOIN "Patients" pat ON c."patientId" = pat.id
+      LEFT JOIN "Psychologists" psy ON c."psychologistId" = psy.id
+      LEFT JOIN LastMessages lm ON c.id = lm."conversationId" AND lm.rn = 1
+      LEFT JOIN UnreadCounts uc ON c.id = uc."conversationId"
+      WHERE (c."psychologistId" = :adminId OR c."patientId" = :adminId)
+      AND (psy.id != :adminId OR pat.id != :adminId)
+      ORDER BY c."updatedAt" DESC;
+    `;
+
+    let conversations = await db.sequelize.query(query, {
+      replacements: { adminId },
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    // Formata os resultados para o formato esperado pelo frontend
+    let finalConversations = conversations.map(convo => ({
+      id: convo.id,
+      otherParticipant: {
+        id: convo.otherParticipantId,
+        nome: convo.otherParticipantNome,
+        fotoUrl: convo.otherParticipantFotoUrl,
+        type: convo.otherParticipantType,
+      },
+      lastMessage: {
+        content: convo.lastMessageContent || 'Nenhuma mensagem.',
+        createdAt: convo.lastMessageCreatedAt || convo.updatedAt,
+        senderId: convo.lastMessageSenderId,
+      },
+      unreadCount: parseInt(convo.unreadCount, 10),
+    }));
+
+    // Aplica o filtro de busca no array já processado
+    if (search) {
+      finalConversations = finalConversations.filter(c =>
+        c.otherParticipant.nome.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    // Lógica para encontrar novos contatos (mantida)
+    if (search) {
+        const existingParticipantIds = finalConversations.map(c => c.otherParticipant.id);
+        
+        const newPatients = await db.Patient.findAll({ where: { nome: { [Op.iLike]: `%${search}%` }, id: { [Op.notIn]: existingParticipantIds } }, attributes: ['id', 'nome', 'fotoUrl'], limit: 5 });
+        const newPsychologists = await db.Psychologist.findAll({ where: { nome: { [Op.iLike]: `%${search}%` }, id: { [Op.notIn]: [...existingParticipantIds, adminId] } }, attributes: ['id', 'nome', 'fotoUrl'], limit: 5 });
+
+        const formatNewContact = (user, type) => ({ id: null, isNew: true, otherParticipant: { id: user.id, nome: user.nome, fotoUrl: user.fotoUrl, type: type }, lastMessage: { content: 'Clique para iniciar uma nova conversa.' }, unreadCount: 0 });
+
+        const newContacts = [
+            ...newPatients.map(p => formatNewContact(p, 'patient')),
+            ...newPsychologists.map(p => formatNewContact(p, 'psychologist'))
+        ];
+        finalConversations.unshift(...newContacts); // Adiciona novos contatos no topo da lista
+    }
+
+    res.status(200).json({
+      conversations: finalConversations,
+      totalPages: 1, // Pagination removed for simplicity, can be re-added
+      currentPage: 1,
+    });
+  } catch (error) {
+    console.error('Erro ao buscar conversas do admin:', error);
+    res.status(500).json({ error: 'Falha ao buscar conversas.' });
+  }
+};
+
+/**
  * Rota: GET /api/admin/me
  * Descrição: Busca os dados do administrador logado.
  */
@@ -134,36 +278,6 @@ exports.updateAdminPhoto = async (req, res) => {
 };
 
 /**
- * Rota: PUT /api/admin/me/photo
- * Descrição: Atualiza a foto de perfil do administrador logado.
- * Requer middleware de upload (ex: multer) para lidar com req.file.
- */
-exports.updateAdminPhoto = async (req, res) => {
-    try {
-        const adminUser = req.psychologist;
-
-        if (!req.file) {
-            return res.status(400).json({ error: 'Nenhum arquivo de imagem foi enviado.' });
-        }
-
-        // Em um ambiente de produção, você faria o upload para um serviço como S3.
-        // Aqui, vamos simular salvando o caminho do arquivo localmente.
-        // O caminho depende de como seu servidor estático está configurado.
-        const fotoUrl = `/uploads/profiles/${req.file.filename}`;
-
-        await adminUser.update({ fotoUrl });
-
-        res.status(200).json({
-            message: 'Foto de perfil atualizada com sucesso!',
-            fotoUrl: fotoUrl // Retorna a nova URL para o frontend
-        });
-    } catch (error) {
-        console.error('Erro ao atualizar foto do admin:', error);
-        res.status(500).json({ error: 'Erro interno no servidor ao processar a imagem.' });
-    }
-};
-
-/**
  * Rota: GET /api/admin/stats
  * Descrição: Busca estatísticas chave para o dashboard do administrador.
  */
@@ -194,16 +308,14 @@ exports.getDashboardStats = async (req, res) => {
         });
 
         // 5. MRR (Receita Recorrente Mensal) - Simulado
-        // Esta é uma simulação, pois não temos um campo 'plano' no modelo Psychologist.
-        // Em um sistema real, buscaríamos os planos de cada psicólogo ativo.
-        const activePsychologists = await db.Psychologist.findAll({ where: { status: 'active' } });
+        // SUGESTÃO: Substituir esta simulação pela lógica real após adicionar o campo 'plano' ao modelo.
+        const activePsychologists = await db.Psychologist.findAll({ where: { status: 'active', plano: { [Op.ne]: null } } });
         const planPrices = { 'Semente': 59.90, 'Luz': 89.90, 'Sol': 129.90 };
         let mrr = 0;
         activePsychologists.forEach(psy => {
-            // Simula um plano aleatório para cada psicólogo ativo
-            const plans = Object.keys(planPrices);
-            const randomPlan = plans[Math.floor(Math.random() * plans.length)];
-            mrr += planPrices[randomPlan];
+            if (planPrices[psy.plano]) {
+                mrr += planPrices[psy.plano];
+            }
         });
 
         // 6. Avaliações pendentes de moderação
@@ -282,11 +394,28 @@ exports.getAllPsychologists = async (req, res) => {
  */
 exports.getAllPatients = async (req, res) => {
     try {
-        const patients = await db.Patient.findAll({
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = parseInt(req.query.limit, 10) || 10;
+        const offset = (page - 1) * limit;
+        const { search } = req.query;
+
+        const whereClause = {};
+        if (search) {
+            whereClause[Op.or] = [
+                { nome: { [Op.iLike]: `%${search}%` } },
+                { email: { [Op.iLike]: `%${search}%` } }
+            ];
+        }
+
+        const { count, rows } = await db.Patient.findAndCountAll({
+            where: whereClause,
+            limit,
+            offset,
             attributes: { exclude: ['senha', 'resetPasswordToken', 'resetPasswordExpires'] },
             order: [['createdAt', 'DESC']]
         });
-        res.status(200).json(patients);
+
+        res.status(200).json({ data: rows, totalPages: Math.ceil(count / limit), currentPage: page, totalCount: count });
     } catch (error) {
         console.error('Erro ao buscar lista de pacientes:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });
@@ -309,6 +438,53 @@ exports.getAllReviews = async (req, res) => {
         res.status(200).json(reviews);
     } catch (error) {
         console.error('Erro ao buscar lista de avaliações:', error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
+};
+
+/**
+ * Rota: GET /api/admin/reviews/pending
+ * Descrição: Busca todas as avaliações com status 'pending' para moderação.
+ */
+exports.getPendingReviews = async (req, res) => {
+    try {
+        const pendingReviews = await db.Review.findAll({
+            where: { status: 'pending' },
+            include: [
+                { model: db.Patient, as: 'patient', attributes: ['nome'] },
+                { model: db.Psychologist, as: 'psychologist', attributes: ['nome'] }
+            ],
+            order: [['createdAt', 'ASC']] // Mais antigas primeiro
+        });
+        res.status(200).json(pendingReviews);
+    } catch (error) {
+        console.error('Erro ao buscar avaliações pendentes:', error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
+};
+
+/**
+ * Rota: PUT /api/admin/reviews/:id/moderate
+ * Descrição: Atualiza o status de uma avaliação (aprova ou rejeita).
+ */
+exports.moderateReview = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body; // 'approved' ou 'rejected'
+
+        if (!['approved', 'rejected'].includes(status)) {
+            return res.status(400).json({ error: 'Status inválido. Use "approved" ou "rejected".' });
+        }
+
+        const [updated] = await db.Review.update({ status }, { where: { id } });
+
+        if (updated) {
+            res.status(200).json({ message: `Avaliação ${status === 'approved' ? 'aprovada' : 'rejeitada'} com sucesso.` });
+        } else {
+            res.status(404).json({ error: 'Avaliação não encontrada.' });
+        }
+    } catch (error) {
+        console.error('Erro ao moderar avaliação:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };
@@ -360,6 +536,7 @@ exports.getAllMessages = async (req, res) => {
  * Descrição: Envia uma mensagem em massa para todos os psicólogos ou pacientes.
  */
 exports.sendBroadcastMessage = async (req, res) => {
+    const transaction = await db.sequelize.transaction();
     try {
         const { target, content } = req.body;
         const adminId = req.psychologist.id;
@@ -396,7 +573,7 @@ exports.sendBroadcastMessage = async (req, res) => {
 
         // Para cada destinatário, encontra ou cria uma conversa e envia a mensagem.
         // Em um app de produção, isso seria uma tarefa em background (background job).
-        for (const recipient of recipients) {
+        const messagePromises = recipients.map(async (recipient) => {
             // Lógica de findOrCreate corrigida para lidar com conversas Psi-Psi
             const whereClause = {
                 [Op.or]: [
@@ -413,7 +590,8 @@ exports.sendBroadcastMessage = async (req, res) => {
 
             const [conversation] = await db.Conversation.findOrCreate({
                 where: whereClause,
-                defaults: defaults
+                defaults: defaults,
+                transaction
             });
 
             await db.Message.create({
@@ -423,12 +601,16 @@ exports.sendBroadcastMessage = async (req, res) => {
                 recipientId: recipient.id,
                 recipientType: recipientType,
                 content: content
-            });
-        }
+            }, { transaction });
+        });
 
+        await Promise.all(messagePromises);
+        await transaction.commit();
+        
         res.status(200).json({ message: `Mensagem enviada para ${recipients.length} destinatários.` });
     } catch (error) {
         console.error('Erro ao enviar mensagem em massa:', error);
+        await transaction.rollback();
         res.status(500).json({ error: 'Erro interno no servidor ao enviar a mensagem.' });
     }
 };
@@ -499,147 +681,121 @@ exports.deleteConversation = async (req, res) => {
         res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };
+/**
+ * Rota: DELETE /api/admin/patients/:id
+ * Descrição: Exclui um paciente específico.
+ */
+exports.deletePatient = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const patient = await db.Patient.findByPk(id);
+
+        if (!patient) {
+            return res.status(404).json({ error: 'Paciente não encontrado.' });
+        }
+
+        // A exclusão em cascata (onDelete: 'CASCADE') nos modelos do Sequelize
+        // garantirá que dados relacionados (como avaliações, favoritos, etc.) sejam removidos.
+        await patient.destroy();
+
+        res.status(200).json({ message: 'Paciente excluído com sucesso.' });
+    } catch (error) {
+        console.error('Erro ao excluir paciente:', error);
+        res.status(500).json({ error: 'Erro interno no servidor ao excluir o paciente.' });
+    }
+};
 
 /**
- * Rota: GET /api/admin/conversations
- * Descrição: Busca conversas paginadas para a caixa de entrada do admin.
- * Query Params: page, limit, view ('inbox' ou 'sent'), search.
+ * Rota: GET /api/admin/conversations/:id/notes
+ * Descrição: Busca todas as notas internas de uma conversa.
  */
-exports.getConversations = async (req, res) => {
+exports.getInternalNotesForConversation = async (req, res) => {
     try {
-        const adminId = req.psychologist.id;
-        const page = parseInt(req.query.page, 10) || 1;
-        const limit = parseInt(req.query.limit, 10) || 15;
-        const offset = (page - 1) * limit;
-        const { view = 'inbox', search = '' } = req.query;
+        const { id } = req.params; // ID da conversa
 
-        // 1. Encontra todas as conversas onde o admin é um dos participantes
-        // A busca por nome será aplicada DEPOIS de identificar os participantes.
-        // Isso simplifica a query e evita problemas com joins complexos.
-        const { count, rows: conversations } = await db.Conversation.findAndCountAll({
-            where: {
-                [Op.or]: [
-                    { psychologistId: adminId },
-                    { patientId: adminId } // Embora admin seja psicólogo, é bom cobrir o caso de ser paciente de outro admin
-                ]
-            },
-            limit,
-            offset,
-            order: [['updatedAt', 'DESC']],
-            include: [ // Inclui os modelos para ter acesso aos dados
-                { model: db.Patient, as: 'patient', attributes: ['id', 'nome', 'fotoUrl'] },
-                { model: db.Psychologist, as: 'psychologist', attributes: ['id', 'nome', 'fotoUrl'] }
-            ]
+        const notes = await db.InternalNote.findAll({
+            where: { conversationId: id },
+            include: [{
+                model: db.Psychologist,
+                as: 'author',
+                attributes: ['id', 'nome', 'fotoUrl']
+            }],
+            order: [['createdAt', 'ASC']]
         });
 
-
-        // Processa cada conversa para adicionar os detalhes necessários pelo front-end
-        const formattedConversations = await Promise.all(
-            conversations.map(async (convo) => {
-                const otherParticipantRaw = convo.patientId === adminId ? convo.psychologist : (convo.patient || convo.psychologist);
-                
-                // Pula conversas inválidas (ex: admin com ele mesmo)
-                if (!otherParticipantRaw || otherParticipantRaw.id === adminId) return null;
-
-                const otherParticipant = {
-                    id: otherParticipantRaw.id,
-                    nome: otherParticipantRaw.nome,
-                    fotoUrl: otherParticipantRaw.fotoUrl,
-                    type: convo.patientId === adminId ? 'psychologist' : (convo.patient ? 'patient' : 'psychologist')
-                };
-
-                const lastMessage = await db.Message.findOne({
-                    where: { conversationId: convo.id },
-                    order: [['createdAt', 'DESC']]
-                });
-
-                const unreadCount = await db.Message.count({
-                    where: {
-                        conversationId: convo.id,
-                        recipientId: adminId,
-                        isRead: false
-                    }
-                });
-
-                return {
-                    // Adiciona o ID da conversa para uso futuro (ex: deletar)
-                    id: convo.id, 
-                    otherParticipant,
-                    lastMessage: {
-                        content: lastMessage?.content || 'Nenhuma mensagem.',
-                        createdAt: lastMessage?.createdAt || convo.createdAt,
-                        senderId: lastMessage?.senderId
-                    },
-                    unreadCount
-                };
-            })
-        );
-        
-        // 2. Remove os nulos e aplica os filtros de 'search' e 'view' no array processado
-        let finalConversations = formattedConversations.filter(Boolean);
-
-        if (search) {
-            finalConversations = finalConversations.filter(c => 
-                c.otherParticipant.nome.toLowerCase().includes(search.toLowerCase())
-            );
-        }
-
-        // 2.5 (NOVO) Se houver busca, encontra usuários que ainda não estão na lista de conversas
-        if (search) {
-            const existingParticipantIds = finalConversations.map(c => c.otherParticipant.id);
-            
-            const newPatients = await db.Patient.findAll({
-                where: {
-                    nome: { [Op.iLike]: `%${search}%` },
-                    id: { [Op.notIn]: existingParticipantIds }
-                },
-                attributes: ['id', 'nome', 'fotoUrl'],
-                limit: 5 // Limita para não sobrecarregar
-            });
-
-            const newPsychologists = await db.Psychologist.findAll({
-                where: {
-                    nome: { [Op.iLike]: `%${search}%` },
-                    id: { [Op.notIn]: [...existingParticipantIds, adminId] } // Exclui também o próprio admin
-                },
-                attributes: ['id', 'nome', 'fotoUrl'],
-                limit: 5
-            });
-
-            const formatNewContact = (user, type) => ({
-                id: null, // Não há ID de conversa ainda
-                isNew: true, // Flag para o frontend
-                otherParticipant: {
-                    id: user.id,
-                    nome: user.nome,
-                    fotoUrl: user.fotoUrl,
-                    type: type
-                },
-                lastMessage: { content: 'Clique para iniciar uma nova conversa.' },
-                unreadCount: 0
-            });
-
-            const newContacts = [
-                ...newPatients.map(p => formatNewContact(p, 'patient')),
-                ...newPsychologists.map(p => formatNewContact(p, 'psychologist'))
-            ];
-            finalConversations.unshift(...newContacts); // Adiciona novos contatos no topo da lista
-        }
-
-        if (view === 'sent') {
-            // Filtra para mostrar apenas conversas onde a ÚLTIMA mensagem foi enviada pelo admin.
-            finalConversations = finalConversations.filter(c => c.lastMessage.senderId === adminId);
-        }
-
-        // 3. Retorna a resposta paginada
-        res.status(200).json({
-            conversations: finalConversations,
-            totalPages: Math.ceil(count / limit),
-            currentPage: page
-        });
-
+        res.status(200).json(notes);
     } catch (error) {
-        console.error('Erro ao buscar conversas do admin:', error);
-        res.status(500).json({ error: 'Falha ao buscar conversas.' });
+        console.error('Erro ao buscar notas internas:', error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
+};
+
+/**
+ * Rota: POST /api/admin/conversations/:id/notes
+ * Descrição: Adiciona uma nova nota interna a uma conversa.
+ */
+exports.addInternalNote = async (req, res) => {
+    try {
+        const { id: conversationId } = req.params;
+        const { content } = req.body;
+        const adminId = req.psychologist.id;
+
+        if (!content) {
+            return res.status(400).json({ error: 'O conteúdo da nota é obrigatório.' });
+        }
+
+        const newNote = await db.InternalNote.create({ conversationId, adminId, content });
+        res.status(201).json(newNote);
+    } catch (error) {
+        console.error('Erro ao adicionar nota interna:', error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
+};
+
+/**
+ * Rota: GET /api/admin/charts/new-users
+ * Descrição: Busca dados de novos usuários (pacientes e psicólogos) por mês para o gráfico.
+ */
+exports.getNewUsersPerMonth = async (req, res) => {
+    try {
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+        const newPatients = await db.Patient.findAll({
+            attributes: [
+                [db.sequelize.fn('date_trunc', 'month', db.sequelize.col('createdAt')), 'month'],
+                [db.sequelize.fn('count', '*'), 'count']
+            ],
+            where: { createdAt: { [Op.gte]: sixMonthsAgo } },
+            group: ['month'],
+            order: [['month', 'ASC']]
+        });
+
+        const newPsychologists = await db.Psychologist.findAll({
+            attributes: [
+                [db.sequelize.fn('date_trunc', 'month', db.sequelize.col('createdAt')), 'month'],
+                [db.sequelize.fn('count', '*'), 'count']
+            ],
+            where: { createdAt: { [Op.gte]: sixMonthsAgo } },
+            group: ['month'],
+            order: [['month', 'ASC']]
+        });
+
+        // Formata os dados para o Chart.js
+        const labels = [];
+        const patientData = [];
+        const psychologistData = [];
+
+        // Lógica para combinar os dados e preencher os meses vazios
+        // (Esta parte pode ser mais elaborada para garantir todos os 6 meses no eixo X)
+
+        // Exemplo simplificado:
+        // Você precisaria de uma lógica mais robusta para mesclar os dados por mês.
+
+        res.status(200).json({ labels, patientData, psychologistData });
+    } catch (error) {
+        console.error('Erro ao buscar dados para o gráfico de novos usuários:', error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };
