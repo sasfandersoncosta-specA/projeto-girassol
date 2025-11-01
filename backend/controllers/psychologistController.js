@@ -370,7 +370,7 @@ exports.updatePsychologistProfile = async (req, res) => {
             }
         }
 
-        await psychologist.update({
+        const updatedPsychologist = await psychologist.update({
             nome, email, crp, cpf, telefone, bio,
             valor_sessao_numero, temas_atuacao, abordagens_tecnicas,
             genero_identidade, praticas_vivencias, disponibilidade_periodo,
@@ -378,11 +378,52 @@ exports.updatePsychologistProfile = async (req, res) => {
             status: 'active' // Garante que o perfil se torne ativo após a primeira edição
         });
 
-        res.status(200).json({ message: 'Perfil atualizado com sucesso!', psychologist });
+        res.status(200).json({ message: 'Perfil atualizado com sucesso!', psychologist: updatedPsychologist });
 
     } catch (error) {
         console.error('Erro ao atualizar perfil do psicólogo:', error);
         res.status(500).json({ error: 'Erro interno no servidor ao atualizar perfil.' });
+    }
+};
+
+// ----------------------------------------------------------------------
+// Rota: POST /api/psychologists/waiting-list/invite (Rota Protegida - Admin)
+// DESCRIÇÃO: Envia um convite manual para um profissional na lista de espera.
+// ----------------------------------------------------------------------
+exports.inviteFromWaitlist = async (req, res) => {
+    try {
+        // Em um app real, verificaríamos se req.user é um admin.
+        const { waitingListId } = req.body;
+
+        if (!waitingListId) {
+            return res.status(400).json({ error: 'ID do candidato na lista de espera é obrigatório.' });
+        }
+
+        const candidate = await db.WaitingList.findOne({
+            where: { id: waitingListId, status: 'pending' }
+        });
+
+        if (!candidate) {
+            return res.status(404).json({ error: 'Candidato não encontrado ou já convidado.' });
+        }
+
+        const invitationToken = crypto.randomBytes(32).toString('hex');
+        const expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + 7); // Expira em 7 dias
+
+        await candidate.update({
+            status: 'invited',
+            invitationToken: invitationToken,
+            invitationExpiresAt: expirationDate,
+        });
+
+        const invitationLink = `http://127.0.0.1:5500/psi_registro.html?token=${invitationToken}&email=${candidate.email}`;
+        await sendInvitationEmail(candidate, invitationLink);
+
+        res.status(200).json({ message: `Convite enviado com sucesso para ${candidate.email}.` });
+    } catch (error) {
+        console.error('Erro ao enviar convite manual:', error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };
 

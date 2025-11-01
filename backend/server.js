@@ -11,8 +11,10 @@ const db = require('./models');
 const patientRoutes = require('./routes/patientRoutes');
 const psychologistRoutes = require('./routes/psychologistRoutes');
 const messageRoutes = require('./routes/messageRoutes'); // Adicionado
-const psychologistController = require('./controllers/psychologistController'); // Adicionado para a rota de slug
-const seedTestData = require('./scripts/seed_test_data'); // Importa a função de seed
+const demandRoutes = require('./routes/demandRoutes'); // Adicionado para salvar buscas
+const adminRoutes = require('./routes/adminRoutes'); // Adicionado para o dashboard
+const psychologistController = require('./controllers/psychologistController');
+const seedTestData = require('./controllers/seed_test_data'); // Caminho corrigido
 
 const app = express();
 
@@ -33,6 +35,8 @@ app.get('/:slug', psychologistController.getProfileBySlug);
 app.use('/api/patients', patientRoutes); // Todas as rotas de Pacientes (Registro, Login, Dados Pessoais)
 app.use('/api/psychologists', psychologistRoutes); // Todas as rotas de Profissionais (Registro, Login, etc)
 app.use('/api/messaging', messageRoutes); // Adicionado
+app.use('/api/demand', demandRoutes); // Adicionado
+app.use('/api/admin', adminRoutes); // Adicionado
 
 // Sincronização com o Banco
 // db.sequelize.sync() lê os modelos e cria/atualiza as tabelas se necessário
@@ -44,16 +48,14 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 // Em desenvolvimento, usamos { force: true } para recriar o banco a cada reinicialização,
 // garantindo que o schema esteja sempre atualizado com os modelos.
 // Em produção, usamos sync() sem 'force' para não perder dados.
-db.sequelize.sync({ force: isDevelopment }).then(() => {
-    app.listen(PORT, () => {
-        console.log(`Servidor rodando na porta ${PORT}.`);
-        if (isDevelopment) {
-            // Após sincronizar, popula o banco com dados de teste
-            console.log('Populando o banco de dados com dados de teste...');
-            seedTestData();
-            console.log('Banco de dados sincronizado com { force: true }');
-        }
-    });
-}).catch(err => {
-    console.error('Não foi possível conectar ao banco de dados:', err);
-});
+const startServer = async () => {
+    if (isDevelopment) {
+        await db.sequelize.sync({ force: true });
+        console.log('Banco de dados sincronizado com { force: true }');
+        await seedTestData();
+    }
+
+    app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}.`));
+};
+
+startServer().catch(err => console.error('Falha ao iniciar o servidor:', err));

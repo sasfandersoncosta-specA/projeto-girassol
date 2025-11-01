@@ -66,6 +66,19 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       unique: true
     },
+    isAdmin: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false
+    },
+    plano: {
+      type: DataTypes.STRING,
+      allowNull: true // 'Semente', 'Luz', 'Sol'
+    },
+    status: {
+      type: DataTypes.STRING,
+      defaultValue: 'pending' // pending, active, inactive, suspended
+    },
     // --- CAMPOS NOVOS (Do Questionário) ---
     // (Os campos 'abordagem', 'especialidades', 'cidade', 'online' foram removidos)
     valor_sessao_numero: {
@@ -77,7 +90,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true
     },
     abordagens_tecnicas: {
-      type: DataTypes.STRING,
+      type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: true
     },
     genero_identidade: {

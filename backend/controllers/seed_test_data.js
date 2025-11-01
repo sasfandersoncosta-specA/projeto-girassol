@@ -1,5 +1,4 @@
-require('dotenv').config({ path: '../.env' }); // Carrega as variáveis de ambiente
-const db = require('../models'); // Este caminho continua correto a partir da pasta 'scripts'
+const db = require('../models');
 const bcrypt = require('bcryptjs');
 
 async function seedTestData() {
@@ -12,11 +11,6 @@ async function seedTestData() {
             .replace(/\s+/g, '-');
     };
     try {
-        // Sincroniza o banco de dados (cria tabelas se não existirem)
-        // CUIDADO: db.sequelize.sync({ force: true }) apagaria todos os dados existentes!
-        // Use apenas db.sequelize.sync() para criar/atualizar tabelas sem apagar dados.
-        await db.sequelize.sync();
-        console.log("Banco de dados sincronizado.");
 
         // --- 1. Criar um Paciente de Teste ---
         const patientPassword = await bcrypt.hash('password123', 10);
@@ -50,6 +44,7 @@ async function seedTestData() {
             email: "ana.psicologa@girassol.com",
             senha: psychologistPassword,
             slug: generateSlug("Dra. Ana Psicóloga"),
+            plano: 'Luz', // Plano atribuído
             status: 'active', // Garante que o psicólogo esteja ativo para buscas
             valor_sessao_numero: 120.00, // Dentro da faixa do paciente
             temas_atuacao: ["Ansiedade", "Estresse", "Depressão", "Relacionamentos"], // Inclui temas do paciente
@@ -80,6 +75,7 @@ async function seedTestData() {
             email: "carlos.terapeuta@girassol.com",
             senha: await bcrypt.hash('password123', 10),
             slug: generateSlug("Dr. Carlos Terapeuta"),
+            plano: 'Semente', // Plano atribuído
             status: 'active',
             valor_sessao_numero: 70.00, // Fora da faixa principal do paciente, mas pode ser um "near match"
             temas_atuacao: ["Carreira", "Estresse"], // Apenas um tema em comum
@@ -102,21 +98,35 @@ async function seedTestData() {
             console.log("Segundo psicólogo de teste criado:", psychologist2.email);
         }
 
+        // --- 4. Criar um Psicólogo Administrador ---
+        const adminPassword = await bcrypt.hash('admin123', 10);
+        const adminData = {
+            nome: "Admin Girassol",
+            crp: "00/000000",
+            email: "admin@girassol.com",
+            senha: adminPassword,
+            slug: generateSlug("Admin Girassol"),
+            status: 'active',
+            isAdmin: true // Define este usuário como administrador
+        };
+
+        let adminUser = await db.Psychologist.findOne({ where: { email: adminData.email } });
+        if (adminUser) {
+            // Garante que o admin sempre tenha os dados e a senha corretos em ambiente de desenvolvimento.
+            await adminUser.update(adminData);
+            console.log("Usuário administrador atualizado:", adminUser.email);
+        } else {
+            adminUser = await db.Psychologist.create(adminData);
+            console.log("Usuário administrador criado:", adminUser.email);
+        }
+
         console.log("Dados de teste criados/atualizados com sucesso!");
 
     } catch (error) {
         console.error("Erro ao popular o banco de dados:", error);
-        // Se estamos executando este script diretamente, encerramos o processo com erro.
-        if (require.main === module) {
-            process.exit(1);
-        }
+        process.exit(1); // Encerra o processo se houver erro no seed
     }
 }
 
-// Executa a função de seed apenas se este arquivo for o ponto de entrada principal
-if (require.main === module) {
-    seedTestData().finally(() => {
-        // Não fechamos a conexão para não interferir com o nodemon
-        console.log("Processo de seed finalizado.");
-    });
-}
+// Exporta a função para que possa ser chamada pelo server.js
+module.exports = seedTestData;

@@ -1,48 +1,55 @@
-// backend/middleware/authMiddleware.js
-
 const jwt = require('jsonwebtoken');
 const db = require('../models');
 
-// O Middleware de proteção principal
+/**
+ * Middleware para proteger rotas. Verifica se o token JWT é válido.
+ */
 const protect = async (req, res, next) => {
     let token;
 
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         try {
-            // 1. Extrai o token do cabeçalho (formato "Bearer TOKEN")
+            // 1. Extrai o token do cabeçalho
             token = req.headers.authorization.split(' ')[1];
 
-            // 2. Verifica e decodifica o token
+            // 2. Verifica o token
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-            // 3. Anexa o usuário à requisição com base no tipo
+            // 3. Encontra o usuário com base no tipo e ID do token
             if (decoded.type === 'patient') {
-                // Busca o paciente pelo ID do token, excluindo a senha
-                req.patient = await db.Patient.findByPk(decoded.id, {
-                    attributes: { exclude: ['senha'] }
-                });
-            } else if (decoded.type === 'psychologist') {
-                // Busca o psicólogo pelo ID do token, excluindo a senha
-                req.psychologist = await db.Psychologist.findByPk(decoded.id, {
-                    attributes: { exclude: ['senha'] }
-                });
+                req.patient = await db.Patient.findByPk(decoded.id, { attributes: { exclude: ['senha'] } });
+            } else if (decoded.type === 'psychologist' || decoded.type === 'admin') {
+                req.psychologist = await db.Psychologist.findByPk(decoded.id, { attributes: { exclude: ['senha'] } });
             }
 
             if (!req.patient && !req.psychologist) {
-                 return res.status(401).json({ error: 'Não autorizado, usuário não encontrado.' });
+                return res.status(401).json({ error: 'Usuário não encontrado.' });
             }
 
-            next(); // Continua para a próxima função (o controller da rota)
+            next(); // Continua para a próxima rota/middleware
 
         } catch (error) {
-            console.error(error);
-            return res.status(401).json({ error: 'Não autorizado, token inválido.' });
+            console.error('Erro de autenticação:', error.message);
+            res.status(401).json({ error: 'Não autorizado, token inválido.' });
         }
     }
 
     if (!token) {
-        return res.status(401).json({ error: 'Não autorizado, nenhum token fornecido.' });
+        res.status(401).json({ error: 'Não autorizado, nenhum token fornecido.' });
     }
 };
 
-module.exports = { protect };
+/**
+ * Middleware para rotas de administrador.
+ * Deve ser usado DEPOIS do middleware 'protect'.
+ */
+const admin = (req, res, next) => {
+    // O middleware 'protect' já deve ter anexado 'req.psychologist'
+    if (req.psychologist && req.psychologist.isAdmin) {
+        next(); // O usuário é um psicólogo e é admin, pode prosseguir.
+    } else {
+        res.status(403).json({ error: 'Acesso negado. Rota exclusiva para administradores.' });
+    }
+};
+
+module.exports = { protect, admin };

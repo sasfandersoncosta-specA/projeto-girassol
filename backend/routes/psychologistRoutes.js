@@ -11,6 +11,9 @@ router.post('/login', psychologistController.loginPsychologist);
 // Rota para o pré-cadastro e verificação de demanda
 router.post('/check-demand', psychologistController.checkDemand);
 
+// Rota para adicionar à lista de espera (pública)
+router.post('/add-to-waitlist', psychologistController.addToWaitlist);
+
 // Rotas protegidas (exigem autenticação)
 router.use(protect); // Aplica o middleware a todas as rotas abaixo
 
@@ -29,6 +32,9 @@ router.get('/me/unread-count', psychologistController.getUnreadMessageCount);
 
 // Rota para visualizar a lista de espera (Acesso PRIVADO)
 router.get('/waiting-list', psychologistController.getWaitingList);
+
+// Rota para convidar manualmente da lista de espera (Acesso PRIVADO)
+router.post('/waiting-list/invite', psychologistController.inviteFromWaitlist);
 
 // Rota para alterar a senha do psicólogo (Acesso PRIVADO)
 router.put('/me/password', psychologistController.updatePsychologistPassword);
