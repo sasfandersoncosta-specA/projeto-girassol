@@ -101,14 +101,28 @@ body.pagina-dashboard {
 .sidebar-footer .btn-sair:hover { opacity: 1; }
 
 /* --- Conteúdo Principal --- */
-.dashboard-main { padding: 40px; overflow-y: auto; }
+.dashboard-main {
+    padding: 40px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
 .main-header {
-    border-bottom: 1px solid var(--cinza-borda);
-    padding-bottom: 25px;
-    margin-bottom: 40px;
+    /* --- CORREÇÃO: Aplica o fundo verde e ajusta o estilo --- */
+    background-color: var(--verde-escuro);
+    color: var(--branco-puro);
+    padding: 40px;
+    border-radius: 16px;
+    margin-bottom: 30px;
+    position: relative;
+    z-index: 1;
 }
 .header-content { display: flex; align-items: center; gap: 20px; }
 .titulo-pagina h1 { font-size: 32px; margin: 0; }
+.titulo-pagina p { margin: 5px 0 0 0; color: var(--cinza-texto); }
+#main-content {
+    flex-grow: 1; /* Faz o conteúdo principal crescer para ocupar o espaço */
+}
 .titulo-pagina p { margin: 5px 0 0 0; color: var(--cinza-texto); }
 .btn-toggle-sidebar { display: none; /* Visível apenas no mobile */ }
 
@@ -339,6 +353,12 @@ body.pagina-dashboard {
 
 .btn-primario:hover {
     background-color: #2a624d; /* Um tom de verde um pouco mais claro */
+}
+
+.btn-sm {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    font-size: 14px;
 }
 
 
@@ -601,17 +621,19 @@ body.pagina-dashboard {
    PÁGINA DA CAIXA DE ENTRADA (MENSAGENS)
    ========================================================================== */
 
+/* --- Container Principal (Layout de 2 Colunas Full-Height) --- */
 .inbox-container {
     display: grid;
-    grid-template-columns: 320px 1fr; /* Coluna da esquerda fixa, direita flexível */
-    height: calc(100vh - 150px); /* Ocupa a altura da tela menos o header e paddings */
+    grid-template-columns: 380px 1fr; /* Coluna 1 (fixa) | Coluna 2 (flexível) */
+    height: 100%; /* Ocupa 100% do seu pai (#main-content) */
     background-color: var(--branco-puro);
     border-radius: 16px;
     box-shadow: 0 4px 25px rgba(0, 0, 0, 0.06);
     overflow: hidden;
+    font-family: 'Inter', sans-serif;
 }
 
-/* --- Coluna da Esquerda --- */
+/* --- Coluna 1: Lista de Conversas --- */
 .lista-conversas {
     display: flex;
     flex-direction: column;
@@ -621,8 +643,38 @@ body.pagina-dashboard {
 .inbox-header {
     padding: 20px;
     border-bottom: 1px solid var(--cinza-borda);
+    flex-shrink: 0; /* Impede que o header encolha */
 }
-.inbox-header h3 { margin: 0 0 15px 0; }
+.inbox-header .btn-primario {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+.inbox-nav-list {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+.inbox-nav-item {
+    flex-grow: 1;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    color: #495057;
+    background-color: var(--cinza-fundo);
+    border: 1px solid var(--cinza-borda);
+    text-align: center;
+}
+.inbox-nav-item.active {
+    background-color: #eaf1ee;
+    color: var(--verde-escuro);
+    font-weight: 700;
+    border-color: transparent;
+}
 
 .conversas-wrapper {
     overflow-y: auto;
@@ -630,19 +682,22 @@ body.pagina-dashboard {
 }
 
 .conversa-preview {
-    padding: 15px 20px;
+    padding: 18px 20px;
     border-bottom: 1px solid var(--cinza-borda);
     cursor: pointer;
     position: relative;
+    transition: background-color 0.2s ease;
 }
 .conversa-preview:hover { background-color: var(--cinza-fundo); }
-.conversa-preview.ativa { background-color: #eaf1ee; }
+.conversa-preview.ativa {
+    background-color: #e9f5ff; /* Azul bem claro e sutil */
+}
 
 .nome-preview { font-weight: bold; }
 .data-preview { float: right; font-size: 12px; color: var(--cinza-texto); }
 .mensagem-preview {
     margin: 5px 0 0 0;
-    font-size: 14px;
+    font-size: 15px;
     color: var(--cinza-texto);
     white-space: nowrap;
     overflow: hidden;
@@ -650,33 +705,78 @@ body.pagina-dashboard {
 }
 .conversa-preview.nao-lida .nome-preview,
 .conversa-preview.nao-lida .mensagem-preview {
-    color: var(--verde-escuro);
     font-weight: 700;
 }
 .conversa-preview.nao-lida::before {
     content: '';
     position: absolute;
-    left: 8px;
+    left: 0;
     top: 50%;
     transform: translateY(-50%);
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
+    width: 4px;
+    height: 25px;
+    border-radius: 0 4px 4px 0;
     background-color: var(--verde-escuro);
 }
 
+.delete-convo-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--cinza-texto);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+.conversa-preview:hover .delete-convo-btn {
+    opacity: 0.6;
+}
 
-/* --- Coluna da Direita --- */
+/* --- Controles de Paginação --- */
+.pagination-container {
+    padding: 15px 20px;
+    border-top: 1px solid var(--cinza-borda);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0; /* Impede que encolha */
+}
+.pagination-btn {
+    background-color: var(--branco-puro);
+    border: 1px solid var(--cinza-borda);
+    color: var(--cinza-texto);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.pagination-btn:hover {
+    background-color: var(--cinza-fundo);
+    border-color: #ccc;
+}
+.pagination-btn.active {
+    background-color: var(--verde-escuro);
+    color: var(--branco-puro);
+    border-color: var(--verde-escuro);
+}
+
+.read-receipt {
+    color: var(--verde-sucesso);
+    font-weight: bold;
+    margin-left: 4px;
+}
+
+/* --- Coluna 2: Visualização da Conversa --- */
 .visualizacao-conversa {
     display: flex;
     flex-direction: column;
+    height: 100%;
+    min-height: 0;
 }
-.conversa-header {
-    padding: 20px;
-    border-bottom: 1px solid var(--cinza-borda);
-}
-.conversa-header h4 { margin: 0; }
-.conversa-header p { margin: 2px 0 0 0; font-size: 13px; color: var(--cinza-texto); }
 
 .mensagens-thread {
     flex-grow: 1;
@@ -685,6 +785,7 @@ body.pagina-dashboard {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    min-height: 0;
 }
 .mensagem {
     padding: 12px 18px;
@@ -692,7 +793,11 @@ body.pagina-dashboard {
     max-width: 70%;
     line-height: 1.6;
 }
-.mensagem p { margin: 0; }
+.mensagem p {
+    margin: 0;
+    overflow-wrap: break-word; /* Garante a quebra de palavras longas */
+    word-break: break-all;     /* Força a quebra para evitar vazamento */
+}
 .mensagem-timestamp {
     display: block;
     text-align: right;
@@ -703,70 +808,55 @@ body.pagina-dashboard {
 
 .mensagem-recebida {
     background-color: var(--cinza-fundo);
-    border-top-left-radius: 4px;
-    align-self: flex-start; /* Alinha à esquerda */
+    border-bottom-left-radius: 4px;
+    align-self: flex-start;
 }
 .mensagem-enviada {
     background-color: #d4e2d4; /* Verde bem claro */
-    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
     align-self: flex-end; /* Alinha à direita */
 }
 .mensagem-enviada .mensagem-timestamp { color: var(--cinza-texto); }
-
-.area-resposta {
+.empty-state-inbox {
     display: flex;
-    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--cinza-texto);
+}
+.area-resposta {
     padding: 20px;
     border-top: 1px solid var(--cinza-borda);
+    background-color: var(--cinza-fundo);
+    flex-shrink: 0; /* Impede que a área de resposta encolha */
+}
+.area-resposta form {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
 }
 .area-resposta textarea {
     flex-grow: 1;
-    border-radius: 8px;
+    border-radius: 25px;
     border: 1px solid var(--cinza-borda);
-    padding: 12px;
+    padding: 14px 20px;
     font-family: 'Inter', sans-serif;
     font-size: 15px;
     resize: none;
-    height: 60px;
+    min-height: 24px; /* Altura inicial para uma linha */
+    max-height: 150px; /* Altura máxima antes de rolar */
+    line-height: 1.5;
 }
 .area-resposta .btn-primario {
-    align-self: flex-end; /* Alinha o botão com a parte de baixo do textarea */
-}
-
-/* Responsividade para a caixa de entrada */
-@media (max-width: 992px) {
-    .inbox-container {
-        grid-template-columns: 1fr; /* Coluna única */
-        height: auto;
-    }
-    .visualizacao-conversa {
-        /* Em um app real, a lista de conversas e a conversa em si
-           seriam telas separadas no mobile. Por enquanto,
-           vamos apenas mostrar uma em cima da outra. */
-    }
-}
-/* ==========================================================================
-   CORREÇÃO UNIVERSAL DE SCROLL DO DASHBOARD (VERSÃO FINAL)
-   ========================================================================== */
-
-/*
-  Esta regra garante que os containers principais do dashboard
-  não tenham altura fixa, permitindo que o conteúdo cresça e a página
-  role naturalmente. Isso se aplica a TODAS as páginas do admin.
-*/
-.dashboard-main,
-#main-content {
-    height: auto !important;
-    overflow-y: visible !important;
-}
-
-/*
-  Esta regra é um ajuste específico para a Caixa de Entrada,
-  removendo qualquer altura mínima residual que poderia causar problemas.
-*/
-.inbox-container {
-    height: auto !important;
-    min-height: initial !important;
+    align-self: flex-end; /* Alinha o botão na base */
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 /* ==========================================================================
    MODIFICADOR DE LAYOUT PARA WIDGETS
@@ -801,8 +891,70 @@ body.pagina-dashboard {
    CORREÇÃO DEFINITIVA: ESCONDER HEADER NA CAIXA DE ENTRADA
    ============================================================= */
    
-.dashboard-main.inbox-active .main-header {
-    display: none !important;
+/* Quando a classe .inbox-active está presente, estas regras são ativadas */
+
+/* 1. Ajusta o container principal para o layout full-height do chat */
+.dashboard-main.inbox-active {
+    overflow-y: hidden !important;
+    /* RESTAURA O PADDING SUPERIOR para consistência com outras páginas */
+    padding-top: 40px !important;
+    /* ZERA OS OUTROS PADDINGS para o chat ocupar o espaço restante */
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* 2. Garante que o #main-content também não tenha padding */
+.dashboard-main.inbox-active #main-content {
+    padding: 0 !important; /* Remove o padding para o container do inbox ocupar tudo */
+}
+
+/* ==========================================================================
+   EDITOR DE MENSAGEM EM MASSA (RICH TEXT)
+   ========================================================================== */
+
+.editor-container {
+    border: 1px solid var(--cinza-borda);
+    border-radius: 8px;
+    overflow: hidden; /* Garante que os cantos arredondados sejam aplicados */
+    margin-top: 10px;
+}
+
+.editor-toolbar {
+    background-color: var(--cinza-fundo);
+    padding: 8px;
+    border-bottom: 1px solid var(--cinza-borda);
+    display: flex;
+    gap: 5px;
+}
+
+.editor-btn {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    color: var(--cinza-texto);
+    transition: background-color 0.2s ease;
+}
+
+.editor-btn:hover {
+    background-color: var(--cinza-borda);
+}
+
+.rich-text-editor {
+    min-height: 300px;
+    padding: 15px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    resize: vertical; /* Permite que o usuário redimensione a altura */
+    overflow-y: auto;
+}
+.rich-text-editor:focus {
+    outline: none;
 }
 /* ==========================================================================
    RESPONSIVIDADE DA TABELA DE GERENCIAMENTO
@@ -901,4 +1053,627 @@ body.pagina-dashboard {
     .dashboard-sidebar {
         z-index: 1001;
     }
+}
+/* ==========================================================================
+   LAYOUT WHATSAPP-LIKE (Full-Height)
+   ========================================================================== */
+
+/* Remove paddings do container principal quando o chat estiver ativo */
+/* O admin.js DEVE adicionar 'inbox-active' ao .dashboard-main */
+.dashboard-main.inbox-active {
+    padding: 0 !important;
+    height: 100vh; /* Força altura total */
+}
+
+/* O Grid principal de 2 colunas */
+.whatsapp-layout {
+    display: grid;
+    grid-template-columns: 350px 1fr; /* Coluna da Esquerda (fixa) e Direita (flex) */
+    height: 100vh; /* Ocupa 100% da altura da janela */
+    background-color: var(--branco-puro);
+    border-left: 1px solid var(--cinza-borda);
+    overflow: hidden; /* Impede o container de rolar */
+}
+
+/* --- Coluna da Esquerda (Lista) --- */
+.lista-conversas {
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* Ocupa 100% da altura */
+    border-right: 1px solid var(--cinza-borda);
+    background-color: var(--branco-puro);
+}
+
+.chat-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    height: 60px; /* Altura fixa para o header */
+    border-bottom: 1px solid var(--cinza-borda);
+    flex-shrink: 0; /* Impede que o header encolha */
+}
+.chat-header-info { flex-grow: 1; margin-left: 15px; }
+.chat-header-info h4 { margin: 0; color: var(--verde-escuro); }
+.header-icones { margin-left: auto; display: flex; gap: 10px; }
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.busca-container {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--cinza-borda);
+    flex-shrink: 0;
+}
+.busca-container .campo-busca { width: 100%; }
+
+.inbox-nav-list {
+    display: flex;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--cinza-borda);
+}
+.inbox-nav-item {
+    flex: 1;
+    text-align: center;
+    padding: 14px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: var(--cinza-texto);
+    font-weight: 500;
+    border-bottom: 3px solid transparent;
+}
+.inbox-nav-item.active {
+    color: var(--verde-escuro);
+    border-bottom-color: var(--verde-escuro);
+}
+
+.conversas-wrapper {
+    flex-grow: 1; /* Ocupa todo o espaço restante */
+    overflow-y: auto; /* AQUI FICA O SCROLL da lista */
+}
+
+.pagination-footer {
+    flex-shrink: 0;
+    padding: 10px;
+    border-top: 1px solid var(--cinza-borda);
+    display: flex;
+    justify-content: center;
+}
+
+/* --- Estilo do Preview da Conversa (na Lista) --- */
+.conversa-preview {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--cinza-borda);
+    position: relative;
+}
+.conversa-preview:hover { background-color: var(--cinza-fundo); }
+.conversa-preview.ativa { background-color: #e9ecef; } /* Cinza de seleção */
+
+.preview-avatar { width: 48px; height: 48px; margin-right: 12px; }
+.preview-info { flex-grow: 1; overflow: hidden; }
+.preview-header { display: flex; justify-content: space-between; }
+.nome-preview { font-weight: 600; color: #111; }
+.data-preview { font-size: 12px; color: var(--cinza-texto); }
+.preview-mensagem { display: flex; justify-content: space-between; align-items: center; }
+.mensagem-preview {
+    font-size: 14px;
+    color: var(--cinza-texto);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+}
+.unread-badge {
+    background-color: var(--verde-sucesso);
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 3px 6px;
+    border-radius: 50%;
+    margin-left: 8px;
+    display: none; /* JS deve mostrar se unreadCount > 0 */
+}
+.conversa-preview.nao-lida .unread-badge { display: inline-block; }
+.conversa-preview.nao-lida .nome-preview { color: var(--verde-escuro); }
+
+.delete-convo-btn {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: none; /* Mostra no hover */
+    opacity: 0.7;
+}
+.conversa-preview:hover .delete-convo-btn { display: block; }
+.delete-convo-btn:hover { opacity: 1; color: var(--coral-quente); }
+
+/* --- Coluna da Direita (Chat Ativo) --- */
+.visualizacao-conversa {
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* 100% da altura */
+}
+
+/* Placeholder (Tela inicial) */
+.placeholder-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    background-color: var(--cinza-fundo);
+}
+.placeholder-view img { max-width: 250px; opacity: 0.5; }
+.placeholder-view h3 { color: var(--verde-escuro); }
+.placeholder-view p { color: var(--cinza-texto); }
+
+
+/* Cabeçalho do Chat (Direita) */
+#right-column-header { background-color: var(--cinza-fundo); }
+
+/* Thread de Mensagens */
+.mensagens-thread {
+    flex-grow: 1; /* Ocupa todo o espaço */
+    overflow-y: auto; /* AQUI FICA O SCROLL das mensagens */
+    padding: 20px 5%; /* Espaçamento lateral */
+    background-color: #e5ddd5; /* Fundo estilo WhatsApp */
+    /* Imagem de fundo sutil (opcional) */
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAICAYAAADR7oBbAAAAFUlEQVQYV2NkgID/Generalized/4wZTAwMjAIAwAAtgAt44yFNgAAAABJRU5ErkJggg==');
+}
+
+/* Área de Resposta (Rodapé) */
+.area-resposta {
+    flex-shrink: 0; /* Impede de encolher */
+    background-color: var(--cinza-fundo);
+    border-top: 1px solid var(--cinza-borda);
+}
+#reply-form {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    gap: 10px;
+}
+#reply-form .icon-btn { flex-shrink: 0; }
+#reply-form textarea {
+    flex-grow: 1;
+    border: 1px solid var(--cinza-borda);
+    border-radius: 20px;
+    padding: 10px 15px;
+    font-size: 15px;
+    resize: none;
+    max-height: 150px; /* Limita o crescimento */
+    min-height: 42px; /* Altura inicial */
+}
+.btn-enviar {
+    background-color: var(--verde-escuro);
+    color: white;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+}
+
+/* Bolhas de Mensagem (Refinadas) */
+.mensagem {
+    padding: 8px 12px;
+    border-radius: 8px;
+    max-width: 65%;
+    line-height: 1.5;
+    word-break: break-word; /* Resolve o vazamento de texto */
+    box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+    position: relative;
+    margin-bottom: 10px;
+}
+.mensagem p { margin: 0; }
+.mensagem-timestamp {
+    display: block;
+    text-align: right;
+    font-size: 11px;
+    margin-top: 4px;
+    color: var(--cinza-texto);
+    opacity: 0.7;
+}
+
+.mensagem-recebida {
+    background-color: var(--branco-puro);
+    align-self: flex-start;
+    border-top-left-radius: 0;
+}
+
+.mensagem-enviada {
+    background-color: #dcf8c6; /* Verde claro WhatsApp */
+    align-self: flex-end;
+    border-top-right-radius: 0;
+}
+
+/* Indicador de "Lido" (Read Receipt) */
+.read-receipt {
+    color: #53bdeb; /* Azul do 'lido' */
+    font-weight: bold;
+    display: inline-block;
+    margin-left: 4px;
+}
+
+/* Ícones genéricos */
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--cinza-texto);
+    padding: 8px;
+    border-radius: 50%;
+}
+.icon-btn:hover { background-color: var(--cinza-borda); }
+
+/* Esconde o botão de voltar no desktop por padrão */
+.back-to-list-btn {
+    display: none;
+    margin-right: 10px;
+}
+
+/* ==========================================================================
+   RESPONSIVIDADE DO CHAT (MOBILE)
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* 1. Layout principal muda para coluna única */
+    .whatsapp-layout {
+        grid-template-columns: 1fr;
+        height: 100vh; /* Garante que ocupe a altura da tela do celular */
+    }
+
+    /* 2. Por padrão, a visualização da conversa fica escondida */
+    .whatsapp-layout .visualizacao-conversa {
+        display: none;
+    }
+
+    /* 3. Quando o chat está ativo no mobile, esconde a lista... */
+    .whatsapp-layout.mobile-chat-active .lista-conversas {
+        display: none;
+    }
+
+    /* 4. ...e mostra a visualização da conversa */
+    .whatsapp-layout.mobile-chat-active .visualizacao-conversa {
+        display: flex; /* Usa 'flex' para manter a estrutura interna de coluna */
+    }
+
+    /* 5. Mostra o botão de voltar no cabeçalho do chat */
+    #right-column-header .back-to-list-btn {
+        display: flex;
+    }
+
+    /* 6. Ajusta a coluna de lista para ocupar a tela inteira */
+    .lista-conversas, .visualizacao-conversa {
+        height: 100vh;
+    }
+
+    /* --- CORREÇÃO FINAL: Esconde o header principal no modo chat --- */
+    .dashboard-main.inbox-active .main-header {
+        display: none !important;
+    }
+}
+}
+/* ==========================================================================
+   LAYOUT WHATSAPP-LIKE (Full-Height)
+   ========================================================================== */
+
+/* Esta regra ESCONDE o header antigo ("Bem-vindo, Admin!") 
+  e força o layout de chat a ocupar 100% da tela.
+*/
+.dashboard-main.inbox-active {
+    padding: 0 !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+}
+
+.dashboard-main.inbox-active .main-header {
+    display: none !important;
+}
+
+
+/* O Grid principal de 2 colunas */
+.whatsapp-layout {
+    display: grid;
+    grid-template-columns: 350px 1fr; /* Coluna da Esquerda (fixa) e Direita (flex) */
+    height: 100vh; /* Ocupa 100% da altura da janela */
+    background-color: var(--branco-puro);
+    border-left: 1px solid var(--cinza-borda);
+    overflow: hidden; /* Impede o container de rolar */
+}
+
+/* --- Coluna da Esquerda (Lista) --- */
+.lista-conversas {
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* Ocupa 100% da altura */
+    border-right: 1px solid var(--cinza-borda);
+    background-color: var(--branco-puro);
+}
+
+.chat-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    height: 60px; /* Altura fixa para o header */
+    border-bottom: 1px solid var(--cinza-borda);
+    flex-shrink: 0; /* Impede que o header encolha */
+    /* --- CORREÇÃO: Aplica o fundo verde e ajusta as cores --- */
+    background-color: var(--verde-escuro);
+    color: var(--branco-puro); /* Cor padrão para ícones */
+}
+.chat-header-info { flex-grow: 1; margin-left: 15px; }
+.chat-header-info h4 { 
+    margin: 0; 
+    color: var(--branco-puro); /* Garante que o nome fique branco */
+}
+
+/* --- NOVO: Estilo para o upload de avatar --- */
+.avatar-upload-label {
+    cursor: pointer;
+}
+.header-icones { margin-left: auto; display: flex; gap: 10px; }
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.busca-container {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--cinza-borda);
+    flex-shrink: 0;
+}
+.busca-container .campo-busca { width: 100%; }
+
+.inbox-nav-list {
+    display: flex;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--cinza-borda);
+}
+.inbox-nav-item {
+    flex: 1;
+    text-align: center;
+    padding: 14px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: var(--cinza-texto);
+    font-weight: 500;
+    border-bottom: 3px solid transparent;
+}
+.inbox-nav-item.active {
+    color: var(--verde-escuro);
+    border-bottom-color: var(--verde-escuro);
+}
+
+.conversas-wrapper {
+    flex-grow: 1; /* Ocupa todo o espaço restante */
+    overflow-y: auto; /* AQUI FICA O SCROLL da lista */
+}
+
+.pagination-footer {
+    flex-shrink: 0;
+    padding: 10px;
+    border-top: 1px solid var(--cinza-borda);
+    display: flex;
+    justify-content: center;
+}
+
+/* --- Estilo do Preview da Conversa (na Lista) --- */
+.conversa-preview {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--cinza-borda);
+    position: relative;
+}
+.conversa-preview:hover { background-color: var(--cinza-fundo); }
+.conversa-preview.ativa { background-color: #e9ecef; } /* Cinza de seleção */
+
+.preview-avatar { width: 48px; height: 48px; margin-right: 12px; }
+.preview-info { flex-grow: 1; overflow: hidden; }
+.preview-header { display: flex; justify-content: space-between; }
+.nome-preview { font-weight: 600; color: #111; }
+.data-preview { font-size: 12px; color: var(--cinza-texto); }
+.preview-mensagem { display: flex; justify-content: space-between; align-items: center; }
+.mensagem-preview {
+    font-size: 14px;
+    color: var(--cinza-texto);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+}
+.unread-badge {
+    background-color: var(--verde-sucesso);
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 3px 6px;
+    border-radius: 50%;
+    margin-left: 8px;
+    display: none; /* JS deve mostrar se unreadCount > 0 */
+}
+.conversa-preview.nao-lida .unread-badge { display: inline-block; }
+.conversa-preview.nao-lida .nome-preview { color: var(--verde-escuro); }
+
+.delete-convo-btn {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: none; /* Mostra no hover */
+    opacity: 0.7;
+}
+.conversa-preview:hover .delete-convo-btn { display: block; }
+.delete-convo-btn:hover { opacity: 1; color: var(--coral-quente); }
+
+/* --- Coluna da Direita (Chat Ativo) --- */
+.visualizacao-conversa {
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* 100% da altura */
+}
+
+/* Placeholder (Tela inicial) */
+.placeholder-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    background-color: var(--cinza-fundo);
+}
+.placeholder-view img { max-width: 250px; opacity: 0.5; }
+.placeholder-view h3 { color: var(--verde-escuro); }
+.placeholder-view p { color: var(--cinza-texto); }
+
+
+/* Cabeçalho do Chat (Direita) */
+#right-column-header { background-color: var(--cinza-fundo); }
+
+/* Thread de Mensagens */
+.mensagens-thread {
+    flex-grow: 1; /* Ocupa todo o espaço */
+    overflow-y: auto; /* AQUI FICA O SCROLL das mensagens */
+    padding: 20px 5%; /* Espaçamento lateral */
+    background-color: #e5ddd5; /* Fundo estilo WhatsApp */
+    /* Imagem de fundo sutil (opcional) */
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAICAYAAADR7oBbAAAAFUlEQVQYV2NkgID/Generalized/4wZTAwMjAIAwAAtgAt44yFNgAAAABJRU5ErkJggg==');
+}
+
+/* Área de Resposta (Rodapé) */
+.area-resposta {
+    flex-shrink: 0; /* Impede de encolher */
+    background-color: var(--cinza-fundo);
+    border-top: 1px solid var(--cinza-borda);
+}
+#reply-form {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    gap: 10px;
+}
+#reply-form .icon-btn { flex-shrink: 0; }
+#reply-form textarea {
+    flex-grow: 1;
+    border: 1px solid var(--cinza-borda);
+    border-radius: 20px;
+    padding: 10px 15px;
+    font-size: 15px;
+    resize: none;
+    max-height: 150px; /* Limita o crescimento */
+    min-height: 42px; /* Altura inicial */
+}
+.btn-enviar {
+    background-color: var(--verde-escuro);
+    color: white;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+}
+
+/* Bolhas de Mensagem (Refinadas) */
+.mensagem {
+    padding: 8px 12px;
+    border-radius: 8px;
+    max-width: 65%;
+    line-height: 1.5;
+    word-break: break-word; /* Resolve o vazamento de texto */
+    box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+    position: relative;
+    margin-bottom: 10px;
+}
+.mensagem p { margin: 0; }
+.mensagem-timestamp {
+    display: block;
+    text-align: right;
+    font-size: 11px;
+    margin-top: 4px;
+    color: var(--cinza-texto);
+    opacity: 0.7;
+}
+
+.mensagem-recebida {
+    background-color: var(--branco-puro);
+    align-self: flex-start;
+    border-top-left-radius: 0;
+}
+
+.mensagem-enviada {
+    background-color: #dcf8c6; /* Verde claro WhatsApp */
+    align-self: flex-end;
+    border-top-right-radius: 0;
+}
+
+/* Indicador de "Lido" (Read Receipt) */
+.read-receipt {
+    color: #53bdeb; /* Azul do 'lido' */
+    font-weight: bold;
+    display: inline-block;
+    margin-left: 4px;
+}
+
+/* Ícones genéricos */
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--cinza-texto);
+    padding: 8px;
+    border-radius: 50%;
+}
+.icon-btn:hover { background-color: var(--cinza-borda); }
+
+/* Esconde o botão de voltar no desktop por padrão */
+.back-to-list-btn {
+    display: none;
+    margin-right: 10px;
+}
+
+/* ==========================================================================
+   RESPONSIVIDADE DO CHAT (MOBILE)
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* 1. Layout principal muda para coluna única */
+    .whatsapp-layout {
+        grid-template-columns: 1fr;
+        height: 100vh; /* Garante que ocupe a altura da tela do celular */
+    }
+
+    /* 2. Por padrão, a visualização da conversa fica escondida */
+    .whatsapp-layout .visualizacao-conversa {
+        display: none;
+    }
+
+    /* 3. Quando o chat está ativo no mobile, esconde a lista... */
+    .whatsapp-layout.mobile-chat-active .lista-conversas {
+        display: none;
+    }
+
+    /* 4. ...e mostra a visualização da conversa */
+    .whatsapp-layout.mobile-chat-active .visualizacao-conversa {
+        display: flex; /* Usa 'flex' para manter a estrutura interna de coluna */
+    }
+
+    /* 5. Mostra o botão de voltar no cabeçalho do chat */
+    #right-column-header .back-to-list-btn {
+        display: flex;
+    }
+
+    /* 6. Ajusta a coluna de lista para ocupar a tela inteira */
+    .lista-conversas, .visualizacao-conversa {
+        height: 100vh;
+    }
+}
 }

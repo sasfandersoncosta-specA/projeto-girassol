@@ -10,23 +10,23 @@
 <div class="kpi-grid">
     <div class="kpi-card">
         <h4>Receita Recorrente (MRR)</h4>
-        <p class="kpi-numero">R$ 7.722,00</p>
-        <span class="kpi-delta">+5.2%</span>
+        <p class="kpi-numero" id="kpi-mrr">R$ 0,00</p>
+        <span class="kpi-delta">--</span>
     </div>
     <div class="kpi-card">
         <h4>Novos Pacientes (30d)</h4>
-        <p class="kpi-numero">128</p>
-        <span class="kpi-delta">+15</span>
+        <p class="kpi-numero" id="kpi-new-patients">0</p>
+        <span class="kpi-delta">--</span>
     </div>
     <div class="kpi-card">
         <h4>Novos Psicólogos (30d)</h4>
-        <p class="kpi-numero">12</p>
-        <span class="kpi-delta kpi-delta-negativo">-2</span>
+        <p class="kpi-numero" id="kpi-new-psychologists">0</p>
+        <span class="kpi-delta">--</span>
     </div>
     <div class="kpi-card">
         <h4>Questionários (Hoje)</h4>
-        <p class="kpi-numero">35</p>
-        <span class="kpi-delta">+8.8%</span>
+        <p class="kpi-numero" id="kpi-questionnaires">0</p>
+        <span class="kpi-delta">--</span>
     </div>
 </div>
 
@@ -35,14 +35,14 @@
         <h3>Alertas e Ações Rápidas</h3>
         <ul class="lista-acoes">
             <li>
-                <span class="acao-numero alerta-critico">3</span>
-                <p class="acao-texto">Verificações de CRP Pendentes</p>
-                <a href="#" class="acao-link">Validar Agora →</a>
+                <span class="acao-numero" id="pending-crp-count">0</span>
+                <p class="acao-texto">Candidatos na Lista de Espera</p>
+                <a href="#" class="acao-link" data-page-link="admin_lista_espera.html">Gerenciar →</a>
             </li>
             <li>
-                <span class="acao-numero">8</span>
+                <span class="acao-numero" id="pending-reviews-count">0</span>
                 <p class="acao-texto">Avaliações para Moderação</p>
-                <a href="#" class="acao-link">Revisar →</a>
+                <a href="#" class="acao-link" data-page-link="admin_gestao_conteudo.html">Revisar →</a>
             </li>
         </ul>
     </div>

@@ -65,6 +65,57 @@ if (elementosOcultos.length > 0) {
     // ... (esta parte está perfeita, não muda)
     const titulosAcordeao = document.querySelectorAll('.acordeao-titulo'); titulosAcordeao.forEach(tituloClicado => { tituloClicado.addEventListener('click', () => { titulosAcordeao.forEach(outroTitulo => { if (outroTitulo !== tituloClicado) { outroTitulo.classList.remove('ativo'); outroTitulo.nextElementSibling.style.maxHeight = null; } }); tituloClicado.classList.toggle('ativo'); const conteudo = tituloClicado.nextElementSibling; if (conteudo.style.maxHeight) { conteudo.style.maxHeight = null; } else { conteudo.style.maxHeight = conteudo.scrollHeight + "px"; } }); });
 
+    // --- LÓGICA DO BANNER DE INSTALAÇÃO PWA ---
+    let deferredPrompt;
+    const installBanner = document.getElementById('pwa-install-banner');
+    const installButton = document.getElementById('pwa-install-button');
+    const dismissButton = document.getElementById('pwa-dismiss-button');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Previne o mini-infobar de aparecer no Chrome
+        e.preventDefault();
+        // Guarda o evento para que possa ser acionado mais tarde.
+        deferredPrompt = e;
+        // Mostra nosso banner de instalação customizado
+        if (installBanner) {
+            installBanner.classList.add('visible');
+        }
+    });
+
+    if (installButton) {
+        installButton.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            // Mostra o prompt de instalação nativo
+            deferredPrompt.prompt();
+            // Espera o usuário responder ao prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`PWA prompt outcome: ${outcome}`);
+            // Limpa o prompt, pois ele só pode ser usado uma vez.
+            deferredPrompt = null;
+            // Esconde o banner
+            if (installBanner) {
+                installBanner.classList.remove('visible');
+            }
+        });
+    }
+
+    if (dismissButton) {
+        dismissButton.addEventListener('click', () => {
+            if (installBanner) {
+                installBanner.classList.remove('visible');
+            }
+        });
+    }
+
+    window.addEventListener('appinstalled', () => {
+        // Limpa o prompt e esconde o banner se o app for instalado
+        deferredPrompt = null;
+        if (installBanner) {
+            installBanner.classList.remove('visible');
+        }
+        console.log('PWA foi instalado com sucesso!');
+    });
+
     // ... (O restante das suas lógicas de FAQ, senha, modal, etc. estão perfeitas e não mudam)
 
 } // Fim da função inicializarScripts()
@@ -73,23 +124,14 @@ if (elementosOcultos.length > 0) {
 document.addEventListener("DOMContentLoaded", () => {
     Promise.all([
         carregarComponente('header.html', 'header-placeholder'),
-        carregarComponente('footer.html', 'footer-placeholder')
+        carregarComponente('footer.html', 'footer-placeholder'),
+        carregarComponente('pwa-banner.html', 'pwa-banner-placeholder') // Carrega o novo banner
     ]).then(() => {
         inicializarScripts();
         // Carrega a vitrine DEPOIS de inicializar os scripts principais
         if (document.getElementById('vitrine-terapeutas')) {
             carregarVitrineTerapeutas();
         }
-    });
-});
-
-// --- PONTO DE ENTRADA PRINCIPAL (NÃO MUDA) ---
-document.addEventListener("DOMContentLoaded", () => {
-    Promise.all([
-        carregarComponente('header.html', 'header-placeholder'),
-        carregarComponente('footer.html', 'footer-placeholder')
-    ]).then(() => {
-        inicializarScripts();
     });
 });
 // =====================================================================
@@ -109,8 +151,8 @@ window.addEventListener('load', setRealViewportHeight);
 // No final do script.js
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    // Ajuste '/jano-web/sw.js' conforme o nome do seu repositório/subpasta
-    navigator.serviceWorker.register('/jano-web/sw.js') 
+    // O Service Worker deve estar na raiz do projeto.
+    navigator.serviceWorker.register('/sw.js') 
       .then(registration => {
         console.log('Service Worker registrado:', registration);
       })

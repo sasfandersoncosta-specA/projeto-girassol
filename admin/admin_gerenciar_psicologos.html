@@ -32,46 +32,25 @@
                     <th>Ações</th>
                 </tr>
             </thead>
-            <tbody>
-    <tr>
-        <td data-label="Nome">Dra. Beatriz Lima</td>
-        <td data-label="E-mail">beatriz.lima@email.com</td>
-        <td data-label="CRP">06/00003</td>
-        <td data-label="Plano">Sol</td>
-        <td data-label="Cliques">18 / 30</td>
-        <td data-label="Status"><span class="status status-ativo">Ativo</span></td>
-        <td data-label="Ações">
-            <button class="btn-tabela">Ver Detalhes</button>
-            <button class="btn-tabela">Editar Plano</button>
-            <button class="btn-tabela">Suspender</button>
-        </td>
-    </tr>
-    <tr>
-        <td data-label="Nome">Dr. Carlos Andrade</td>
-        <td data-label="E-mail">carlos.andrade@email.com</td>
-        <td data-label="CRP">06/00004</td>
-        <td data-label="Plano">Luz</td>
-        <td data-label="Cliques">15 / 15</td>
-        <td data-label="Status"><span class="status status-pendente">Pendente</span></td>
-        <td data-label="Ações">
-            <button class="btn-tabela">Ver Detalhes</button>
-            <button class="btn-tabela">Editar Plano</button>
-            <button class="btn-tabela">Reativar</button>
-        </td>
-    </tr>
-    <tr>
-        <td data-label="Nome">Dra. Helena Souza</td>
-        <td data-label="E-mail">helena.souza@email.com</td>
-        <td data-label="CRP">06/00001</td>
-        <td data-label="Plano">-</td>
-        <td data-label="Cliques">- / -</td>
-        <td data-label="Status"><span class="status status-inativo">Pendente CRP</span></td>
-        <td data-label="Ações">
-            <button class="btn-tabela">Verificar CRP</button>
-            <button class="btn-tabela">Excluir</button>
-        </td>
-    </tr>
-</tbody>
+            <tbody id="psychologists-table-body">
+                <!-- Linhas serão inseridas aqui pelo JavaScript -->
+                <tr>
+                    <td colspan="7" class="loading-row">Carregando psicólogos...</td>
+                </tr>
+            </tbody>
         </table>
     </div>
 </section>
+
+<!-- Template para a linha da tabela de psicólogos -->
+<template id="psychologist-row-template">
+    <tr>
+        <td data-label="Nome"></td>
+        <td data-label="E-mail"></td>
+        <td data-label="CRP"></td>
+        <td data-label="Plano"></td>
+        <td data-label="Cliques"></td>
+        <td data-label="Status"><span class="status"></span></td>
+        <td data-label="Ações"></td>
+    </tr>
+</template>

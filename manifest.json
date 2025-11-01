@@ -1,10 +1,10 @@
 {
-  "name": "Girassol - Encontre seu Psicólogo",
+  "name": "Girassol - Apoio Psicológico",
   "short_name": "Girassol",
-  "description": "Uma plataforma para conectar pacientes a psicólogos compatíveis.",
-  "start_url": "/login.html",
+  "description": "Plataforma de apoio psicológico que conecta pacientes a psicólogos com foco em acolhimento e compatibilidade.",
+  "start_url": "/index.html?source=pwa",
   "display": "standalone",
-  "background_color": "#fdfaf6",
+  "background_color": "#FFFDF5",
   "theme_color": "#1B4332",
   "icons": [
     {
@@ -16,6 +16,12 @@
       "src": "assets/images/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "assets/images/maskable-icon.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
     }
   ]
 }

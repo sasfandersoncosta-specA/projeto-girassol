@@ -1,11 +1,11 @@
 <section class="filtros-container">
-    <input type="text" class="campo-busca" placeholder="Buscar por nome ou e-mail do paciente...">
+    <input type="text" class="campo-busca" placeholder="Buscar por nome ou e-mail...">
     <button class="btn-primario">Adicionar Paciente</button>
 </section>
 
 <section class="tabela-container">
     <h3>Gerenciamento de Pacientes</h3>
-    <p class="subtitulo-secao">Visualize e gerencie todos os pacientes cadastrados na plataforma.</p>
+    <p class="subtitulo-secao">Visualize e gerencie todos os pacientes da plataforma.</p>
     
     <div class="tabela-wrapper">
         <table class="tabela-gerenciamento">
@@ -14,38 +14,25 @@
                     <th>Nome</th>
                     <th>E-mail</th>
                     <th>Data de Cadastro</th>
+                    <th>Status</th>
                     <th>Ações</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="patients-table-body">
                 <tr>
-                    <td>Ana Silva</td>
-                    <td>ana.silva@email.com</td>
-                    <td>08/10/2025</td>
-                    <td>
-                        <button class="btn-tabela">Ver Histórico</button>
-                        <button class="btn-tabela btn-tabela-perigo">Gerenciar Dados (LGPD)</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Marcos Oliveira</td>
-                    <td>marcos.o@email.com</td>
-                    <td>05/10/2025</td>
-                    <td>
-                        <button class="btn-tabela">Ver Histórico</button>
-                        <button class="btn-tabela btn-tabela-perigo">Gerenciar Dados (LGPD)</button>
-                    </td>
-                </tr>
-                 <tr>
-                    <td>Juliana Pereira</td>
-                    <td>juliana.pereira@email.com</td>
-                    <td>01/10/2025</td>
-                    <td>
-                        <button class="btn-tabela">Ver Histórico</button>
-                        <button class="btn-tabela btn-tabela-perigo">Gerenciar Dados (LGPD)</button>
-                    </td>
+                    <td colspan="5" class="loading-row">Carregando pacientes...</td>
                 </tr>
             </tbody>
         </table>
     </div>
 </section>
+
+<template id="patient-row-template">
+    <tr>
+        <td data-label="Nome"></td>
+        <td data-label="E-mail"></td>
+        <td data-label="Data de Cadastro"></td>
+        <td data-label="Status"><span class="status"></span></td>
+        <td data-label="Ações"></td>
+    </tr>
+</template>

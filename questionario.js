@@ -77,6 +77,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =====================================================================
+    // NOVA FUNÇÃO: REGISTRA A BUSCA ANÔNIMA
+    // =====================================================================
+    async function recordAnonymousSearch() {
+        try {
+            // Remove dados sensíveis ou desnecessários para a análise de demanda
+            const { nome, whatsapp, ...demandAnswers } = userAnswers;
+
+            await fetch('http://localhost:3001/api/demand/searches', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(demandAnswers),
+            });
+            console.log("Busca anônima registrada com sucesso.");
+        } catch (error) {
+            console.error("Não foi possível registrar a busca anônima:", error);
+        }
+    }
+    // =====================================================================
     // FUNÇÃO FINALIZE (IMPLEMENTADA)
     // AGORA ELA CHAMA A API DE MATCH E REDIRECIONA PARA OS RESULTADOS
     // =====================================================================
@@ -86,6 +106,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 2. Mostra a tela de "final" enquanto processa
         goToSlide(questions.findIndex(q => q.id === 'final'));
+
+        // Dispara o registro da busca anônima em paralelo. Não precisamos esperar.
+        recordAnonymousSearch();
 
         try {
             // 3. Envia as respostas para o novo endpoint de match

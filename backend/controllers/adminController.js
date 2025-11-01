@@ -36,8 +36,9 @@ exports.loginAdmin = async (req, res) => {
 exports.getAdminData = async (req, res) => {
     // O middleware 'protect' já anexa o usuário em req.psychologist
     if (req.psychologist) {
-        const { id, nome, email, telefone } = req.psychologist;
-        res.status(200).json({ id, nome, email, telefone });
+        // Retorna também a fotoUrl, que é necessária no frontend
+        const { id, nome, email, telefone, fotoUrl } = req.psychologist;
+        res.status(200).json({ id, nome, email, telefone, fotoUrl });
     } else {
         res.status(404).json({ error: 'Administrador não encontrado.' });
     }
@@ -99,6 +100,66 @@ exports.updateAdminPassword = async (req, res) => {
     } catch (error) {
         console.error('Erro ao alterar senha do admin:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
+};
+
+/**
+ * Rota: PUT /api/admin/me/photo
+ * Descrição: Atualiza a foto de perfil do administrador logado.
+ * Requer middleware de upload (ex: multer) para lidar com req.file.
+ */
+exports.updateAdminPhoto = async (req, res) => {
+    try {
+        const adminUser = req.psychologist;
+
+        if (!req.file) {
+            return res.status(400).json({ error: 'Nenhum arquivo de imagem foi enviado.' });
+        }
+
+        // Em um ambiente de produção, você faria o upload para um serviço como S3.
+        // Aqui, vamos simular salvando o caminho do arquivo localmente.
+        // O caminho depende de como seu servidor estático está configurado.
+        const fotoUrl = `/uploads/profiles/${req.file.filename}`;
+
+        await adminUser.update({ fotoUrl });
+
+        res.status(200).json({
+            message: 'Foto de perfil atualizada com sucesso!',
+            fotoUrl: fotoUrl // Retorna a nova URL para o frontend
+        });
+    } catch (error) {
+        console.error('Erro ao atualizar foto do admin:', error);
+        res.status(500).json({ error: 'Erro interno no servidor ao processar a imagem.' });
+    }
+};
+
+/**
+ * Rota: PUT /api/admin/me/photo
+ * Descrição: Atualiza a foto de perfil do administrador logado.
+ * Requer middleware de upload (ex: multer) para lidar com req.file.
+ */
+exports.updateAdminPhoto = async (req, res) => {
+    try {
+        const adminUser = req.psychologist;
+
+        if (!req.file) {
+            return res.status(400).json({ error: 'Nenhum arquivo de imagem foi enviado.' });
+        }
+
+        // Em um ambiente de produção, você faria o upload para um serviço como S3.
+        // Aqui, vamos simular salvando o caminho do arquivo localmente.
+        // O caminho depende de como seu servidor estático está configurado.
+        const fotoUrl = `/uploads/profiles/${req.file.filename}`;
+
+        await adminUser.update({ fotoUrl });
+
+        res.status(200).json({
+            message: 'Foto de perfil atualizada com sucesso!',
+            fotoUrl: fotoUrl // Retorna a nova URL para o frontend
+        });
+    } catch (error) {
+        console.error('Erro ao atualizar foto do admin:', error);
+        res.status(500).json({ error: 'Erro interno no servidor ao processar a imagem.' });
     }
 };
 
@@ -336,17 +397,23 @@ exports.sendBroadcastMessage = async (req, res) => {
         // Para cada destinatário, encontra ou cria uma conversa e envia a mensagem.
         // Em um app de produção, isso seria uma tarefa em background (background job).
         for (const recipient of recipients) {
+            // Lógica de findOrCreate corrigida para lidar com conversas Psi-Psi
+            const whereClause = {
+                [Op.or]: [
+                    { psychologistId: adminId, patientId: recipient.id },
+                    { psychologistId: recipient.id, patientId: adminId }
+                ]
+            };
+            
+            // Se o destinatário for um psicólogo, o admin será o 'patientId' na conversa para evitar conflito de chave.
+            // Esta é uma convenção para o modelo atual.
+            const defaults = recipientType === 'psychologist' 
+                ? { psychologistId: recipient.id, patientId: adminId }
+                : { psychologistId: adminId, patientId: recipient.id };
+
             const [conversation] = await db.Conversation.findOrCreate({
-                where: {
-                    [Op.or]: [
-                        { psychologistId: adminId, patientId: recipient.id },
-                        { psychologistId: recipient.id, patientId: adminId } // Caso o admin envie para outro psicólogo
-                    ]
-                },
-                defaults: {
-                    psychologistId: recipientType === 'psychologist' ? recipient.id : adminId,
-                    patientId: recipientType === 'patient' ? recipient.id : null
-                }
+                where: whereClause,
+                defaults: defaults
             });
 
             await db.Message.create({
@@ -430,5 +497,149 @@ exports.deleteConversation = async (req, res) => {
     } catch (error) {
         console.error('Erro ao deletar conversa:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
+};
+
+/**
+ * Rota: GET /api/admin/conversations
+ * Descrição: Busca conversas paginadas para a caixa de entrada do admin.
+ * Query Params: page, limit, view ('inbox' ou 'sent'), search.
+ */
+exports.getConversations = async (req, res) => {
+    try {
+        const adminId = req.psychologist.id;
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = parseInt(req.query.limit, 10) || 15;
+        const offset = (page - 1) * limit;
+        const { view = 'inbox', search = '' } = req.query;
+
+        // 1. Encontra todas as conversas onde o admin é um dos participantes
+        // A busca por nome será aplicada DEPOIS de identificar os participantes.
+        // Isso simplifica a query e evita problemas com joins complexos.
+        const { count, rows: conversations } = await db.Conversation.findAndCountAll({
+            where: {
+                [Op.or]: [
+                    { psychologistId: adminId },
+                    { patientId: adminId } // Embora admin seja psicólogo, é bom cobrir o caso de ser paciente de outro admin
+                ]
+            },
+            limit,
+            offset,
+            order: [['updatedAt', 'DESC']],
+            include: [ // Inclui os modelos para ter acesso aos dados
+                { model: db.Patient, as: 'patient', attributes: ['id', 'nome', 'fotoUrl'] },
+                { model: db.Psychologist, as: 'psychologist', attributes: ['id', 'nome', 'fotoUrl'] }
+            ]
+        });
+
+
+        // Processa cada conversa para adicionar os detalhes necessários pelo front-end
+        const formattedConversations = await Promise.all(
+            conversations.map(async (convo) => {
+                const otherParticipantRaw = convo.patientId === adminId ? convo.psychologist : (convo.patient || convo.psychologist);
+                
+                // Pula conversas inválidas (ex: admin com ele mesmo)
+                if (!otherParticipantRaw || otherParticipantRaw.id === adminId) return null;
+
+                const otherParticipant = {
+                    id: otherParticipantRaw.id,
+                    nome: otherParticipantRaw.nome,
+                    fotoUrl: otherParticipantRaw.fotoUrl,
+                    type: convo.patientId === adminId ? 'psychologist' : (convo.patient ? 'patient' : 'psychologist')
+                };
+
+                const lastMessage = await db.Message.findOne({
+                    where: { conversationId: convo.id },
+                    order: [['createdAt', 'DESC']]
+                });
+
+                const unreadCount = await db.Message.count({
+                    where: {
+                        conversationId: convo.id,
+                        recipientId: adminId,
+                        isRead: false
+                    }
+                });
+
+                return {
+                    // Adiciona o ID da conversa para uso futuro (ex: deletar)
+                    id: convo.id, 
+                    otherParticipant,
+                    lastMessage: {
+                        content: lastMessage?.content || 'Nenhuma mensagem.',
+                        createdAt: lastMessage?.createdAt || convo.createdAt,
+                        senderId: lastMessage?.senderId
+                    },
+                    unreadCount
+                };
+            })
+        );
+        
+        // 2. Remove os nulos e aplica os filtros de 'search' e 'view' no array processado
+        let finalConversations = formattedConversations.filter(Boolean);
+
+        if (search) {
+            finalConversations = finalConversations.filter(c => 
+                c.otherParticipant.nome.toLowerCase().includes(search.toLowerCase())
+            );
+        }
+
+        // 2.5 (NOVO) Se houver busca, encontra usuários que ainda não estão na lista de conversas
+        if (search) {
+            const existingParticipantIds = finalConversations.map(c => c.otherParticipant.id);
+            
+            const newPatients = await db.Patient.findAll({
+                where: {
+                    nome: { [Op.iLike]: `%${search}%` },
+                    id: { [Op.notIn]: existingParticipantIds }
+                },
+                attributes: ['id', 'nome', 'fotoUrl'],
+                limit: 5 // Limita para não sobrecarregar
+            });
+
+            const newPsychologists = await db.Psychologist.findAll({
+                where: {
+                    nome: { [Op.iLike]: `%${search}%` },
+                    id: { [Op.notIn]: [...existingParticipantIds, adminId] } // Exclui também o próprio admin
+                },
+                attributes: ['id', 'nome', 'fotoUrl'],
+                limit: 5
+            });
+
+            const formatNewContact = (user, type) => ({
+                id: null, // Não há ID de conversa ainda
+                isNew: true, // Flag para o frontend
+                otherParticipant: {
+                    id: user.id,
+                    nome: user.nome,
+                    fotoUrl: user.fotoUrl,
+                    type: type
+                },
+                lastMessage: { content: 'Clique para iniciar uma nova conversa.' },
+                unreadCount: 0
+            });
+
+            const newContacts = [
+                ...newPatients.map(p => formatNewContact(p, 'patient')),
+                ...newPsychologists.map(p => formatNewContact(p, 'psychologist'))
+            ];
+            finalConversations.unshift(...newContacts); // Adiciona novos contatos no topo da lista
+        }
+
+        if (view === 'sent') {
+            // Filtra para mostrar apenas conversas onde a ÚLTIMA mensagem foi enviada pelo admin.
+            finalConversations = finalConversations.filter(c => c.lastMessage.senderId === adminId);
+        }
+
+        // 3. Retorna a resposta paginada
+        res.status(200).json({
+            conversations: finalConversations,
+            totalPages: Math.ceil(count / limit),
+            currentPage: page
+        });
+
+    } catch (error) {
+        console.error('Erro ao buscar conversas do admin:', error);
+        res.status(500).json({ error: 'Falha ao buscar conversas.' });
     }
 };
