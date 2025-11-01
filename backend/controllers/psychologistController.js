@@ -207,6 +207,21 @@ exports.getPsychologistData = async (req, res) => {
     }
 };
 
+/**
+ * Função auxiliar para extrair valores mínimo e máximo de uma faixa de preço.
+ * Ex: "R$ 91 - R$ 150" => { min: 91, max: 150 }
+ * @param {string} rangeString A faixa de preço.
+ * @returns {{min: number, max: number}}
+ */
+const parsePriceRange = (rangeString) => {
+    if (!rangeString || typeof rangeString !== 'string') return { min: 0, max: 9999 };
+    const numbers = rangeString.match(/\d+/g);
+    if (!numbers || numbers.length === 0) return { min: 0, max: 9999 };
+    const min = parseInt(numbers[0], 10);
+    const max = numbers.length > 1 ? parseInt(numbers[1], 10) : min;
+    return { min, max };
+};
+
 // ----------------------------------------------------------------------
 // Rota: POST /api/psychologists/check-demand
 // DESCRIÇÃO: Verifica se há demanda para o perfil do psicólogo.
@@ -220,54 +235,80 @@ exports.checkDemand = async (req, res) => {
             return res.status(400).json({ error: 'Dados insuficientes para verificar a demanda.' });
         }
 
-        // --- LÓGICA DO BOLSÃO DE DEMANDA (APRIMORADA) ---
-        const LIQUIDITY_TARGET = 8; // Número-alvo de profissionais por nicho
+        // --- LÓGICA DE VERIFICAÇÃO DE DEMANDA (CORRIGIDA) ---
+        // O objetivo é encontrar PACIENTES que buscam um perfil como o do psicólogo.
+        const DEMAND_TARGET = 5; // Número-alvo de pacientes buscando um nicho para justificar um novo profissional.
 
-        // Define o "bolsão" de demanda combinando os critérios.
-        // A cláusula `where` irá procurar por psicólogos que correspondam a TODOS os critérios.
+        // 1. Extrai a faixa de valor do psicólogo
+        const { min: psyMinPrice, max: psyMaxPrice } = parsePriceRange(valor_sessao_faixa);
+
+        // 2. Define a cláusula para buscar PACIENTES compatíveis
         const whereClause = {
-            status: 'active', // Considera apenas psicólogos ativos
-            genero_identidade: genero_identidade,
-            valor_sessao_faixa: valor_sessao_faixa,
-            temas_atuacao: {
-                [Op.contains]: temas_atuacao // Psicólogo deve ter TODOS os temas informados
+            // Pacientes que aceitam pagar um valor que está na faixa do psicólogo
+            valor_sessao_faixa: { [Op.ne]: null }, // Garante que o paciente preencheu
+            // Pacientes que buscam pelo menos um dos temas que o psicólogo atende
+            temas_buscados: {
+                [Op.overlap]: temas_atuacao
             },
-            praticas_vivencias: { // CORRIGIDO: O nome do campo no modelo é 'praticas_vivencias'
-                [Op.contains]: praticas_afirmativas // Psicólogo deve ter TODAS as práticas informadas
+            // Pacientes que buscam o gênero do psicólogo ou são indiferentes
+            genero_profissional: {
+                [Op.or]: [genero_identidade, 'Indiferente']
             }
         };
 
-        // Conta quantos psicólogos ativos já existem com a mesma combinação de características.
-        const count = await db.Psychologist.count({ where: whereClause });
+        // 3. Conta quantos pacientes existem com essas preferências
+        const count = await db.Patient.count({ where: whereClause });
 
-        // Log para depuração: mostra a contagem e o alvo
-        console.log(`[CHECK DEMAND] Nicho verificado. Profissionais ativos encontrados: ${count}. Alvo: ${LIQUIDITY_TARGET}.`);
+        console.log(`[CHECK DEMAND] Nicho verificado. Pacientes encontrados: ${count}. Alvo: ${DEMAND_TARGET}.`);
 
-        if (count < LIQUIDITY_TARGET) {
+        if (count >= DEMAND_TARGET) {
             // Status: Aprovado
             res.status(200).json({ status: 'approved', message: 'Há demanda para este perfil.' });
         } else {
-            // Status: Lista de Espera
-            // Salva os dados do pré-cadastro na tabela WaitlistedProfiles (ou WaitingList)
-            await db.WaitingList.findOrCreate({
-                where: { email }, // Usar e-mail como chave única é mais seguro
-                defaults: { 
-                    nome, 
-                    email, 
-                    crp, 
-                    genero_identidade,
-                    valor_sessao_faixa, 
-                    temas_atuacao, 
-                    praticas_afirmativas, // O campo no modelo é 'praticas_afirmativas'
-                    abordagens_tecnicas, 
-                    status: 'pending' 
-                }
-            });
+            // Status: Lista de Espera. Apenas informa o frontend.
+            // O frontend será responsável por coletar o e-mail final e chamar outro endpoint.
             res.status(200).json({ status: 'waitlisted', message: 'Perfil adicionado à lista de espera.' });
         }
     } catch (error) {
         console.error('Erro ao verificar demanda:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
+};
+
+// ----------------------------------------------------------------------
+// Rota: POST /api/psychologists/add-to-waitlist
+// DESCRIÇÃO: Adiciona um profissional à lista de espera.
+// ----------------------------------------------------------------------
+exports.addToWaitlist = async (req, res) => {
+    try {
+        const { nome, email, crp, genero_identidade, valor_sessao_faixa, temas_atuacao, praticas_afirmativas, abordagens_tecnicas } = req.body;
+
+        // Validação do e-mail é a mais importante aqui
+        if (!email) {
+            return res.status(400).json({ error: 'O e-mail é obrigatório para entrar na lista de espera.' });
+        }
+
+        // Usa findOrCreate para evitar duplicatas pelo e-mail
+        const [waitlistEntry, created] = await db.WaitingList.findOrCreate({
+            where: { email },
+            defaults: {
+                nome,
+                email,
+                crp,
+                genero_identidade,
+                valor_sessao_faixa,
+                temas_atuacao,
+                praticas_afirmativas,
+                abordagens_tecnicas,
+                status: 'pending'
+            }
+        });
+
+        console.log(`[WAITLIST] E-mail ${email} ${created ? 'adicionado' : 'já estava'} na lista de espera.`);
+        res.status(201).json({ message: 'E-mail adicionado à lista de espera com sucesso.' });
+    } catch (error) {
+        console.error('Erro ao adicionar à lista de espera:', error);
+        res.status(500).json({ error: 'Erro interno no servidor ao salvar na lista de espera.' });
     }
 };
 
@@ -667,6 +708,38 @@ exports.getAnonymousMatches = async (req, res) => {
     } catch (error) {
         console.error('Erro ao processar match anônimo:', error);
         res.status(500).json({ error: 'Erro interno no servidor ao buscar recomendações.' });
+    }
+};
+
+// ----------------------------------------------------------------------
+// Rota: GET /api/psychologists/showcase
+// DESCRIÇÃO: Retorna uma seleção de psicólogos para a página inicial.
+// ----------------------------------------------------------------------
+exports.getShowcasePsychologists = async (req, res) => {
+    try {
+        const psychologists = await db.Psychologist.findAll({
+            where: {
+                status: 'active',
+                fotoUrl: { [Op.ne]: null } // Apenas perfis com foto
+            },
+            order: db.sequelize.random(), // Ordena aleatoriamente
+            limit: 4, // Limita a 4 resultados
+            attributes: ['id', 'nome', 'fotoUrl'] // Apenas os campos necessários
+        });
+
+        // Se não encontrar 4, preenche com dados de exemplo para não quebrar o layout
+        while (psychologists.length < 4) {
+            psychologists.push({
+                id: 0,
+                nome: "Em breve",
+                fotoUrl: "https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+            });
+        }
+
+        res.status(200).json(psychologists);
+    } catch (error) {
+        console.error('Erro ao buscar psicólogos para vitrine:', error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };
 

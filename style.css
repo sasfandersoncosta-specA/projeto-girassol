@@ -1628,13 +1628,13 @@ header.header-rolagem nav a:hover {
     width: 100%;
     height: 100%; /* Ocupa 100% do .slides-container */
     box-sizing: border-box;
-    padding: 20px 20px 30px 20px;
+    padding: 20px 20px 120px 20px; /* Aumenta o padding inferior para compensar o rodapé fixo */
     
     display: grid;
     grid-template-rows: auto 1fr auto;
     gap: 15px;
     
-    opacity: 0;
+    opacity: 0; 
     pointer-events: none;
     transition: opacity 0.4s ease-out;
 }
@@ -1681,12 +1681,18 @@ header.header-rolagem nav a:hover {
 
 /* 3. A NAVEGAÇÃO (BOTÕES) */
 .navigation-buttons {
+    position: sticky; /* Fica "preso" na parte inferior do slide */
+    bottom: 0;
+    left: 0;
     width: 100%;
-    max-width: 700px;
-    margin: 0 auto;
+    max-width: 100%; /* Ocupa toda a largura */
+    margin: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: 20px; /* Espaçamento interno */
+    background-color: var(--verde-escuro); /* Garante que não seja transparente */
+    box-sizing: border-box;
 }
 .navigation-buttons.single-button {
     justify-content: center;
@@ -2359,6 +2365,36 @@ body.pagina-dashboard {
 
 .toast.toast-error {
     background-color: #E63946; /* Cor de perigo */
+}
+
+/* =============================================================
+   BANNER DE INSTALAÇÃO PWA
+   ============================================================= */
+
+#pwa-install-banner {
+    display: none; /* Escondido por padrão */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--verde-escuro);
+    color: var(--branco-puro);
+    padding: 15px 20px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1500;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+#pwa-install-banner p {
+    margin: 0;
+    font-size: 15px;
+}
+
+#pwa-install-button {
+    flex-shrink: 0; /* Impede que o botão encolha */
 }
 
 @keyframes slideIn {

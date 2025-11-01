@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Telas de Resultado Dinâmico
         { id: 'loading', type: 'loading', question: "Analisando a demanda...", subtitle: "Estamos cruzando seus dados com as buscas de nossos pacientes. Só um instante." },
         { id: 'approved', type: 'approved', question: "Ótima notícia! Há uma grande procura por seu perfil.", subtitle: "Identificamos que há uma demanda ativa de pacientes buscando por profissionais com suas especialidades e faixa de preço. Estamos felizes em te convidar para a próxima etapa: a validação de suas credenciais." },
-        { id: 'waitlisted', type: 'waitlisted', question: "Agradecemos seu interesse na Girassol!", subtitle: "No momento, a busca por profissionais com seu perfil específico já está bem atendida em nossa plataforma. Para garantir que todos os nossos parceiros tenham sucesso, seu perfil foi adicionado à nossa lista de espera estratégica. Você será notificado(a) por e-mail assim que surgir uma nova oportunidade alinhada à sua prática." },
+        { id: 'waitlisted', type: 'waitlisted', question: "Agradecemos seu interesse na Girassol!", subtitle: "No momento, a busca por profissionais com seu perfil específico já está bem atendida. Para garantir que todos os nossos parceiros tenham sucesso, adicionamos seu perfil à nossa lista de espera. Deixe seu e-mail abaixo para ser notificado(a) assim que surgir uma nova oportunidade.", buttonText: "Confirmar E-mail e Finalizar" },
         { id: 'error', type: 'error', question: "Oops! Ocorreu um problema.", subtitle: "Não foi possível conectar ao servidor para verificar a demanda. Por favor, tente novamente em alguns instantes.", buttonText: "Tentar Novamente" }
     ];
 
@@ -57,7 +57,15 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'loading':
                 contentHTML = `<div class="loading-animation"><img src="assets/images/logo-girassol-icon.svg" alt="Carregando"></div>`;
                 break;
-            case 'welcome': case 'info': case 'waitlisted': case 'error':
+            case 'waitlisted':
+                // Adiciona o campo de e-mail à tela de lista de espera
+                contentHTML = `
+                    <div class="form-group-questionario">
+                        <input type="email" id="input-waitlist-email" class="text-input" placeholder=" " required>
+                        <label for="input-waitlist-email" class="input-label">Seu melhor e-mail</label>
+                    </div>`;
+                break;
+            case 'welcome': case 'info': case 'error':
                 break;
             default:
                 contentHTML = `<p>Tipo de pergunta não reconhecido: ${questionData.type}</p>`;
@@ -72,6 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
             nextButtonHTML = `<button class="cta-button" data-action="${action}">${buttonText}</button>`;
         } else if (questionData.type === 'approved') {
             nextButtonHTML = `<button class="cta-button" data-action="submit-validation">Enviar para Validação</button>`;
+        } else if (questionData.type === 'waitlisted') {
+            nextButtonHTML = `<button class="cta-button" data-action="submit-waitlist">${questionData.buttonText}</button>`;
         } else if (questionData.type === 'error') {
             nextButtonHTML = `<button class="cta-button" data-action="restart">${questionData.buttonText}</button>`;
         }
@@ -108,6 +118,13 @@ document.addEventListener('DOMContentLoaded', () => {
             // Garante que a biblioteca IMask esteja disponível
             if (crpInput && window.IMask) {
                 IMask(crpInput, { mask: '00/000000' });
+            }
+        }
+        // Pré-preenche o e-mail na tela de waitlist, se já tiver sido digitado
+        if (currentQuestion && currentQuestion.id === 'waitlisted') {
+            const waitlistEmailInput = document.getElementById('input-waitlist-email');
+            if (waitlistEmailInput && userAnswers.email) {
+                waitlistEmailInput.value = userAnswers.email;
             }
         }
     }
@@ -183,17 +200,43 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 if (data.status === 'approved') {
                     goToSlide(questions.findIndex(q => q.id === 'approved'));
-                } else { 
+                } else { // 'waitlisted'
                     goToSlide(questions.findIndex(q => q.id === 'waitlisted'));
                 }
             } else {
-                // Handle server errors (e.g., show a generic error slide)
                 console.error("Erro na API:", data.error);
                 goToSlide(questions.findIndex(q => q.id === 'error'));
             }
         } catch (error) {
             console.error("Erro de conexão:", error);
             goToSlide(questions.findIndex(q => q.id === 'error'));
+        }
+    }
+
+    async function submitToWaitlist() {
+        const waitlistEmailInput = document.getElementById('input-waitlist-email');
+        const email = waitlistEmailInput.value;
+
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            waitlistEmailInput.parentElement.classList.add('shake-error');
+            setTimeout(() => waitlistEmailInput.parentElement.classList.remove('shake-error'), 500);
+            return;
+        }
+
+        // Atualiza o e-mail nas respostas caso tenha sido alterado
+        userAnswers.email = email;
+
+        try {
+            await fetch('http://localhost:3001/api/psychologists/add-to-waitlist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userAnswers)
+            });
+            // Redireciona para uma página de agradecimento ou para a home
+            window.location.href = 'obrigado_lista_espera.html';
+        } catch (error) {
+            console.error("Erro ao adicionar à lista de espera:", error);
+            alert("Ocorreu um erro ao salvar seu e-mail. Tente novamente.");
         }
     }
 
@@ -225,6 +268,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     validateAndAdvance(); // Reutiliza a lógica de validação e shake
                 }
+            } else if (target.matches('[data-action="submit-waitlist"]')) {
+                submitToWaitlist();
             } else if (target.matches('.back-button')) {
                 goToSlide(currentStep - 1);
             } else if (target.matches('.choice-button')) {

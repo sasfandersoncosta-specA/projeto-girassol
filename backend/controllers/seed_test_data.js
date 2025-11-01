@@ -3,6 +3,14 @@ const db = require('../models'); // Este caminho continua correto a partir da pa
 const bcrypt = require('bcryptjs');
 
 async function seedTestData() {
+    // Função Auxiliar: Gera um slug a partir de um nome
+    const generateSlug = (name) => {
+        return name
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Remove acentos
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres não alfanuméricos
+            .replace(/\s+/g, '-');
+    };
     try {
         // Sincroniza o banco de dados (cria tabelas se não existirem)
         // CUIDADO: db.sequelize.sync({ force: true }) apagaria todos os dados existentes!
@@ -41,12 +49,14 @@ async function seedTestData() {
             crp: "06/123456",
             email: "ana.psicologa@girassol.com",
             senha: psychologistPassword,
+            slug: generateSlug("Dra. Ana Psicóloga"),
+            status: 'active', // Garante que o psicólogo esteja ativo para buscas
             valor_sessao_numero: 120.00, // Dentro da faixa do paciente
             temas_atuacao: ["Ansiedade", "Estresse", "Depressão", "Relacionamentos"], // Inclui temas do paciente
             abordagens_tecnicas: ["Psicanálise", "Terapia Humanista", "Terapia Cognitivo-Comportamental"], // Inclui abordagens do paciente
             genero_identidade: "Feminino", // Corresponde ao gênero preferido do paciente
             praticas_vivencias: ["Feminista", "LGBTQIAPN+ friendly", "Antirracista"], // Inclui práticas do paciente
-            disponibilidade_periodo: ["Manhã", "Tarde", "Noite"],
+            disponibilidade_periodo: ["Manhã", "Tarde", "Noite"], 
             bio: "Psicóloga com foco em terapia individual para adultos, oferecendo um espaço de escuta e acolhimento.",
             fotoUrl: "https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
         };
@@ -69,6 +79,8 @@ async function seedTestData() {
             crp: "06/654321",
             email: "carlos.terapeuta@girassol.com",
             senha: await bcrypt.hash('password123', 10),
+            slug: generateSlug("Dr. Carlos Terapeuta"),
+            status: 'active',
             valor_sessao_numero: 70.00, // Fora da faixa principal do paciente, mas pode ser um "near match"
             temas_atuacao: ["Carreira", "Estresse"], // Apenas um tema em comum
             abordagens_tecnicas: ["Terapia Cognitivo-Comportamental"], // Nenhuma abordagem em comum com o paciente

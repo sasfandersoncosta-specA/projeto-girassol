@@ -5,6 +5,30 @@ function carregarComponente(url, elementoId) {
     return fetch(url).then(response => { if (!response.ok) { throw new Error('Não foi possível carregar o componente: ' + url); } return response.text(); }).then(data => { const elemento = document.getElementById(elementoId); if (elemento) { elemento.innerHTML = data; } }).catch(error => console.error('Erro ao carregar componente:', error));
 }
 
+async function carregarVitrineTerapeutas() {
+    const container = document.getElementById('vitrine-terapeutas');
+    if (!container) return;
+
+    try {
+        const response = await fetch('http://localhost:3001/api/psychologists/showcase');
+        if (!response.ok) throw new Error('Falha ao buscar dados da vitrine');
+        
+        const psicologos = await response.json();
+
+        // Mapeia os psicólogos para os elementos de imagem existentes
+        const imagens = container.querySelectorAll('.foto-terapeuta');
+        psicologos.forEach((psi, index) => {
+            if (imagens[index]) {
+                imagens[index].src = psi.fotoUrl;
+                imagens[index].alt = `Foto de ${psi.nome}`;
+            }
+        });
+    } catch (error) {
+        console.error("Erro ao carregar vitrine de terapeutas:", error);
+        // Em caso de erro, as imagens de placeholder do HTML serão mantidas.
+    }
+}
+
 function inicializarScripts() {
     
     // --- LÓGICA PARA O MENU HAMBÚRGUER ---
@@ -45,6 +69,19 @@ if (elementosOcultos.length > 0) {
 
 } // Fim da função inicializarScripts()
 
+// --- PONTO DE ENTRADA PRINCIPAL (NÃO MUDA) ---
+document.addEventListener("DOMContentLoaded", () => {
+    Promise.all([
+        carregarComponente('header.html', 'header-placeholder'),
+        carregarComponente('footer.html', 'footer-placeholder')
+    ]).then(() => {
+        inicializarScripts();
+        // Carrega a vitrine DEPOIS de inicializar os scripts principais
+        if (document.getElementById('vitrine-terapeutas')) {
+            carregarVitrineTerapeutas();
+        }
+    });
+});
 
 // --- PONTO DE ENTRADA PRINCIPAL (NÃO MUDA) ---
 document.addEventListener("DOMContentLoaded", () => {
