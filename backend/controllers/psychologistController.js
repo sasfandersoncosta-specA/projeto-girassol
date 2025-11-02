@@ -237,7 +237,7 @@ exports.checkDemand = async (req, res) => {
 
         // --- LÓGICA DE VERIFICAÇÃO DE DEMANDA (CORRIGIDA) ---
         // O objetivo é encontrar PACIENTES que buscam um perfil como o do psicólogo.
-        const DEMAND_TARGET = 5; // Número-alvo de pacientes buscando um nicho para justificar um novo profissional.
+        const DEMAND_TARGET = 0; // FORÇADO PARA TESTE: Aprova qualquer profissional.
 
         // 1. Extrai a faixa de valor do psicólogo
         const { min: psyMinPrice, max: psyMaxPrice } = parsePriceRange(valor_sessao_faixa);
