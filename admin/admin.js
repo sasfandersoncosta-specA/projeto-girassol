@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             // Faz uma chamada à API para validar o token e buscar os dados do admin
-            const response = await fetch('http://localhost:3001/api/admin/me', {
+            const response = await fetch('/api/admin/me', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
