@@ -44,10 +44,8 @@ app.use('/api/admin', adminRoutes); // Adicionado
 // --- ROTAS DE FRONT-END (Catch-all) ---
 // Esta rota deve ser a ÚLTIMA. Ela captura qualquer requisição GET que não foi
 // tratada pelas rotas da API ou pelos arquivos estáticos.
-app.get('*', (req, res) => {
-    // Envia o index.html para o navegador, permitindo que o roteamento do
-    // lado do cliente (front-end) assuma o controle.
-    res.sendFile(path.join(__dirname, '..', 'index.html'));
+app.get('/*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Sincronização com o Banco
