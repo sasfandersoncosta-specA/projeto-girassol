@@ -33,7 +33,7 @@ window.initializePage = function() {
         button.textContent = 'Enviando...';
 
         try {
-            const response = await fetch('http://localhost:3001/api/psychologists/waiting-list/invite', {
+            const response = await fetch('/api/psychologists/waiting-list/invite', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ window.initializePage = function() {
     // Função para buscar e renderizar a lista
     async function fetchWaitingList() {
         try {
-            const response = await fetch('http://localhost:3001/api/psychologists/waiting-list', {
+            const response = await fetch('/api/psychologists/waiting-list', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
