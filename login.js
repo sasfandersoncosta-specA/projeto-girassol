@@ -1,18 +1,33 @@
 // Aguarda o carregamento completo do documento antes de executar o script
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Elementos do Formulário
-    // IDs adicionados no login.html: form-login, email-login, senha-login, mensagem-login
     const loginForm = document.getElementById('form-login');
     const emailInput = document.getElementById('email-login');
     const senhaInput = document.getElementById('senha-login');
     const mensagemEl = document.getElementById('mensagem-login');
-
-    // --- LÓGICA PARA O NOVO SELETOR DE PERFIL ---
     const btnPaciente = document.getElementById('btnPaciente');
     const btnPsicologo = document.getElementById('btnPsicologo');
+
+    // --- LÓGICA DE PRÉ-PREENCHIMENTO (NOVO) ---
+    const prefillEmail = localStorage.getItem('login_prefetch_email');
+    const prefillRole = localStorage.getItem('login_prefetch_role');
+
+    if (prefillEmail) {
+        emailInput.value = prefillEmail;
+        localStorage.removeItem('login_prefetch_email'); // Limpa para não usar de novo
+    }
+    if (prefillRole === 'psychologist' && btnPsicologo) {
+        btnPsicologo.click(); // Simula o clique no botão "Sou Psicólogo(a)"
+        localStorage.removeItem('login_prefetch_role'); // Limpa
+    }
+    // --- FIM DO BLOCO NOVO ---
+
+
+    // --- LÓGICA PARA O NOVO SELETOR DE PERFIL ---
     let selectedRole = 'patient'; // Valor padrão
 
     if (btnPaciente && btnPsicologo) {
+        // ... (o resto do seu código de seletor de perfil continua igual) ...
         // Adiciona um campo oculto para guardar o valor do papel selecionado
         let roleInput = loginForm.querySelector('input[name="role"]');
         if (!roleInput) {
@@ -22,6 +37,11 @@ document.addEventListener('DOMContentLoaded', () => {
             loginForm.appendChild(roleInput);
         }
         roleInput.value = selectedRole; // Define o valor inicial
+
+        // Atualiza o valor padrão se o pré-preenchimento já o mudou
+        if (prefillRole === 'psychologist') {
+            roleInput.value = 'psychologist';
+        }
 
         btnPaciente.addEventListener('click', () => {
             btnPaciente.classList.add('active');
@@ -41,11 +61,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Função para exibir mensagens (Sucesso ou Erro)
     function showMessage(text, isError = false) {
         mensagemEl.textContent = text;
-        // Classes de estilo definidas no CSS para controle de visibilidade/cor
         mensagemEl.classList.remove('mensagem-oculta', 'mensagem-erro', 'mensagem-sucesso');
         mensagemEl.classList.add(isError ? 'mensagem-erro' : 'mensagem-sucesso');
         
-        // Define para sumir após 5 segundos
         setTimeout(() => {
             mensagemEl.classList.add('mensagem-oculta');
         }, 5000);
@@ -54,34 +72,32 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. Evento de Submissão do Formulário
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Impede o envio tradicional (que recarrega a página)
+            e.preventDefault(); 
 
             const email = emailInput.value;
             const senha = senhaInput.value;
 
-            // Limpa mensagens anteriores
             mensagemEl.textContent = '';
             mensagemEl.classList.add('mensagem-oculta');
 
-            // Define o endpoint da API e o caminho do dashboard com base no tipo de usuário
-            const apiUrl = selectedRole === 'patient'
+            // Pega o 'selectedRole' do JS, que é mais confiável
+            const role = selectedRole; 
+
+            const apiUrl = role === 'patient'
                 ? `${API_BASE_URL}/api/patients/login`
                 : `${API_BASE_URL}/api/psychologists/login`;
 
-            const dashboardPath = selectedRole === 'patient'
+            const dashboardPath = role === 'patient'
                 ? '/patient/patient_dashboard.html'
                 : '/psi/psi_dashboard.html';
 
-            // Prepara os dados para o backend
             const payload = JSON.stringify({ email, senha });
 
             try {
-                // 3. Chamada à API de Login (agora dinâmica)
+                // 3. Chamada à API de Login
                 const response = await fetch(apiUrl, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: payload,
                 });
 
@@ -89,34 +105,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // 4. Tratamento da Resposta
                 if (response.ok) {
-                    // Login Bem-Sucedido
-                    showMessage('Login bem-sucedido! Redirecionando...', false); // Mostra a mensagem
-                    localStorage.setItem('girassol_token', data.token); // Salva o token
+                    showMessage('Login bem-sucedido! Redirecionando...', false);
+                    localStorage.setItem('girassol_token', data.token); 
 
-                    // Adiciona uma pequena pausa antes de redirecionar para garantir que a mensagem seja vista
-                    // e para evitar que o setTimeout da mensagem interfira com o redirecionamento.
                     setTimeout(() => {
-                        // Se for um psicólogo, redireciona diretamente para o dashboard dele.
-                        if (selectedRole === 'psychologist') {
+                        if (role === 'psychologist') {
                             window.location.href = window.location.origin + dashboardPath;
                             return;
                         }
 
-                        // Se for um paciente, verifica se há respostas do questionário para salvar.
                         const savedAnswers = localStorage.getItem('girassol_questionario_respostas');
                         if (savedAnswers) {
                             window.location.href = 'resultados.html';
                         } else {
                             window.location.href = window.location.origin + dashboardPath;
                         }
-                    }, 500); // Meio segundo de espera
+                    }, 500); 
                 } else {
-                    // Erro de Login (Email/Senha inválidos, etc.)
                     const errorMessage = data.error || 'Email ou senha inválidos. Tente novamente.';
                     showMessage(errorMessage, true);
                 }
             } catch (error) {
-                // Erro de Rede ou Servidor
                 console.error('Erro de conexão:', error);
                 showMessage('Falha na conexão com o servidor. Verifique se o backend está ligado.', true);
             }

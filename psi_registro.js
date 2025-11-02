@@ -27,9 +27,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const crpParam = params.get('crp');
     const tokenParam = params.get('token'); 
 
+    const emailInput = document.getElementById('email'); // Definido aqui para usar depois
+
     if (nomeParam) document.getElementById('nome-completo').value = nomeParam;
-    if (emailParam) document.getElementById('email').value = emailParam;
-    if (crpParam) document.getElementById('crp').value = crpParam;
+    if (emailParam) emailInput.value = emailParam;
+    if (crpParam) crpInput.value = crpParam;
 
     // --- LÓGICA DO FORMULÁRIO ---
     const formRegistro = document.getElementById('form-registro-psi');
@@ -48,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const nome = document.getElementById('nome-completo').value;
         const crp = crpInput.value;
         const cpf = cpfInput.value;
-        const email = document.getElementById('email').value;
+        const email = emailInput.value; // Pega o valor do e-mail
         const senha = document.getElementById('senha').value;
         const confirmarSenha = document.getElementById('confirmar-senha').value;
         const termosAceite = document.getElementById('termos-aceite').checked;
@@ -59,20 +61,16 @@ document.addEventListener('DOMContentLoaded', () => {
             mensagemRegistro.className = 'mensagem-erro';
             return;
         }
-
-        // 3. VALIDAÇÃO DE 6 DÍGITOS ADICIONADA
         if (senha.length < 6) {
             mensagemRegistro.textContent = 'A senha deve ter ao menos 6 dígitos.';
             mensagemRegistro.className = 'mensagem-erro';
             return;
         }
-
         if (!isCpfValid(cpf)) {
              mensagemRegistro.textContent = 'O CPF informado é inválido. Verifique.';
              mensagemRegistro.className = 'mensagem-erro';
              return;
         }
-
         if (!termosAceite) {
             mensagemRegistro.textContent = 'Você precisa aceitar os Termos e Condições.';
             mensagemRegistro.className = 'mensagem-erro';
@@ -80,12 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const dadosPsicologo = {
-            nome: nome,
-            crp: crp,
-            cpf: cpf,
-            email: email,
-            senha: senha,
-            invitationToken: tokenParam 
+            nome: nome, crp: crp, cpf: cpf,
+            email: email, senha: senha, invitationToken: tokenParam 
         };
 
         // --- CHAMADA DE API ---
@@ -102,6 +96,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 mensagemRegistro.textContent = result.message + " Redirecionando para o login...";
                 mensagemRegistro.className = 'mensagem-sucesso';
                 formRegistro.reset();
+
+                // --- ADICIONADO (FEATURE REQUEST) ---
+                localStorage.setItem('login_prefetch_email', email);
+                localStorage.setItem('login_prefetch_role', 'psychologist');
+                // ------------------------------------
 
                 setTimeout(() => {
                     window.location.href = 'login.html'; 
