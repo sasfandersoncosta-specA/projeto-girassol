@@ -2,28 +2,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- MÁSCARAS DE INPUT ---
     const crpInput = document.getElementById('crp');
-    const cpfInput = document.getElementById('cpf'); // Pega o novo campo
+    const cpfInput = document.getElementById('cpf');
 
     if (crpInput && window.IMask) {
         IMask(crpInput, { mask: '00/000000' });
     }
     if (cpfInput && window.IMask) {
-        IMask(cpfInput, { mask: '000.000.000-00' }); // Máscara de CPF
+        IMask(cpfInput, { mask: '000.000.000-00' });
     }
 
     // --- LÓGICA DE VALIDAÇÃO DE CPF (SIMPLES) ---
     function isCpfValid(cpf) {
         if (!cpf) return false;
-        const cpfLimpo = cpf.replace(/\D/g, ''); // Remove máscara
+        const cpfLimpo = cpf.replace(/\D/g, ''); 
         if (cpfLimpo.length !== 11) return false;
-        // Evita CPFs inválidos conhecidos (ex: 111.111.111-11)
         if (/^(\d)\1{10}$/.test(cpfLimpo)) return false; 
-        
-        // Validação de dígito (simplificada para o frontend, o backend deve revalidar)
-        // Esta é uma validação básica de formato
         return /^\d{11}$/.test(cpfLimpo);
     }
-
 
     // --- PRÉ-PREENCHIMENTO DA URL ---
     const params = new URLSearchParams(window.location.search);
@@ -32,20 +27,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const crpParam = params.get('crp');
     const tokenParam = params.get('token'); 
 
-    const nomeInput = document.getElementById('nome-completo');
-    const emailInput = document.getElementById('email');
-    
-    if (nomeParam) nomeInput.value = nomeParam;
-    if (emailParam) emailInput.value = emailParam;
-    if (crpParam) crpInput.value = crpParam;
+    if (nomeParam) document.getElementById('nome-completo').value = nomeParam;
+    if (emailParam) document.getElementById('email').value = emailParam;
+    if (crpParam) document.getElementById('crp').value = crpParam;
 
-    // Força o "label flutuante" a subir se houver pré-preenchimento
-    [nomeInput, emailInput, crpInput].forEach(input => {
-        if (input.value) {
-            input.classList.add('prefilled'); // Assumindo que você tem um CSS para :not(:placeholder-shown)
-        }
-    });
-
+    // --- LÓGICA DO FORMULÁRIO ---
     const formRegistro = document.getElementById('form-registro-psi');
     const mensagemRegistro = document.getElementById('mensagem-registro-psi');
 
@@ -56,19 +42,18 @@ document.addEventListener('DOMContentLoaded', () => {
     formRegistro.addEventListener('submit', async (event) => {
         
         event.preventDefault();
-
         mensagemRegistro.textContent = '';
-        mensagemRegistro.className = 'mensagem-oculta'; // Reseta classes
+        mensagemRegistro.className = 'mensagem-oculta'; 
 
-        const nome = nomeInput.value;
+        const nome = document.getElementById('nome-completo').value;
         const crp = crpInput.value;
-        const cpf = cpfInput.value; // Coleta o CPF
-        const email = emailInput.value;
+        const cpf = cpfInput.value;
+        const email = document.getElementById('email').value;
         const senha = document.getElementById('senha').value;
         const confirmarSenha = document.getElementById('confirmar-senha').value;
         const termosAceite = document.getElementById('termos-aceite').checked;
         
-        // --- VALIDAÇÕES DO LADO DO CLIENTE ---
+        // --- VALIDAÇÕES ---
         if (senha !== confirmarSenha) {
             mensagemRegistro.textContent = 'As senhas não conferem. Verifique.';
             mensagemRegistro.className = 'mensagem-erro';
@@ -90,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const dadosPsicologo = {
             nome: nome,
             crp: crp,
-            cpf: cpf, // Envia o CPF para o backend
+            cpf: cpf,
             email: email,
             senha: senha,
             invitationToken: tokenParam 
@@ -98,12 +83,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- CHAMADA DE API ---
         try {
-            // O ERRO 3 (CONEXÃO) É RESOLVIDO PORQUE config.js FOI CARREGADO NO HTML
             const response = await fetch(`${API_BASE_URL}/api/psychologists/register`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(dadosPsicologo)
             });
 
@@ -115,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 formRegistro.reset();
 
                 setTimeout(() => {
-                    window.location.href = 'login.html';
+                    window.location.href = 'login.html'; // URL DE REDIRECT CORRETA
                 }, 2000);
 
             } else {
@@ -124,7 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
         } catch (error) {
-            // Este erro (ReferenceError) não deve mais acontecer
             console.error('Erro de conexão ou script:', error); 
             mensagemRegistro.textContent = 'Erro ao conectar com o servidor. Verifique o console.';
             mensagemRegistro.className = 'mensagem-erro';
