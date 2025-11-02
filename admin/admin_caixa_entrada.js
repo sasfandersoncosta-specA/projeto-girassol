@@ -472,7 +472,7 @@ window.initializePage = function() {
     // --- LÓGICA DO SOCKET.IO ---
 
     function initializeSocket() {
-        socket = io('http://localhost:3001', {
+        socket = io({
             auth: {
                 token: token
             }
