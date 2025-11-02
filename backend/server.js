@@ -15,6 +15,7 @@ const patientRoutes = require('./routes/patientRoutes');
 const psychologistRoutes = require('./routes/psychologistRoutes');
 const messageRoutes = require('./routes/messageRoutes'); // Adicionado
 const demandRoutes = require('./routes/demandRoutes'); // Adicionado para salvar buscas
+const usuarioRoutes = require('./routes/usuarioRoutes'); // Adicionado conforme solicitado
 const adminRoutes = require('./routes/adminRoutes'); // Adicionado para o dashboard
 const psychologistController = require('./controllers/psychologistController');
 const seedTestData = require('./controllers/seed_test_data'); // Caminho corrigido
@@ -35,6 +36,7 @@ app.use('/api/patients', patientRoutes); // Todas as rotas de Pacientes (Registr
 app.use('/api/psychologists', psychologistRoutes); // Todas as rotas de Profissionais (Registro, Login, etc)
 app.use('/api/messaging', messageRoutes); // Adicionado
 app.use('/api/demand', demandRoutes); // Adicionado
+app.use('/api/usuarios', usuarioRoutes); // Adicionado conforme solicitado
 app.use('/api/admin', adminRoutes); // Adicionado
 
 // --- SERVIR ARQUIVOS ESTÁTICOS (FRONT-END) ---
