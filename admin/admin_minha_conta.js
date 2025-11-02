@@ -7,6 +7,9 @@ window.initializePage = function() {
     const nomeInput = document.getElementById('admin-nome');
     const emailInput = document.getElementById('admin-email');
     const telefoneInput = document.getElementById('admin-telefone');
+    const photoPreview = document.getElementById('admin-profile-photo-preview');
+    const photoUploadInput = document.getElementById('admin-photo-upload');
+
 
     if (!formDados || !formSenha || !token) {
         console.error("Elementos do formulário ou token não encontrados.");
@@ -44,6 +47,10 @@ window.initializePage = function() {
             nomeInput.value = admin.nome || '';
             emailInput.value = admin.email || '';
             telefoneInput.value = admin.telefone || '';
+            if (admin.fotoUrl) {
+                // Constrói a URL completa para a imagem
+                photoPreview.src = `http://localhost:3001${admin.fotoUrl}`;
+            }
 
         } catch (error) {
             showToast(error.message, 'error');
@@ -128,6 +135,44 @@ window.initializePage = function() {
         } finally {
             button.disabled = false;
             button.textContent = 'Alterar Senha';
+        }
+    });
+
+    // Evento para lidar com a seleção de nova foto
+    photoUploadInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Mostra um preview instantâneo da imagem selecionada
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            photoPreview.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+
+        // Envia a imagem para o backend
+        const formData = new FormData();
+        formData.append('profilePhoto', file);
+
+        try {
+            const response = await fetch('http://localhost:3001/api/admin/me/photo', {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData // Não defina 'Content-Type', o browser faz isso automaticamente para FormData
+            });
+
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error);
+
+            showToast(result.message, 'success');
+            // Atualiza a foto no menu lateral também
+            const sidebarPhoto = document.querySelector('#admin-avatar');
+            if (sidebarPhoto) {
+                sidebarPhoto.src = `http://localhost:3001${result.fotoUrl}`;
+            }
+
+        } catch (error) {
+            showToast(error.message, 'error');
         }
     });
 

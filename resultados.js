@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // 3. Faz a chamada para a API, enviando o token
-            const response = await fetch('http://localhost:3001/api/psychologists/matches', {
+            const response = await fetch(`${API_BASE_URL}/api/psychologists/matches`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 try {
-                    const response = await fetch('http://localhost:3001/api/patients/me/favorites', {
+                    const response = await fetch(`${API_BASE_URL}/api/patients/me/favorites`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',

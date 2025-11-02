@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // 4. Chamada à API (endpoint de registro no localhost:3001)
-            const response = await fetch('http://localhost:3001/api/patients/register', {
+            const response = await fetch(`${API_BASE_URL}/api/patients/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json' // Indica que o corpo é JSON

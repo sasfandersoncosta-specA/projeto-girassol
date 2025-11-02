@@ -14,8 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
             mensagemEl.className = 'mensagem-sucesso';
 
             const apiUrl = userType === 'patient'
-                ? 'http://localhost:3001/api/patients/forgot-password'
-                : 'http://localhost:3001/api/psychologists/forgot-password';
+                ? `${API_BASE_URL}/api/patients/forgot-password`
+                : `${API_BASE_URL}/api/psychologists/forgot-password`;
 
             try {
                 const response = await fetch(apiUrl, {

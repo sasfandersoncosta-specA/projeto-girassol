@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const admin = await response.json();
             
             // Se a validação passou, atualiza a UI e configura a página
+            window.adminId = admin.id; // Armazena o ID do admin globalmente
             const adminNameEl = document.querySelector('.nome-admin');
             if (adminNameEl) adminNameEl.textContent = admin.nome;
 
@@ -79,15 +80,6 @@ document.addEventListener('DOMContentLoaded', function() {
          * Função principal: busca o conteúdo de um arquivo HTML e o insere na página.
          */
         function loadPage(pageUrl) {
-            const dashboardMain = document.querySelector('.dashboard-main');
-
-            // Adiciona ou remove a classe que esconde o header principal
-            if (pageUrl.includes('admin_caixa_entrada.html')) {
-                dashboardMain.classList.add('inbox-active');
-            } else {
-                dashboardMain.classList.remove('inbox-active');
-            }
-
             if (!pageUrl) return;
     
             // Mostra um feedback de carregamento
@@ -167,6 +159,46 @@ document.addEventListener('DOMContentLoaded', function() {
         window.addEventListener('adminDataUpdated', updateWelcomeMessage);
     }
 
+    /**
+     * Controla o modal de confirmação genérico.
+     */
+    function setupConfirmationModal() {
+        const modal = document.getElementById('confirmation-modal');
+        if (!modal) return;
+
+        const confirmBtn = document.getElementById('modal-confirm-btn');
+        const cancelBtn = document.getElementById('modal-cancel-btn');
+        const closeBtn = document.getElementById('modal-close-btn');
+        let confirmCallback = null;
+
+        const closeModal = () => {
+            modal.setAttribute('aria-hidden', 'true');
+            confirmCallback = null; // Limpa o callback para evitar execuções acidentais
+        };
+
+        // Função global para abrir o modal
+        window.openConfirmationModal = (title, body, onConfirm) => {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-body').innerHTML = body;
+            confirmCallback = onConfirm;
+            modal.setAttribute('aria-hidden', 'false');
+        };
+
+        confirmBtn.addEventListener('click', () => {
+            if (typeof confirmCallback === 'function') {
+                confirmCallback();
+            }
+            closeModal();
+        });
+
+        cancelBtn.addEventListener('click', closeModal);
+        closeBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+    }
+
     // Ponto de entrada: Inicia a verificação de segurança.
     initializeAndProtect();
+    setupConfirmationModal(); // Inicializa o modal
 });

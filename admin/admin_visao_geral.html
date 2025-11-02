@@ -2,7 +2,10 @@
     <div class="header-content">
         <div class="titulo-pagina">
             <h1>Visão Geral</h1>
-            <p>Resumo vital da saúde da plataforma em tempo real.</p>
+            <p>
+                Resumo vital da saúde da plataforma em tempo real.
+                <span id="last-updated-timestamp" style="display: block; font-size: 0.8rem; opacity: 0.8; margin-top: 5px;"></span>
+            </p>
         </div>
     </div>
 </header>
@@ -11,22 +14,18 @@
     <div class="kpi-card">
         <h4>Receita Recorrente (MRR)</h4>
         <p class="kpi-numero" id="kpi-mrr">R$ 0,00</p>
-        <span class="kpi-delta">--</span>
     </div>
     <div class="kpi-card">
         <h4>Novos Pacientes (30d)</h4>
         <p class="kpi-numero" id="kpi-new-patients">0</p>
-        <span class="kpi-delta">--</span>
     </div>
     <div class="kpi-card">
         <h4>Novos Psicólogos (30d)</h4>
         <p class="kpi-numero" id="kpi-new-psychologists">0</p>
-        <span class="kpi-delta">--</span>
     </div>
     <div class="kpi-card">
-        <h4>Questionários (Hoje)</h4>
-        <p class="kpi-numero" id="kpi-questionnaires">0</p>
-        <span class="kpi-delta">--</span>
+        <h4>Questionários Preenchidos (Hoje)</h4>
+        <p class="kpi-numero" id="kpi-questionnaires-today">0</p>
     </div>
 </div>
 
@@ -35,7 +34,7 @@
         <h3>Alertas e Ações Rápidas</h3>
         <ul class="lista-acoes">
             <li>
-                <span class="acao-numero" id="pending-crp-count">0</span>
+                <span class="acao-numero" id="waiting-list-count">0</span>
                 <p class="acao-texto">Candidatos na Lista de Espera</p>
                 <a href="#" class="acao-link" data-page-link="admin_lista_espera.html">Gerenciar →</a>
             </li>
@@ -49,5 +48,12 @@
     <div class="widget">
         <h3>Atividade Recente</h3>
         <p>(Em breve...)</p>
+    </div>
+</div>
+<!-- Seção para o Gráfico -->
+<div class="widget">
+    <h3>Novos Usuários (Últimos 6 Meses)</h3>
+    <div class="chart-container">
+        <canvas id="new-users-chart"></canvas>
     </div>
 </div>

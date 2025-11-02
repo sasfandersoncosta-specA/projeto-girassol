@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
         goToSlide(questions.findIndex(q => q.id === 'loading'));
 
         try {
-            const response = await fetch('http://localhost:3001/api/psychologists/check-demand', {
+            const response = await fetch(`${API_BASE_URL}/api/psychologists/check-demand`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(userAnswers)
@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
         userAnswers.email = email;
 
         try {
-            await fetch('http://localhost:3001/api/psychologists/add-to-waitlist', {
+            await fetch(`${API_BASE_URL}/api/psychologists/add-to-waitlist`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(userAnswers)

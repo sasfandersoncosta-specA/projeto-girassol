@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Remove dados sensíveis ou desnecessários para a análise de demanda
             const { nome, whatsapp, ...demandAnswers } = userAnswers;
 
-            await fetch('http://localhost:3001/api/demand/searches', {
+            await fetch(`${API_BASE_URL}/api/demand/searches`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // 3. Envia as respostas para o novo endpoint de match
-            const response = await fetch('http://localhost:3001/api/psychologists/match', {
+            const response = await fetch(`${API_BASE_URL}/api/psychologists/match`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

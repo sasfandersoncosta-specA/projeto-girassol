@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            const response = await fetch('http://localhost:3001/api/psychologists/me/complete-profile', {
+            const response = await fetch(`${API_BASE_URL}/api/psychologists/me/complete-profile`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

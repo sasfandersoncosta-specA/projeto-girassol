@@ -1,63 +1,21 @@
-<div class="widgets-container widgets-container--vertical">
-
-    <div class="widget">
-        <h3>Log de Eventos do Sistema</h3>
-        <p class="subtitulo-secao">Feed de eventos importantes da plataforma.</p>
-        <div class="tabela-wrapper">
-            <table class="tabela-gerenciamento">
-                <thead>
-                    <tr>
-                        <th>Data/Hora</th>
-                        <th>Nível</th>
-                        <th>Evento</th>
-                        <th>Detalhes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>09/10/2025 23:15:02</td>
-                        <td><span class="status status-info">INFO</span></td>
-                        <td>Novo Cadastro na Lista de Espera</td>
-                        <td>Profissional 'joana.d@email.com' se cadastrou.</td>
-                    </tr>
-                    <tr>
-                        <td>09/10/2025 23:10:45</td>
-                        <td><span class="status status-inativo">ERRO</span></td>
-                        <td>Falha no Pagamento</td>
-                        <td>Usuário 'dra.beatriz.lima' (sub_1a2b3c) - Cartão recusado.</td>
-                    </tr>
-                    <tr>
-                        <td>09/10/2025 22:55:10</td>
-                        <td><span class="status status-info">INFO</span></td>
-                        <td>Match com Sucesso</td>
-                        <td>Questionário #582 encontrou 7 perfis.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="widget">
-        <h3>Saúde do Sistema</h3>
-        <p class="subtitulo-secao">Status operacional dos serviços principais.</p>
-        <ul class="lista-saude-sistema">
-            <li>
-                <span>Banco de Dados Principal</span>
-                <span class="status-dot online"></span> Operacional
-            </li>
-            <li>
-                <span>API de Pagamento (Stripe)</span>
-                <span class="status-dot online"></span> Operacional
-            </li>
-            <li>
-                <span>Serviço de E-mails (SendGrid)</span>
-                <span class="status-dot online"></span> Operacional
-            </li>
-            <li>
-                <span>API do WhatsApp</span>
-                <span class="status-dot offline"></span> Instável
-            </li>
-        </ul>
-    </div>
+<!-- admin/admin_logs_sistema.html -->
+<div class="widget">
+    <h3>Logs do Sistema</h3>
+    <p class="subtitulo-secao">Atividade recente e eventos importantes registrados na plataforma.</p>
     
+    <div class="tabela-wrapper">
+        <table class="tabela-gerenciamento">
+            <thead>
+                <tr>
+                    <th>Nível</th>
+                    <th>Mensagem</th>
+                    <th>Data e Hora</th>
+                </tr>
+            </thead>
+            <tbody id="logs-table-body">
+                <!-- Os logs serão inseridos aqui pelo JavaScript -->
+                <tr><td colspan="3" class="loading-row">Carregando logs...</td></tr>
+            </tbody>
+        </table>
+    </div>
 </div>

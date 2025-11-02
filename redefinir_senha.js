@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const apiUrl = userType === 'patient'
-            ? `http://localhost:3001/api/patients/reset-password/${token}`
-            : `http://localhost:3001/api/psychologists/reset-password/${token}`;
+            ? `${API_BASE_URL}/api/patients/reset-password/${token}`
+            : `${API_BASE_URL}/api/psychologists/reset-password/${token}`;
 
         try {
             const response = await fetch(apiUrl, {

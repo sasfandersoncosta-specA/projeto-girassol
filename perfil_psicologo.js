@@ -115,8 +115,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // Busca os dados do perfil e as avaliações em paralelo
             const [profileResponse, reviewsResponse] = await Promise.all([
-                fetch(`http://localhost:3001/api/psychologists/${psychologistId}`),
-                fetch(`http://localhost:3001/api/psychologists/${psychologistId}/reviews`)
+                fetch(`${API_BASE_URL}/api/psychologists/${psychologistId}`),
+                fetch(`${API_BASE_URL}/api/psychologists/${psychologistId}/reviews`)
             ]);
 
             if (!profileResponse.ok) {

@@ -2,32 +2,11 @@
 
     <div class="widget">
         <h3>Moderação de Avaliações Pendentes</h3>
-        <ul class="lista-moderacao">
-            <li>
-                <div class="avaliacao-info">
-                    <span class="avaliacao-autor">Ana S. (Paciente)</span>
-                    <span class="avaliacao-data">09/10/2025</span>
-                </div>
-                <p class="avaliacao-texto">"A Dra. Beatriz foi incrível! Me senti muito acolhida e compreendida desde a primeira sessão. Recomendo muito."</p>
-                <div class="avaliacao-rating">★★★★☆ (4/5)</div>
-                <div class="moderacao-acoes">
-                    <button class="btn-tabela btn-aprovar">Aprovar</button>
-                    <button class="btn-tabela btn-reprovar">Reprovar</button>
-                </div>
-            </li>
-            <li>
-                <div class="avaliacao-info">
-                    <span class="avaliacao-autor">Marcos O. (Paciente)</span>
-                    <span class="avaliacao-data">08/10/2025</span>
-                </div>
-                <p class="avaliacao-texto">"O Dr. Carlos é um profissional excelente, mas a plataforma demorou um pouco para conectar."</p>
-                <div class="avaliacao-rating">★★★☆☆ (3/5)</div>
-                <div class="moderacao-acoes">
-                    <button class="btn-tabela btn-aprovar">Aprovar</button>
-                    <button class="btn-tabela btn-reprovar">Reprovar</button>
-                </div>
-            </li>
+        <ul class="lista-moderacao" id="pending-reviews-list">
+            <!-- As avaliações pendentes serão carregadas aqui pelo JavaScript -->
         </ul>
+        <div id="reviews-loading-state" style="padding: 20px; text-align: center;">Carregando...</div>
+        <div id="reviews-empty-state" style="display: none; padding: 20px; text-align: center;">Não há avaliações pendentes.</div>
     </div>
 
     <div class="widget">

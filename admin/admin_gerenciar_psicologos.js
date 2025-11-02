@@ -80,10 +80,55 @@ window.initializePage = function() {
 
             // A lógica dos botões de ação pode ser adicionada aqui
             const actionsCell = row.querySelector('[data-label="Ações"]');
+            const isSuspended = psy.status === 'inactive';
+
             actionsCell.innerHTML = `
                 <button class="btn-tabela">Ver Detalhes</button>
-                <button class="btn-tabela">Suspender</button>
+                <button class="btn-tabela btn-suspend">${isSuspended ? 'Reativar' : 'Suspender'}</button>
+                <button class="btn-tabela btn-tabela-perigo btn-delete">Excluir</button>
             `;
+
+            // Adiciona funcionalidade ao botão de Suspender/Reativar
+            actionsCell.querySelector('.btn-suspend').addEventListener('click', () => {
+                const newStatus = isSuspended ? 'active' : 'inactive';
+                const actionText = isSuspended ? 'reativar' : 'suspender';
+                
+                window.openConfirmationModal(
+                    `Confirmar ${isSuspended ? 'Reativação' : 'Suspensão'}`,
+                    `<p>Você tem certeza que deseja <strong>${actionText}</strong> o perfil de ${psy.nome}?</p>`,
+                    async () => {
+                        try {
+                            const response = await fetch(`http://localhost:3001/api/admin/psychologists/${psy.id}/status`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                body: JSON.stringify({ status: newStatus })
+                            });
+                            if (!response.ok) throw new Error('Falha ao atualizar status.');
+                            fetchPsychologists(currentPage, currentFilters); // Recarrega a tabela
+                        } catch (error) {
+                            alert(error.message);
+                        }
+                    }
+                );
+            });
+
+            // Adiciona funcionalidade ao botão de Excluir
+            actionsCell.querySelector('.btn-delete').addEventListener('click', () => {
+                window.openConfirmationModal(
+                    'Confirmar Exclusão Permanente',
+                    `<p>Esta ação é irreversível. Você tem certeza que deseja <strong>excluir permanentemente</strong> o perfil de ${psy.nome}?</p>`,
+                    async () => {
+                        try {
+                            const response = await fetch(`http://localhost:3001/api/admin/psychologists/${psy.id}`, {
+                                method: 'DELETE',
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (!response.ok) throw new Error('Falha ao excluir perfil.');
+                            row.remove(); // Remove da UI imediatamente
+                        } catch (error) { alert(error.message); }
+                    }
+                );
+            });
 
             tableBody.appendChild(row);
         });

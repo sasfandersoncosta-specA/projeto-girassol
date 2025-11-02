@@ -65,8 +65,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Define o endpoint da API e o caminho do dashboard com base no tipo de usuário
             const apiUrl = selectedRole === 'patient'
-                ? 'http://localhost:3001/api/patients/login'
-                : 'http://localhost:3001/api/psychologists/login';
+                ? `${API_BASE_URL}/api/patients/login`
+                : `${API_BASE_URL}/api/psychologists/login`;
 
             const dashboardPath = selectedRole === 'patient'
                 ? '/patient/patient_dashboard.html'
