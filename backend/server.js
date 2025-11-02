@@ -3,6 +3,7 @@
 require('dotenv').config();
 const express = require('express');
 const http = require('http'); // 1. Importa o módulo http
+const path = require('path'); // Adicionado para lidar com caminhos de arquivo
 const { initSocket } = require('./config/socket'); // 2. Importa nosso inicializador de socket
 const cors = require('cors');
 
@@ -28,16 +29,9 @@ app.use(cors()); // Permite requisições de origens diferentes (seu frontend)
 app.use(express.json()); // Permite que o servidor entenda JSON no corpo das requisições
 app.use(express.urlencoded({ extended: true })); // Permite entender dados de formulários
 
-// --- CORREÇÃO: Servir arquivos estáticos ---
-app.use(express.static('public')); // Torna a pasta 'public' acessível publicamente
-
-// Rota de Teste Simples
-app.get('/', (req, res) => {
-    res.json({ message: 'Bem-vindo à API Jano! Status: OK' });
-});
-
-// Rota para perfil público com URL amigável (deve vir antes das rotas da API)
-app.get('/:slug', psychologistController.getProfileBySlug);
+// --- SERVIR ARQUIVOS ESTÁTICOS (FRONT-END) ---
+// Aponta para a pasta raiz do projeto, onde estão os arquivos HTML, CSS, JS.
+app.use(express.static(path.join(__dirname, '..')));
 
 // Futuras Rotas da API
 app.use('/api/patients', patientRoutes); // Todas as rotas de Pacientes (Registro, Login, Dados Pessoais)
@@ -45,6 +39,15 @@ app.use('/api/psychologists', psychologistRoutes); // Todas as rotas de Profissi
 app.use('/api/messaging', messageRoutes); // Adicionado
 app.use('/api/demand', demandRoutes); // Adicionado
 app.use('/api/admin', adminRoutes); // Adicionado
+
+// --- ROTAS DE CAPTURA (Catch-all) ---
+// Rota para perfil público com URL amigável (deve vir antes da rota principal)
+app.get('/:slug', psychologistController.getProfileBySlug);
+
+// Rota principal que serve o index.html para qualquer outra requisição GET não capturada
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'index.html'));
+});
 
 // Sincronização com o Banco
 // db.sequelize.sync() lê os modelos e cria/atualiza as tabelas se necessário
