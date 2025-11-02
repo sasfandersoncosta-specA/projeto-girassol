@@ -42,98 +42,97 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    formRegistro.addEventListener('submit', async (event) => {
-        
-        event.preventDefault();
-        mensagemRegistro.textContent = '';
-        mensagemRegistro.className = 'mensagem-oculta'; 
+formRegistro.addEventListener('submit', async (event) => {
+    
+    event.preventDefault();
+    mensagemRegistro.textContent = '';
+    mensagemRegistro.className = 'mensagem-oculta'; 
 
-        // --- VALIDAÇÕES (permanecem as mesmas) ---
-        const senha = document.getElementById('senha').value;
-        const confirmarSenha = document.getElementById('confirmar-senha').value;
-        const cpf = cpfInput.value;
-        const termosAceite = document.getElementById('termos-aceite').checked;
+    // --- VALIDAÇÕES (permanecem as mesmas) ---
+    const senha = document.getElementById('senha').value;
+    const confirmarSenha = document.getElementById('confirmar-senha').value;
+    const cpf = cpfInput.value;
+    const termosAceite = document.getElementById('termos-aceite').checked;
 
-        if (senha !== confirmarSenha) {
-            mensagemRegistro.textContent = 'As senhas não conferem. Verifique.';
-            mensagemRegistro.className = 'mensagem-erro';
-            return;
-        }
-        if (senha.length < 6) {
-            mensagemRegistro.textContent = 'A senha deve ter ao menos 6 dígitos.';
-            mensagemRegistro.className = 'mensagem-erro';
-            return;
-        }
-        if (!isCpfValid(cpf)) {
-             mensagemRegistro.textContent = 'O CPF informado é inválido. Verifique.';
-             mensagemRegistro.className = 'mensagem-erro';
-             return;
-        }
-        if (!termosAceite) {
-            mensagemRegistro.textContent = 'Você precisa aceitar os Termos e Condições.';
-            mensagemRegistro.className = 'mensagem-erro';
-            return;
-        }
+    if (senha !== confirmarSenha) {
+        mensagemRegistro.textContent = 'As senhas não conferem. Verifique.';
+        mensagemRegistro.className = 'mensagem-erro';
+        return;
+    }
+    if (senha.length < 6) {
+        mensagemRegistro.textContent = 'A senha deve ter ao menos 6 dígitos.';
+        mensagemRegistro.className = 'mensagem-erro';
+        return;
+    }
+    if (!isCpfValid(cpf)) {
+         mensagemRegistro.textContent = 'O CPF informado é inválido. Verifique.';
+         mensagemRegistro.className = 'mensagem-erro';
+         return;
+    }
+    if (!termosAceite) {
+        mensagemRegistro.textContent = 'Você precisa aceitar os Termos e Condições.';
+        mensagemRegistro.className = 'mensagem-erro';
+        return;
+    }
 
-        // --- CORREÇÃO APLICADA AQUI ---
+    // --- CORREÇÃO APLICADA AQUI ---
 
-        // 1. Tenta carregar os dados do questionário do localStorage
-        const storedAnswers = JSON.parse(localStorage.getItem('psi_questionario_respostas') || '{}');
+    // 1. Tenta carregar os dados do questionário do localStorage
+    const storedAnswers = JSON.parse(localStorage.getItem('psi_questionario_respostas') || '{}');
 
-        // 2. Coleta os dados deste formulário
-        const registrationData = {
-            nome: document.getElementById('nome-completo').value,
-            crp: crpInput.value,
-            cpf: cpf,
-            email: emailInput.value,
-            senha: senha,
-            invitationToken: tokenParam 
-        };
+    // 2. Coleta os dados deste formulário
+    const registrationData = {
+        nome: document.getElementById('nome-completo').value,
+        crp: crpInput.value,
+        cpf: cpf,
+        email: emailInput.value,
+        senha: senha,
+        invitationToken: tokenParam 
+    };
 
-        // 3. MESCLA os dois objetos. Os dados do registro (mais recentes) têm prioridade.
-        const dadosPsicologo = {
-            ...storedAnswers,
-            ...registrationData
-        };
+    // 3. MESCLA os dois objetos. Os dados do registro (mais recentes) têm prioridade.
+    const dadosPsicologo = {
+        ...storedAnswers,
+        ...registrationData
+    };
 
-        // --- FIM DA CORREÇÃO ---
+    // --- FIM DA CORREÇÃO ---
 
+    // --- CHAMADA DE API ---
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/psychologists/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dadosPsicologo) // Envia o payload mesclado
+        });
 
-        // --- CHAMADA DE API ---
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/psychologists/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dadosPsicologo) // Envia o payload mesclado
-            });
+        const result = await response.json();
 
-            const result = await response.json();
+        if (response.ok) { 
+            mensagemRegistro.textContent = result.message + " Redirecionando para o login...";
+            mensagemRegistro.className = 'mensagem-sucesso';
+            formRegistro.reset();
 
-            if (response.ok) { 
-                mensagemRegistro.textContent = result.message + " Redirecionando para o login...";
-                mensagemRegistro.className = 'mensagem-sucesso';
-                formRegistro.reset();
+            // 4. LIMPA o localStorage após o sucesso
+            localStorage.removeItem('psi_questionario_respostas');
 
-                // 4. LIMPA o localStorage após o sucesso
-                localStorage.removeItem('psi_questionario_respostas');
+            // Salva os dados de pré-login (que você já tinha)
+            localStorage.setItem('login_prefetch_email', registrationData.email);
+            localStorage.setItem('login_prefetch_role', 'psychologist');
 
-                // Salva os dados de pré-login (que você já tinha)
-                localStorage.setItem('login_prefetch_email', registrationData.email);
-                localStorage.setItem('login_prefetch_role', 'psychologist');
+            setTimeout(() => {
+                window.location.href = 'login.html'; 
+            }, 2000);
 
-                setTimeout(() => {
-                    window.location.href = 'login.html'; 
-                }, 2000);
-
-            } else {
-                mensagemRegistro.textContent = result.error;
-                mensagemRegistro.className = 'mensagem-erro';
-            }
-
-        } catch (error) {
-            console.error('Erro de conexão ou script:', error); 
-            mensagemRegistro.textContent = 'Erro ao conectar com o servidor. Verifique o console.';
+        } else {
+            mensagemRegistro.textContent = result.error;
             mensagemRegistro.className = 'mensagem-erro';
         }
-    });
+
+    } catch (error) {
+        console.error('Erro de conexão ou script:', error); 
+        mensagemRegistro.textContent = 'Erro ao conectar com o servidor. Verifique o console.';
+        mensagemRegistro.className = 'mensagem-erro';
+    }
+});
 });

@@ -228,66 +228,66 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initializeQuiz() {
-        slidesContainer.innerHTML = questions.map((q, i) => createSlideHTML(q, i)).join('');
-        
-        slidesContainer.addEventListener('click', (e) => {
-            const target = e.target;
-            if (target.matches('[data-action="next"]')) {
-                validateAndAdvance();
-            } else if (target.matches('[data-action="restart"]')) {
-                goToSlide(0); 
-            } else if (target.matches('[data-action="submit-validation"]')) {
-                
-                // --- CORREÇÃO APLICADA AQUI ---
-                // 1. Salva TODAS as respostas do questionário no localStorage
-                localStorage.setItem('psi_questionario_respostas', JSON.stringify(userAnswers));
+    slidesContainer.innerHTML = questions.map((q, i) => createSlideHTML(q, i)).join('');
+    
+    slidesContainer.addEventListener('click', (e) => {
+        const target = e.target;
+        if (target.matches('[data-action="next"]')) {
+            validateAndAdvance();
+        } else if (target.matches('[data-action="restart"]')) {
+            goToSlide(0); 
+        } else if (target.matches('[data-action="submit-validation"]')) {
+            
+            // --- CORREÇÃO APLICADA AQUI ---
+            // 1. Salva TODAS as respostas do questionário no localStorage
+            localStorage.setItem('psi_questionario_respostas', JSON.stringify(userAnswers));
 
-                // 2. Continua com o fluxo normal de redirect com os parâmetros da URL
-                const { nome, email, crp } = userAnswers;
-                const params = new URLSearchParams({
-                    nome: nome || '',
-                    email: email || '',
-                    crp: crp || ''
-                });
-                window.location.href = `psi_registro.html?${params.toString()}`;
+            // 2. Continua com o fluxo normal de redirect com os parâmetros da URL
+            const { nome, email, crp } = userAnswers;
+            const params = new URLSearchParams({
+                nome: nome || '',
+                email: email || '',
+                crp: crp || ''
+            });
+            window.location.href = `psi_registro.html?${params.toString()}`;
 
-            } else if (target.matches('[data-action="check"]')) {
-                const currentSlideEl = document.querySelector('.slide.active');
-                if (currentSlideEl.querySelectorAll('.choice-button.selected').length > 0) {
-                    checkDemand();
-                } else {
-                    validateAndAdvance(); 
-                }
-            } else if (target.matches('[data-action="submit-waitlist"]')) {
-                submitToWaitlist();
-            } else if (target.matches('.back-button')) {
-                goToSlide(currentStep - 1);
-            } else if (target.matches('.choice-button')) {
-                if (target.classList.contains('multi-choice')) {
-                    target.classList.toggle('selected');
-                } else {
-                    target.closest('.choices-container').querySelectorAll('.choice-button').forEach(btn => btn.classList.remove('selected'));
-                    target.classList.add('selected');
-                    collectAnswer();
-                    setTimeout(() => goToSlide(currentStep + 1), 200);
-                }
+        } else if (target.matches('[data-action="check"]')) {
+            const currentSlideEl = document.querySelector('.slide.active');
+            if (currentSlideEl.querySelectorAll('.choice-button.selected').length > 0) {
+                checkDemand();
+            } else {
+                validateAndAdvance(); 
+            }
+        } else if (target.matches('[data-action="submit-waitlist"]')) {
+            submitToWaitlist();
+        } else if (target.matches('.back-button')) {
+            goToSlide(currentStep - 1);
+        } else if (target.matches('.choice-button')) {
+            if (target.classList.contains('multi-choice')) {
+                target.classList.toggle('selected');
+            } else {
+                target.closest('.choices-container').querySelectorAll('.choice-button').forEach(btn => btn.classList.remove('selected'));
+                target.classList.add('selected');
+                collectAnswer();
+                setTimeout(() => goToSlide(currentStep + 1), 200);
+            }
+        }
+    });
+
+    const uploadInput = document.getElementById('crp-upload');
+    const uploadText = document.getElementById('upload-text');
+    if (uploadInput && uploadText) {
+        uploadInput.addEventListener('change', () => {
+            if (uploadInput.files.length > 0) {
+                uploadText.textContent = `Arquivo selecionado: ${uploadInput.files[0].name}`;
+            } else {
+                uploadText.textContent = 'Clique aqui para enviar a foto do seu CRP';
             }
         });
-
-        const uploadInput = document.getElementById('crp-upload');
-        const uploadText = document.getElementById('upload-text');
-        if (uploadInput && uploadText) {
-            uploadInput.addEventListener('change', () => {
-                if (uploadInput.files.length > 0) {
-                    uploadText.textContent = `Arquivo selecionado: ${uploadInput.files[0].name}`;
-                } else {
-                    uploadText.textContent = 'Clique aqui para enviar a foto do seu CRP';
-                }
-            });
-        }
-
-        goToSlide(0);
     }
+
+    goToSlide(0);
+}
 
     initializeQuiz();
 });

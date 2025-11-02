@@ -1018,6 +1018,41 @@ fieldset:disabled .multiselect-display {
     font-size: 14px;
     font-weight: 700;
 }
+/* ================================================== */
+/* PADRONIZAÇÃO DO MENU LATERAL (Igual ao Admin)      */
+/* ================================================== */
+
+.sidebar-nav ul {
+    padding: 0 16px; /* Adiciona um respiro lateral para o menu */
+    margin: 0;
+    list-style: none;
+}
+
+.sidebar-nav li a {
+    display: flex;
+    align-items: center;
+    height: 48px; /* Altura fixa para todos os botões */
+    padding: 0 16px; /* Espaçamento interno consistente */
+    text-decoration: none;
+    color: #ffffff; /* Cor do texto (assumindo branco do logo) */
+    font-weight: 500;
+    border-radius: 8px;
+    margin: 4px 0; /* Espaçamento vertical entre botões */
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.sidebar-nav li.active a {
+    background-color: #ffffff; /* Fundo branco para item ativo */
+    color: #1B4332; /* Cor do texto verde */
+}
+
+/* Garante que os badges (notificação, em breve) fiquem alinhados */
+.sidebar-nav li a .notification-badge,
+.sidebar-nav li a .badge-em-breve {
+    margin-left: auto; /* Empurra para a direita */
+    flex-shrink: 0; /* Impede que o badge encolha */
+}
+}
 /* --- ESTILOS PARA PAINEL DE INSIGHTS (PLANO LUZ) --- */
 .insights-secao {
     margin-top: 40px;
