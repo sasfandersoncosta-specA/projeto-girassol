@@ -1,8 +1,6 @@
-// Arquivo: profissionais.js (CORRIGIDO)
 document.addEventListener('DOMContentLoaded', () => {
     const questions = [
-        // ... (todo o seu array 'questions' permanece o mesmo) ...
-        { id: 'boas-vindas', type: 'welcome', question: "Junte-se à Nossa Comunidade de Profissionais", subtitle: "Olá! Ficamos felizes com seu interesse. Este pré-cadastro rápido nos ajudará a entender sua prática e a verificar a demanda de pacientes para o seu perfil." },        
+        { id: 'boas-vindas', type: 'welcome', question: "Boas-vindas ao Girassol, colega.", subtitle: "Este pré-cadastro rápido nos ajudará a entender sua prática e a verificar a demanda de pacientes para o seu perfil." },
         { id: 'nome', type: 'text', question: "Primeiro, qual o seu nome completo?", placeholder: "Nome Completo", required: true },
         { id: 'email', type: 'email', question: "Qual o seu melhor e-mail profissional?", placeholder: "E-mail Profissional", required: true },
         { id: 'crp', type: 'text', question: "E o seu número de registro no CRP?", placeholder: "Número do CRP (ex: 06/123456)", required: true },
@@ -25,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalQuestions = questions.filter(q => !['welcome', 'info', 'loading', 'approved', 'waitlisted', 'error'].includes(q.type)).length;
 
     function createSlideHTML(questionData, index) {
-        // ... (função createSlideHTML permanece idêntica) ...
         let contentHTML = '', navHTML = '';
         const isFirstInteractiveStep = questions.findIndex(q => !['welcome', 'info', 'error'].includes(q.type)) === index;
 
@@ -97,14 +94,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateProgressBar() {
-        // ... (função updateProgressBar permanece idêntica) ...
         const questionIndex = questions.slice(0, currentStep + 1).filter(q => !['welcome', 'info', 'loading', 'approved', 'waitlisted', 'error'].includes(q.type)).length;
         const progress = Math.max(0, (questionIndex / totalQuestions) * 100);
         progressBarFill.style.width = `${progress}%`;
     }
 
     function goToSlide(index) {
-        // ... (função goToSlide permanece idêntica) ...
         document.querySelector('.slide.active')?.classList.remove('active');
         currentStep = index;
         document.querySelector(`[data-index="${currentStep}"]`)?.classList.add('active');
@@ -126,7 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function collectAnswer() {
-        // ... (função collectAnswer permanece idêntica) ...
         const question = questions[currentStep];
         if (!question || !question.id) return;
 
@@ -140,7 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function validateAndAdvance() {
-        // ... (função validateAndAdvance permanece idêntica) ...
         const currentQuestion = questions[currentStep];
         const currentSlideEl = document.querySelector('.slide.active');
         if (!currentQuestion.required) {
@@ -182,7 +175,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function checkDemand() {
-        // ... (função checkDemand permanece idêntica) ...
         collectAnswer();
         goToSlide(questions.findIndex(q => q.id === 'loading'));
 
@@ -211,7 +203,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function submitToWaitlist() {
-        // ... (função submitToWaitlist permanece idêntica) ...
         const waitlistEmailInput = document.getElementById('input-waitlist-email');
         const email = waitlistEmailInput.value;
 
@@ -283,7 +274,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // ... (resto da função initializeQuiz permanece idêntico) ...
         const uploadInput = document.getElementById('crp-upload');
         const uploadText = document.getElementById('upload-text');
         if (uploadInput && uploadText) {

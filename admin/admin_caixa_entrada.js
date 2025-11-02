@@ -111,7 +111,7 @@ window.initializePage = function() {
      */
     async function fetchAndRenderConversations(searchTerm = '') {
         try {
-            const response = await fetch(`http://localhost:3001/api/admin/conversations?search=${searchTerm}`, {
+            const response = await fetch(`/api/admin/conversations?search=${searchTerm}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!response.ok) throw new Error('Falha ao buscar conversas.');
@@ -143,7 +143,7 @@ window.initializePage = function() {
 
         notesThreadContainer.innerHTML = '<p class="notes-empty-state">Carregando notas...</p>';
         try {
-            const response = await fetch(`http://localhost:3001/api/admin/conversations/${activeConversationId}/notes`, {
+            const response = await fetch(`/api/admin/conversations/${activeConversationId}/notes`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!response.ok) throw new Error('Falha ao buscar notas.');
@@ -190,7 +190,7 @@ window.initializePage = function() {
         if (!content || !activeConversationId) return;
 
         try {
-            const response = await fetch(`http://localhost:3001/api/admin/conversations/${activeConversationId}/notes`, {
+            const response = await fetch(`/api/admin/conversations/${activeConversationId}/notes`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -239,7 +239,7 @@ window.initializePage = function() {
      */
     async function fetchMessagesForConversation(conversationId) {
         messagesThreadContainer.innerHTML = '<p style="text-align:center; padding: 20px;">Carregando histórico...</p>';
-        const response = await fetch(`http://localhost:3001/api/admin/conversations/${conversationId}/messages`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const response = await fetch(`/api/admin/conversations/${conversationId}/messages`, { headers: { 'Authorization': `Bearer ${token}` } });
         const messages = await response.json();
         messagesThreadContainer.innerHTML = ''; // Limpa a thread
         messages.forEach(renderMessageBubble);
@@ -269,8 +269,8 @@ window.initializePage = function() {
                 'Confirmar Exclusão',
                 `<p>Você tem certeza que deseja excluir permanentemente a conversa com <strong>${contactName}</strong>? Todas as mensagens serão perdidas.</p>`,
                 async () => {
-                    try {
-                        const response = await fetch(`http://localhost:3001/api/admin/conversations/${conversationId}`, {
+                    try { 
+                        const response = await fetch(`/api/admin/conversations/${conversationId}`, {
                             method: 'DELETE',
                             headers: { 'Authorization': `Bearer ${token}` }
                         });
@@ -320,7 +320,7 @@ window.initializePage = function() {
 
             // 2. Envia a requisição para o backend para marcar como lido
             try {
-                await fetch(`http://localhost:3001/api/messaging/conversations/${activeConversationId}/read`, {
+                await fetch(`/api/messaging/conversations/${activeConversationId}/read`, {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
