@@ -122,10 +122,10 @@ if (elementosOcultos.length > 0) {
 
 // --- PONTO DE ENTRADA PRINCIPAL (NÃO MUDA) ---
 document.addEventListener("DOMContentLoaded", () => {
-    Promise.all([
-        carregarComponente('header.html', 'header-placeholder'),
-        carregarComponente('footer.html', 'footer-placeholder'),
-        carregarComponente('pwa-banner.html', 'pwa-banner-placeholder') // Carrega o novo banner
+    Promise.all([ 
+        carregarComponente('/components/header.html', 'header-placeholder'),
+        carregarComponente('/components/footer.html', 'footer-placeholder'),
+        carregarComponente('/components/pwa-banner.html', 'pwa-banner-placeholder') 
     ]).then(() => {
         inicializarScripts();
         // Carrega a vitrine DEPOIS de inicializar os scripts principais

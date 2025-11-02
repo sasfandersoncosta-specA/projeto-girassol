@@ -43,6 +43,11 @@ app.use('/api/admin', adminRoutes); // Adicionado
 // Esta linha deve vir DEPOIS das rotas da API.
 app.use(express.static(path.join(__dirname, '..')));
 
+// --- ROTA DE PERFIL PÚBLICO (SLUG) ---
+// Esta rota deve vir DEPOIS de `express.static` e ANTES do catch-all.
+// Ela captura URLs de primeiro nível (ex: /dr-anderson) que não são arquivos estáticos.
+app.get('/:slug', psychologistController.getProfileBySlug);
+
 // --- ROTAS DE FRONT-END (Catch-all) ---
 // Esta rota deve ser a ÚLTIMA. Ela captura qualquer requisição GET que não foi
 // tratada pelas rotas da API ou pelos arquivos estáticos.

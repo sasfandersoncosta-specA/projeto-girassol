@@ -946,6 +946,78 @@ fieldset:disabled .multiselect-display {
     height: auto;
     margin-bottom: 30px;
 }
+
+/* ================================================== */
+/* CORREÇÕES (MENU E ASSINATURA) */
+/* ================================================== */
+
+/* --- 3. Padronização do Menu Lateral --- */
+/* Isso força todos os botões do menu a terem o mesmo tamanho e espaçamento */
+.sidebar-nav ul {
+    padding: 0 16px; /* Adiciona um respiro lateral para o menu */
+    margin: 0;
+    list-style: none;
+}
+
+.sidebar-nav li a {
+    display: flex;
+    align-items: center;
+    height: 48px; /* Altura fixa para todos os botões */
+    padding: 0 16px; /* Espaçamento interno consistente */
+    text-decoration: none;
+    color: #ffffff; /* Cor do texto (assumindo branco do logo) */
+    font-weight: 500;
+    border-radius: 8px;
+    margin: 4px 0; /* Espaçamento vertical entre botões */
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.sidebar-nav li a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-nav li.active a {
+    background-color: #ffffff; /* Fundo branco para item ativo */
+    color: #1B4332; /* Cor do texto verde */
+}
+
+.sidebar-nav li a span {
+    flex-grow: 1; /* Faz o texto ocupar o espaço */
+}
+
+/* Garante que os badges (notificação, em breve) fiquem alinhados */
+.sidebar-nav li a .notification-badge,
+.sidebar-nav li a .badge-em-breve {
+    margin-left: auto; /* Empurra para a direita */
+}
+
+/* --- 2. Redução dos Cards de Assinatura --- */
+.plano-card {
+    max-width: 380px; 
+    margin: 16px auto; /* Centraliza o card na página */
+}
+
+/* ================================================== */
+/* CORREÇÃO: Botões do formulário "Meu Perfil" */
+/* ================================================== */
+
+/* Alinha os botões à direita dentro dos formulários */
+#perfil-form .form-actions,
+#password-form .form-actions {
+    text-align: right;
+    margin-top: 20px; /* Adiciona um respiro */
+}
+
+/* * Define um tamanho automático para os botões "Alterar", "Salvar" e "Alterar Senha",
+* sobrescrevendo o 'width: 100%' do style.css.
+*/
+#perfil-form .btn,
+#password-form .btn {
+    width: auto; /* Esta é a correção principal */
+    padding: 10px 24px; /* Garante que ambos tenham o mesmo padding */
+    font-size: 14px;
+    font-weight: 700;
+}
 /* --- ESTILOS PARA PAINEL DE INSIGHTS (PLANO LUZ) --- */
 .insights-secao {
     margin-top: 40px;
