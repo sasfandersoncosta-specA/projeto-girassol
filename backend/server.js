@@ -29,10 +29,6 @@ app.use(cors()); // Permite requisições de origens diferentes (seu frontend)
 app.use(express.json()); // Permite que o servidor entenda JSON no corpo das requisições
 app.use(express.urlencoded({ extended: true })); // Permite entender dados de formulários
 
-// --- SERVIR ARQUIVOS ESTÁTICOS (FRONT-END) ---
-// Aponta para a pasta raiz do projeto, onde estão os arquivos HTML, CSS, JS.
-app.use(express.static(path.join(__dirname, '..')));
-
 // --- ROTAS DA API ---
 // Todas as requisições que começam com /api/ são tratadas aqui primeiro.
 app.use('/api/patients', patientRoutes); // Todas as rotas de Pacientes (Registro, Login, Dados Pessoais)
@@ -40,6 +36,10 @@ app.use('/api/psychologists', psychologistRoutes); // Todas as rotas de Profissi
 app.use('/api/messaging', messageRoutes); // Adicionado
 app.use('/api/demand', demandRoutes); // Adicionado
 app.use('/api/admin', adminRoutes); // Adicionado
+
+// --- SERVIR ARQUIVOS ESTÁTICOS (FRONT-END) ---
+// Esta linha deve vir DEPOIS das rotas da API.
+app.use(express.static(path.join(__dirname, '..')));
 
 // --- ROTAS DE FRONT-END (Catch-all) ---
 // Esta rota deve ser a ÚLTIMA. Ela captura qualquer requisição GET que não foi
