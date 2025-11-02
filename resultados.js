@@ -2,7 +2,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const loadingState = document.getElementById('loading-state');
     const resultsContainer = document.getElementById('results-container');
-    const loginUrl = 'http://127.0.0.1:5500/login.html'; // URL para redirecionar se não houver login
+    const loginUrl = 'login.html'; // URL para redirecionar se não houver login
 
     // --- FUNÇÃO PARA CRIAR UM CARD DE PROFISSIONAL (REUTILIZÁVEL) ---
     function createProfileCard(profile, tier, compromiseText = "") {

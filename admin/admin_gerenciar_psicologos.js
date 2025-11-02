@@ -34,7 +34,7 @@ window.initializePage = function() {
         if (filters.status) params.append('status', filters.status);
         if (filters.plano) params.append('plano', filters.plano);
 
-        const url = `http://localhost:3001/api/admin/psychologists?${params.toString()}`;
+        const url = `${API_BASE_URL}/api/admin/psychologists?${params.toString()}`;
 
         try {
             const response = await fetch(url, {
@@ -98,7 +98,7 @@ window.initializePage = function() {
                     `<p>Você tem certeza que deseja <strong>${actionText}</strong> o perfil de ${psy.nome}?</p>`,
                     async () => {
                         try {
-                            const response = await fetch(`http://localhost:3001/api/admin/psychologists/${psy.id}/status`, {
+                            const response = await fetch(`${API_BASE_URL}/api/admin/psychologists/${psy.id}/status`, {
                                 method: 'PUT',
                                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                                 body: JSON.stringify({ status: newStatus })
@@ -119,7 +119,7 @@ window.initializePage = function() {
                     `<p>Esta ação é irreversível. Você tem certeza que deseja <strong>excluir permanentemente</strong> o perfil de ${psy.nome}?</p>`,
                     async () => {
                         try {
-                            const response = await fetch(`http://localhost:3001/api/admin/psychologists/${psy.id}`, {
+                            const response = await fetch(`${API_BASE_URL}/api/admin/psychologists/${psy.id}`, {
                                 method: 'DELETE',
                                 headers: { 'Authorization': `Bearer ${token}` }
                             });

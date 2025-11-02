@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
-            const response = await fetch('http://localhost:3001/api/psychologists/me', {
+            const response = await fetch(`${API_BASE_URL}/api/psychologists/me`, {
                 headers: { 'Authorization': `Bearer ${token}` },
                 signal: AbortSignal.timeout(8000) // Timeout de 8 segundos
             });
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!badge) return;
 
         try {
-            const response = await apiFetch('http://localhost:3001/api/psychologists/me/unread-count');
+            const response = await apiFetch(`${API_BASE_URL}/api/psychologists/me/unread-count`);
             if (response.ok) {
                 const data = await response.json();
                 badge.textContent = data.count;
@@ -326,7 +326,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     .toLowerCase()
                     .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres não alfanuméricos
                     .replace(/\s+/g, '-');
-                viewProfileLink.href = `http://localhost:3001/${slug}`;
+                viewProfileLink.href = `${API_BASE_URL}/${slug}`;
                 viewProfileLink.style.display = 'inline-block';
             }
         }
@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', function() {
             };
 
             try {
-                const response = await apiFetch('http://localhost:3001/api/psychologists/me', {
+                const response = await apiFetch(`${API_BASE_URL}/api/psychologists/me`, {
                     method: 'PUT',
                     body: payload
                 });
@@ -418,7 +418,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!token) { showToast('Você precisa estar logado.', 'error'); return; }
 
                 try {
-                    const response = await apiFetch('http://localhost:3001/api/psychologists/me/password', {
+                    const response = await apiFetch(`${API_BASE_URL}/api/psychologists/me/password`, {
                         method: 'PUT',
                         body: { senha_atual: senhaAtual, nova_senha: novaSenha }
                     });
@@ -469,7 +469,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
 
                     try {
-                        const response = await apiFetch('http://localhost:3001/api/psychologists/me', {
+                        const response = await apiFetch(`${API_BASE_URL}/api/psychologists/me`, {
                             method: 'DELETE',
                             body: { senha: senhaConfirmacao }
                         });
@@ -529,7 +529,7 @@ document.addEventListener('DOMContentLoaded', function() {
         async function loadConversations() {
             conversationListEl.innerHTML = '<li>Carregando conversas...</li>';
             try {
-                const response = await apiFetch('http://localhost:3001/api/messaging/conversations');
+                const response = await apiFetch(`${API_BASE_URL}/api/messaging/conversations`);
                 const conversations = await response.json();
                 
                 if (conversations.length === 0) {
@@ -557,7 +557,7 @@ document.addEventListener('DOMContentLoaded', function() {
         async function loadMessages(conversationId) {
             messageContentEl.innerHTML = '<p>Carregando mensagens...</p>';
             try {
-                const response = await apiFetch(`http://localhost:3001/api/messaging/conversations/${conversationId}`);
+                const response = await apiFetch(`${API_BASE_URL}/api/messaging/conversations/${conversationId}`);
                 const messages = await response.json();
 
                 // Lógica para renderizar o header e o corpo da mensagem
@@ -604,7 +604,7 @@ document.addEventListener('DOMContentLoaded', function() {
         tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px;">Carregando lista de espera...</td></tr>';
 
         try {
-            const response = await apiFetch('http://localhost:3001/api/psychologists/waiting-list');
+            const response = await apiFetch(`${API_BASE_URL}/api/psychologists/waiting-list`);
 
             if (!response.ok) {
                 throw new Error('Falha ao buscar a lista de espera.');
@@ -648,7 +648,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 try {
                     // Assumindo que o endpoint para convite manual seja este:
-                    const response = await apiFetch(`http://localhost:3001/api/admin/waiting-list/invite`, {
+                    const response = await apiFetch(`${API_BASE_URL}/api/admin/waiting-list/invite`, {
                         method: 'POST',
                         body: { id: psychologistId }
                     });

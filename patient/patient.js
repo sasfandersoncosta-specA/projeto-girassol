@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. VARIÁVEIS DE ESTADO E INFORMAÇÃO
     // -----------------------------------------------------
     let patientData = null; 
-    const loginUrl = 'http://127.0.0.1:5500/login.html'; 
+    const loginUrl = '../login.html'; 
     
     const menuToggle = document.getElementById('menu-toggle');
     const sidebar = document.getElementById('sidebar');
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch('http://localhost:3001/api/patients/me', {
+            const response = await fetch(`${API_BASE_URL}/api/patients/me`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}` 
@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const token = localStorage.getItem('girassol_token');
             
-            const response = await fetch('http://localhost:3001/api/psychologists/matches', {
+            const response = await fetch(`${API_BASE_URL}/api/psychologists/matches`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}` 
@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const token = localStorage.getItem('girassol_token');
-            const response = await fetch('http://localhost:3001/api/patients/me/favorites', {
+            const response = await fetch(`${API_BASE_URL}/api/patients/me/favorites`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const token = localStorage.getItem('girassol_token');
-            const response = await fetch('http://localhost:3001/api/patients/me/reviews', {
+            const response = await fetch(`${API_BASE_URL}/api/patients/me/reviews`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -286,8 +286,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const psychologistId = button.dataset.id;
                 const token = localStorage.getItem('girassol_token');
 
-                try {
-                    const response = await fetch('http://localhost:3001/api/patients/me/favorites', {
+                try { // prettier-ignore
+                    const response = await fetch(`${API_BASE_URL}/api/patients/me/favorites`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
@@ -357,7 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const token = localStorage.getItem('girassol_token');
 
             try {
-                const response = await fetch('http://localhost:3001/api/patients/me', {
+                const response = await fetch(`${API_BASE_URL}/api/patients/me`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -392,7 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const novaSenha = document.getElementById('nova-senha').value;
 
             try {
-                const response = await fetch('http://localhost:3001/api/patients/me/password', {
+                const response = await fetch(`${API_BASE_URL}/api/patients/me/password`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -446,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         try {
                             const token = localStorage.getItem('girassol_token');
-                            const response = await fetch('http://localhost:3001/api/patients/me', {
+                            const response = await fetch(`${API_BASE_URL}/api/patients/me`, {
                                 method: 'DELETE',
                                 headers: {
                                     'Content-Type': 'application/json',

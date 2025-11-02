@@ -38,7 +38,7 @@ window.initializePage = function() {
     // Busca e preenche os dados do admin
     async function fetchAdminData() {
         try {
-            const response = await fetch('http://localhost:3001/api/admin/me', {
+            const response = await fetch(`${API_BASE_URL}/api/admin/me`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!response.ok) throw new Error('Falha ao buscar dados do administrador.');
@@ -48,8 +48,8 @@ window.initializePage = function() {
             emailInput.value = admin.email || '';
             telefoneInput.value = admin.telefone || '';
             if (admin.fotoUrl) {
-                // Constrói a URL completa para a imagem
-                photoPreview.src = `http://localhost:3001${admin.fotoUrl}`;
+                // A URL da imagem agora é relativa à origem
+                photoPreview.src = `${API_BASE_URL}${admin.fotoUrl}`;
             }
 
         } catch (error) {
@@ -71,7 +71,7 @@ window.initializePage = function() {
         };
 
         try {
-            const response = await fetch('http://localhost:3001/api/admin/me', {
+            const response = await fetch(`${API_BASE_URL}/api/admin/me`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(payload)
@@ -119,7 +119,7 @@ window.initializePage = function() {
         };
 
         try {
-            const response = await fetch('http://localhost:3001/api/admin/me/password', {
+            const response = await fetch(`${API_BASE_URL}/api/admin/me/password`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(payload)
@@ -155,7 +155,7 @@ window.initializePage = function() {
         formData.append('profilePhoto', file);
 
         try {
-            const response = await fetch('http://localhost:3001/api/admin/me/photo', {
+            const response = await fetch(`${API_BASE_URL}/api/admin/me/photo`, {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData // Não defina 'Content-Type', o browser faz isso automaticamente para FormData
@@ -168,7 +168,7 @@ window.initializePage = function() {
             // Atualiza a foto no menu lateral também
             const sidebarPhoto = document.querySelector('#admin-avatar');
             if (sidebarPhoto) {
-                sidebarPhoto.src = `http://localhost:3001${result.fotoUrl}`;
+                sidebarPhoto.src = `${API_BASE_URL}${result.fotoUrl}`;
             }
 
         } catch (error) {
