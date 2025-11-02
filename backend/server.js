@@ -40,12 +40,11 @@ app.use('/api/messaging', messageRoutes); // Adicionado
 app.use('/api/demand', demandRoutes); // Adicionado
 app.use('/api/admin', adminRoutes); // Adicionado
 
-// --- ROTAS DE CAPTURA (Catch-all) ---
+// --- ROTAS DE FRONT-END ---
 // Rota para perfil público com URL amigável (deve vir antes da rota principal)
 app.get('/:slug', psychologistController.getProfileBySlug);
-
 // Rota principal que serve o index.html para qualquer outra requisição GET não capturada
-app.get('*', (req, res) => {
+app.get(/(.*)/, (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
