@@ -2326,6 +2326,163 @@ body.pagina-dashboard {
     transform: scale(1);
 }
 
+/* ================================================== */
+/* ESTILOS DE AUTENTICAÇÃO (Login / Registro) */
+/* ================================================== */
+
+/* Define o fundo da página (cinza claro) */
+.pagina-registro {
+    background-color: #f9fafb;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Centraliza o card na tela */
+.container-auth {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+/* O card branco que centraliza tudo e dá "espaço nas laterais" */
+.card-auth {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 32px 40px;
+    width: 100%;
+    max-width: 450px; /* Limita a largura máxima */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centraliza o conteúdo (logo, título) */
+}
+
+/* Logo dentro do card */
+.logo-auth {
+    width: 150px;
+    height: auto;
+    margin-bottom: 24px;
+}
+
+/* Título (Registro de Psicólogo) */
+.card-auth h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1B4332; /* Verde Girassol */
+    margin-bottom: 24px;
+    text-align: center; /* Centraliza o texto */
+}
+
+/* Formulário e seus grupos */
+.card-auth form {
+    width: 100%;
+}
+
+.form-group {
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151; /* Cinza escuro */
+    margin-bottom: 6px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #D1D5DB; /* Borda cinza clara */
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+/* Checkbox de Termos */
+.form-group-checkbox {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.form-group-checkbox input {
+    margin-right: 10px;
+}
+
+.form-group-checkbox label {
+    font-size: 13px;
+    color: #4b5563;
+}
+
+.form-group-checkbox label a {
+    color: #1B4332;
+    text-decoration: underline;
+}
+
+/* Botão principal (Registrar) */
+.btn.btn-principal {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    background-color: #1B4332;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn.btn-principal:hover {
+    background-color: #295e4a;
+}
+
+/* Mensagens de erro/sucesso */
+.mensagem-oculta {
+    display: none;
+}
+.mensagem-erro, .mensagem-sucesso {
+    width: 100%;
+    text-align: center;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 16px;
+    font-size: 14px;
+}
+.mensagem-erro {
+    background-color: #fef2f2;
+    color: #991b1b;
+}
+.mensagem-sucesso {
+    background-color: #ecfdf5;
+    color: #065f46;
+}
+
+/* Link inferior (Já tem uma conta?) */
+.link-auth {
+    margin-top: 24px;
+    font-size: 14px;
+    text-align: center; /* Centraliza o texto */
+    color: #4b5563;
+}
+
+.link-auth a {
+    color: #1B4332;
+    font-weight: 500;
+    text-decoration: none;
+}
+.link-auth a:hover {
+    text-decoration: underline;
+}
+
 /* Estilos do Banner PWA (iOS) */
 .pwa-banner {
     display: none; /* Começa escondido */

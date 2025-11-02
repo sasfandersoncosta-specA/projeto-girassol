@@ -60,6 +60,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // 3. VALIDAÇÃO DE 6 DÍGITOS ADICIONADA
+        if (senha.length < 6) {
+            mensagemRegistro.textContent = 'A senha deve ter ao menos 6 dígitos.';
+            mensagemRegistro.className = 'mensagem-erro';
+            return;
+        }
+
         if (!isCpfValid(cpf)) {
              mensagemRegistro.textContent = 'O CPF informado é inválido. Verifique.';
              mensagemRegistro.className = 'mensagem-erro';
@@ -97,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 formRegistro.reset();
 
                 setTimeout(() => {
-                    window.location.href = 'login.html'; // URL DE REDIRECT CORRETA
+                    window.location.href = 'login.html'; 
                 }, 2000);
 
             } else {
