@@ -1,20 +1,17 @@
-// Arquivo: profissionais.js
-
+// Arquivo: profissionais.js (CORRIGIDO)
 document.addEventListener('DOMContentLoaded', () => {
     const questions = [
-        // Etapa 1: Boas-vindas e Dados Básicos
+        // ... (todo o seu array 'questions' permanece o mesmo) ...
         { id: 'boas-vindas', type: 'welcome', question: "Junte-se à Nossa Comunidade de Profissionais", subtitle: "Olá! Ficamos felizes com seu interesse. Este pré-cadastro rápido nos ajudará a entender sua prática e a verificar a demanda de pacientes para o seu perfil." },        
         { id: 'nome', type: 'text', question: "Primeiro, qual o seu nome completo?", placeholder: "Nome Completo", required: true },
         { id: 'email', type: 'email', question: "Qual o seu melhor e-mail profissional?", placeholder: "E-mail Profissional", required: true },
         { id: 'crp', type: 'text', question: "E o seu número de registro no CRP?", placeholder: "Número do CRP (ex: 06/123456)", required: true },
-        // Etapa 2: Definição do Nicho
         { id: 'nicho-intro', type: 'info', question: "Entendendo sua Prática e Especialidades", subtitle: "Suas respostas aqui são cruciais. Elas definem seu 'nicho de mercado' e nos permitem verificar se há uma demanda ativa de pacientes para o seu perfil." },
         { id: 'genero_identidade', question: "Com qual gênero você se identifica?", type: 'choice', choices: ["Feminino", "Masculino", "Não-binário", "Outro"], required: true },
         { id: 'valor_sessao_faixa', question: "Em qual faixa de preço você pretende atender?", type: 'choice', choices: ["Até R$ 50", "R$ 51 - R$ 90", "R$ 91 - R$ 150", "Acima de R$ 150"], required: true },
         { id: 'temas_atuacao', question: "Quais são seus principais temas de atuação?", type: 'multiple-choice', scrollable: true, choices: ["Ansiedade", "Estresse", "Depressão", "Relacionamentos", "Carreira", "Autoestima", "Luto", "Traumas", "TDAH", "Sexualidade"], required: true },
         { id: 'abordagens_tecnicas', question: "Qual a sua principal abordagem teórica?", type: 'choice', scrollable: true, choices: ["Psicanálise", "Terapia Cognitivo-Comportamental (TCC)", "Humanista / Centrada na Pessoa", "Gestalt-terapia", "Análise do Comportamento (ABA)", "Sistêmica", "Outra"], required: true },
         { id: 'praticas_afirmativas', question: "Sua prática é afirmativa para quais comunidades ou perspectivas?", type: 'multiple-choice', scrollable: true, choices: ["LGBTQIAPN+ friendly", "Antirracista", "Feminista", "Neurodiversidade", "Nenhuma específica"], required: true, buttonText: "Verificar Demanda" },
-        // Telas de Resultado Dinâmico
         { id: 'loading', type: 'loading', question: "Analisando a demanda...", subtitle: "Estamos cruzando seus dados com as buscas de nossos pacientes. Só um instante." },
         { id: 'approved', type: 'approved', question: "Ótima notícia! Há uma grande procura por seu perfil.", subtitle: "Identificamos que há uma demanda ativa de pacientes buscando por profissionais com suas especialidades e faixa de preço. Estamos felizes em te convidar para a próxima etapa: a validação de suas credenciais." },
         { id: 'waitlisted', type: 'waitlisted', question: "Agradecemos seu interesse na Girassol!", subtitle: "No momento, a busca por profissionais com seu perfil específico já está bem atendida. Para garantir que todos os nossos parceiros tenham sucesso, adicionamos seu perfil à nossa lista de espera. Deixe seu e-mail abaixo para ser notificado(a) assim que surgir uma nova oportunidade.", buttonText: "Confirmar E-mail e Finalizar" },
@@ -28,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalQuestions = questions.filter(q => !['welcome', 'info', 'loading', 'approved', 'waitlisted', 'error'].includes(q.type)).length;
 
     function createSlideHTML(questionData, index) {
+        // ... (função createSlideHTML permanece idêntica) ...
         let contentHTML = '', navHTML = '';
         const isFirstInteractiveStep = questions.findIndex(q => !['welcome', 'info', 'error'].includes(q.type)) === index;
 
@@ -58,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 contentHTML = `<div class="loading-animation"><img src="assets/images/logo-girassol-icon.svg" alt="Carregando"></div>`;
                 break;
             case 'waitlisted':
-                // Adiciona o campo de e-mail à tela de lista de espera
                 contentHTML = `
                     <div class="form-group-questionario">
                         <input type="email" id="input-waitlist-email" class="text-input" placeholder=" " required>
@@ -100,27 +97,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateProgressBar() {
+        // ... (função updateProgressBar permanece idêntica) ...
         const questionIndex = questions.slice(0, currentStep + 1).filter(q => !['welcome', 'info', 'loading', 'approved', 'waitlisted', 'error'].includes(q.type)).length;
         const progress = Math.max(0, (questionIndex / totalQuestions) * 100);
         progressBarFill.style.width = `${progress}%`;
     }
 
     function goToSlide(index) {
+        // ... (função goToSlide permanece idêntica) ...
         document.querySelector('.slide.active')?.classList.remove('active');
         currentStep = index;
         document.querySelector(`[data-index="${currentStep}"]`)?.classList.add('active');
         updateProgressBar();
 
-        // --- APLICA A MÁSCARA DE INPUT PARA O CRP ---
         const currentQuestion = questions[currentStep];
         if (currentQuestion && currentQuestion.id === 'crp') {
             const crpInput = document.getElementById(`input-${currentQuestion.id}`);
-            // Garante que a biblioteca IMask esteja disponível
             if (crpInput && window.IMask) {
                 IMask(crpInput, { mask: '00/000000' });
             }
         }
-        // Pré-preenche o e-mail na tela de waitlist, se já tiver sido digitado
         if (currentQuestion && currentQuestion.id === 'waitlisted') {
             const waitlistEmailInput = document.getElementById('input-waitlist-email');
             if (waitlistEmailInput && userAnswers.email) {
@@ -130,6 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function collectAnswer() {
+        // ... (função collectAnswer permanece idêntica) ...
         const question = questions[currentStep];
         if (!question || !question.id) return;
 
@@ -143,6 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function validateAndAdvance() {
+        // ... (função validateAndAdvance permanece idêntica) ...
         const currentQuestion = questions[currentStep];
         const currentSlideEl = document.querySelector('.slide.active');
         if (!currentQuestion.required) {
@@ -154,14 +152,12 @@ document.addEventListener('DOMContentLoaded', () => {
         let isValid = true;
         let elementToShake;
 
-        // Função de validação de email
         const isEmailValid = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        // Função de validação de CRP (formato 00/000000)
         const isCrpValid = (crp) => /^\d{2}\/\d{6}$/.test(crp);
 
         if (['text', 'email'].includes(currentQuestion.type)) {
             const input = document.getElementById(`input-${currentQuestion.id}`);
-            elementToShake = input.parentElement; // Anima o grupo do formulário
+            elementToShake = input.parentElement; 
 
             const value = input.value.trim();
             if (!value) {
@@ -186,6 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function checkDemand() {
+        // ... (função checkDemand permanece idêntica) ...
         collectAnswer();
         goToSlide(questions.findIndex(q => q.id === 'loading'));
 
@@ -214,6 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function submitToWaitlist() {
+        // ... (função submitToWaitlist permanece idêntica) ...
         const waitlistEmailInput = document.getElementById('input-waitlist-email');
         const email = waitlistEmailInput.value;
 
@@ -223,7 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Atualiza o e-mail nas respostas caso tenha sido alterado
         userAnswers.email = email;
 
         try {
@@ -232,7 +229,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(userAnswers)
             });
-            // Redireciona para uma página de agradecimento ou para a home
             window.location.href = 'obrigado_lista_espera.html';
         } catch (error) {
             console.error("Erro ao adicionar à lista de espera:", error);
@@ -248,25 +244,28 @@ document.addEventListener('DOMContentLoaded', () => {
             if (target.matches('[data-action="next"]')) {
                 validateAndAdvance();
             } else if (target.matches('[data-action="restart"]')) {
-                goToSlide(0); // Volta para o início
+                goToSlide(0); 
             } else if (target.matches('[data-action="submit-validation"]')) {
-                // Simula o envio do CRP e redireciona para a página de registro
+                
+                // --- CORREÇÃO APLICADA AQUI ---
+                // 1. Salva TODAS as respostas do questionário no localStorage
+                localStorage.setItem('psi_questionario_respostas', JSON.stringify(userAnswers));
+
+                // 2. Continua com o fluxo normal de redirect com os parâmetros da URL
                 const { nome, email, crp } = userAnswers;
                 const params = new URLSearchParams({
                     nome: nome || '',
                     email: email || '',
                     crp: crp || ''
                 });
-                // A página psi_registro.html já sabe como ler esses parâmetros
                 window.location.href = `psi_registro.html?${params.toString()}`;
 
             } else if (target.matches('[data-action="check"]')) {
-                // Validação antes de verificar a demanda
                 const currentSlideEl = document.querySelector('.slide.active');
                 if (currentSlideEl.querySelectorAll('.choice-button.selected').length > 0) {
                     checkDemand();
                 } else {
-                    validateAndAdvance(); // Reutiliza a lógica de validação e shake
+                    validateAndAdvance(); 
                 }
             } else if (target.matches('[data-action="submit-waitlist"]')) {
                 submitToWaitlist();
@@ -284,6 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        // ... (resto da função initializeQuiz permanece idêntico) ...
         const uploadInput = document.getElementById('crp-upload');
         const uploadText = document.getElementById('upload-text');
         if (uploadInput && uploadText) {

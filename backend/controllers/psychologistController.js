@@ -30,10 +30,16 @@ const generateSlug = (name) => {
 // ----------------------------------------------------------------------
 exports.registerPsychologist = async (req, res) => {
     try {
-        const { nome, email, senha, crp, invitationToken } = req.body;
+        // 1. DADOS EXPANDIDOS: Agora inclui todos os campos do questionário
+        const { 
+            nome, email, senha, crp, cpf, invitationToken,
+            // Campos adicionados do questionário:
+            genero_identidade, valor_sessao_faixa, temas_atuacao, 
+            abordagens_tecnicas, praticas_afirmativas, disponibilidade_periodo
+        } = req.body;
 
-        if (!nome || !email || !senha || !crp) {
-            return res.status(400).json({ error: 'Nome, email, senha e CRP são obrigatórios.' });
+        if (!nome || !email || !senha || !crp || !cpf) {
+            return res.status(400).json({ error: 'Nome, email, senha, CRP e CPF são obrigatórios.' });
         }
 
         // Validação do convite (APENAS se um token for fornecido)
@@ -63,15 +69,31 @@ exports.registerPsychologist = async (req, res) => {
             return res.status(409).json({ error: 'Este CRP já está cadastrado.' });
         }
 
+        // Verifica se o CPF já está cadastrado
+        const existingCpf = await db.Psychologist.findOne({ where: { cpf: cpf } });
+        if (existingCpf) {
+            return res.status(409).json({ error: 'Este CPF já está cadastrado.' });
+        }
+        
         const hashedPassword = await bcrypt.hash(senha, 10);
 
+        // 2. CREATE EXPANDIDO: Salva os dados do registro E do questionário
         const newPsychologist = await db.Psychologist.create({
             nome,
             email,
             senha: hashedPassword,
             crp,
-            slug: generateSlug(nome), // Gera o slug no registro
-            // Os outros campos serão preenchidos posteriormente no perfil do psicólogo
+            cpf,
+            slug: generateSlug(nome),
+            status: 'active', // Define o status como ativo no registro
+
+            // Campos do questionário agora sendo salvos:
+            genero_identidade: genero_identidade,
+            valor_sessao_faixa: valor_sessao_faixa, 
+            temas_atuacao: temas_atuacao,
+            abordagens_tecnicas: abordagens_tecnicas ? [abordagens_tecnicas] : [], // Garante que seja um array se vier único
+            praticas_vivencias: praticas_afirmativas, // Mapeia praticas_afirmativas para praticas_vivencias
+            disponibilidade_periodo: disponibilidade_periodo
         });
 
         // Se o registro foi bem-sucedido e veio de um convite, remove da lista de espera

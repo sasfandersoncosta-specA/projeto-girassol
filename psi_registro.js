@@ -1,3 +1,4 @@
+// Arquivo: psi_registro.js (CORRIGIDO)
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- MÁSCARAS DE INPUT ---
@@ -27,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const crpParam = params.get('crp');
     const tokenParam = params.get('token'); 
 
-    const emailInput = document.getElementById('email'); // Definido aqui para usar depois
+    const emailInput = document.getElementById('email'); 
 
     if (nomeParam) document.getElementById('nome-completo').value = nomeParam;
     if (emailParam) emailInput.value = emailParam;
@@ -47,15 +48,12 @@ document.addEventListener('DOMContentLoaded', () => {
         mensagemRegistro.textContent = '';
         mensagemRegistro.className = 'mensagem-oculta'; 
 
-        const nome = document.getElementById('nome-completo').value;
-        const crp = crpInput.value;
-        const cpf = cpfInput.value;
-        const email = emailInput.value; // Pega o valor do e-mail
+        // --- VALIDAÇÕES (permanecem as mesmas) ---
         const senha = document.getElementById('senha').value;
         const confirmarSenha = document.getElementById('confirmar-senha').value;
+        const cpf = cpfInput.value;
         const termosAceite = document.getElementById('termos-aceite').checked;
-        
-        // --- VALIDAÇÕES ---
+
         if (senha !== confirmarSenha) {
             mensagemRegistro.textContent = 'As senhas não conferem. Verifique.';
             mensagemRegistro.className = 'mensagem-erro';
@@ -77,17 +75,36 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const dadosPsicologo = {
-            nome: nome, crp: crp, cpf: cpf,
-            email: email, senha: senha, invitationToken: tokenParam 
+        // --- CORREÇÃO APLICADA AQUI ---
+
+        // 1. Tenta carregar os dados do questionário do localStorage
+        const storedAnswers = JSON.parse(localStorage.getItem('psi_questionario_respostas') || '{}');
+
+        // 2. Coleta os dados deste formulário
+        const registrationData = {
+            nome: document.getElementById('nome-completo').value,
+            crp: crpInput.value,
+            cpf: cpf,
+            email: emailInput.value,
+            senha: senha,
+            invitationToken: tokenParam 
         };
+
+        // 3. MESCLA os dois objetos. Os dados do registro (mais recentes) têm prioridade.
+        const dadosPsicologo = {
+            ...storedAnswers,
+            ...registrationData
+        };
+
+        // --- FIM DA CORREÇÃO ---
+
 
         // --- CHAMADA DE API ---
         try {
             const response = await fetch(`${API_BASE_URL}/api/psychologists/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dadosPsicologo)
+                body: JSON.stringify(dadosPsicologo) // Envia o payload mesclado
             });
 
             const result = await response.json();
@@ -97,10 +114,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 mensagemRegistro.className = 'mensagem-sucesso';
                 formRegistro.reset();
 
-                // --- ADICIONADO (FEATURE REQUEST) ---
-                localStorage.setItem('login_prefetch_email', email);
+                // 4. LIMPA o localStorage após o sucesso
+                localStorage.removeItem('psi_questionario_respostas');
+
+                // Salva os dados de pré-login (que você já tinha)
+                localStorage.setItem('login_prefetch_email', registrationData.email);
                 localStorage.setItem('login_prefetch_role', 'psychologist');
-                // ------------------------------------
 
                 setTimeout(() => {
                     window.location.href = 'login.html'; 
