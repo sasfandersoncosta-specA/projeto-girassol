@@ -33,18 +33,20 @@ app.use(express.urlencoded({ extended: true })); // Permite entender dados de fo
 // Aponta para a pasta raiz do projeto, onde estão os arquivos HTML, CSS, JS.
 app.use(express.static(path.join(__dirname, '..')));
 
-// Futuras Rotas da API
+// --- ROTAS DA API ---
+// Todas as requisições que começam com /api/ são tratadas aqui primeiro.
 app.use('/api/patients', patientRoutes); // Todas as rotas de Pacientes (Registro, Login, Dados Pessoais)
 app.use('/api/psychologists', psychologistRoutes); // Todas as rotas de Profissionais (Registro, Login, etc)
 app.use('/api/messaging', messageRoutes); // Adicionado
 app.use('/api/demand', demandRoutes); // Adicionado
 app.use('/api/admin', adminRoutes); // Adicionado
 
-// --- ROTAS DE FRONT-END ---
-// Rota para perfil público com URL amigável (deve vir antes da rota principal)
-app.get('/:slug', psychologistController.getProfileBySlug);
-// Rota principal que serve o index.html para qualquer outra requisição GET não capturada
-app.get(/(.*)/, (req, res) => {
+// --- ROTAS DE FRONT-END (Catch-all) ---
+// Esta rota deve ser a ÚLTIMA. Ela captura qualquer requisição GET que não foi
+// tratada pelas rotas da API ou pelos arquivos estáticos.
+app.get('*', (req, res) => {
+    // Envia o index.html para o navegador, permitindo que o roteamento do
+    // lado do cliente (front-end) assuma o controle.
     res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
