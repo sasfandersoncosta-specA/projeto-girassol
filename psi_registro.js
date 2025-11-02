@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 formRegistro.reset();
 
                 setTimeout(() => {
-                    window.location.href = 'psi_login.html'; 
+                    window.location.href = 'login.html';
                 }, 2000);
 
             } else {
