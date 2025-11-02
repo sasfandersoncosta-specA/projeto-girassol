@@ -66,26 +66,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const navLinks = document.querySelectorAll('.sidebar-nav li');
         const sidebar = document.querySelector('.dashboard-sidebar');
         const toggleButton = document.getElementById('toggleSidebar');
-        const logoutButton = document.querySelector('.btn-sair');
-
-        // Adiciona o evento de clique ao botão de sair
-        if (logoutButton) {
-            logoutButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                logout();
-            });
-        }
 
         /**
          * Função principal: busca o conteúdo de um arquivo HTML e o insere na página.
          */
         function loadPage(pageUrl) {
-            if (!pageUrl) return;
+            // Garante que a URL da página comece com /admin/
+            const absolutePageUrl = `/admin/${pageUrl}`;
     
             // Mostra um feedback de carregamento
             mainContent.innerHTML = '<p style="text-align:center; padding: 40px;">Carregando...</p>';
     
-            fetch(pageUrl) // O caminho já está correto, ex: "admin_visao_geral.html"
+            fetch(absolutePageUrl)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`Arquivo não encontrado: ${pageUrl}`);
@@ -102,7 +94,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         oldScript.remove();
                     }
 
-                    const scriptName = pageUrl.replace('.html', '.js');
+                    // Cria o caminho absoluto para o script
+                    const scriptName = absolutePageUrl.replace('.html', '.js');
                     const script = document.createElement('script');
                     script.src = scriptName;
                     script.id = 'dynamic-page-script'; // Adiciona um ID para fácil remoção no futuro
@@ -198,7 +191,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    /**
+     * Configura eventos globais da página que não dependem de autenticação, como o botão de sair.
+     */
+    function setupGlobalEvents() {
+        const logoutButton = document.querySelector('.btn-sair');
+        if (logoutButton) {
+            logoutButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                logout();
+            });
+        }
+    }
+
     // Ponto de entrada: Inicia a verificação de segurança.
     initializeAndProtect();
     setupConfirmationModal(); // Inicializa o modal
+    setupGlobalEvents(); // Configura eventos globais como o de logout
 });
