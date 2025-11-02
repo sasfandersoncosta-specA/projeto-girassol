@@ -12,6 +12,9 @@ async function seedTestData() {
             .replace(/\s+/g, '-');
     };
     try {
+        // --- Cria as tabelas no banco de dados (se ainda não existirem) ---
+        await db.sequelize.sync({ force: true });
+        console.log("Tabelas sincronizadas com sucesso no banco de dados Render.");
 
         // --- 1. Criar um Paciente de Teste ---
         const patientPassword = await bcrypt.hash('password123', 10);
@@ -136,3 +139,5 @@ async function seedTestData() {
 
 // Exporta a função para que possa ser chamada pelo server.js
 module.exports = seedTestData;
+// Executa automaticamente se o script for rodado diretamente
+seedTestData();
