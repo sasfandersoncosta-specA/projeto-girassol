@@ -161,3 +161,47 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
+
+window.addEventListener('load', () => {
+    // Função para detectar iOS
+    function isIOS() {
+        return [
+            'iPad Simulator',
+            'iPhone Simulator',
+            'iPod Simulator',
+            'iPad',
+            'iPhone',
+            'iPod'
+        ].includes(navigator.platform)
+        // Adiciona verificação de userAgent para Safari, caso a plataforma falhe
+        || (navigator.userAgent.includes("Mac") && "ontouchend" in document) 
+        || navigator.userAgent.includes("iPhone");
+    }
+
+    // Função para verificar se está no modo standalone (PWA)
+    function isInStandaloneMode() {
+        return ('standalone' in window.navigator) && (window.navigator.standalone);
+    }
+
+    // Função para verificar se já dispensou o banner
+    function hasDismissedBanner() {
+        return localStorage.getItem('pwaInstallDismissed') === 'true';
+    }
+
+    // Lógica principal
+    if (isIOS() && !isInStandaloneMode() && !hasDismissedBanner()) {
+        const banner = document.getElementById('pwa-install-banner');
+        const closeButton = document.getElementById('pwa-banner-close');
+
+        if (banner && closeButton) {
+            // Mostra o banner
+            banner.style.display = 'block';
+
+            // Adiciona evento ao botão de fechar
+            closeButton.addEventListener('click', () => {
+                banner.style.display = 'none';
+                localStorage.setItem('pwaInstallDismissed', 'true');
+            });
+        }
+    }
+});

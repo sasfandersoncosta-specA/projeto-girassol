@@ -2326,6 +2326,67 @@ body.pagina-dashboard {
     transform: scale(1);
 }
 
+/* Estilos do Banner PWA (iOS) */
+.pwa-banner {
+    display: none; /* Começa escondido */
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    background-color: #f4f4f4;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+    border: 1px solid #ddd;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.pwa-banner-content {
+    display: flex;
+    align-items: center;
+}
+
+.pwa-banner-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.pwa-banner-content div {
+    flex-grow: 1;
+}
+
+.pwa-banner-content strong {
+    font-size: 15px;
+    color: #333;
+    display: block;
+}
+
+.pwa-banner-content p {
+    font-size: 13px;
+    color: #555;
+    margin: 4px 0 0 0;
+    line-height: 1.4;
+}
+
+.pwa-banner-close {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #aaa;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 .modal-header h2 { margin: 0; font-family: 'New Kansas', serif; color: var(--verde-escuro); }
 .modal-close { background: none; border: none; font-size: 2rem; cursor: pointer; color: #aaa; }
