@@ -17,6 +17,8 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     async function initializeAndProtect() {
         const token = localStorage.getItem('girassol_token');
+
+
         if (!token) {
             logout();
             return; // Interrompe a execução
