@@ -991,16 +991,6 @@ fieldset:disabled .multiselect-display {
     margin-left: auto; /* Empurra para a direita */
 }
 
-/* --- 2. Redução dos Cards de Assinatura --- */
-.plano-card {
-    max-width: 380px; 
-    margin: 16px auto; /* Centraliza o card na página */
-}
-
-/* ================================================== */
-/* CORREÇÃO: Botões do formulário "Meu Perfil" */
-/* ================================================== */
-
 /* Alinha os botões à direita dentro dos formulários */
 #perfil-form .form-actions,
 #password-form .form-actions {
@@ -1051,6 +1041,51 @@ fieldset:disabled .multiselect-display {
 .sidebar-nav li a .badge-em-breve {
     margin-left: auto; /* Empurra para a direita */
     flex-shrink: 0; /* Impede que o badge encolha */
+}
+
+/* ================================================== */
+/* AJUSTES FINAIS DO DASHBOARD PSI */
+/* ================================================== */
+
+/* --- 5. Menu lateral 20% mais estreito --- */
+.dashboard-sidebar {
+    width: 240px; /* O padrão parecia ser ~300px, 240px é ~20% menor */
+    /* Se o seu menu mobile quebrar, talvez precise ajustar o @media query */
+}
+
+/* --- 3. Cards de plano lado a lado --- */
+/* Assumindo que os cards estão dentro de um container com a classe .planos-container */
+.planos-container {
+    display: flex;
+    flex-wrap: wrap; /* Permite quebrar em telas menores */
+    justify-content: center;
+    gap: 24px; /* Espaçamento entre os cards */
+}
+
+/* Ajusta os cards de plano para o layout flex */
+.plano-card {
+    flex: 1 1 300px; /* Flex-grow, flex-shrink, flex-basis */
+    max-width: 320px; /* Limita a largura máxima de cada card */
+    margin: 0; /* Remove margens automáticas para o flex controlar */
+}
+
+/* --- 4. Botão "Me avise" (Comunidade) --- */
+.btn-avise {
+    display: inline-block;
+    padding: 12px 24px;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background-color: #1B4332; /* Verde principal */
+    color: #ffffff; /* Texto branco */
+    transition: background-color 0.2s;
+}
+.btn-avise:hover {
+    background-color: #295e4a; /* Verde mais escuro no hover */
 }
 }
 /* --- ESTILOS PARA PAINEL DE INSIGHTS (PLANO LUZ) --- */
