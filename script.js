@@ -125,7 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
     Promise.all([ 
         carregarComponente('/components/header.html', 'header-placeholder'),
         carregarComponente('/components/footer.html', 'footer-placeholder'),
-        carregarComponente('/components/pwa-banner.html', 'pwa-banner-placeholder') 
+        carregarComponente('/components/pwa-banner.html', 'pwa-banner-placeholder')
     ]).then(() => {
         inicializarScripts();
         // Carrega a vitrine DEPOIS de inicializar os scripts principais
