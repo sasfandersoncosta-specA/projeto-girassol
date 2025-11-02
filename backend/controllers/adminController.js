@@ -19,6 +19,13 @@ exports.loginAdmin = async (req, res) => {
         const adminUser = await db.Psychologist.findOne({ where: { email, isAdmin: true } });
 
         if (adminUser && (await bcrypt.compare(senha, adminUser.senha))) {
+            // --- GERAÇÃO DE LOG REAL ---
+            await db.SystemLog.create({
+                level: 'info',
+                message: `Login de administrador bem-sucedido: ${adminUser.email}`,
+                meta: { adminId: adminUser.id }
+            });
+
             res.status(200).json({ token: generateAdminToken(adminUser.id) });
         } else {
             res.status(401).json({ error: 'Credenciais de administrador inválidas.' });
@@ -783,19 +790,153 @@ exports.getNewUsersPerMonth = async (req, res) => {
         });
 
         // Formata os dados para o Chart.js
-        const labels = [];
-        const patientData = [];
-        const psychologistData = [];
+        const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+        const labels = Array.from({ length: 6 }, (_, i) => {
+            const d = new Date();
+            d.setMonth(d.getMonth() - 5 + i);
+            return monthNames[d.getMonth()];
+        });
+
+        const dataMap = new Map();
+        labels.forEach(label => dataMap.set(label, { patients: 0, psychologists: 0 }));
+
+        newPatients.forEach(item => {
+            const monthName = monthNames[new Date(item.dataValues.month).getMonth()];
+            if (dataMap.has(monthName)) {
+                dataMap.get(monthName).patients = parseInt(item.dataValues.count, 10);
+            }
+        });
+
+        newPsychologists.forEach(item => {
+            const monthName = monthNames[new Date(item.dataValues.month).getMonth()];
+            if (dataMap.has(monthName)) {
+                dataMap.get(monthName).psychologists = parseInt(item.dataValues.count, 10);
+            }
+        });
+
+        const patientData = labels.map(label => dataMap.get(label).patients);
+        const psychologistData = labels.map(label => dataMap.get(label).psychologists);
 
         // Lógica para combinar os dados e preencher os meses vazios
         // (Esta parte pode ser mais elaborada para garantir todos os 6 meses no eixo X)
 
-        // Exemplo simplificado:
-        // Você precisaria de uma lógica mais robusta para mesclar os dados por mês.
-
         res.status(200).json({ labels, patientData, psychologistData });
     } catch (error) {
         console.error('Erro ao buscar dados para o gráfico de novos usuários:', error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
+};
+
+/**
+ * Rota: GET /api/admin/financials
+ * Descrição: Busca dados financeiros para o dashboard.
+ */
+exports.getFinancials = async (req, res) => {
+    try {
+        // Busca Planos Ativos reais do banco
+        const activePsychologists = await db.Psychologist.findAll({
+            where: {
+                plano: { [Op.ne]: null },
+                status: 'active'
+            },
+            attributes: ['nome', 'plano', 'updatedAt'] // updatedAt pode simular a data do próximo pagamento
+        });
+
+        const planPrices = { 'Semente': 59.90, 'Luz': 89.90, 'Sol': 129.90 };
+
+        // Cálculo do MRR
+        const mrr = activePsychologists.reduce((acc, psy) => acc + (planPrices[psy.plano] || 0), 0);
+
+        // --- Cálculo do Churn Rate (real) ---
+        const thirtyDaysAgo = new Date(new Date().setDate(new Date().getDate() - 30));
+        // Conta psicólogos que se tornaram inativos nos últimos 30 dias
+        const churnedCount = await db.Psychologist.count({
+            where: {
+                status: 'inactive',
+                updatedAt: { [Op.gte]: thirtyDaysAgo }
+            }
+        });
+
+        const totalActiveCount = activePsychologists.length;
+        const totalUsersAtStartOfMonth = totalActiveCount + churnedCount;
+        
+        const churnRate = totalUsersAtStartOfMonth > 0 ? (churnedCount / totalUsersAtStartOfMonth) * 100 : 0;
+        const ltv = churnRate > 0 ? (mrr / totalActiveCount) / (churnRate / 100) : 0;
+
+        const kpis = {
+            mrr: mrr,
+            churnRate: churnRate.toFixed(1), // Formata para uma casa decimal
+            ltv: ltv,
+        };
+
+        // Simulação de Faturas Recentes
+        // Em um sistema real, você buscaria de uma tabela 'Invoices' ou 'Payments'
+        const recentInvoices = [
+            { psychologistName: 'Dra. Ana Psicóloga', date: new Date(), amount: 89.90, status: 'Paga' },
+            { psychologistName: 'Dr. Carlos Terapeuta', date: new Date(), amount: 59.90, status: 'Paga' },
+        ];
+
+        const activePlans = activePsychologists.map(psy => ({
+            psychologistName: psy.nome,
+            planName: psy.plano,
+            mrr: planPrices[psy.plano] || 0,
+            nextBilling: new Date(new Date(psy.updatedAt).setMonth(new Date(psy.updatedAt).getMonth() + 1)) // Simula próximo pagamento
+        }));
+
+        res.status(200).json({
+            kpis,
+            recentInvoices,
+            activePlans
+        });
+
+    } catch (error) {
+        console.error('Erro ao buscar dados financeiros:', error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
+};
+
+/**
+ * Rota: PUT /api/admin/psychologists/:id/status
+ * Descrição: Atualiza o status de um psicólogo (ex: 'active', 'inactive').
+ */
+exports.updatePsychologistStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        if (!status || !['active', 'inactive', 'pending'].includes(status)) {
+            return res.status(400).json({ error: 'Status inválido.' });
+        }
+
+        const psychologist = await db.Psychologist.findByPk(id);
+        if (!psychologist) {
+            return res.status(404).json({ error: 'Psicólogo não encontrado.' });
+        }
+
+        await psychologist.update({ status });
+        res.status(200).json(psychologist);
+
+    } catch (error) {
+        console.error('Erro ao atualizar status do psicólogo:', error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
+};
+
+/**
+ * Rota: DELETE /api/admin/psychologists/:id
+ * Descrição: Exclui permanentemente um psicólogo.
+ */
+exports.deletePsychologist = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const psychologist = await db.Psychologist.findByPk(id);
+        if (!psychologist) {
+            return res.status(404).json({ error: 'Psicólogo não encontrado.' });
+        }
+        await psychologist.destroy();
+        res.status(200).json({ message: 'Psicólogo excluído com sucesso.' });
+    } catch (error) {
+        console.error('Erro ao excluir psicólogo:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };

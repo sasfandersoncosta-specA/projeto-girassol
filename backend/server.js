@@ -28,6 +28,9 @@ app.use(cors()); // Permite requisições de origens diferentes (seu frontend)
 app.use(express.json()); // Permite que o servidor entenda JSON no corpo das requisições
 app.use(express.urlencoded({ extended: true })); // Permite entender dados de formulários
 
+// --- CORREÇÃO: Servir arquivos estáticos ---
+app.use(express.static('public')); // Torna a pasta 'public' acessível publicamente
+
 // Rota de Teste Simples
 app.get('/', (req, res) => {
     res.json({ message: 'Bem-vindo à API Jano! Status: OK' });
@@ -55,8 +58,9 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 // Em produção, usamos sync() sem 'force' para não perder dados.
 const startServer = async () => {
     if (isDevelopment) {
-        await db.sequelize.sync({ force: true });
-        console.log('Banco de dados sincronizado com { force: true }');
+        // CORREÇÃO: Removido { force: true } para garantir a persistência dos dados.
+        await db.sequelize.sync(); // A opção { force: true } foi removida.
+        console.log('Banco de dados sincronizado (sem forçar).');
         await seedTestData();
     }
 

@@ -1,5 +1,6 @@
 const db = require('../models');
 const bcrypt = require('bcryptjs');
+const { Op } = require('sequelize');
 
 async function seedTestData() {
     // Função Auxiliar: Gera um slug a partir de um nome
@@ -110,11 +111,16 @@ async function seedTestData() {
             isAdmin: true // Define este usuário como administrador
         };
 
-        let adminUser = await db.Psychologist.findOne({ where: { email: adminData.email } });
+        // CORREÇÃO: Procura pelo admin usando o email OU o CRP para evitar erro de duplicidade.
+        let adminUser = await db.Psychologist.findOne({
+            where: {
+                [Op.or]: [{ email: adminData.email }, { crp: adminData.crp }]
+            }
+        });
         if (adminUser) {
-            // Garante que o admin sempre tenha os dados e a senha corretos em ambiente de desenvolvimento.
-            await adminUser.update(adminData);
-            console.log("Usuário administrador atualizado:", adminUser.email);
+            // CORREÇÃO: Atualiza a senha se necessário, mas preserva outros dados.
+            await adminUser.update({ senha: adminPassword });
+            console.log("Usuário administrador já existe. Senha de teste garantida.");
         } else {
             adminUser = await db.Psychologist.create(adminData);
             console.log("Usuário administrador criado:", adminUser.email);

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
 const { protect, admin } = require('../middleware/authMiddleware');
+const upload = require('../config/upload'); // Importa a configuração de upload
 
 // Rota pública para login do admin
 router.post('/login', adminController.loginAdmin);
@@ -17,9 +18,14 @@ router.get('/stats', adminController.getDashboardStats);
 router.get('/me', adminController.getAdminData);
 router.put('/me', adminController.updateAdminData);
 router.put('/me/password', adminController.updateAdminPassword);
+router.put('/me/photo', upload.single('profilePhoto'), adminController.updateAdminPhoto);
 
 // Rota para buscar todos os psicólogos para a página de gerenciamento
 router.get('/psychologists', adminController.getAllPsychologists);
+// Novas rotas para gerenciar psicólogos
+router.put('/psychologists/:id/status', adminController.updatePsychologistStatus);
+router.delete('/psychologists/:id', adminController.deletePsychologist);
+
 
 // Rota para buscar todos os pacientes
 router.get('/patients', adminController.getAllPatients);
@@ -58,5 +64,8 @@ router.get('/conversations/:id/messages', adminController.getConversationMessage
 
 // Rota para dados de gráficos
 router.get('/charts/new-users', adminController.getNewUsersPerMonth);
+
+// Rota para dados financeiros
+router.get('/financials', adminController.getFinancials);
 
 module.exports = router;
