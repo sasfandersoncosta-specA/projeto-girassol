@@ -1240,13 +1240,14 @@ header.header-rolagem nav a:hover {
 
 /* --- SEÇÃO HERO --- */
 .hero-profissionais {
-    /* Seu CSS de hero provavelmente já existe, estes são ajustes */
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 100px 20px;
+    /* Ajuste: Padding vertical reduzido para diminuir o espaço em branco */
+    padding: 80px 20px;
 }
+
 
 .hero-profissionais .hero-texto {
     max-width: 800px;
@@ -1331,6 +1332,12 @@ header.header-rolagem nav a:hover {
     padding-bottom: 120px; /* Mais espaço antes do footer */
 }
 
+/* Classe utilitária para a última seção antes do rodapé */
+.secao-final .container {
+    /* Garante um respiro maior no final da página */
+    padding-bottom: 100px;
+}
+
 /* --- AJUSTES GERAIS --- */
 /* Garante que os divisores de onda ocupem toda a largura */
 .wave-divider {
@@ -1349,6 +1356,7 @@ header.header-rolagem nav a:hover {
 
 /* Alvo: O H1 dentro da seção hero-profissionais */
 .hero-profissionais .hero-texto h1 {
+    font-family: 'New Kansas', serif; /* Garante a aplicação da fonte correta */
     color: var(--verde-escuro); /* Define a cor do título principal para verde */
 }
 
