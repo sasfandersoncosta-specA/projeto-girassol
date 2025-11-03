@@ -30,10 +30,8 @@ const generateSlug = (name) => {
 // ----------------------------------------------------------------------
 exports.registerPsychologist = async (req, res) => {
     try {
-        // 1. DADOS EXPANDIDOS: Agora inclui todos os campos do questionário
         const { 
             nome, email, senha, crp, cpf, invitationToken,
-            // Campos adicionados do questionário:
             genero_identidade, valor_sessao_faixa, temas_atuacao, 
             abordagens_tecnicas, praticas_afirmativas, disponibilidade_periodo
         } = req.body;
@@ -41,74 +39,35 @@ exports.registerPsychologist = async (req, res) => {
         if (!nome || !email || !senha || !crp || !cpf) {
             return res.status(400).json({ error: 'Nome, email, senha, CRP e CPF são obrigatórios.' });
         }
-
-        // Validação do convite (APENAS se um token for fornecido)
-        if (invitationToken) {
-            const waitingListEntry = await db.WaitingList.findOne({
-                where: {
-                    invitationToken: invitationToken,
-                    status: 'invited',
-                    invitationExpiresAt: { [Op.gt]: new Date() } // Maior que a data atual
-                }
-            });
-
-            if (!waitingListEntry) {
-                return res.status(403).json({ error: 'Convite inválido ou expirado. Por favor, faça o pré-cadastro novamente.' });
-            }
-        } // Se não há token, é um registro direto (após triagem com vaga). O fluxo continua.
-
-        // Verifica se o email já está cadastrado
+        
+        // ... (Suas verificações de email, crp, cpf existentes)...
         const existingEmail = await db.Psychologist.findOne({ where: { email: email } });
-        if (existingEmail) {
-            return res.status(409).json({ error: 'Este email já está cadastrado.' });
-        }
-
-        // Verifica se o CRP já está cadastrado
+        if (existingEmail) { return res.status(409).json({ error: 'Este email já está cadastrado.' }); }
         const existingCrp = await db.Psychologist.findOne({ where: { crp: crp } });
-        if (existingCrp) {
-            return res.status(409).json({ error: 'Este CRP já está cadastrado.' });
-        }
-
-        // Verifica se o CPF já está cadastrado
+        if (existingCrp) { return res.status(409).json({ error: 'Este CRP já está cadastrado.' }); }
         const existingCpf = await db.Psychologist.findOne({ where: { cpf: cpf } });
-        if (existingCpf) {
-            return res.status(409).json({ error: 'Este CPF já está cadastrado.' });
-        }
+        if (existingCpf) { return res.status(409).json({ error: 'Este CPF já está cadastrado.' }); }
         
         const hashedPassword = await bcrypt.hash(senha, 10);
 
-        // 2. CREATE EXPANDIDO: Salva os dados do registro E do questionário
         const newPsychologist = await db.Psychologist.create({
-            nome,
-            email,
-            senha: hashedPassword,
-            crp,
-            cpf,
-            slug: generateSlug(nome),
-            status: 'active', // Define o status como ativo no registro
-
-            // Campos do questionário agora sendo salvos:
+            nome, email, senha: hashedPassword, crp, cpf,
+            slug: generateSlug(nome), status: 'active',
             genero_identidade: genero_identidade,
             valor_sessao_faixa: valor_sessao_faixa, 
             temas_atuacao: temas_atuacao,
-            abordagens_tecnicas: abordagens_tecnicas ? [abordagens_tecnicas] : [], // Garante que seja um array se vier único
-            praticas_vivencias: praticas_afirmativas, // Mapeia praticas_afirmativas para praticas_vivencias
+            abordagens_tecnicas: abordagens_tecnicas ? [abordagens_tecnicas] : [], 
+            praticas_vivencias: praticas_afirmativas,
             disponibilidade_periodo: disponibilidade_periodo
         });
-
-        // Se o registro foi bem-sucedido e veio de um convite, remove da lista de espera
+        
         if (invitationToken) {
             await db.WaitingList.destroy({ where: { invitationToken: invitationToken } });
-            console.log(`Profissional ${email} registrado via convite e removido da lista de espera.`);
-        } else {
-            // Lógica para registro direto (se houver)
         }
-
+        
         res.status(201).json({
-            id: newPsychologist.id,
-            nome: newPsychologist.nome,
-            email: newPsychologist.email,
-            crp: newPsychologist.crp,
+            id: newPsychologist.id, nome: newPsychologist.nome,
+            email: newPsychologist.email, crp: newPsychologist.crp,
             token: generateToken(newPsychologist.id),
             message: 'Psicólogo cadastrado com sucesso!',
         });
