@@ -42,22 +42,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // Em: psi_registro.js
     formRegistro.addEventListener('submit', async (event) => {
         event.preventDefault();
         mensagemRegistro.textContent = '';
-        mensagemRegistro.className = 'mensagem-oculta'; 
-    
+        mensagemRegistro.className = 'mensagem-oculta';
+
         const senha = document.getElementById('senha').value;
         const confirmarSenha = document.getElementById('confirmar-senha').value;
         const cpf = cpfInput.value;
         const termosAceite = document.getElementById('termos-aceite').checked;
-    
-        if (senha !== confirmarSenha) { /* ... (validação de senha) ... */ return; }
-        if (senha.length < 6) { /* ... (validação de 6 dígitos) ... */ return; }
-        if (!isCpfValid(cpf)) { /* ... (validação de cpf) ... */ return; }
-        if (!termosAceite) { /* ... (validação de termos) ... */ return; }
-    
-        // --- CORREÇÃO APLICADA AQUI ---
+
+        if (senha !== confirmarSenha) { mensagemRegistro.textContent = 'As senhas não conferem.'; mensagemRegistro.className = 'mensagem-erro'; return; }
+        if (senha.length < 6) { mensagemRegistro.textContent = 'A senha deve ter no mínimo 6 caracteres.'; mensagemRegistro.className = 'mensagem-erro'; return; }
+        if (!isCpfValid(cpf)) { mensagemRegistro.textContent = 'CPF inválido.'; mensagemRegistro.className = 'mensagem-erro'; return; }
+        if (!termosAceite) { mensagemRegistro.textContent = 'Você deve aceitar os termos.'; mensagemRegistro.className = 'mensagem-erro'; return; }
+
+        // --- 5. CORREÇÃO DO PERFIL VAZIO (Problema 5) ---
         const storedAnswers = JSON.parse(localStorage.getItem('psi_questionario_respostas') || '{}');
         const registrationData = {
             nome: document.getElementById('nome-completo').value,
@@ -65,11 +66,11 @@ document.addEventListener('DOMContentLoaded', () => {
             cpf: cpf,
             email: emailInput.value,
             senha: senha,
-            invitationToken: tokenParam 
+            invitationToken: tokenParam
         };
         const dadosPsicologo = { ...storedAnswers, ...registrationData };
         // --- FIM DA CORREÇÃO ---
-    
+
         try {
             const response = await fetch(`${API_BASE_URL}/api/psychologists/register`, {
                 method: 'POST',
@@ -77,23 +78,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(dadosPsicologo) // Envia o payload mesclado
             });
             const result = await response.json();
-    
-            if (response.ok) { 
-                mensagemRegistro.textContent = result.message + " Redirecionando para o login...";
-                mensagemRegistro.className = 'mensagem-sucesso';
-                formRegistro.reset();
+
+            if (response.ok) {
                 localStorage.removeItem('psi_questionario_respostas'); // LIMPA o cache
                 localStorage.setItem('login_prefetch_email', registrationData.email);
                 localStorage.setItem('login_prefetch_role', 'psychologist');
+                mensagemRegistro.textContent = result.message + " Redirecionando...";
+                mensagemRegistro.className = 'mensagem-sucesso';
                 setTimeout(() => { window.location.href = 'login.html'; }, 2000);
             } else {
                 mensagemRegistro.textContent = result.error;
                 mensagemRegistro.className = 'mensagem-erro';
             }
         } catch (error) {
-            console.error('Erro de conexão ou script:', error); 
-            mensagemRegistro.textContent = 'Erro ao conectar com o servidor. Verifique o console.';
+            console.error('Erro de conexão ou script:', error);
+            mensagemRegistro.textContent = 'Erro ao conectar com o servidor.';
             mensagemRegistro.className = 'mensagem-erro';
         }
-    });
+    });    
 });

@@ -52,7 +52,7 @@ exports.registerPsychologist = async (req, res) => {
 
         const newPsychologist = await db.Psychologist.create({
             nome, email, senha: hashedPassword, crp, cpf,
-            slug: generateSlug(nome), status: 'active',
+            slug: generateSlug(nome), status: 'pending', // MUDADO PARA 'pending'
             genero_identidade: genero_identidade,
             valor_sessao_faixa: valor_sessao_faixa, 
             temas_atuacao: temas_atuacao,
@@ -833,6 +833,36 @@ exports.getProfileBySlug = async (req, res) => {
         }
     } catch (error) {
         res.status(500).send('Erro no servidor');
+    }
+};
+
+// ----------------------------------------------------------------------
+// Rota: PUT /api/psychologists/me/crp-document (Rota Protegida)
+// DESCRIÇÃO: Faz o upload do documento CRP para verificação.
+// ----------------------------------------------------------------------
+exports.uploadCrpDocument = async (req, res) => {
+    try {
+        const psychologist = req.psychologist;
+
+        if (!req.file) {
+            return res.status(400).json({ error: 'Nenhum arquivo foi enviado.' });
+        }
+
+        // A URL segura do arquivo no Cloudinary é fornecida em req.file.path
+        const crpDocumentUrl = req.file.path;
+
+        // Atualiza o perfil do psicólogo com a URL do documento e muda o status para 'pending'
+        await psychologist.update({
+            crpDocumentUrl: crpDocumentUrl,
+            status: 'pending' // Garante que o perfil entre em modo de revisão
+        });
+
+        res.status(200).json({
+            message: 'Documento enviado com sucesso! Nossa equipe irá analisá-lo em breve.',
+        });
+    } catch (error) {
+        console.error('Erro no upload do documento CRP:', error);
+        res.status(500).json({ error: 'Erro interno no servidor ao processar o arquivo.' });
     }
 };
 

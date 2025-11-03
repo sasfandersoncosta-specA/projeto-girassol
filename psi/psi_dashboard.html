@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Dashboard - Projeto Girassol</title>
 
-    <link rel="stylesheet" href="../style.css?v=1.4">
+    <link rel="stylesheet" href="../style.css?v=1.5">
 
-    <link rel="stylesheet" href="psi_dashboard.css?v=1.4">
+    <link rel="stylesheet" href="psi_dashboard.css?v=1.5">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -79,9 +79,28 @@
         </div>
     </div>
 
+    <!-- Modal de Upload de CRP -->
+    <div id="crp-upload-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <h2 class="modal-title">Enviar Documento CRP</h2>
+            <div class="modal-body">
+                <p>Para verificar sua conta e ganhar o selo de profissional verificado, por favor, envie uma foto (frente e verso) do seu documento CRP.</p>
+                <form id="crp-upload-form">
+                    <div class="form-group-upload">
+                        <label for="crp-file-input" class="upload-label">
+                            <span id="crp-upload-text">Clique para selecionar um arquivo</span>
+                        </label>
+                        <input type="file" id="crp-file-input" accept="image/jpeg, image/png, application/pdf" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secundario modal-cancel">Cancelar</button><button class="btn btn-principal" id="crp-upload-confirm">Enviar</button></div>
+        </div>
+    </div>
 
     <script src="https://unpkg.com/imask"></script>
-    <script src="/config.js?v=1.4"></script>
-    <script src="psi_dashboard.js?v=1.4"></script>
+    <script src="/config.js?v=1.5"></script>
+    <script src="psi_dashboard.js?v=1.5"></script>
 </body>
 </html>

@@ -161,6 +161,105 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // (A função showToast() FOI REMOVIDA DAQUI)
     }
+    // Em: psi_dashboard.js, dentro de inicializarLogicaDoPerfil()
+    async function uploadCrpDocument(file) {
+        const token = localStorage.getItem('girassol_token');
+        if (!file || !token) {
+            showToast('Falha na autenticação ou nenhum arquivo selecionado.', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        // O nome 'crpDocument' deve ser o mesmo esperado pelo middleware `uploadCrpDocument.single()` no backend.
+        formData.append('crpDocument', file);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/psychologists/me/crp-document`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                    // Não defina 'Content-Type', o navegador faz isso por você com FormData
+                },
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showToast(result.message, 'success');
+                // Opcional: Recarregar a página ou apenas atualizar o widget de status
+                loadPage('psi_meu_perfil.html'); // Recarrega a seção do perfil
+            } else {
+                throw new Error(result.error || 'Falha no upload do documento.');
+            }
+        } catch (error) {
+            showToast(error.message, 'error');
+        }
+    }
+    function inicializarLogicaDoPerfil() {
+        // ... (todo o seu código existente de 'inicializarLogicaDoPerfil' aqui) ...
+    
+        // --- 3. LÓGICA DE VERIFICAÇÃO (Problema 3) ---
+        const widget = document.getElementById('verification-widget');
+        const statusText = document.getElementById('verification-status-text');
+        const description = document.getElementById('verification-description');
+    
+        if (widget && psychologistData) {
+            widget.style.display = 'block';
+            if (psychologistData.status === 'active') {
+                widget.classList.add('status-verified');
+                statusText.textContent = 'Verificado';
+                description.textContent = 'Sua conta foi verificada por nossa equipe. Você tem o selo de verificado!';
+            } else if (psychologistData.status === 'pending') {
+                widget.classList.add('status-pending');
+                statusText.textContent = 'Verificação Pendente';
+                description.innerHTML = `Envie seu CRP para análise e ganhe o selo de verificado. 
+                    <button class="btn btn-secundario" id="btn-upload-crp-perfil">Enviar CRP</button>`;
+                
+                // --- LÓGICA DE CLIQUE E UPLOAD DO CRP ---
+                const btnUploadCrp = document.getElementById('btn-upload-crp-perfil');
+                const crpModal = document.getElementById('crp-upload-modal');
+
+                if (btnUploadCrp && crpModal) {
+                    btnUploadCrp.addEventListener('click', () => {
+                        crpModal.classList.add('is-visible');
+                    });
+
+                    // Lógica para fechar o modal
+                    crpModal.addEventListener('click', (e) => {
+                        if (e.target.classList.contains('modal-overlay') || e.target.classList.contains('modal-close') || e.target.classList.contains('modal-cancel')) {
+                            crpModal.classList.remove('is-visible');
+                        }
+                    });
+
+                    // Lógica para o input de arquivo
+                    const fileInput = document.getElementById('crp-file-input');
+                    const uploadText = document.getElementById('crp-upload-text');
+                    fileInput.addEventListener('change', () => {
+                        if (fileInput.files.length > 0) {
+                            uploadText.textContent = `Arquivo: ${fileInput.files[0].name}`;
+                        } else {
+                            uploadText.textContent = 'Clique para selecionar um arquivo';
+                        }
+                    });
+
+                    // Lógica para o botão de envio do modal
+                    const confirmUploadBtn = document.getElementById('crp-upload-confirm');
+                    confirmUploadBtn.addEventListener('click', async () => {
+                        const file = fileInput.files[0];
+                        if (!file) {
+                            showToast('Por favor, selecione um arquivo.', 'error');
+                            return;
+                        }
+
+                        // Chama a função de upload real
+                        await uploadCrpDocument(file);
+                        crpModal.classList.remove('is-visible');
+                    });
+                }
+            }
+        }
+    }
 
     // Lógica da Página: CAIXA DE ENTRADA (Modal)
     async function inicializarLogicaDaCaixaDeEntrada() {

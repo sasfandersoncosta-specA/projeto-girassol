@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const psychologistController = require('../controllers/psychologistController');
 const { protect } = require('../middleware/authMiddleware'); // Importa o Middleware
-const upload = require('../config/upload'); // Importa a configuração de upload
+const { uploadProfilePhoto, uploadCrpDocument } = require('../middleware/upload'); // Importa a configuração de upload
 
 // Rotas públicas de autenticação
 router.post('/register', psychologistController.registerPsychologist);
@@ -25,7 +25,10 @@ router.get('/me', psychologistController.getPsychologistData);
 router.put('/me', psychologistController.updatePsychologistProfile);
 
 // Rota para upload da foto de perfil
-router.put('/me/photo', upload.single('profilePhoto'), psychologistController.updateProfilePhoto);
+router.put('/me/photo', uploadProfilePhoto.single('profilePhoto'), psychologistController.updateProfilePhoto);
+
+// Rota para upload do documento CRP
+router.put('/me/crp-document', uploadCrpDocument.single('crpDocument'), psychologistController.uploadCrpDocument);
 
 // Rota para buscar a contagem de mensagens não lidas
 router.get('/me/unread-count', psychologistController.getUnreadMessageCount);

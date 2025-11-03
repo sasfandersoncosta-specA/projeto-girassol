@@ -1209,6 +1209,77 @@ fieldset:disabled .multiselect-display {
     background-color: #1B4332;
     border-radius: 4px;
 }
+
+/* ================================================== */
+/* ESTILOS DO WIDGET DE VERIFICAÇÃO (MEU PERFIL)      */
+/* ================================================== */
+
+/* Base do widget de verificação */
+#verification-widget {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px;
+    border-left-width: 5px;
+    border-left-style: solid;
+    margin-bottom: 30px; /* Espaçamento abaixo do widget */
+}
+
+#verification-widget h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#verification-widget p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Estilo para status PENDENTE */
+#verification-widget.status-pending {
+    background-color: #fffbeb; /* Amarelo bem claro */
+    border-left-color: #f59e0b; /* Amarelo/Laranja */
+    color: #b45309; /* Texto Laranja escuro */
+}
+
+/* Estilo para status VERIFICADO */
+#verification-widget.status-verified {
+    background-color: #f0fdf4; /* Verde bem claro */
+    border-left-color: #16a34a; /* Verde sucesso */
+    color: #14532d; /* Texto Verde escuro */
+}
+
+/* ================================================== */
+/* ESTILOS DO MODAL DE UPLOAD DE CRP                  */
+/* ================================================== */
+
+.form-group-upload {
+    margin-top: 20px;
+}
+
+.form-group-upload .upload-label {
+    display: block;
+    padding: 40px 20px;
+    border: 2px dashed var(--cinza-borda);
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.form-group-upload .upload-label:hover {
+    background-color: var(--cinza-fundo);
+    border-color: var(--verde-escuro);
+}
+
+.form-group-upload input[type="file"] {
+    display: none;
+}
 /* --- ESTILOS PARA PAINEL DE INSIGHTS (PLANO LUZ) --- */
 .insights-secao {
     margin-top: 40px;

@@ -70,4 +70,66 @@ async function sendPasswordResetEmail(user, resetLink) {
     }
 }
 
-module.exports = { sendInvitationEmail, sendPasswordResetEmail };
+/**
+ * Envia um e-mail informando o psicólogo sobre a rejeição do seu cadastro.
+ * @param {object} psychologist - O objeto do psicólogo.
+ * @param {string} reason - O motivo da rejeição.
+ */
+async function sendRejectionEmail(psychologist, reason) {
+    const { nome, email } = psychologist;
+
+    const emailContent = {
+        to: email,
+        from: 'nao-responda@girassol.com',
+        subject: 'Atualização sobre seu cadastro na Girassol',
+        html: `
+            <div style="font-family: sans-serif; line-height: 1.6;">
+                <h2>Olá, ${nome},</h2>
+                <p>Agradecemos seu interesse em fazer parte da comunidade Girassol.</p>
+                <p>Após análise, seu cadastro não pôde ser aprovado neste momento pelo seguinte motivo:</p>
+                <div style="background-color: #f8f9fa; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+                    <p style="margin: 0;"><em>${reason}</em></p>
+                </div>
+                <p>Se você acredita que isso foi um erro ou pode corrigir a pendência, por favor, entre em contato com nosso suporte.</p>
+                <p>Atenciosamente,<br>Equipe Girassol</p>
+            </div>
+        `,
+    };
+
+    console.log(`[SIMULAÇÃO] E-mail de rejeição enviado para ${email}. Motivo: ${reason}`);
+    // Em produção: await sgMail.send(emailContent);
+}
+
+/**
+ * Envia um e-mail de boas-vindas para um psicólogo aprovado.
+ * @param {object} psychologist - O objeto do psicólogo.
+ */
+async function sendApprovalEmail(psychologist) {
+    const { nome, email } = psychologist;
+
+    const emailContent = {
+        to: email,
+        from: 'nao-responda@girassol.com',
+        subject: 'Seu perfil na Girassol foi aprovado!',
+        html: `
+            <div style="font-family: sans-serif; line-height: 1.6;">
+                <h2>Parabéns, ${nome}!</h2>
+                <p>Temos o prazer de informar que seu cadastro na plataforma Girassol foi <strong>aprovado</strong> por nossa equipe!</p>
+                <p>Seu perfil já está ativo e pode ser recomendado para pacientes que buscam um profissional com suas qualificações.</p>
+                <p>Sugerimos os seguintes próximos passos:</p>
+                <ul>
+                    <li>Acesse seu painel para revisar e completar todas as informações do seu perfil.</li>
+                    <li>Explore os recursos disponíveis, como a comunidade de profissionais (em breve).</li>
+                </ul>
+                <a href="http://127.0.0.1:5500/login.html" style="background-color: #FFEE8C; color: #1B4332; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-weight: bold; display: inline-block; margin: 20px 0;">Acessar meu Painel</a>
+                <p>Seja bem-vindo(a) à nossa comunidade!</p>
+                <p>Atenciosamente,<br>Equipe Girassol</p>
+            </div>
+        `,
+    };
+
+    console.log(`[SIMULAÇÃO] E-mail de aprovação enviado para ${email}.`);
+    // Em produção: await sgMail.send(emailContent);
+}
+
+module.exports = { sendInvitationEmail, sendPasswordResetEmail, sendRejectionEmail, sendApprovalEmail };

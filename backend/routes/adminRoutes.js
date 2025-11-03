@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
-const { protect, admin } = require('../middleware/authMiddleware');
+const { protect, admin } = require('../middleware/authMiddleware'); // Corrigido para importar ambos
 const upload = require('../config/upload'); // Importa a configuração de upload
 
 // Rota pública para login do admin
@@ -10,6 +10,12 @@ router.post('/login', adminController.loginAdmin);
 // Aplica proteção para garantir que apenas admins logados acessem
 router.use(protect);
 router.use(admin);
+
+// --- NOVAS ROTAS DE VERIFICAÇÃO ---
+// Busca psicólogos com documentos pendentes de verificação
+router.get('/verifications', adminController.getPendingVerifications);
+// Modera (aprova/rejeita) um psicólogo
+router.put('/psychologists/:id/moderate', adminController.moderatePsychologist);
 
 // Rota para buscar as estatísticas da Visão Geral
 router.get('/stats', adminController.getDashboardStats);
