@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const backButtonHTML = !isFirstInteractiveStep && !['welcome', 'info', 'loading', 'approved', 'waitlisted', 'error'].includes(questionData.type) ? `<button class="back-button">← Voltar</button>` : '';
 
         let nextButtonHTML = '';
-        if (['welcome', 'info', 'text', 'email', 'choice', 'multiple-choice'].includes(questionData.type)) {
+        if (['welcome', 'info', 'text', 'email', 'multiple-choice'].includes(questionData.type)) {
             const buttonText = questionData.buttonText || "Avançar";
             const action = questionData.buttonText ? "check" : "next";
             nextButtonHTML = `<button class="cta-button" data-action="${action}">${buttonText}</button>`;
@@ -271,6 +271,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 collectAnswer();
                 setTimeout(() => goToSlide(currentStep + 1), 200);
             }
+        }
+    });
+
+    // Adiciona a funcionalidade de avançar com "Enter" nos campos de texto
+    slidesContainer.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && e.target.matches('.text-input')) {
+            e.preventDefault(); // Previne o comportamento padrão do Enter
+            validateAndAdvance();
         }
     });
 
