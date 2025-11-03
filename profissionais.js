@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Etapa 1: Boas-vindas e Dados Básicos
         { id: 'boas-vindas', type: 'welcome', question: "Boas-vindas ao Girassol, colega.", subtitle: "Estamos felizes por ter você aqui. Este questionário inicial é a etapa mais importante: ele define seu perfil para que possamos conectá-lo(a) aos pacientes certos. Responda com calma." },        
         { id: 'nome', type: 'text', question: "Primeiro, qual o seu nome completo?", placeholder: "Nome Completo", required: true },
-        { id: 'email', type: 'email', question: "Qual o seu melhor e-mail profissional?", placeholder: "E-mail Profissional", required: true },
-        { id: 'crp', type: 'text', question: "E o seu número de registro no CRP?", placeholder: "Número do CRP (ex: 06/123456)", required: true },
+        { id: 'email', type: 'email', question: "Qual o seu melhor e-mail profissional?", placeholder: "E-mail Profissional", required: true, inputMode: 'email' },
+        { id: 'crp', type: 'text', question: "E o seu número de registro no CRP?", placeholder: "Número do CRP (ex: 06/123456)", required: true, inputMode: 'numeric' },
         // Etapa 2: Definição do Nicho
         { id: 'nicho-intro', type: 'info', question: "Entendendo sua Prática e Especialidades", subtitle: "Suas respostas aqui são cruciais. Elas definem seu 'nicho de mercado' e nos permitem verificar se há uma demanda ativa de pacientes para o seu perfil." },
         { id: 'genero_identidade', question: "Com qual gênero você se identifica?", type: 'choice', choices: ["Feminino", "Masculino", "Não-binário", "Outro"], required: true },
@@ -41,9 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
         switch (questionData.type) {
             case 'text':
             case 'email':
+                const inputMode = questionData.inputMode ? `inputmode="${questionData.inputMode}"` : '';
                 contentHTML = `
                     <div class="form-group-questionario">
-                        <input type="${questionData.type}" id="input-${questionData.id}" class="text-input" placeholder=" " required>
+                        <input type="${questionData.type}" id="input-${questionData.id}" class="text-input" placeholder=" " required ${inputMode}>
                         <label for="input-${questionData.id}" class="input-label">${questionData.placeholder}</label>
                     </div>`;
                 break;

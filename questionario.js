@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 'terapia_anterior', question: "Você já fez terapia antes, [NOME]?", subtitle: "Entender sua trajetória nos ajuda a traçar um novo futuro.", type: 'choice', choices: ["Sim, e foi uma boa experiência", "Sim, mas não foi uma boa experiência", "Não, esta é minha primeira vez"], required: true },
         { id: 'experiencia_desejada', question: "Que tipo de experiência terapêutica você imagina?", subtitle: "Isso nos ajuda a alinhar seu estilo com o do profissional.", type: 'multiple-choice', choices: ["Um espaço de escuta e acolhimento para me encontrar", "Ferramentas e tarefas práticas para aplicar no dia a dia", "Entender meu passado e a raiz das minhas emoções", "Focar em soluções para problemas específicos", "Não sei / Indiferente"], required: true },
         { id: 'caracteristicas_prof', question: "Existem características importantes para você em um(a) psicólogo(a)?", subtitle: "A identidade de quem te escuta pode fazer toda a diferença.", type: 'multiple-choice', choices: ["Que faça parte da comunidade LGBTQIAPN+", "Que seja uma pessoa não-branca (racializada) / prática antirracista", "Que tenha uma perspectiva feminista", "Que entenda de neurodiversidade (TDAH, Autismo, etc.)", "Indiferente"], required: true },
-        { id: 'faixa_valor', question: "Qual faixa de valor você pode investir por sessão?", subtitle: "Isso garante que vamos te conectar com profissionais que cabem no seu orçamento.", type: 'choice', choices: ["Até R$ 50", "R$ 51 - R$ 90", "R$ 91 - R$ 150", "Acima de R$ 150"], required: true },
-        { id: 'whatsapp', question: "Para finalizar, [NOME], qual seu número de WhatsApp?", subtitle: "Seu número será usado apenas para o contato inicial do profissional e mensagens de acompanhamento da Girassol.", type: 'tel', placeholder: "(XX) XXXXX-XXXX", required: true },
+        { id: 'faixa_valor', question: "Qual faixa de valor você pode investir por sessão?", subtitle: "Isso garante que vamos te conectar com profissionais que cabem no seu orçamento.", type: 'choice', choices: ["Até R$ 50", "R$ 51 - R$ 90", "R$ 91 - R$ 150", "Acima de R$ 150"], required: true },        
+        { id: 'whatsapp', question: "Para finalizar, [NOME], qual seu número de WhatsApp?", subtitle: "Seu número será usado apenas para o contato inicial do profissional e mensagens de acompanhamento da Girassol.", type: 'tel', placeholder: "(XX) XXXXX-XXXX", required: true, inputMode: 'numeric' },
         { id: 'avaliacao_ux', question: "Como você avalia sua experiência ao preencher este questionário?", subtitle: "Seu feedback nos ajuda a melhorar!", type: 'choice', choices: ["1 (Ruim)", "2", "3", "4", "5 (Ótima)"], required: true },
         { id: 'agradecimento', type: 'thank-you', question: "Obrigado pelo seu feedback, [NOME]!", subtitle: "Sua jornada de cuidado está prestes a começar." },
         { id: 'final', type: 'final', question: "Tudo pronto, [NOME]!", subtitle: "Estamos cruzando suas respostas para encontrar as conexões mais significativas. Em instantes, você verá suas recomendações."},
@@ -37,8 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const isFirstStep = questions.findIndex(q => q.type !== 'welcome') === index; 
         
         switch (questionData.type) { 
-            case 'text': case 'tel': 
-                contentHTML = `<input type="${questionData.type}" id="input-${questionData.id}" class="text-input" placeholder="${questionData.placeholder}">`; 
+            case 'text': case 'tel':
+                const inputModeAttr = questionData.inputMode ? `inputmode="${questionData.inputMode}"` : '';
+                contentHTML = `<input type="${questionData.type}" id="input-${questionData.id}" class="text-input" placeholder="${questionData.placeholder}" ${inputModeAttr}>`; 
                 break; 
             case 'choice': case 'multiple-choice': 
                 const choicesClass = questionData.scrollable ? 'choices-container scrollable' : 'choices-container'; 

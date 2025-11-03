@@ -19,8 +19,11 @@
             const token = params.get('token');
             const dashboardPath = params.get('dashboard');
             if (token && dashboardPath) {
-                localStorage.setItem('girassol_token', token);
-                window.location.href = dashboardPath;
+                localStorage.setItem('girassol_token', token); // Salva o token
+                // Adiciona um pequeno delay para garantir que o localStorage seja escrito antes do redirecionamento
+                setTimeout(() => {
+                    window.location.href = dashboardPath;
+                }, 200);
             }
         });
     </script>

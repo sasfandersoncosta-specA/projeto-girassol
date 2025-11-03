@@ -26,30 +26,38 @@ document.addEventListener('DOMContentLoaded', function() {
     // FUNÇÃO DE SEGURANÇA E BUSCA DE DADOS INICIAL
     // =====================================================================
     async function fetchPsychologistData() {
+        // Adiciona um pequeno delay para dar tempo ao navegador de estabilizar o localStorage
+        await new Promise(resolve => setTimeout(resolve, 100));
+
         const token = localStorage.getItem('girassol_token');
-        if (!token) {
-            window.location.href = '../login.html';
-            return false; 
-        }
+        console.log('Token Lido:', token); // Log para depuração
 
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/psychologists/me`, {
-                headers: { 'Authorization': `Bearer ${token}` },
-                signal: AbortSignal.timeout(8000) 
-            });
-
-            if (response.ok) {
-                psychologistData = await response.json();
-                return true; // Sucesso
-            } else {
-                throw new Error("Sessão inválida ou expirada.");
+        return new Promise(async (resolvePromise) => {
+            if (!token) {
+                window.location.href = '../login.html';
+                resolvePromise(false); 
+                return;
             }
-        } catch (error) {
-            console.error('Falha na autenticação:', error.message);
-            localStorage.removeItem('girassol_token');
-            window.location.href = '../login.html';
-            return false; // Falha
-        }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/psychologists/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    signal: AbortSignal.timeout(8000) 
+                });
+
+                if (response.ok) {
+                    psychologistData = await response.json();
+                    resolvePromise(true); // Sucesso
+                } else {
+                    throw new Error("Sessão inválida ou expirada.");
+                }
+            } catch (error) {
+                console.error('Falha na autenticação:', error.message);
+                localStorage.removeItem('girassol_token');
+                window.location.href = '../login.html';
+                resolvePromise(false); // Falha
+            }
+        });
     }
 
     // =====================================================================
