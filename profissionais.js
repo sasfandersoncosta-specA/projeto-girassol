@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 'email', type: 'email', question: "Qual o seu melhor e-mail profissional?", placeholder: "E-mail Profissional", required: true, inputMode: 'email' },
         { id: 'crp', type: 'text', question: "E o seu número de registro no CRP?", placeholder: "Número do CRP (ex: 06/123456)", required: true, inputMode: 'numeric' },
         // Etapa 2: Definição do Nicho
+        { id: 'modalidade', type: 'choice', question: "Como você prefere atender?", choices: ["Apenas Online", "Apenas Presencial", "Híbrido (Online e Presencial)"], required: true },
+        { id: 'cep', type: 'text', question: "Qual o CEP do seu local de atendimento?", placeholder: "CEP (ex: 12345-678)", required: true, inputMode: 'numeric' },
         { id: 'nicho-intro', type: 'info', question: "Entendendo sua Prática e Especialidades", subtitle: "Suas respostas aqui são cruciais. Elas definem seu 'nicho de mercado' e nos permitem verificar se há uma demanda ativa de pacientes para o seu perfil." },
         { id: 'genero_identidade', question: "Com qual gênero você se identifica?", type: 'choice', choices: ["Feminino", "Masculino", "Não-binário", "Outro"], required: true },
         { id: 'valor_sessao_faixa', question: "Em qual faixa de preço você pretende atender?", type: 'choice', choices: ["Até R$ 50", "R$ 51 - R$ 90", "R$ 91 - R$ 150", "Acima de R$ 150"], required: true },
@@ -29,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const userAnswers = {};
     const slidesContainer = document.querySelector('.slides-container');
     const progressBarFill = document.querySelector('.progress-bar-fill');
-    const totalQuestions = questions.filter(q => !['welcome', 'info', 'loading', 'approved', 'waitlisted', 'error'].includes(q.type)).length;
+    const totalQuestions = questions.filter(q => !['welcome', 'info', 'loading', 'approved', 'waitlisted', 'error', 'cep'].includes(q.type)).length;
 
     // Esta é a função COMPLETA que estava faltando
     function createSlideHTML(questionData, index) {
@@ -73,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const backButtonHTML = !isFirstInteractiveStep && !['welcome', 'info', 'loading', 'approved', 'waitlisted', 'error'].includes(questionData.type) ? `<button class="back-button">← Voltar</button>` : '';
 
         let nextButtonHTML = '';
-        if (['welcome', 'info', 'text', 'email', 'choice', 'multiple-choice'].includes(questionData.type)) {
+        if (['welcome', 'info', 'text', 'email', 'multiple-choice'].includes(questionData.type)) {
             const buttonText = questionData.buttonText || "Avançar";
             const action = questionData.buttonText ? "check" : "next";
             nextButtonHTML = `<button class="cta-button" data-action="${action}">${buttonText}</button>`;
@@ -132,6 +134,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const currentQuestion = questions[currentStep];
         if (currentQuestion && currentQuestion.id === 'crp') {
+            const crpInput = document.getElementById(`input-${currentQuestion.id}`);
+            if (crpInput && window.IMask) {
+                IMask(crpInput, { mask: '00/000000' });
+            }
+        }
+        if (currentQuestion && currentQuestion.id === 'cep') {
             const crpInput = document.getElementById(`input-${currentQuestion.id}`);
             if (crpInput && window.IMask) {
                 IMask(crpInput, { mask: '00/000000' });
@@ -303,15 +311,41 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (target.matches('[data-action="submit-waitlist"]')) {
                 submitToWaitlist();
             } else if (target.matches('.back-button')) {
-                goToSlide(currentStep - 1);
+                let passoAnterior = currentStep - 1;
+                const cepStepIndex = questions.findIndex(q => q.id === 'cep');
+        
+                // Se estou no passo DEPOIS do CEP (ex: 'genero_identidade')
+                if (currentStep === cepStepIndex + 1) {
+                    const modalidade = userAnswers['modalidade'];
+                    if (modalidade === 'Apenas Online') {
+                        // PULA o CEP e volta direto para Modalidade
+                        passoAnterior = cepStepIndex - 1;
+                    }
+                }
+                goToSlide(passoAnterior);
             } else if (target.matches('.choice-button')) {
+                const currentQuestion = questions[currentStep];
+                let proximoPasso = currentStep + 1; // Define o próximo passo padrão
+
                 if (target.classList.contains('multi-choice')) {
                     target.classList.toggle('selected');
                 } else {
                     target.closest('.choices-container').querySelectorAll('.choice-button').forEach(btn => btn.classList.remove('selected'));
                     target.classList.add('selected');
                     collectAnswer();
-                    setTimeout(() => goToSlide(currentStep + 1), 200);
+                    // *** INÍCIO DA LÓGICA CONDICIONAL ***
+                    if (currentQuestion.id === 'modalidade') {
+                        const modalidade = userAnswers['modalidade'];
+                        if (modalidade === 'Apenas Online') {
+                            // PULA a etapa do CEP
+                            const cepStepIndex = questions.findIndex(q => q.id === 'cep');
+                            proximoPasso = cepStepIndex + 1; 
+                            
+                            // Limpa o CEP, caso o usuário esteja voltando e mudando a opção
+                            userAnswers['cep'] = null; 
+                        }
+                    }
+                    setTimeout(() => goToSlide(proximoPasso), 200);
                 }
             }
         });
