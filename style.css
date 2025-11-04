@@ -2985,45 +2985,24 @@ body.pagina-dashboard {
 /* --- ESTILOS GLOBAIS PARA O ÍCONE DE VER SENHA (CORRIGIDO) --- */
 
 .form-group-password-wrapper {
-    /* Torna este contêiner a referência para o ícone */
-    position: relative; 
-    
-    /* Mantém o layout original do seu formulário */
-    margin-bottom: 20px; 
-    display: flex;
-    flex-direction: column;
+position: relative;
+margin-bottom: 20px;
+display: flex;
+flex-direction: column;
 }
+.form-group-password-wrapper input[type="password"], .form-group-password-wrapper input[type="text"] { box-sizing: border-box; padding-right: 50px !important; }
 
-.form-group-password-wrapper input[type="password"],
-.form-group-password-wrapper input[type="text"] {
-    /* Garante que o padding não quebre o layout */
-    box-sizing: border-box; 
-    /* Adiciona espaço à DIREITA para o ícone não sobrepor o texto */
-    padding-right: 50px !important; 
-}
+.password-toggle-icon { position: absolute; right: 15px; cursor: pointer; color: #888; transition: color 0.2s ease; }
 
-.password-toggle-icon {
-    position: absolute;
-    /* Posiciona o ícone dentro do campo, na parte inferior.
-       'bottom: 12px' deve alinhar bem com o texto. 
-       Ajuste este valor se o ícone não ficar centrado. */
-    bottom: 12px; 
-    right: 15px;
-    cursor: pointer;
-    color: #888; /* Cor sutil */
-    transition: color 0.2s ease;
-}
+/* Centraliza o ícone se NÃO houver <label> (Página de Login) */ .form-group-password-wrapper:not(:has(label)) .password-toggle-icon { top: 50%; transform: translateY(-50%); }
 
-.password-toggle-icon:hover {
-    color: var(--verde-escuro); /* Sua cor de destaque */
-}
+/* Alinha o ícone pela base se HOUVER <label> (Página de Registro) */ .form-group-password-wrapper label + input + .password-toggle-icon { bottom: 12px; }
 
-.password-toggle-icon svg {
-    /* Define o tamanho dos ícones */
-    width: 22px;
-    height: 22px;
-    display: block; /* Remove espaçamento extra */
-}
+.password-toggle-icon:hover { color: var(--verde-escuro); }
+
+.password-toggle-icon svg { width: 22px; height: 22px; display: block; }
+
+.hidden { display: none !important; }
 
 /* Estilo para o botão de avançar desabilitado no questionário */
 .cta-button:disabled {

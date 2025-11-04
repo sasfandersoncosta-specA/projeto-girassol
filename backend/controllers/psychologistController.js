@@ -29,53 +29,71 @@ const generateSlug = (name) => {
 // DESCRIÇÃO: Registra um novo psicólogo.
 // ----------------------------------------------------------------------
 exports.registerPsychologist = async (req, res) => {
-    try {
-        const { 
-            nome, email, senha, crp, cpf, invitationToken,
-            genero_identidade, valor_sessao_faixa, temas_atuacao, 
-            abordagens_tecnicas, praticas_afirmativas, disponibilidade_periodo
-        } = req.body;
+  try {
+    const {
+      nome, email, senha, crp, cpf, invitationToken,
+      genero_identidade, valor_sessao_faixa, temas_atuacao,
+      abordagens_tecnicas, praticas_afirmativas, modalidade, cep
+    } = req.body;
 
-        if (!nome || !email || !senha || !crp || !cpf) {
-            return res.status(400).json({ error: 'Nome, email, senha, CRP e CPF são obrigatórios.' });
-        }
-        
-        // ... (Suas verificações de email, crp, cpf existentes)...
-        const existingEmail = await db.Psychologist.findOne({ where: { email: email } });
-        if (existingEmail) { return res.status(409).json({ error: 'Este email já está cadastrado.' }); }
-        const existingCrp = await db.Psychologist.findOne({ where: { crp: crp } });
-        if (existingCrp) { return res.status(409).json({ error: 'Este CRP já está cadastrado.' }); }
-        const existingCpf = await db.Psychologist.findOne({ where: { cpf: cpf } });
-        if (existingCpf) { return res.status(409).json({ error: 'Este CPF já está cadastrado.' }); }
-        
-        const hashedPassword = await bcrypt.hash(senha, 10);
-
-        const newPsychologist = await db.Psychologist.create({
-            nome, email, senha: hashedPassword, crp, cpf,
-            slug: generateSlug(nome), status: 'pending', // MUDADO PARA 'pending'
-            genero_identidade: genero_identidade,
-            valor_sessao_faixa: valor_sessao_faixa, 
-            temas_atuacao: temas_atuacao,
-            abordagens_tecnicas: abordagens_tecnicas ? [abordagens_tecnicas] : [], 
-            praticas_vivencias: praticas_afirmativas,
-            disponibilidade_periodo: disponibilidade_periodo
-        });
-        
-        if (invitationToken) {
-            await db.WaitingList.destroy({ where: { invitationToken: invitationToken } });
-        }
-        
-        res.status(201).json({
-            id: newPsychologist.id, nome: newPsychologist.nome,
-            email: newPsychologist.email, crp: newPsychologist.crp,
-            token: generateToken(newPsychologist.id),
-            message: 'Psicólogo cadastrado com sucesso!',
-        });
-
-    } catch (error) {
-        console.error('Erro ao registrar psicólogo:', error);
-        res.status(500).json({ error: 'Erro interno no servidor.' });
+    // 1. Validação dos dados essenciais
+    if (!nome || !email || !senha || !crp || !cpf) {
+      return res.status(400).json({ error: 'Nome, email, senha, CRP e CPF são obrigatórios.' });
     }
+
+    // 2. Criptografia da senha
+    const hashedPassword = await bcrypt.hash(senha, 10);
+
+    // 3. Início da Transação Prisma
+    const result = await db.$transaction(async (prisma) => {
+      // Verifica se o email, CRP ou CPF já existem
+      const existingUser = await prisma.user.findUnique({ where: { email } });
+      if (existingUser) throw new Error('Este email já está cadastrado.');
+
+      const existingProfile = await prisma.psychologistProfile.findFirst({
+        where: { OR: [{ crp }, { cpf }] }
+      });
+      if (existingProfile) throw new Error('Este CRP ou CPF já está cadastrado.');
+
+      // 3.1. Cria o 'User'
+      const newUser = await prisma.user.create({
+        data: {
+          email: email,
+          password: hashedPassword,
+          role: 'PSYCHOLOGIST',
+        },
+      });
+
+      // 3.2. Cria o 'PsychologistProfile' e o vincula ao 'User'
+      const newProfile = await prisma.psychologistProfile.create({
+        data: {
+          nome, crp, cpf,
+          slug: generateSlug(nome),
+          genero_identidade,
+          valor_sessao_faixa,
+          temas_atuacao: temas_atuacao || [],
+          abordagens_tecnicas: abordagens_tecnicas ? [abordagens_tecnicas] : [],
+          praticas_vivencias: praticas_afirmativas || [],
+          modalidade,
+          cep,
+          userId: newUser.id, // Vincula o perfil ao usuário recém-criado
+        },
+      });
+
+      return { user: newUser, profile: newProfile };
+    });
+
+    // 4. Retorna sucesso
+    res.status(201).json({ message: 'Psicólogo cadastrado com sucesso!', userId: result.user.id });
+
+  } catch (error) {
+    console.error('Erro ao registrar psicólogo:', error);
+    // Se o erro for uma das mensagens de validação da transação
+    if (error.message.includes('já está cadastrado')) {
+      return res.status(409).json({ error: error.message });
+    }
+    res.status(500).json({ error: 'Erro interno no servidor.' });
+  }
 };
 
 // ----------------------------------------------------------------------
