@@ -2984,25 +2984,40 @@ body.pagina-dashboard {
 
 /* --- ESTILOS GLOBAIS PARA O ÍCONE DE VER SENHA (CORRIGIDO) --- */
 
-.form-group-password-wrapper {
-position: relative;
-margin-bottom: 20px;
-display: flex;
-flex-direction: column;
+.form-group-password-wrapper { 
+    position: relative; 
+    margin-bottom: 20px; 
+    display: flex; 
+    flex-direction: column; 
 }
-.form-group-password-wrapper input[type="password"], .form-group-password-wrapper input[type="text"] { box-sizing: border-box; padding-right: 50px !important; }
 
-.password-toggle-icon { position: absolute; right: 15px; cursor: pointer; color: #888; transition: color 0.2s ease; }
+.form-group-password-wrapper input[type="password"], .form-group-password-wrapper input[type="text"] { 
+    box-sizing: border-box; 
+    padding-right: 50px !important; 
+}
 
-/* Centraliza o ícone se NÃO houver <label> (Página de Login) */ .form-group-password-wrapper:not(:has(label)) .password-toggle-icon { top: 50%; transform: translateY(-50%); }
+.password-toggle-icon { 
+    position: absolute; 
+    right: 15px; 
+    cursor: pointer; 
+    color: #888; 
+    transition: color 0.2s ease; 
+}
 
-/* Alinha o ícone pela base se HOUVER <label> (Página de Registro) */ .form-group-password-wrapper label + input + .password-toggle-icon { bottom: 12px; }
+/* Centraliza o ícone se NÃO houver <label> (Página de Login) */ 
+.form-group-password-wrapper:not(:has(label)) .password-toggle-icon { 
+    top: 50%; 
+    transform: translateY(-50%); 
+}
+
+/* Alinha o ícone pela base se HOUVER <label> (Página de Registro) */ 
+.form-group-password-wrapper label + input + .password-toggle-icon { 
+    bottom: 12px; /* Alinha 12px da base do wrapper */ 
+}
 
 .password-toggle-icon:hover { color: var(--verde-escuro); }
 
 .password-toggle-icon svg { width: 22px; height: 22px; display: block; }
-
-.hidden { display: none !important; }
 
 /* Estilo para o botão de avançar desabilitado no questionário */
 .cta-button:disabled {

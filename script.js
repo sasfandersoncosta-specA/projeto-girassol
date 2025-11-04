@@ -165,42 +165,6 @@ if (document.readyState === 'loading') {
 } else {
     setupPasswordToggles(); // Roda imediatamente se o DOM já estiver pronto
 }
-// Adiciona o manipulador de eventos para os ícones de senha
-function setupPasswordToggles() {
-    const toggleIcons = document.querySelectorAll('.password-toggle-icon');
-
-    toggleIcons.forEach(icon => {
-        // Previne que o evento seja adicionado múltiplas vezes
-        if (icon.dataset.listenerAttached) return; 
-
-        icon.addEventListener('click', function() {
-            // O input está logo ANTES do span do ícone no HTML
-            const input = this.previousElementSibling; 
-            
-            const iconEye = this.querySelector('.icon-eye');
-            const iconEyeSlash = this.querySelector('.icon-eye-slash');
-
-            if (input.type === 'password') {
-                input.type = 'text';
-                iconEye.classList.add('hidden');
-                iconEyeSlash.classList.remove('hidden');
-            } else {
-                input.type = 'password';
-                iconEye.classList.remove('hidden');
-                iconEyeSlash.classList.add('hidden');
-            }
-        });
-        // Marca o ícone como "processado"
-        icon.dataset.listenerAttached = 'true'; 
-    });
-}
-
-// Garante que o script rode após o DOM carregar
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupPasswordToggles);
-} else {
-    setupPasswordToggles(); // Roda imediatamente se o DOM já estiver pronto
-}
 // Executa a função quando a página carrega e sempre que a tela muda de tamanho
 window.addEventListener('resize', setRealViewportHeight);
 window.addEventListener('load', setRealViewportHeight);
