@@ -29,40 +29,6 @@ async function carregarVitrineTerapeutas() {
     }
 }
 
-/**
- * Adiciona um ícone de "olho" para alternar a visibilidade de campos de senha.
- */
-function initializePasswordToggles() {
-    // Seleciona todos os inputs de senha que ainda não foram processados
-    document.querySelectorAll('input[type="password"]:not(.password-toggle-initialized)').forEach(passwordInput => {
-        // Envolve o input para posicionar o ícone corretamente
-        const wrapper = document.createElement('div');
-        wrapper.className = 'password-container';
-        passwordInput.parentNode.insertBefore(wrapper, passwordInput);
-        wrapper.appendChild(passwordInput);
-
-        // Cria o ícone
-        const toggleIcon = document.createElement('span');
-        toggleIcon.className = 'toggle-password-visibility';
-        toggleIcon.textContent = '👁️'; // Ícone de olho aberto
-        wrapper.appendChild(toggleIcon);
-
-        // Adiciona o evento de clique ao ícone
-        toggleIcon.addEventListener('click', () => {
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleIcon.textContent = '🙈'; // Ícone de olho fechado
-            } else {
-                passwordInput.type = 'password';
-                toggleIcon.textContent = '👁️'; // Ícone de olho aberto
-            }
-        });
-
-        // Marca o input como inicializado para não processá-lo novamente
-        passwordInput.classList.add('password-toggle-initialized');
-    });
-}
-
 function inicializarScripts() {
     
     // --- LÓGICA PARA O MENU HAMBÚRGUER ---
@@ -103,8 +69,6 @@ if (elementosOcultos.length > 0) {
     let deferredPrompt;
     const installBanner = document.getElementById('pwa-install-banner');
 
-    // CHAMA A FUNÇÃO PARA INICIALIZAR OS ÍCONES DE SENHA
-    initializePasswordToggles();
     const installButton = document.getElementById('pwa-install-button');
     const dismissButton = document.getElementById('pwa-dismiss-button');
 
@@ -156,26 +120,6 @@ if (elementosOcultos.length > 0) {
     // ... (O restante das suas lógicas de FAQ, senha, modal, etc. estão perfeitas e não mudam)
 
 } // Fim da função inicializarScripts()
-
-// Adiciona a inicialização do toggle também no dashboard quando uma nova página é carregada
-document.addEventListener('page-loaded', () => {
-    initializePasswordToggles();
-});
-
-
-// --- PONTO DE ENTRADA PRINCIPAL (NÃO MUDA) ---
-document.addEventListener("DOMContentLoaded", () => {
-    Promise.all([ 
-        carregarComponente('/components/header.html', 'header-placeholder'),
-        carregarComponente('/components/footer.html', 'footer-placeholder')
-    ]).then(() => {
-        inicializarScripts();
-        // Carrega a vitrine DEPOIS de inicializar os scripts principais
-        if (document.getElementById('vitrine-terapeutas')) {
-            carregarVitrineTerapeutas();
-        }
-    });
-});
 // =====================================================================
 // CORREÇÃO PARA 100VH NO MOBILE (EXPERIÊNCIA DE APP)
 // =====================================================================
@@ -185,10 +129,66 @@ function setRealViewportHeight() {
     // Define o valor na variável CSS '--vh' no elemento raiz (<html>)
     document.documentElement.style.setProperty('--vh', `${vh}px`);
 }
+// Adiciona o manipulador de eventos para os ícones de senha
+function setupPasswordToggles() {
+    const toggleIcons = document.querySelectorAll('.password-toggle-icon');
 
+    toggleIcons.forEach(icon => {
+        // Previne que o evento seja adicionado múltiplas vezes
+        if (icon.dataset.listenerAttached) return; 
+
+        icon.addEventListener('click', function() {
+            // O input está logo ANTES do span do ícone no HTML
+            const input = this.previousElementSibling; 
+            
+            const iconEye = this.querySelector('.icon-eye');
+            const iconEyeSlash = this.querySelector('.icon-eye-slash');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                iconEye.classList.add('hidden');
+                iconEyeSlash.classList.remove('hidden');
+            } else {
+                input.type = 'password';
+                iconEye.classList.remove('hidden');
+                iconEyeSlash.classList.add('hidden');
+            }
+        });
+        // Marca o ícone como "processado"
+        icon.dataset.listenerAttached = 'true'; 
+    });
+}
+
+// Garante que o script rode após o DOM carregar
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupPasswordToggles);
+} else {
+    setupPasswordToggles(); // Roda imediatamente se o DOM já estiver pronto
+}
+function setRealViewportHeight() {
+    // Mede a altura interna da janela e calcula 1% dela
+    let vh = window.innerHeight * 0.01;
+    // Define o valor na variável CSS '--vh' no elemento raiz (<html>)
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
 // Executa a função quando a página carrega e sempre que a tela muda de tamanho
 window.addEventListener('resize', setRealViewportHeight);
 window.addEventListener('load', setRealViewportHeight);
+// Removi a chamada a `setRealViewportHeight` pois estamos usando `100svh` no CSS,
+// que é uma solução mais moderna e não requer JavaScript.
+
+// Adiciona a inicialização do toggle também no dashboard quando uma nova página é carregada
+
+// --- PONTO DE ENTRADA PRINCIPAL (NÃO MUDA) ---
+document.addEventListener("DOMContentLoaded", () => {
+    Promise.all([ 
+        carregarComponente('/components/header.html', 'header-placeholder'), 
+        carregarComponente('/components/footer.html', 'footer-placeholder') 
+    ]).then(() => {
+        inicializarScripts(); if (document.getElementById('vitrine-terapeutas')) { carregarVitrineTerapeutas(); }
+        setupPasswordToggles(); // Garante que funcione após carregar componentes
+    });
+});
 
 // No final do script.js
 if ('serviceWorker' in navigator) {

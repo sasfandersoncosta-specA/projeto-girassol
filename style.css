@@ -1637,8 +1637,8 @@ header.header-rolagem nav a:hover {
 .questionario-container {
     display: flex;
     flex-direction: column;
-    /* Usa a nossa variável customizada '--vh' para uma altura estável */
-    height: calc(var(--vh, 1vh) * 100); /* <--- A SOLUÇÃO ESTÁ AQUI */
+    /* Small Viewport Height: adapta-se ao espaço 100% visível, ignorando barras de UI do navegador */
+    height: 100svh;
     width: 100%;
 }
 
@@ -1676,8 +1676,9 @@ header.header-rolagem nav a:hover {
     box-sizing: border-box;
     padding: 20px 20px 120px 20px; /* Aumenta o padding inferior para compensar o rodapé fixo */
     
-    display: grid;
-    grid-template-rows: auto 1fr auto;
+    display: flex;
+    flex-direction: column;
+    /* display: grid; grid-template-rows: auto 1fr auto; */
     gap: 15px;
     
     opacity: 0; 
@@ -1714,7 +1715,8 @@ header.header-rolagem nav a:hover {
 
 /* 2. O CORPO (OPÇÕES) - ROLÁVEL */
 .slide-body {
-    overflow-y: auto;
+    flex-grow: 1; /* Faz o conteúdo crescer e empurrar o rodapé para baixo */
+    overflow-y: auto; /* Permite a rolagem apenas do conteúdo */
     min-height: 0; /* Fix para rolagem funcionar no Grid */
     width: 100%;
     display: flex;
@@ -1829,6 +1831,39 @@ header.header-rolagem nav a:hover {
 .choice-button:hover, .choice-button.selected {background-color: var(--cor-girassol); border-color: var(--cor-girassol); color: var(--verde-escuro);}
 .shake-error {animation: shake 0.5s ease-in-out;}
 @keyframes shake {0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 50% { transform: translateX(8px); } 75% { transform: translateX(-8px); }}
+/* =====================================================================
+/* --- NOVO: Estilos para Avaliação por Estrelas --- */
+.rating-stars {
+    display: inline-block;
+    direction: rtl; /* Inverte a ordem para o efeito de hover funcionar corretamente */
+    text-align: center;
+    margin-top: 30px;
+}
+
+.rating-stars input[type="radio"] {
+    display: none; /* Esconde os inputs de rádio */
+}
+
+.rating-stars label {
+    font-size: 50px; /* Tamanho das estrelas */
+    color: rgba(255, 255, 255, 0.3); /* Cor da estrela vazia */
+    cursor: pointer;
+    transition: color 0.2s ease;
+    padding: 0 5px;
+}
+
+/* Efeito de hover: Pinta as estrelas à "direita" (na verdade, à esquerda por causa do RTL) */
+.rating-stars label:hover,
+.rating-stars label:hover ~ label {
+    color: var(--cor-girassol);
+}
+
+/* Estilo para a estrela selecionada (e as à sua "direita") */
+.rating-stars input[type="radio"]:checked ~ label {
+    color: var(--cor-girassol);
+}
+
+/* --- Fim dos Estilos de Avaliação --- */
 /* =====================================================================
 /* PÁGINA DE RESULTADOS (ESTILOS UNIFICADOS)
    ========================================================================== */
@@ -2945,4 +2980,47 @@ body.pagina-dashboard {
  }
 @keyframes fadeOut {
     to { opacity: 0; transform: translateX(100%); }
+}
+
+/* --- ESTILOS GLOBAIS PARA O ÍCONE DE VER SENHA (CORRIGIDO) --- */
+
+.form-group-password-wrapper {
+    /* Torna este contêiner a referência para o ícone */
+    position: relative; 
+    
+    /* Mantém o layout original do seu formulário */
+    margin-bottom: 20px; 
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group-password-wrapper input[type="password"],
+.form-group-password-wrapper input[type="text"] {
+    /* Garante que o padding não quebre o layout */
+    box-sizing: border-box; 
+    /* Adiciona espaço à DIREITA para o ícone não sobrepor o texto */
+    padding-right: 50px !important; 
+}
+
+.password-toggle-icon {
+    position: absolute;
+    /* Posiciona o ícone dentro do campo, na parte inferior.
+       'bottom: 12px' deve alinhar bem com o texto. 
+       Ajuste este valor se o ícone não ficar centrado. */
+    bottom: 12px; 
+    right: 15px;
+    cursor: pointer;
+    color: #888; /* Cor sutil */
+    transition: color 0.2s ease;
+}
+
+.password-toggle-icon:hover {
+    color: var(--verde-escuro); /* Sua cor de destaque */
+}
+
+.password-toggle-icon svg {
+    /* Define o tamanho dos ícones */
+    width: 22px;
+    height: 22px;
+    display: block; /* Remove espaçamento extra */
 }
