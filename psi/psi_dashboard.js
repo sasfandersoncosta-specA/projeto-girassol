@@ -162,14 +162,60 @@ document.addEventListener('DOMContentLoaded', function() {
     // Lógica da Página: MEU PERFIL
     function inicializarLogicaDoPerfil() {
         // ... (Esta função permanece 100% igual, exceto que showToast foi movida) ...
-        
-        // (Todo o código de inicializarLogicaDoPerfil() vai aqui, exatamente como estava antes)
-        // ...
-        // ...
-        
-        // (A função showToast() FOI REMOVIDA DAQUI)
+        const form = document.getElementById('perfil-form');
+        const fieldset = document.getElementById('form-fieldset');
+        const btnAlterar = document.getElementById('btn-alterar');
+        const btnSalvar = document.getElementById('btn-salvar');
+
+        if (!form || !fieldset || !btnAlterar || !btnSalvar) return;
+
+        // Preenche o formulário com os dados existentes
+        if (psychologistData) {
+            form.elements['nome'].value = psychologistData.nome || '';
+            form.elements['email'].value = psychologistData.email || '';
+            form.elements['crp'].value = psychologistData.crp || '';
+            form.elements['cpf'].value = psychologistData.cpf || '';
+            // Adicione outros campos conforme necessário
+        }
+
+        btnAlterar.addEventListener('click', () => {
+            fieldset.disabled = false;
+            btnAlterar.classList.add('hidden');
+            btnSalvar.classList.remove('hidden');
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const updatedData = {
+                nome: form.elements['nome'].value,
+                email: form.elements['email'].value,
+                // Adicione outros campos que podem ser atualizados
+            };
+
+            try {
+                const response = await apiFetch(`${API_BASE_URL}/api/psychologists/me`, {
+                    method: 'PUT',
+                    body: updatedData
+                });
+
+                if (response.ok) {
+                    // Após salvar:
+                    fieldset.disabled = true;
+                    btnSalvar.classList.add('hidden');
+                    btnAlterar.classList.remove('hidden');
+                    showToast('Perfil atualizado com sucesso!', 'success');
+                    // Atualiza os dados locais para refletir a mudança na UI
+                    psychologistData = { ...psychologistData, ...updatedData };
+                } else {
+                    const errorResult = await response.json();
+                    throw new Error(errorResult.error || 'Falha ao atualizar o perfil.');
+                }
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        });
     }
-    // Em: psi_dashboard.js, dentro de inicializarLogicaDoPerfil()
     async function uploadCrpDocument(file) {
         const token = localStorage.getItem('girassol_token');
         if (!file || !token) {

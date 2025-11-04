@@ -42,6 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // Garante que a funcionalidade de ver/esconder senha (definida no script.js) seja ativada.
+    if (typeof setupPasswordToggles === 'function') {
+        setupPasswordToggles();
+    }
+
     // Em: psi_registro.js
     formRegistro.addEventListener('submit', async (event) => {
         event.preventDefault();

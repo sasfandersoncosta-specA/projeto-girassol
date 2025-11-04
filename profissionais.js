@@ -17,10 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Telas de Resultado Dinâmico
         { id: 'loading', type: 'loading', question: "Analisando a demanda...", subtitle: "Estamos cruzando seus dados com as buscas de nossos pacientes. Só um instante." },
         
-        // 2. CÓPIA DO CRP ATUALIZADA (Problema 2)
         { id: 'approved', type: 'approved', 
-          question: "Ótima notícia! Há uma grande procura por seu perfil.", 
-          subtitle: "Para ganhar seu selo de 'Verificado' e finalizar o cadastro, envie uma foto do seu CRP (opcional)." 
+          question: "Ótima notícia! Há uma grande procura por seu perfil."
         },
 
         { id: 'waitlisted', type: 'waitlisted', question: "Agradecemos seu interesse na Girassol!", subtitle: "No momento, a busca por profissionais com seu perfil específico já está bem atendida. Para garantir que todos os nossos parceiros tenham sucesso, adicionamos seu perfil à nossa lista de espera. Deixe seu e-mail abaixo para ser notificado(a) assim que surgir uma nova oportunidade.", buttonText: "Confirmar E-mail e Finalizar" },
@@ -54,16 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 contentHTML = `<div class="${choicesClass}">${questionData.choices.map(choice => `<button class="${buttonClass}" data-value="${choice}">${choice}</button>`).join('')}</div>`;
                 break;
             case 'approved':
-                contentHTML = `
-                    <div class="upload-container">
-                        <label for="crp-upload" class="upload-label">
-                            <span id="upload-text">Clique aqui para enviar a foto do seu CRP</span>
-                        </label>
-                        <input type="file" id="crp-upload" accept="image/*,.pdf">
-                    </div>`;
+                // O conteúdo foi removido, pois o redirecionamento será direto.
                 break;
             case 'loading':
-                contentHTML = `<div class="loading-animation"><img src="assets/images/logo-girassol-icon.svg" alt="Carregando"></div>`;
+                contentHTML = '<div class="loader-wrapper"><div class="loader-spinner"></div></div>';
                 break;
             case 'waitlisted':
                 contentHTML = `
@@ -86,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const action = questionData.buttonText ? "check" : "next";
             nextButtonHTML = `<button class="cta-button" data-action="${action}">${buttonText}</button>`;
         } else if (questionData.type === 'approved') {
-            nextButtonHTML = `<button class="cta-button" data-action="submit-validation">Enviar para Validação</button>`;
+            nextButtonHTML = `<button class="cta-button" data-action="submit-validation">Finalizar Cadastro</button>`;
         } else if (questionData.type === 'waitlisted') {
             nextButtonHTML = `<button class="cta-button" data-action="submit-waitlist">${questionData.buttonText}</button>`;
         } else if (questionData.type === 'error') {
@@ -112,6 +104,26 @@ document.addEventListener('DOMContentLoaded', () => {
         progressBarFill.style.width = `${progress}%`;
     }
 
+    // NOVA FUNÇÃO: Verifica o estado dos inputs e habilita/desabilita o botão de avançar
+    function checkNextButtonState(slide) {
+        const nextButton = slide.querySelector('[data-action="next"], [data-action="check"]');
+        if (!nextButton) return;
+
+        const input = slide.querySelector('input[required]');
+        if (input) {
+            const isEmail = input.type === 'email';
+            const isCrp = input.id === 'input-crp';
+            let isValid = input.value.trim() !== '';
+
+            if (isValid && isEmail) {
+                isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value);
+            } else if (isValid && isCrp) {
+                isValid = /^\d{2}\/\d{6}$/.test(input.value);
+            }
+            nextButton.disabled = !isValid;
+        }
+    }
+
     function goToSlide(index) {
         document.querySelector('.slide.active')?.classList.remove('active');
         currentStep = index;
@@ -131,6 +143,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 waitlistEmailInput.value = userAnswers.email;
             }
         }
+
+        // Chama a verificação do botão sempre que um novo slide é exibido
+        checkNextButtonState(document.querySelector(`[data-index="${currentStep}"]`));
     }
 
     function collectAnswer() {
@@ -255,6 +270,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        // Adiciona o listener de input para todos os campos de texto requeridos
+        slidesContainer.querySelectorAll('input[required]').forEach(input => {
+            const slide = input.closest('.slide');
+            input.addEventListener('input', () => checkNextButtonState(slide));
+        });
+
         slidesContainer.addEventListener('click', (e) => {
             const target = e.target;
             if (target.matches('[data-action="next"]')) {
@@ -262,8 +283,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (target.matches('[data-action="restart"]')) {
                 goToSlide(0); 
             } else if (target.matches('[data-action="submit-validation"]')) {
-                
-                // 5. CORREÇÃO DO PERFIL VAZIO (Problema 5)
                 localStorage.setItem('psi_questionario_respostas', JSON.stringify(userAnswers));
 
                 const { nome, email, crp } = userAnswers;
@@ -296,18 +315,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-
-        const uploadInput = document.getElementById('crp-upload');
-        const uploadText = document.getElementById('upload-text');
-        if (uploadInput && uploadText) {
-            uploadInput.addEventListener('change', () => {
-                if (uploadInput.files.length > 0) {
-                    uploadText.textContent = `Arquivo selecionado: ${uploadInput.files[0].name}`;
-                } else {
-                    uploadText.textContent = 'Clique aqui para enviar a foto do seu CRP';
-                }
-            });
-        }
 
         goToSlide(0);
     }

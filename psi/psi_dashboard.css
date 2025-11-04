@@ -154,6 +154,9 @@ body.pagina-dashboard {
 
 /* Adicionado: Justifica o texto do campo de biografia */
 .form-group textarea#bio {
+    width: 100%;
+    box-sizing: border-box; /* Impede o vazamento */
+    min-height: 120px;
     text-align: justify;
 }
 

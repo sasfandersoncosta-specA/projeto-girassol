@@ -10,6 +10,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // Garante que a funcionalidade de ver/esconder senha (definida no script.js) seja ativada.
+    if (typeof setupPasswordToggles === 'function') {
+        setupPasswordToggles();
+    }
+
     formRegistro.addEventListener('submit', async (event) => {
         
         event.preventDefault(); // Impede o recarregamento da página
