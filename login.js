@@ -53,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnPsicologo.addEventListener('click', () => {
             btnPsicologo.classList.add('active');
             btnPaciente.classList.remove('active');
+            // Garante que a variável de controle também seja atualizada
             selectedRole = 'psychologist';
             roleInput.value = selectedRole;
         });

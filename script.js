@@ -29,6 +29,40 @@ async function carregarVitrineTerapeutas() {
     }
 }
 
+/**
+ * Adiciona um ícone de "olho" para alternar a visibilidade de campos de senha.
+ */
+function initializePasswordToggles() {
+    // Seleciona todos os inputs de senha que ainda não foram processados
+    document.querySelectorAll('input[type="password"]:not(.password-toggle-initialized)').forEach(passwordInput => {
+        // Envolve o input para posicionar o ícone corretamente
+        const wrapper = document.createElement('div');
+        wrapper.className = 'password-container';
+        passwordInput.parentNode.insertBefore(wrapper, passwordInput);
+        wrapper.appendChild(passwordInput);
+
+        // Cria o ícone
+        const toggleIcon = document.createElement('span');
+        toggleIcon.className = 'toggle-password-visibility';
+        toggleIcon.textContent = '👁️'; // Ícone de olho aberto
+        wrapper.appendChild(toggleIcon);
+
+        // Adiciona o evento de clique ao ícone
+        toggleIcon.addEventListener('click', () => {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.textContent = '🙈'; // Ícone de olho fechado
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.textContent = '👁️'; // Ícone de olho aberto
+            }
+        });
+
+        // Marca o input como inicializado para não processá-lo novamente
+        passwordInput.classList.add('password-toggle-initialized');
+    });
+}
+
 function inicializarScripts() {
     
     // --- LÓGICA PARA O MENU HAMBÚRGUER ---
@@ -68,6 +102,9 @@ if (elementosOcultos.length > 0) {
     // --- LÓGICA DO BANNER DE INSTALAÇÃO PWA ---
     let deferredPrompt;
     const installBanner = document.getElementById('pwa-install-banner');
+
+    // CHAMA A FUNÇÃO PARA INICIALIZAR OS ÍCONES DE SENHA
+    initializePasswordToggles();
     const installButton = document.getElementById('pwa-install-button');
     const dismissButton = document.getElementById('pwa-dismiss-button');
 
@@ -119,6 +156,12 @@ if (elementosOcultos.length > 0) {
     // ... (O restante das suas lógicas de FAQ, senha, modal, etc. estão perfeitas e não mudam)
 
 } // Fim da função inicializarScripts()
+
+// Adiciona a inicialização do toggle também no dashboard quando uma nova página é carregada
+document.addEventListener('page-loaded', () => {
+    initializePasswordToggles();
+});
+
 
 // --- PONTO DE ENTRADA PRINCIPAL (NÃO MUDA) ---
 document.addEventListener("DOMContentLoaded", () => {

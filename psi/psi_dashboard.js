@@ -304,6 +304,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (pageUrl.includes('psi_lista_espera.html')) {
                     inicializarListaDeEspera();
                 }
+
+                // Dispara um evento customizado para que outros scripts (como o de toggle de senha) possam reagir
+                document.dispatchEvent(new CustomEvent('page-loaded'));
             })
             .catch(error => {
                 mainContent.innerHTML = `<div style="padding: 40px; text-align:center;"><h2>Página em Construção</h2><p>O conteúdo para esta seção estará disponível em breve.</p></div>`;

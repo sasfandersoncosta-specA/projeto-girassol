@@ -126,6 +126,7 @@ nav ul {
 nav a {
     text-decoration: none;
     color: white;
+    font-family: 'Inter', sans-serif; /* PADRONIZAÇÃO: Garante a fonte correta no menu */
     font-size: 18px; /* Fonte do menu reduzida */
 }
 nav a:hover {
@@ -745,6 +746,28 @@ header.header-rolagem nav a:hover {
   color: #FFFFFF; /* Texto branco */
 }
 
+/* --- ESTILO PARA O OLHO DE VISIBILIDADE DA SENHA --- */
+.password-container {
+    position: relative;
+}
+
+.toggle-password-visibility {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #888;
+    user-select: none; /* Impede que o ícone seja selecionado como texto */
+    font-size: 20px; /* Tamanho do ícone */
+    font-style: normal; /* Garante que não fique itálico */
+}
+
+.toggle-password-visibility:hover {
+    color: #333;
+}
+
+
 /* Efeito Hover para o botão INATIVO */
 .role-btn:not(.active):hover {
   background-color: #F8F9FA; /* Nosso Branco-Nuvem, um cinza bem claro */
@@ -1230,13 +1253,13 @@ header.header-rolagem nav a:hover {
 .container {
     max-width: 900px; /* Largura máxima para boa legibilidade */
     margin: 0 auto; /* Truque clássico para centralizar */
-    padding: 80px 20px; /* Espaçamento interno (vertical, horizontal) */
+    padding: 60px 20px; /* Espaçamento interno (vertical, horizontal) */
     text-align: center; /* Centraliza o texto dentro do container */
 }
 
 /* Títulos principais de cada seção */
 .secao-conteudo-pro h2 {
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'New Kansas', serif; /* PADRONIZAÇÃO: Usa a fonte de destaque do projeto */
     font-weight: 700;
     font-size: 2.5rem;
     color: var(--verde-escuro);
@@ -1330,7 +1353,7 @@ header.header-rolagem nav a:hover {
 }
 
 .coluna-item h3 {
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'New Kansas', serif; /* PADRONIZAÇÃO: Usa a fonte de destaque do projeto */
     font-size: 1.4rem;
     color: var(--verde-escuro);
     margin-bottom: 10px;
@@ -1365,7 +1388,7 @@ header.header-rolagem nav a:hover {
 /* Cada seção precisa de position: relative para o divisor funcionar */
 .hero-profissionais, .secao-conteudo-pro, .faq-secao {
     position: relative;
-    padding-bottom: 120px; /* Espaço para o divisor não sobrepor o conteúdo */
+    padding-bottom: 60px; /* Espaço para o divisor não sobrepor o conteúdo */
 }
 /* --- CORREÇÃO DE COR: TÍTULO DA PÁGINA PROFISSIONAIS --- */
 
