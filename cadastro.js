@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const choiceButtons = slide.querySelectorAll('.choice-button');
             choiceButtons.forEach(button => {
                 button.addEventListener('click', () => {
-                    const key = slide.querySelector('h1').innerText; // Usa a pergunta como chave
+                    const key = slide.dataset.slideId === '4' ? 'modalidade_atendimento' : slide.querySelector('h1').innerText;
                     formData[key] = button.dataset.value;
                     
                     // Adiciona um pequeno delay para o usuário ver a seleção
