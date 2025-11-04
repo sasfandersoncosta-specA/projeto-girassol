@@ -12,7 +12,7 @@
 
     <main class="container secao-conteudo-pagina"> 
         <h1>Termos e Condições de Uso - Girassol</h1>
-        <p class="subtitulo-secao">Última atualização: [Data da Última Atualização]</p>
+        <p class="subtitulo-secao">Última atualização: <span id="data-atualizacao"></span></p>
 
         <h2>1. Aceitação dos Termos</h2>
         <p>Ao acessar e utilizar a plataforma Girassol ("Plataforma"), você ("Usuário", seja Paciente ou Psicólogo) concorda em cumprir e estar vinculado a estes Termos e Condições de Uso ("Termos"). Se você não concorda com estes Termos, não utilize a Plataforma.</p>
@@ -57,7 +57,17 @@
         </svg>
     </div>
     <div id="footer-placeholder"></div>
-    <script src="script.js"></script> 
+    <script src="script.js"></script>
+<script>
+  // Gera a data atual formatada no padrão brasileiro
+  const data = new Date();
+  const dataFormatada = data.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  });
+  document.getElementById('data-atualizacao').textContent = dataFormatada;
+</script>
     </body>
 </body>
 </html>

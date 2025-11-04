@@ -2987,8 +2987,6 @@ body.pagina-dashboard {
 .form-group-password-wrapper { 
     position: relative; 
     margin-bottom: 20px; 
-    display: flex; 
-    flex-direction: column; 
 }
 
 .form-group-password-wrapper input[type="password"], .form-group-password-wrapper input[type="text"] { 
@@ -3006,13 +3004,24 @@ body.pagina-dashboard {
 
 /* Centraliza o ícone se NÃO houver <label> (Página de Login) */ 
 .form-group-password-wrapper:not(:has(label)) .password-toggle-icon { 
-    top: 50%; 
-    transform: translateY(-50%); 
+    /* Remove as regras que estão falhando */
+    top: auto; 
+    transform: none;
+    /* Aplica a mesma lógica da página de registro, alinhando pela base */
+    bottom: 12px; 
 }
 
-/* Alinha o ícone pela base se HOUVER <label> (Página de Registro) */ 
-.form-group-password-wrapper label + input + .password-toggle-icon { 
-    bottom: 12px; /* Alinha 12px da base do wrapper */ 
+/* =============================================================
+   CORREÇÃO DE ALINHAMENTO: ÍCONE DE SENHA NO REGISTRO
+   ============================================================= */
+
+/*
+ * Alvo: O ícone de senha em um wrapper que CONTÉM um label (ex: registrar.html).
+ * Lógica: Alinha o ícone pela base do input, garantindo consistência.
+ */
+.form-group-password-wrapper:has(label) .password-toggle-icon {
+    top: auto; /* Remove o alinhamento pelo topo */
+    bottom: 12px; /* Alinha pela base, a 12px de distância */
 }
 
 .password-toggle-icon:hover { color: var(--verde-escuro); }
@@ -3058,4 +3067,46 @@ body.pagina-dashboard {
     to {
         transform: rotate(360deg);
     }
+}
+
+/* === Corrigir alinhamento e ícone duplo === */
+.form-group-password-wrapper {
+  position: relative;
+}
+
+.form-group-password-wrapper input[type="password"],
+.form-group-password-wrapper input[type="text"] {
+  padding-right: 45px;
+  box-sizing: border-box;
+}
+
+.password-toggle-icon {
+  position: absolute;
+  right: 12px;
+  top: 53%; /* antes era 50% */
+  transform: translateY(10%);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+/* Oculta o ícone alternativo por padrão */
+.password-toggle-icon svg {
+  display: none;
+}
+
+/* Exibe o olho fechado quando o campo é senha */
+.password-toggle-icon .eye-closed {
+  display: block;
+}
+
+/* Exibe o olho aberto quando ativo */
+.password-toggle-icon.active .eye-closed {
+  display: none;
+}
+.password-toggle-icon.active .eye-open {
+  display: block;
 }

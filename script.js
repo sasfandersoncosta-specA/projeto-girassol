@@ -29,8 +29,57 @@ async function carregarVitrineTerapeutas() {
     }
 }
 
+/**
+ * Configura os listeners de evento para todos os ícones de alternância de senha.
+ * Procura por elementos com a classe .password-toggle-icon.
+ */
+function setupPasswordToggles() {
+    // 1. Seleciona todos os ícones-wrapper
+    const toggleIcons = document.querySelectorAll('.password-toggle-icon');
+
+    toggleIcons.forEach(iconWrapper => {
+        
+        // 2. Encontra os SVGs específicos dentro do wrapper
+        const iconEye = iconWrapper.querySelector('.icon-eye');
+        const iconEyeSlash = iconWrapper.querySelector('.icon-eye-slash');
+
+        // 3. Encontra o input de senha que é "irmão" do ícone
+        // (Usando .closest() para achar o pai e .querySelector() para achar o input)
+        const inputWrapper = iconWrapper.closest('.form-group-password-wrapper');
+        if (!inputWrapper) {
+            console.error('Ícone de senha não está dentro de um .form-group-password-wrapper');
+            return;
+        }
+        
+        const passwordInput = inputWrapper.querySelector('input[type="password"], input[type="text"]');
+         if (!passwordInput || !iconEye || !iconEyeSlash) {
+            console.error('Estrutura do toggle de senha incompleta.');
+            return;
+        }
+
+        // 4. Adiciona o clique no wrapper do ícone
+        iconWrapper.addEventListener('click', function() {
+            // 5. Verifica o tipo do input e alterna
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                // Mostra o ícone "cortado"
+                iconEye.classList.add('hidden');
+                iconEyeSlash.classList.remove('hidden');
+            } else {
+                passwordInput.type = 'password';
+                // Mostra o ícone "aberto"
+                iconEye.classList.remove('hidden');
+                iconEyeSlash.classList.add('hidden');
+            }
+        });
+    });
+}
+
 function inicializarScripts() {
     
+    // --- LÓGICA PARA MOSTRAR/ESCONDER SENHA ---
+    setupPasswordToggles();
+
     // --- LÓGICA PARA O MENU HAMBÚRGUER ---
     // ... (esta parte está perfeita, não muda)
     const menuHamburguer = document.querySelector('.menu-hamburguer'); const containerNavegacao = document.querySelector('.container-navegacao'); if (menuHamburguer && containerNavegacao) { menuHamburguer.addEventListener('click', () => { containerNavegacao.classList.toggle('ativo'); }); }
@@ -129,42 +178,7 @@ function setRealViewportHeight() {
     // Define o valor na variável CSS '--vh' no elemento raiz (<html>)
     document.documentElement.style.setProperty('--vh', `${vh}px`);
 }
-// Adiciona o manipulador de eventos para os ícones de senha
-function setupPasswordToggles() {
-    const toggleIcons = document.querySelectorAll('.password-toggle-icon');
 
-    toggleIcons.forEach(icon => {
-        // Previne que o evento seja adicionado múltiplas vezes
-        if (icon.dataset.listenerAttached) return; 
-
-        icon.addEventListener('click', function() {
-            // O input está logo ANTES do span do ícone no HTML
-            const input = this.previousElementSibling; 
-            
-            const iconEye = this.querySelector('.icon-eye');
-            const iconEyeSlash = this.querySelector('.icon-eye-slash');
-
-            if (input.type === 'password') {
-                input.type = 'text';
-                iconEye.classList.add('hidden');
-                iconEyeSlash.classList.remove('hidden');
-            } else {
-                input.type = 'password';
-                iconEye.classList.remove('hidden');
-                iconEyeSlash.classList.add('hidden');
-            }
-        });
-        // Marca o ícone como "processado"
-        icon.dataset.listenerAttached = 'true'; 
-    });
-}
-
-// Garante que o script rode após o DOM carregar
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupPasswordToggles);
-} else {
-    setupPasswordToggles(); // Roda imediatamente se o DOM já estiver pronto
-}
 // Executa a função quando a página carrega e sempre que a tela muda de tamanho
 window.addEventListener('resize', setRealViewportHeight);
 window.addEventListener('load', setRealViewportHeight);
@@ -178,7 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
         carregarComponente('/components/footer.html', 'footer-placeholder') 
     ]).then(() => {
         inicializarScripts(); if (document.getElementById('vitrine-terapeutas')) { carregarVitrineTerapeutas(); }
-        setupPasswordToggles(); // Garante que funcione após carregar componentes
+        
     });
 });
 
