@@ -3024,3 +3024,44 @@ body.pagina-dashboard {
     height: 22px;
     display: block; /* Remove espaçamento extra */
 }
+
+/* Estilo para o botão de avançar desabilitado no questionário */
+.cta-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* --- SPINNER DE CARREGAMENTO MODERNO (LOADER) --- */
+
+/* O contêiner para centralizar */
+.loader-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 40px; /* Espaçamento */
+}
+
+/* O spinner em si */
+.loader-spinner {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    
+    /* Cor de fundo do círculo (branco/transparente) */
+    border: 5px solid rgba(255, 255, 255, 0.2); 
+    
+    /* Cor principal da animação (amarelo-girassol) */
+    border-top-color: #FFEE8C; 
+    
+    animation: spin 1s linear infinite;
+}
+
+/* A animação de rotação */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
