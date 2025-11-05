@@ -3338,3 +3338,225 @@ body.pagina-dashboard {
     color: #d97706; /* Laranja escuro */
     margin-bottom: 15px;
 }
+/* =============================================================
+   PÁGINA DE PERFIL PÚBLICO DO PSICÓLOGO
+   ============================================================= */
+
+.profile-page-main {
+    padding-top: 60px;
+    padding-bottom: 80px;
+    background-color: #f8f9fa; /* Fundo cinza claro */
+}
+
+/* Grid Principal (Info + Card) */
+.profile-header-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* 1 coluna no mobile */
+    gap: 30px;
+    margin-bottom: 40px;
+}
+@media (min-width: 992px) {
+    .profile-header-grid {
+        /* 2 colunas no desktop: 2/3 para info, 1/3 para card */
+        grid-template-columns: 2fr 1fr; 
+    }
+}
+
+/* Coluna 1: Infos */
+.profile-info {
+    text-align: center;
+}
+.profile-photo-wrapper {
+    width: 180px;
+    height: 180px;
+    margin: 0 auto 20px auto;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+.profile-photo-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.profile-info h1 {
+    font-family: 'New Kansas', serif;
+    font-size: 2.5rem;
+    color: var(--verde-escuro);
+    margin: 0;
+}
+.profile-info .crp {
+    font-size: 1rem;
+    color: var(--cinza-texto);
+    margin: 5px 0 15px 0;
+}
+.profile-tags-container {
+    margin-top: 25px;
+    text-align: left;
+}
+.profile-tags-container h3 {
+    font-family: 'New Kansas', serif;
+    color: var(--verde-escuro);
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+.profile-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 15px;
+}
+.tag, .small-tag {
+    background-color: var(--cor-girassol);
+    color: var(--verde-escuro);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+.small-tag {
+    background-color: #f1f3f5; /* Cinza claro */
+    font-size: 0.8rem;
+    padding: 4px 10px;
+}
+
+
+/* Coluna 2: Card de Conversão */
+.conversion-card-wrapper {
+    position: relative;
+}
+.conversion-card {
+    background-color: var(--branco-puro);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+    position: sticky;
+    top: 100px; /* (Header tem 80px) + 20px de margem */
+}
+.conversion-card h3 {
+    font-size: 1rem;
+    color: var(--cinza-texto);
+    font-weight: 400;
+    margin: 0;
+}
+.conversion-card .price {
+    font-family: 'New Kansas', serif;
+    font-size: 2.2rem;
+    color: var(--verde-escuro);
+    margin: 5px 0 20px 0;
+}
+.conversion-card .cta-subtitle {
+    font-size: 0.9rem;
+    text-align: center;
+    color: var(--cinza-texto);
+    margin-top: 10px;
+}
+.conversion-card .small-tags {
+    margin-top: 25px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+
+/* Sistema de Abas */
+.tabs-nav {
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 30px;
+}
+.tab-link {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 500;
+    font-family: 'Montserrat', sans-serif;
+    padding: 15px 25px;
+    cursor: pointer;
+    color: var(--cinza-texto);
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px; /* Puxa para cima da borda principal */
+}
+.tab-link.active, .tab-link:hover {
+    color: var(--verde-escuro);
+    border-bottom-color: var(--verde-escuro);
+}
+.tab-content {
+    display: none; /* Escondido por padrão */
+}
+.tab-content.active {
+    display: block; /* Visível */
+}
+.tab-content h2 {
+    font-family: 'New Kansas', serif;
+    color: var(--verde-escuro);
+    margin-top: 0;
+}
+
+/* Sistema de Avaliação (Estrelas) */
+.rating-summary-stars .star,
+.review-card .star {
+    font-size: 1.5rem;
+    color: #ccc;
+}
+.rating-summary-stars .star.filled,
+.review-card .star.filled {
+    color: #f39c12; /* Cor de estrela */
+}
+.rating-summary-stars span {
+    margin-left: 10px;
+    font-weight: bold;
+    color: var(--cinza-texto);
+}
+
+/* Formulário de Avaliação (Input) */
+.star-rating-input {
+    display: flex;
+    flex-direction: row-reverse; /* Faz as estrelas acenderem da direita p/ esquerda */
+    justify-content: flex-end;
+}
+.star-rating-input input[type="radio"] {
+    display: none;
+}
+.star-rating-input label {
+    font-size: 2.5rem;
+    color: #ccc;
+    cursor: pointer;
+    padding: 0 3px;
+    transition: color 0.2s;
+}
+.star-rating-input input[type="radio"]:checked ~ label,
+.star-rating-input label:hover,
+.star-rating-input label:hover ~ label {
+    color: #f39c12;
+}
+
+/* Card de Avaliação Individual */
+#reviews-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 30px;
+}
+.review-card {
+    background-color: var(--branco-puro);
+    border: 1px solid #eee;
+    padding: 20px;
+    border-radius: 12px;
+}
+.review-card .review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.review-card .review-header h4 {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+}
+.review-card .review-header .rating-stars .star {
+    font-size: 1.1rem;
+}
+.review-card .review-comment {
+    font-style: italic;
+    color: var(--cinza-texto);
+    margin: 0;
+}

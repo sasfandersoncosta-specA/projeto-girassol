@@ -226,6 +226,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 viewPublicProfileLink.href = `/psi/${data.slug}`;
                 viewPublicProfileLink.style.display = 'inline-block';
             }
+
+            // CORREÇÃO: A inicialização dos multiselects deve ocorrer DEPOIS que o formulário foi populado.
+            // Esta função agora é chamada aqui.
+            if (form.elements['nome']) { // Garante que o formulário do perfil está presente
+                initializeMultiselect('temas_atuacao_multiselect', data.temas_atuacao);
+                initializeMultiselect('abordagens_tecnicas_multiselect', Array.isArray(data.abordagens_tecnicas) ? data.abordagens_tecnicas : [data.abordagens_tecnicas].filter(Boolean));
+                initializeMultiselect('genero_identidade_multiselect', [data.genero_identidade].filter(Boolean));
+                initializeMultiselect('praticas_vivencias_multiselect', data.praticas_vivencias);
+                initializeMultiselect('disponibilidade_periodo_multiselect', data.disponibilidade_periodo);
+            }
         }
     
         // Função para coletar dados do formulário, incluindo os multiselects
@@ -373,14 +383,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const btnUploadCrp = document.getElementById('btn-upload-crp-perfil');
                 const crpModal = document.getElementById('crp-upload-modal');
 
-                // Popula os multiselects com os dados do psicólogo
-                initializeMultiselect('temas_atuacao_multiselect', psychologistData.temas_atuacao);
-                initializeMultiselect('abordagens_tecnicas_multiselect', Array.isArray(psychologistData.abordagens_tecnicas) ? psychologistData.abordagens_tecnicas : [psychologistData.abordagens_tecnicas].filter(Boolean));
-                initializeMultiselect('genero_identidade_multiselect', [psychologistData.genero_identidade].filter(Boolean));
-                initializeMultiselect('praticas_vivencias_multiselect', psychologistData.praticas_vivencias);
-                initializeMultiselect('disponibilidade_periodo_multiselect', psychologistData.disponibilidade_periodo);
-
-
                 if (btnUploadCrp && crpModal) {
                     btnUploadCrp.addEventListener('click', () => {
                         crpModal.classList.add('is-visible');
@@ -418,13 +420,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         crpModal.classList.remove('is-visible');
                     });
                 }
-            } else { // Se não for active nem pending, trata outros status
-                // Popula os multiselects mesmo para outros status
-                initializeMultiselect('temas_atuacao_multiselect', psychologistData.temas_atuacao);
-                initializeMultiselect('abordagens_tecnicas_multiselect', Array.isArray(psychologistData.abordagens_tecnicas) ? psychologistData.abordagens_tecnicas : [psychologistData.abordagens_tecnicas].filter(Boolean));
-                initializeMultiselect('genero_identidade_multiselect', [psychologistData.genero_identidade].filter(Boolean));
-                initializeMultiselect('praticas_vivencias_multiselect', psychologistData.praticas_vivencias);
-                initializeMultiselect('disponibilidade_periodo_multiselect', psychologistData.disponibilidade_periodo);
             }
         }
     }

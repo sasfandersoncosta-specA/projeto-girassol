@@ -1,144 +1,224 @@
 // Arquivo: perfil_psicologo.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    const profilePlaceholder = document.getElementById('profile-content-placeholder');
-    const reviewsPlaceholder = document.getElementById('reviews-content-placeholder');
-    const loadingIndicator = document.getElementById('perfil-loading');
+    // 1. Pega o ID do psicólogo da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const psychologistId = urlParams.get('id'); // Espera uma URL como: .../perfil_psicologo.html?id=123
 
-    // Função para gerar as estrelas de avaliação
-    function getStarRating(rating) {
-        if (rating === null || rating === undefined) return '<span>Novo na plataforma</span>';
-        const fullStars = Math.floor(rating);
-        const halfStar = rating % 1 >= 0.5 ? 1 : 0;
-        const emptyStars = 5 - fullStars - halfStar;
-        return '★'.repeat(fullStars) + '½'.repeat(halfStar) + '☆'.repeat(emptyStars);
+    if (psychologistId) {
+        fetchProfileData(psychologistId);
+    } else {
+        // Lidar com o caso de ID não encontrado
+        document.getElementById('psi-nome').textContent = "Perfil não encontrado";
+        document.getElementById('psi-bio').textContent = "O ID do psicólogo não foi fornecido na URL.";
     }
 
-    // Função para renderizar o perfil principal
-    function renderProfile(profile) {
-        document.title = `${profile.nome} - Perfil Girassol`; // Atualiza o título da página
+    // 2. Configura a lógica das Abas (Tabs)
+    setupTabs();
 
-        const profileHTML = `
-            <div class="perfil-container">
-                <header class="perfil-header">
-                    <div class="perfil-foto">
-                        <img src="${profile.fotoUrl || 'https://placehold.co/150x150'}" alt="Foto de ${profile.nome}">
-                    </div>
-                    <div class="perfil-info">
-                        <h1>${profile.nome}</h1>
-                        <p class="crp">CRP: ${profile.crp}</p>
-                        <div class="perfil-rating">
-                            <span class="stars">${getStarRating(profile.average_rating)}</span>
-                            <span>(${profile.review_count} ${profile.review_count === 1 ? 'avaliação' : 'avaliações'})</span>
-                        </div>
-                        <div class="perfil-acoes">
-                            <a href="https://wa.me/55${profile.telefone}?text=Olá, encontrei seu perfil na Girassol e gostaria de mais informações." target="_blank" class="btn btn-principal">Iniciar Conversa</a>
-                            <button class="btn btn-secundario">Favoritar</button>
-                        </div>
-                    </div>
-                </header>
-
-                <section class="perfil-secao">
-                    <h2>Sobre Mim</h2>
-                    <p>${profile.bio || 'Este profissional ainda não adicionou uma biografia.'}</p>
-                </section>
-
-                <section class="perfil-secao">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;">
-                        <div class="info-card">
-                            <h3>Valor da Sessão</h3>
-                            <p>R$ ${profile.valor_sessao_numero ? profile.valor_sessao_numero.toFixed(2).replace('.', ',') : 'N/A'}</p>
-                        </div>
-                        <div class="info-card">
-                            <h3>Gênero</h3>
-                            <p>${profile.genero_identidade || 'Não informado'}</p>
-                        </div>
-                        <div class="info-card">
-                            <h3>Disponibilidade</h3>
-                            <p>${profile.disponibilidade_periodo ? profile.disponibilidade_periodo.join(', ') : 'Não informada'}</p>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="perfil-secao">
-                    <h2>Especialidades e Abordagens</h2>
-                    <h3>Principais Temas de Atuação</h3>
-                    <ul class="tags-container">
-                        ${profile.temas_atuacao ? profile.temas_atuacao.map(tag => `<li class="tag">${tag}</li>`).join('') : '<li>Não informado</li>'}
-                    </ul>
-                    <h3 style="margin-top: 20px;">Abordagem Teórica</h3>
-                    <ul class="tags-container">
-                        ${profile.abordagens_tecnicas ? profile.abordagens_tecnicas.map(tag => `<li class="tag">${tag}</li>`).join('') : '<li>Não informado</li>'}
-                    </ul>
-                    <h3 style="margin-top: 20px;">Práticas e Vivências</h3>
-                    <ul class="tags-container">
-                        ${profile.praticas_vivencias ? profile.praticas_vivencias.map(tag => `<li class="tag">${tag}</li>`).join('') : '<li>Não informado</li>'}
-                    </ul>
-                </section>
-            </div>
-        `;
-        profilePlaceholder.innerHTML = profileHTML;
-    }
-
-    // Função para renderizar as avaliações
-    function renderReviews(reviews) {
-        const reviewsHTML = `
-            <div class="perfil-container">
-                <section class="perfil-secao">
-                    <h2>Avaliações de Pacientes</h2>
-                    ${reviews.length > 0 ? reviews.map(review => `
-                        <div class="review-item">
-                            <div class="review-header">
-                                <span class="review-author">${review.patient.nome}</span>
-                                <span class="stars">${getStarRating(review.rating)}</span>
-                            </div>
-                            <p>${review.comment}</p>
-                            <div class="review-date">Publicado em: ${new Date(review.createdAt).toLocaleDateString('pt-BR')}</div>
-                        </div>
-                    `).join('') : '<p>Este profissional ainda não recebeu avaliações.</p>'}
-                </section>
-            </div>
-        `;
-        reviewsPlaceholder.innerHTML = reviewsHTML;
-    }
-
-    // Função principal para buscar todos os dados
-    async function fetchProfileData() {
-        const params = new URLSearchParams(window.location.search);
-        const psychologistId = params.get('id');
-
-        if (!psychologistId) {
-            loadingIndicator.innerHTML = '<p style="text-align: center; color: red;">ID do profissional não encontrado na URL.</p>';
-            return;
-        }
-
-        try {
-            // Busca os dados do perfil e as avaliações em paralelo
-            const [profileResponse, reviewsResponse] = await Promise.all([
-                fetch(`${API_BASE_URL}/api/psychologists/${psychologistId}`),
-                fetch(`${API_BASE_URL}/api/psychologists/${psychologistId}/reviews`)
-            ]);
-
-            if (!profileResponse.ok) {
-                throw new Error(`Erro ao buscar perfil: ${profileResponse.statusText}`);
-            }
-            if (!reviewsResponse.ok) {
-                throw new Error(`Erro ao buscar avaliações: ${reviewsResponse.statusText}`);
-            }
-
-            const profileData = await profileResponse.json();
-            const reviewsData = await reviewsResponse.json();
-
-            // Esconde o loading e renderiza o conteúdo
-            loadingIndicator.style.display = 'none';
-            renderProfile(profileData);
-            renderReviews(reviewsData);
-
-        } catch (error) {
-            console.error("Falha ao carregar dados do perfil:", error);
-            loadingIndicator.innerHTML = `<p style="text-align: center; color: red;">Não foi possível carregar o perfil. Tente novamente mais tarde.</p>`;
-        }
-    }
-
-    fetchProfileData();
+    // 3. Verifica se o paciente está logado para mostrar o form de avaliação
+    checkPatientLoginStatus(psychologistId);
 });
+
+/**
+ * Busca os dados do psicólogo na API e preenche a página.
+ */
+async function fetchProfileData(id) {
+    try {
+        // ROTA DO BACKEND (do seu controller)
+        const response = await fetch(`/api/psychologists/${id}`);
+        
+        if (!response.ok) {
+            throw new Error('Perfil não encontrado ou erro no servidor.');
+        }
+        
+        const data = await response.json();
+
+        // 1. Preenche o Título da Página
+        document.title = `${data.nome} - Psicólogo(a) na Jano`;
+
+        // 2. Preenche o Cabeçalho do Perfil (Info)
+        document.getElementById('psi-foto').src = data.fotoUrl || 'assets/images/default-avatar.png';
+        document.getElementById('psi-nome').textContent = data.nome;
+        document.getElementById('psi-crp').textContent = `CRP: ${data.crp}`;
+
+        // 3. Preenche o Card de Conversão (Preço, Modalidade)
+        document.getElementById('psi-valor').textContent = data.valor_sessao_faixa || 'A consultar';
+        document.getElementById('psi-modalidade').textContent = data.modalidade || 'Não informado';
+        
+        // 4. Preenche as Tags (usando uma função auxiliar)
+        populateTags('psi-tags-especialidades', data.temas_atuacao, 'tag');
+        populateTags('psi-tags-abordagens', data.abordagens_tecnicas, 'small-tag');
+        
+        // 5. Preenche a Aba "Sobre Mim"
+        document.getElementById('psi-bio').textContent = data.bio || 'Este profissional ainda não escreveu uma biografia.';
+        populateTags('psi-tags-praticas', data.praticas_vivencias, 'tag');
+
+        // 6. Preenche a Aba "Avaliações"
+        renderRatingSummary(data.average_rating, data.review_count);
+        renderReviews(data.reviews || []);
+
+    } catch (error) {
+        console.error('Erro ao buscar dados do perfil:', error);
+        document.getElementById('psi-nome').textContent = "Erro ao carregar perfil";
+    }
+}
+
+/**
+ * Função auxiliar para criar e injetar tags (especialidades, etc.)
+ */
+function populateTags(containerId, tagsArray, tagClass) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = ''; // Limpa o container
+    
+    if (tagsArray && tagsArray.length > 0) {
+        tagsArray.forEach(text => {
+            const span = document.createElement('span');
+            span.className = tagClass;
+            span.textContent = text;
+            container.appendChild(span);
+        });
+    } else {
+        container.innerHTML = `<span class="${tagClass}" style="background-color: #f1f3f5;">Não informado</span>`;
+    }
+}
+
+/**
+ * Renderiza o resumo das estrelas (ex: 4.8 (12 avaliações))
+ */
+function renderRatingSummary(avgRating, reviewCount) {
+    const container = document.getElementById('psi-rating-summary');
+    container.innerHTML = ''; // Limpa
+    
+    const rating = parseFloat(avgRating) || 0;
+    const count = parseInt(reviewCount) || 0;
+
+    // Cria as 5 estrelas
+    for (let i = 1; i <= 5; i++) {
+        const star = document.createElement('span');
+        star.className = 'star';
+        // Preenche a estrela se o 'i' for menor que a nota arredondada
+        if (i <= Math.round(rating)) {
+            star.classList.add('filled');
+        }
+        star.innerHTML = '★';
+        container.appendChild(star);
+    }
+    
+    // Adiciona o texto
+    const text = document.createElement('span');
+    if (count > 0) {
+        text.textContent = `${rating.toFixed(1)} (${count} ${count === 1 ? 'avaliação' : 'avaliações'})`;
+    } else {
+        text.textContent = "Nenhuma avaliação";
+    }
+    container.appendChild(text);
+}
+
+/**
+ * Renderiza a lista de cards de avaliação
+ */
+function renderReviews(reviews) {
+    const container = document.getElementById('reviews-list-container');
+    container.innerHTML = ''; // Limpa
+
+    if (!reviews || reviews.length === 0) {
+        container.innerHTML = '<p>Este profissional ainda não recebeu avaliações.</p>';
+        return;
+    }
+
+    reviews.forEach(review => {
+        const card = document.createElement('div');
+        card.className = 'review-card';
+        
+        const rating = parseFloat(review.rating);
+        let starsHTML = '';
+        for (let i = 1; i <= 5; i++) {
+            starsHTML += `<span class="star ${i <= rating ? 'filled' : ''}">★</span>`;
+        }
+
+        card.innerHTML = `
+            <div class="review-header">
+                <h4>${review.patient ? review.patient.nome : 'Paciente Anônimo'}</h4>
+                <div class="rating-stars">${starsHTML}</div>
+            </div>
+            <p class="review-comment">"${review.comment}"</p>
+        `;
+        container.appendChild(card);
+    });
+}
+
+/**
+ * Configura a navegação por Abas (Tabs)
+ */
+function setupTabs() {
+    const tabLinks = document.querySelectorAll('.tab-link');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            const tabId = link.getAttribute('data-tab');
+
+            // Remove 'active' de todos
+            tabLinks.forEach(item => item.classList.remove('active'));
+            tabContents.forEach(item => item.classList.remove('active'));
+
+            // Adiciona 'active' ao clicado
+            link.classList.add('active');
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+        });
+    });
+}
+
+/**
+ * Verifica se é um paciente logado e mostra o formulário de avaliação
+ */
+function checkPatientLoginStatus(psychologistId) {
+    // ASSUMINDO que você salva o token do PACIENTE no localStorage
+    const patientToken = localStorage.getItem('patientToken');
+    
+    if (patientToken) {
+        document.getElementById('review-form-wrapper').style.display = 'block';
+        
+        // Adiciona o listener para o submit do formulário
+        const reviewForm = document.getElementById('review-form');
+        reviewForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const rating = new FormData(reviewForm).get('rating');
+            const comment = new FormData(reviewForm).get('comment');
+            
+            if (!rating) {
+                alert('Por favor, selecione uma nota (de 1 a 5 estrelas).');
+                return;
+            }
+
+            try {
+                // ROTA NOVA (você precisará criar no backend)
+                const response = await fetch('/api/reviews', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${patientToken}`
+                    },
+                    body: JSON.stringify({
+                        psychologistId: psychologistId,
+                        rating: parseInt(rating),
+                        comment: comment
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Avaliação enviada com sucesso!');
+                    window.location.reload(); // Recarrega a página para ver a nova avaliação
+                } else {
+                    const errorData = await response.json();
+                    alert(`Erro ao enviar avaliação: ${errorData.error}`);
+                }
+            } catch (error) {
+                console.error('Erro no submit da avaliação:', error);
+                alert('Erro de conexão ao enviar avaliação.');
+            }
+        });
+    }
+}
