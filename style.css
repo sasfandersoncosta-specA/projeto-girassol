@@ -3242,3 +3242,99 @@ body.pagina-dashboard {
     width: 100%;
     line-height: 0;
 }
+
+/* =============================================================
+   PÁGINA DE RECURSOS DE CRISE
+   ============================================================= */
+
+/* O Bloco de Aviso Vermelho */
+.aviso-crise-box {
+    background-color: #fef2f2; /* Vermelho bem claro */
+    border: 2px solid #E63946;  /* Vermelho de perigo */
+    border-radius: 12px;
+    padding: 25px;
+    margin: 30px 0 40px 0;
+}
+.aviso-crise-box h2 {
+    color: #991b1b; /* Vermelho escuro */
+}
+.aviso-crise-box p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #b91c1c; /* Vermelho escuro */
+    margin-bottom: 0;
+}
+
+/* Grid para os Cards de Emergência */
+.recursos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.recurso-card {
+    background-color: var(--branco-puro);
+    border: 1px solid #eee;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centraliza os botões */
+}
+.recurso-card h3 {
+    font-family: 'New Kansas', serif;
+    color: var(--verde-escuro);
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+.recurso-card p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    flex-grow: 1; /* Empurra o botão para baixo */
+}
+
+/* Botão de Emergência */
+.btn-emergencia {
+    display: block;
+    width: 100%;
+    background-color: #E63946;
+    color: var(--branco-puro);
+    border-color: #E63946;
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 12px;
+    text-align: center;
+    margin-top: 15px;
+}
+.btn-emergencia:hover {
+    background-color: #c9303c;
+    border-color: #c9303c;
+    transform: none; /* Remove o scale do :hover padrão */
+}
+
+.link-externo {
+    display: block;
+    text-align: center;
+    margin-top: 15px;
+    font-weight: bold;
+    color: var(--verde-escuro);
+}
+
+/* Bloco de Aviso Informativo (Amarelo/Gentil) */
+.aviso-info-box {
+    background-color: #fffbeb; /* Amarelo bem claro */
+    border: 2px solid #FBBF24;  /* Amarelo/Laranja */
+    border-radius: 12px;
+    padding: 25px;
+    margin: 30px 0 40px 0;
+}
+.aviso-info-box h2 {
+    color: #b45309; /* Laranja escuro */
+}
+.aviso-info-box p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #d97706; /* Laranja escuro */
+    margin-bottom: 15px;
+}
