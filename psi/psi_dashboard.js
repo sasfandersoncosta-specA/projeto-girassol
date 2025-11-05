@@ -200,6 +200,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const btnAlterar = document.getElementById('btn-alterar');
         const btnSalvar = document.getElementById('btn-salvar');
         const viewPublicProfileLink = document.getElementById('view-public-profile-link');
+
+        // Aplica a máscara de telefone
+        const telefoneInput = document.getElementById('telefone');
+        if (telefoneInput && window.IMask) {
+            IMask(telefoneInput, { mask: '(00) 00000-0000' });
+        }
     
         // Função para popular os campos do formulário
         function populateForm(data) {
@@ -294,6 +300,63 @@ document.addEventListener('DOMContentLoaded', function() {
         const statusText = document.getElementById('verification-status-text');
         const description = document.getElementById('verification-description');
         
+        // --- NOVA FUNÇÃO PARA INICIALIZAR MULTISELECTS ---
+        function initializeMultiselect(containerId, selectedValues = []) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const display = container.querySelector('.multiselect-display');
+            const optionsContainer = container.querySelector('.multiselect-options');
+            const isSingleSelect = container.dataset.singleSelect === 'true';
+
+            // Limpa o estado anterior
+            display.innerHTML = '';
+            optionsContainer.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+
+            // Popula com os valores salvos
+            selectedValues.forEach(value => {
+                const option = optionsContainer.querySelector(`.option[data-value="${value}"]`);
+                if (option) {
+                    addTag(option.textContent, value);
+                    option.classList.add('selected');
+                }
+            });
+
+            function addTag(text, value) {
+                if (isSingleSelect) {
+                    display.innerHTML = ''; // Limpa antes de adicionar
+                }
+                const tag = document.createElement('span');
+                tag.className = 'tag';
+                tag.textContent = text;
+                tag.dataset.value = value;
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-tag';
+                removeBtn.innerHTML = '&times;';
+                removeBtn.onclick = () => {
+                    const option = optionsContainer.querySelector(`.option[data-value="${value}"]`);
+                    if (option) option.classList.remove('selected');
+                    tag.remove();
+                };
+                tag.appendChild(removeBtn);
+                display.appendChild(tag);
+            }
+
+            // Adiciona o listener de clique nas opções
+            optionsContainer.addEventListener('click', (e) => {
+                if (container.classList.contains('disabled')) return; // Não faz nada se estiver desabilitado
+
+                const option = e.target.closest('.option');
+                if (!option) return;
+
+                option.classList.toggle('selected');
+                display.innerHTML = ''; // Recria as tags
+                optionsContainer.querySelectorAll('.option.selected').forEach(opt => {
+                    addTag(opt.textContent, opt.dataset.value);
+                });
+            });
+        }
+
         if (widget && psychologistData) {
             widget.style.display = 'block';
             if (psychologistData.status === 'active') {
@@ -304,11 +367,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 widget.classList.add('status-pending');
                 statusText.textContent = 'Verificação Pendente';
                 description.innerHTML = `Envie seu CRP para análise e ganhe o selo de verificado. 
-                    <button class="btn btn-secundario" id="btn-upload-crp-perfil">Enviar CRP</button>`;
+                    <button class="btn btn-secundario" id="btn-upload-crp-perfil">Enviar CRP</button>`; // CORREÇÃO: Fechamento do template literal
                 
                 // --- LÓGICA DE CLIQUE E UPLOAD DO CRP ---
                 const btnUploadCrp = document.getElementById('btn-upload-crp-perfil');
                 const crpModal = document.getElementById('crp-upload-modal');
+
+                // Popula os multiselects com os dados do psicólogo
+                initializeMultiselect('temas_atuacao_multiselect', psychologistData.temas_atuacao);
+                initializeMultiselect('abordagens_tecnicas_multiselect', Array.isArray(psychologistData.abordagens_tecnicas) ? psychologistData.abordagens_tecnicas : [psychologistData.abordagens_tecnicas].filter(Boolean));
+                initializeMultiselect('genero_identidade_multiselect', [psychologistData.genero_identidade].filter(Boolean));
+                initializeMultiselect('praticas_vivencias_multiselect', psychologistData.praticas_vivencias);
+                initializeMultiselect('disponibilidade_periodo_multiselect', psychologistData.disponibilidade_periodo);
+
 
                 if (btnUploadCrp && crpModal) {
                     btnUploadCrp.addEventListener('click', () => {
@@ -347,6 +418,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         crpModal.classList.remove('is-visible');
                     });
                 }
+            } else { // Se não for active nem pending, trata outros status
+                // Popula os multiselects mesmo para outros status
+                initializeMultiselect('temas_atuacao_multiselect', psychologistData.temas_atuacao);
+                initializeMultiselect('abordagens_tecnicas_multiselect', Array.isArray(psychologistData.abordagens_tecnicas) ? psychologistData.abordagens_tecnicas : [psychologistData.abordagens_tecnicas].filter(Boolean));
+                initializeMultiselect('genero_identidade_multiselect', [psychologistData.genero_identidade].filter(Boolean));
+                initializeMultiselect('praticas_vivencias_multiselect', psychologistData.praticas_vivencias);
+                initializeMultiselect('disponibilidade_periodo_multiselect', psychologistData.disponibilidade_periodo);
             }
         }
     }
