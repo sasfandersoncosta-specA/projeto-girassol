@@ -226,16 +226,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 viewPublicProfileLink.href = `/psi/${data.slug}`;
                 viewPublicProfileLink.style.display = 'inline-block';
             }
-
-            // CORREÇÃO: A inicialização dos multiselects deve ocorrer DEPOIS que o formulário foi populado.
-            // Esta função agora é chamada aqui.
-            if (form.elements['nome']) { // Garante que o formulário do perfil está presente
-                initializeMultiselect('temas_atuacao_multiselect', data.temas_atuacao);
-                initializeMultiselect('abordagens_tecnicas_multiselect', Array.isArray(data.abordagens_tecnicas) ? data.abordagens_tecnicas : [data.abordagens_tecnicas].filter(Boolean));
-                initializeMultiselect('genero_identidade_multiselect', [data.genero_identidade].filter(Boolean));
-                initializeMultiselect('praticas_vivencias_multiselect', data.praticas_vivencias);
-                initializeMultiselect('disponibilidade_periodo_multiselect', data.disponibilidade_periodo);
-            }
         }
     
         // Função para coletar dados do formulário, incluindo os multiselects
@@ -267,12 +257,23 @@ document.addEventListener('DOMContentLoaded', function() {
         // Popula o formulário com os dados já existentes
         populateForm(psychologistData);
     
+        // CORREÇÃO: Popula os multiselects com os dados do psicólogo
+        initializeMultiselect('temas_atuacao_multiselect', psychologistData.temas_atuacao);
+        initializeMultiselect('abordagens_tecnicas_multiselect', Array.isArray(psychologistData.abordagens_tecnicas) ? psychologistData.abordagens_tecnicas : [psychologistData.abordagens_tecnicas].filter(Boolean));
+        initializeMultiselect('genero_identidade_multiselect', [psychologistData.genero_identidade].filter(Boolean));
+        initializeMultiselect('praticas_vivencias_multiselect', psychologistData.praticas_vivencias);
+        initializeMultiselect('disponibilidade_periodo_multiselect', psychologistData.disponibilidade_periodo);
+
         // --- LÓGICA DE HABILITAÇÃO DO FORMULÁRIO ---
         if (btnAlterar && btnSalvar && fieldset) {
             btnAlterar.addEventListener('click', () => {
                 fieldset.disabled = false;
                 btnAlterar.classList.add('hidden');
                 btnSalvar.classList.remove('hidden');
+                // CORREÇÃO: Habilita os componentes de multiselect
+                document.querySelectorAll('.multiselect-tag').forEach(el => {
+                    el.classList.remove('disabled');
+                });
                 showToast('Modo de edição ativado.', 'info');
             });
     
@@ -292,6 +293,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         fieldset.disabled = true;
                         btnSalvar.classList.add('hidden');
                         btnAlterar.classList.remove('hidden');
+                        // CORREÇÃO: Desabilita os componentes de multiselect após salvar
+                        document.querySelectorAll('.multiselect-tag').forEach(el => {
+                            el.classList.add('disabled');
+                        });
                         showToast(result.message || 'Perfil atualizado com sucesso!', 'success');
                         // Atualiza os dados locais para refletir a mudança na UI e no nome da sidebar
                         psychologistData = result.psychologist;
