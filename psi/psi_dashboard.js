@@ -543,12 +543,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // ... (O restante da sua função initializeDashboard permanece 100% igual) ...
         fetchUnreadCount();
-        const navLinks = document.querySelectorAll('aside.dashboard-sidebar nav.sidebar-nav ul li');
+        // CORREÇÃO 1: O seletor agora mira nos 'a' tags
+        const navLinks = document.querySelectorAll('aside.dashboard-sidebar nav.sidebar-nav ul li a');
+        
         navLinks.forEach(link => {
             link.addEventListener('click', function(e) {
-                e.preventDefault();
-                navLinks.forEach(item => item.classList.remove('active'));
-                this.classList.add('active');
+                e.preventDefault(); // Impede o 'href'
+                
+                // CORREÇÃO 2: Remove 'active' de todos os 'li' pais
+                navLinks.forEach(item => item.parentElement.classList.remove('active'));
+                
+                // CORREÇÃO 3: Adiciona 'active' ao 'li' pai do link clicado
+                this.parentElement.classList.add('active');
+                
+                // A lógica de carregar a página permanece a mesma
                 loadPage(this.getAttribute('data-page'));
             });
         });
