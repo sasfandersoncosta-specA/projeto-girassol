@@ -33,7 +33,7 @@
                 </div>
                 <div class="form-group form-group-password-wrapper">
                   <label for="senha">Senha</label>
-                  <input type="password" id="senha" name="senha" required>
+                  <input type="password" id="senha-login" name="senha" required>
                   <span class="password-toggle-icon" id="togglePassword">
                     <!-- olho fechado -->
                     <svg class="eye-closed" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -71,7 +71,7 @@
 
     <script>
       const togglePassword = document.getElementById("togglePassword");
-      const passwordField = document.getElementById("senha");
+      const passwordField = document.getElementById("senha-login");
     
       togglePassword.addEventListener("click", () => {
         const isPassword = passwordField.type === "password";
