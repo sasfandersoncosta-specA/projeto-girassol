@@ -444,22 +444,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(pageUrl)
             .then(response => response.ok ? response.text() : Promise.reject(`Arquivo não encontrado: ${pageUrl}`))
             .then(html => {
-                mainContent.innerHTML = html;
-                
-                // Roteador de Lógica: (Agora com o Header de Boas-vindas)
-                if (pageUrl.includes('psi_visao_geral.html')) {
-                    const welcomeEl = document.getElementById('psi-welcome-subtitle');
-                    if (welcomeEl && psychologistData) {
-                        welcomeEl.textContent = `Bem-vindo(a), ${psychologistData.nome.split(' ')[0]}!`;
-                    }
-                } else if (pageUrl.includes('psi_meu_perfil.html')) {
-                    inicializarLogicaDoPerfil();
-                } else if (pageUrl.includes('psi_caixa_de_entrada.html')) {
-                    inicializarLogicaDaCaixaDeEntrada();
-                } else if (pageUrl.includes('psi_lista_espera.html')) {
-                    inicializarListaDeEspera();
-                }
-
+                mainContent.innerHTML = html;                
                 // Dispara um evento customizado para que outros scripts (como o de toggle de senha) possam reagir
                 document.dispatchEvent(new CustomEvent('page-loaded'));
             })
