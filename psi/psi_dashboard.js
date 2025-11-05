@@ -201,11 +201,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const btnSalvar = document.getElementById('btn-salvar');
         const viewPublicProfileLink = document.getElementById('view-public-profile-link');
 
-        // --- FUNÇÃO PARA INICIALIZAR MULTISELECTS (MOVIDA PARA CIMA) ---
+        // --- NOVA FUNÇÃO (COMPLETA) PARA INICIALIZAR MULTISELECTS ---
         function initializeMultiselect(containerId, selectedValues = []) {
             const container = document.getElementById(containerId);
             if (!container) return;
 
+            // Encontra o fieldset pai para checar o 'disabled'
+            const fieldset = container.closest('fieldset');
+            
             const display = container.querySelector('.multiselect-display');
             const optionsContainer = container.querySelector('.multiselect-options');
             const isSingleSelect = container.dataset.singleSelect === 'true';
@@ -214,18 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
             display.innerHTML = '';
             optionsContainer.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
 
-            // Garante que selectedValues seja sempre um array
-            const values = Array.isArray(selectedValues) ? selectedValues : [selectedValues].filter(Boolean);
-
-            // Popula com os valores salvos
-            values.forEach(value => {
-                const option = optionsContainer.querySelector(`.option[data-value="${value}"]`);
-                if (option) {
-                    addTag(option.textContent, value);
-                    option.classList.add('selected');
-                }
-            });
-
+            // --- 1. FUNÇÃO INTERNA: Adicionar Tag ---
             function addTag(text, value) {
                 if (isSingleSelect) {
                     display.innerHTML = ''; // Limpa antes de adicionar
@@ -234,28 +226,77 @@ document.addEventListener('DOMContentLoaded', function() {
                 tag.className = 'tag';
                 tag.textContent = text;
                 tag.dataset.value = value;
+                
                 const removeBtn = document.createElement('button');
+                removeBtn.type = 'button'; // Previne submit de formulário
                 removeBtn.className = 'remove-tag';
                 removeBtn.innerHTML = '&times;';
-                removeBtn.onclick = () => {
+                
+                removeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Impede o clique de abrir o dropdown
+                    if (fieldset && fieldset.disabled) return; // Não permite remover se desabilitado
+                    
                     const option = optionsContainer.querySelector(`.option[data-value="${value}"]`);
                     if (option) option.classList.remove('selected');
                     tag.remove();
-                };
+                });
+
                 tag.appendChild(removeBtn);
                 display.appendChild(tag);
             }
 
-            // Adiciona o listener de clique nas opções
-            optionsContainer.addEventListener('click', (e) => {
-                if (container.classList.contains('disabled')) return;
+            // --- 2. POPULA OS DADOS INICIAIS ---
+            (selectedValues || []).forEach(value => {
+                if (!value) return;
+                const option = optionsContainer.querySelector(`.option[data-value="${value}"]`);
+                if (option) {
+                    addTag(option.textContent, value);
+                    option.classList.add('selected');
+                }
+            });
 
+            // --- 3. LISTENER PARA ABRIR/FECHAR O DROPDOWN (A PARTE QUE FALTAVA) ---
+            display.addEventListener('click', () => {
+                // SÓ ABRE SE O FIELDSET NÃO ESTIVER DESABILITADO
+                if (fieldset && fieldset.disabled) return; 
+                
+                container.classList.toggle('open');
+            });
+
+            // --- 4. LISTENER PARA SELECIONAR OPÇÕES ---
+            optionsContainer.addEventListener('click', (e) => {
                 const option = e.target.closest('.option');
                 if (!option) return;
 
-                option.classList.toggle('selected');
-                display.innerHTML = ''; // Recria as tags
-                optionsContainer.querySelectorAll('.option.selected').forEach(opt => addTag(opt.textContent, opt.dataset.value));
+                const value = option.dataset.value;
+                const text = option.textContent;
+
+                if (isSingleSelect) {
+                    // Desmarca todos
+                    optionsContainer.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+                    // Marca o clicado
+                    option.classList.add('selected');
+                    // Atualiza a tag
+                    display.innerHTML = '';
+                    addTag(text, value);
+                    // Fecha o dropdown
+                    container.classList.remove('open');
+                } else {
+                    // Lógica de Múltipla Seleção
+                    option.classList.toggle('selected');
+                    // Recria as tags
+                    display.innerHTML = '';
+                    optionsContainer.querySelectorAll('.option.selected').forEach(opt => {
+                        addTag(opt.textContent, opt.dataset.value);
+                    });
+                }
+            });
+
+            // --- 5. Opcional: Fechar ao clicar fora ---
+            document.addEventListener('click', (e) => {
+                if (!container.contains(e.target) && container.classList.contains('open')) {
+                    container.classList.remove('open');
+                }
             });
         }
 

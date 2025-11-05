@@ -176,61 +176,6 @@ body.pagina-dashboard {
     margin-top: 5px;
 }
 
-/* --- COMPONENTE MULTI-SELECT DROPDOWN COM TAGS --- */
-.multiselect-tag {
-    position: relative;
-}
-.multiselect-display {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 6px 10px; /* Padding reduzido */
-    border: 1px solid #ced4da;
-    border-radius: 8px;
-    background-color: #f8f9fa;
-    cursor: pointer;
-    min-height: 24px; /* Altura mínima consistente com outros inputs */
-    transition: border-color 0.2s ease;
-}
-.multiselect-tag.open .multiselect-display {
-    border-color: var(--verde-escuro);
-    box-shadow: 0 0 0 3px rgba(27, 67, 50, 0.1);
-}
-.tag-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background-color: #C7D9A7; /* Verde Sálvia (sugestão) */
-    color: var(--verde-escuro);
-    padding: 3px 7px; /* Tag mais compacta */
-    border-radius: 6px;
-    font-size: 13px; /* Fonte reduzida */
-    font-weight: 500;
-}
-.remove-tag {
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 16px;
-    line-height: 1;
-}
-.multiselect-options {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    background-color: var(--branco-puro);
-    border: 1px solid #ced4da;
-    border-radius: 8px;
-    margin-top: 4px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    z-index: 100;
-    max-height: 200px;
-    overflow-y: auto;
-}
-.multiselect-tag.open .multiselect-options {
-    display: block;
-}
 .multiselect-options .option {
     padding: 8px 12px; /* Padding reduzido */
     cursor: pointer;
@@ -1102,6 +1047,80 @@ fieldset:disabled .multiselect-display {
 .btn-avise:hover {
     background-color: #295e4a; /* Verde mais escuro no hover */
 }
+}
+/* =============================================================
+   CORREÇÃO: FUNCIONALIDADE DO MULTISELECT CUSTOMIZADO
+   ============================================================= */
+
+/* 1. Esconde as opções por padrão */
+.multiselect-tag .multiselect-options {
+    display: none;
+    position: absolute;
+    background-color: var(--branco-puro);
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+    margin-top: 5px;
+}
+
+/* 2. Mostra as opções quando o container tiver a classe '.open' */
+.multiselect-tag.open .multiselect-options {
+    display: block;
+}
+
+/* 3. Estiliza a área de display para parecer clicável */
+.multiselect-tag .multiselect-display {
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 8px;
+    min-height: 45px;
+    cursor: pointer;
+    background-color: #fff;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+/* 4. Estilo de Foco/Aberto */
+.multiselect-tag.open .multiselect-display {
+    border-color: var(--verde-escuro);
+    box-shadow: 0 0 0 2px rgba(27, 67, 50, 0.2);
+}
+
+/* 5. Desabilita visualmente quando o fieldset está disabled */
+fieldset:disabled .multiselect-tag .multiselect-display {
+    background-color: #f1f3f5;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* 6. Estilo da tag (que você já tem, mas garantindo) */
+.multiselect-display .tag {
+    background-color: var(--cor-girassol);
+    color: var(--verde-escuro);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.multiselect-display .tag .remove-tag {
+    background: none;
+    border: none;
+    color: var(--verde-escuro);
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    opacity: 0.7;
+}
+.multiselect-display .tag .remove-tag:hover {
+    opacity: 1;
 }
 /* ================================================== */
 /* CSS (KPIs Visão Geral + Cards de Plano) */
