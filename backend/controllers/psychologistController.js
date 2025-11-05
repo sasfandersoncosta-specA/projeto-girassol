@@ -41,52 +41,40 @@ exports.registerPsychologist = async (req, res) => {
             return res.status(400).json({ error: 'Nome, email, senha, CRP e CPF são obrigatórios.' });
         }
 
-        // 2. Verifica duplicidade (Sintaxe Sequelize)
-        // Assumindo que seu model de usuário se chama 'user' (minúsculo) como no seu código
-        const existingUser = await db.user.findOne({ where: { email } });
-        if (existingUser) {
-            return res.status(409).json({ error: 'Este email já está cadastrado.' });
-        }
-
-        // Assumindo que seu model de perfil se chama 'psychologistProfile'
-        const existingProfile = await db.psychologistProfile.findOne({
-            where: { [Op.or]: [{ crp }, { cpf }] } // Sintaxe correta do Op
+        // 2. Verifica duplicidade usando o modelo correto: db.Psychologist
+        const existingPsychologist = await db.Psychologist.findOne({
+            where: { [Op.or]: [{ email }, { crp }, { cpf }] }
         });
-        if (existingProfile) {
-            return res.status(409).json({ error: 'Este CRP ou CPF já está cadastrado.' });
+
+        if (existingPsychologist) {
+            if (existingPsychologist.email === email) {
+                return res.status(409).json({ error: 'Este email já está cadastrado.' });
+            }
+            if (existingPsychologist.crp === crp) {
+                return res.status(409).json({ error: 'Este CRP já está cadastrado.' });
+            }
+            if (existingPsychologist.cpf === cpf) {
+                return res.status(409).json({ error: 'Este CPF já está cadastrado.' });
+            }
         }
 
         // 3. Criptografa a senha
         const hashedPassword = await bcrypt.hash(senha, 10);
 
-        // 4. Cria o usuário e o perfil (Sintaxe Sequelize para criação aninhada)
-        // Isso assume que a associação entre 'user' e 'psychologistProfile'
-        // está definida nos seus models (ex: user.hasOne(psychologistProfile))
-        const newUser = await db.user.create({
-            email: email,
-            password: hashedPassword,
-            role: 'PSYCHOLOGIST',
-            // O Sequelize permite a criação aninhada se a associação estiver correta
-            psychologistProfile: { 
-                nome, crp, cpf,
-                slug: generateSlug(nome),
-                genero_identidade,
-                valor_sessao_faixa,
-                temas_atuacao: temas_atuacao || [],
-                abordagens_tecnicas: abordagens_tecnicas ? [abordagens_tecnicas] : [],
-                praticas_vivencias: praticas_vivencias || [],
-                modalidade,
-                cep,
-            }
-        }, {
-            // Informa ao Sequelize para incluir a associação na criação
-            include: [{
-                association: 'profile' // AJUSTADO para bater com o alias do modelo
-            }]
+        // 4. Cria o novo psicólogo usando o modelo db.Psychologist
+        const newPsychologist = await db.Psychologist.create({
+            nome, email, crp, cpf,
+            senha: hashedPassword,
+            slug: generateSlug(nome),
+            status: 'pending', // Status inicial para moderação do admin
+            // Dados do questionário
+            genero_identidade, valor_sessao_faixa, temas_atuacao: temas_atuacao || [],
+            abordagens_tecnicas: abordagens_tecnicas ? [abordagens_tecnicas] : [],
+            praticas_vivencias: praticas_vivencias || [], modalidade, cep,
         });
 
         // 5. Retorna sucesso
-        res.status(201).json({ message: 'Psicólogo cadastrado com sucesso!', userId: newUser.id });
+        res.status(201).json({ message: 'Psicólogo cadastrado com sucesso! Seu perfil será revisado pela nossa equipe.', userId: newPsychologist.id });
 
     } catch (error) {
         console.error('Erro ao registrar psicólogo:', error);
