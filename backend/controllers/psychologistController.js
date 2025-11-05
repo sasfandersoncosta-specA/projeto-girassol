@@ -29,61 +29,64 @@ const generateSlug = (name) => {
 // DESCRIÇÃO: Registra um novo psicólogo.
 // ----------------------------------------------------------------------
 exports.registerPsychologist = async (req, res) => {
-  try {
-      const {
-          nome, email, senha, crp, cpf,
-          genero_identidade, valor_sessao_faixa, temas_atuacao,
-          abordagens_tecnicas, praticas_vivencias, modalidade, cep
-      } = req.body;
+    try {
+        const {
+            nome, email, senha, crp, cpf,
+            genero_identidade, valor_sessao_faixa, temas_atuacao,
+            abordagens_tecnicas, praticas_vivencias, modalidade, cep
+        } = req.body;
 
-      // 1. Validação dos dados essenciais
-      if (!nome || !email || !senha || !crp || !cpf) {
-          return res.status(400).json({ error: 'Nome, email, senha, CRP e CPF são obrigatórios.' });
-      }
+        // 1. Validação dos dados essenciais
+        if (!nome || !email || !senha || !crp || !cpf) {
+            return res.status(400).json({ error: 'Nome, email, senha, CRP e CPF são obrigatórios.' });
+        }
 
-      // 2. Verifica duplicidade ANTES da transação
-      const existingUser = await db.user.findUnique({ where: { email } });
-      if (existingUser) {
-          return res.status(409).json({ error: 'Este email já está cadastrado.' });
-      }
+        // 2. Verifica duplicidade (Sintaxe Sequelize)
+        // Assumindo que seu model de usuário se chama 'user' (minúsculo) como no seu código
+        const existingUser = await db.user.findOne({ where: { email } });
+        if (existingUser) {
+            return res.status(409).json({ error: 'Este email já está cadastrado.' });
+        }
 
-      const existingProfile = await db.psychologistProfile.findFirst({
-          where: { OR: [{ crp }, { cpf }] }
-      });
-      if (existingProfile) {
-          return res.status(409).json({ error: 'Este CRP ou CPF já está cadastrado.' });
-      }
+        // Assumindo que seu model de perfil se chama 'psychologistProfile'
+        const existingProfile = await db.psychologistProfile.findOne({
+            where: { [Op.or]: [{ crp }, { cpf }] } // Sintaxe correta do Op
+        });
+        if (existingProfile) {
+            return res.status(409).json({ error: 'Este CRP ou CPF já está cadastrado.' });
+        }
 
-      // 3. Criptografa a senha
-      const hashedPassword = await bcrypt.hash(senha, 10);
+        // 3. Criptografa a senha
+        const hashedPassword = await bcrypt.hash(senha, 10);
 
-      // 4. Cria o usuário e o perfil dentro de uma transação
-      const newUser = await db.user.create({
-          data: {
-              email: email,
-              password: hashedPassword,
-              role: 'PSYCHOLOGIST',
-              psychologistProfile: {
-                  create: {
-                      nome, crp, cpf,
-                      slug: generateSlug(nome),
-                      genero_identidade,
-                      valor_sessao_faixa,
-                      temas_atuacao: temas_atuacao || [],
-                      abordagens_tecnicas: abordagens_tecnicas ? [abordagens_tecnicas] : [],
-                      praticas_vivencias: praticas_vivencias || [],
-                      modalidade,
-                      cep,
-                  },
-              },
-          },
-          include: {
-              psychologistProfile: true, // Inclui o perfil criado na resposta
-          },
-      });
+        // 4. Cria o usuário e o perfil (Sintaxe Sequelize para criação aninhada)
+        // Isso assume que a associação entre 'user' e 'psychologistProfile'
+        // está definida nos seus models (ex: user.hasOne(psychologistProfile))
+        const newUser = await db.user.create({
+            email: email,
+            password: hashedPassword,
+            role: 'PSYCHOLOGIST',
+            // O Sequelize permite a criação aninhada se a associação estiver correta
+            psychologistProfile: { 
+                nome, crp, cpf,
+                slug: generateSlug(nome),
+                genero_identidade,
+                valor_sessao_faixa,
+                temas_atuacao: temas_atuacao || [],
+                abordagens_tecnicas: abordagens_tecnicas ? [abordagens_tecnicas] : [],
+                praticas_vivencias: praticas_vivencias || [],
+                modalidade,
+                cep,
+            }
+        }, {
+            // Informa ao Sequelize para incluir a associação na criação
+            include: [{
+                association: 'profile' // AJUSTADO para bater com o alias do modelo
+            }]
+        });
 
-      // 5. Retorna sucesso
-      res.status(201).json({ message: 'Psicólogo cadastrado com sucesso!', userId: newUser.id });
+        // 5. Retorna sucesso
+        res.status(201).json({ message: 'Psicólogo cadastrado com sucesso!', userId: newUser.id });
 
     } catch (error) {
         console.error('Erro ao registrar psicólogo:', error);
