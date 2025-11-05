@@ -445,11 +445,25 @@ document.addEventListener('DOMContentLoaded', function() {
     function loadPage(pageUrl) {
         if (!pageUrl) return;
         mainContent.innerHTML = '<p style="text-align:center; padding: 40px;">Carregando...</p>';
-        
+
         fetch(pageUrl)
             .then(response => response.ok ? response.text() : Promise.reject(`Arquivo não encontrado: ${pageUrl}`))
             .then(html => {
-                mainContent.innerHTML = html;                
+                mainContent.innerHTML = html;
+
+                // --- AQUI ESTÁ A CORREÇÃO ---
+                // O script do HTML injetado não roda.
+                // Nós chamamos manualmente a função de inicialização correta
+                // com base na URL da página que acabamos de carregar.
+                if (pageUrl.includes('psi_meu_perfil.html')) {
+                    inicializarLogicaDoPerfil();
+                } else if (pageUrl.includes('psi_caixa_de_entrada.html')) {
+                    inicializarLogicaDaCaixaDeEntrada();
+                } else if (pageUrl.includes('psi_lista_de_espera.html')) {
+                    inicializarListaDeEspera();
+                }
+                // (Adicione outras chamadas 'else if' aqui para novas páginas)
+
                 // Dispara um evento customizado para que outros scripts (como o de toggle de senha) possam reagir
                 document.dispatchEvent(new CustomEvent('page-loaded'));
             })
