@@ -15,6 +15,17 @@
 </head>
 
 <body class="pagina-registro">
+    <script>
+        // Verifica se a "chave" existe
+        const passouPeloQuestionario = sessionStorage.getItem('questionarioCompleto');
+
+        if (passouPeloQuestionario !== 'true') {
+            // Se não tem a chave, não pode estar aqui. Expulsa ele.
+            alert("Você precisa preencher o questionário de perfil primeiro.");
+            window.location.href = 'psi_questionario.html'; 
+        }
+        // Se a chave existe, o resto da página carrega normalmente.
+    </script>
     
     <div class="container-auth">
         <div class="card-auth">

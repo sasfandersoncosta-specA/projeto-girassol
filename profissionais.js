@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 'genero_identidade', question: "Com qual gênero você se identifica?", type: 'choice', choices: ["Feminino", "Masculino", "Não-binário", "Outro"], required: true },
         { id: 'valor_sessao_faixa', question: "Em qual faixa de preço você pretende atender?", type: 'choice', choices: ["Até R$ 50", "R$ 51 - R$ 90", "R$ 91 - R$ 150", "Acima de R$ 150"], required: true },
         { id: 'temas_atuacao', question: "Quais são seus principais temas de atuação?", type: 'multiple-choice', scrollable: true, choices: ["Ansiedade", "Estresse", "Depressão", "Relacionamentos", "Carreira", "Autoestima", "Luto", "Traumas", "TDAH", "Sexualidade"], required: true },
-        { id: 'abordagens_tecnicas', question: "Qual a sua principal abordagem teórica?", type: 'choice', scrollable: true, choices: ["Psicanálise", "Terapia Cognitivo-Comportamental (TCC)", "Humanista / Centrada na Pessoa", "Gestalt-terapia", "Análise do Comportamento (ABA)", "Sistêmica", "Outra"], required: true },
+        { id: 'abordagem_teorica', question: "Qual a sua principal abordagem teórica?", type: 'choice', scrollable: true, choices: ["Psicanálise", "Terapia Cognitivo-Comportamental (TCC)", "Humanista / Centrada na Pessoa", "Gestalt-terapia", "Análise do Comportamento (ABA)", "Sistêmica", "Outra"], required: true },
         { id: 'praticas_afirmativas', question: "Sua prática é afirmativa para quais comunidades ou perspectivas?", type: 'multiple-choice', scrollable: true, choices: ["LGBTQIAPN+ friendly", "Antirracista", "Feminista", "Neurodiversidade", "Nenhuma específica"], required: true, buttonText: "Verificar Demanda" },
         // Telas de Resultado Dinâmico
         { id: 'loading', type: 'loading', question: "Analisando a demanda...", subtitle: "Estamos cruzando seus dados com as buscas de nossos pacientes. Só um instante." },
@@ -293,6 +293,9 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (target.matches('[data-action="submit-validation"]')) {
                 localStorage.setItem('psi_questionario_respostas', JSON.stringify(userAnswers));
 
+                // Salva uma "chave" que prova que ele passou por aqui
+                sessionStorage.setItem('questionarioCompleto', 'true');
+
                 const { nome, email, crp } = userAnswers;
                 const params = new URLSearchParams({
                     nome: nome || '',
@@ -300,6 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     crp: crp || ''
                 });
                 window.location.href = `psi_registro.html?${params.toString()}`;
+
 
             } else if (target.matches('[data-action="check"]')) {
                 const currentSlideEl = document.querySelector('.slide.active');

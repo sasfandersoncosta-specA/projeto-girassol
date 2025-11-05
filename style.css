@@ -3110,3 +3110,135 @@ body.pagina-dashboard {
 .password-toggle-icon.active .eye-open {
   display: block;
 }
+
+/* =============================================================
+   CORREÇÃO: PÁGINA PROFISSIONAIS (NOV/2025)
+   ============================================================= */
+
+/* 1. Reduz o espaçamento em branco entre as seções */
+.secao-conteudo-pagina {
+    padding-top: 60px;
+    padding-bottom: 60px;
+}
+
+/* 2. Garante que o rodapé cole na seção verde acima dele */
+.rodape-principal {
+    margin-top: 0 !important; /* Remove qualquer margem que cause o espaço */
+}
+
+/* 3. Estilo dos novos Pricing Cards (Modernos) */
+.pricing-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* 1 coluna no mobile */
+    gap: 20px;
+    max-width: 1100px;
+    margin: 40px auto 0 auto;
+}
+
+.pricing-card {
+    background-color: var(--branco-puro);
+    border: 1px solid #eee;
+    border-radius: 16px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    
+    /* LINHA NOVA ADICIONADA: */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* REGRA NOVA ADICIONADA: */
+.pricing-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+}
+
+/* 4. Estilo de Destaque (Plano Ecossistema) */
+.pricing-card.highlighted {
+    border: 2px solid var(--verde-escuro);
+    transform: none; /* Reseta o scale(1.03) antigo */
+}
+
+.pricing-card-header {
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+}
+
+.pricing-card-header h3 {
+    font-family: 'New Kansas', serif;
+    font-size: 1.8rem;
+    color: var(--verde-escuro);
+    margin: 0 0 10px 0;
+}
+
+.pricing-card-header .price-subtitle {
+    font-size: 0.9rem;
+    color: var(--cinza-texto);
+    min-height: 40px; /* Garante altura uniforme */
+}
+
+.pricing-card-features {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+    flex-grow: 1; /* Empurra o botão para baixo */
+}
+
+.pricing-card-features li {
+    padding: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95rem;
+}
+
+/* Ícone de Check (✓) */
+.pricing-card-features li::before {
+    content: '✓';
+    font-weight: bold;
+    color: var(--verde-escuro);
+    font-size: 1.2rem;
+}
+
+/* Ícone de 'X' para features ausentes */
+.pricing-card-features li.disabled {
+    color: #aaa;
+}
+.pricing-card-features li.disabled::before {
+    content: '–'; /* Traço no lugar do check */
+    color: #ccc;
+    font-size: 1.5rem;
+}
+
+
+.pricing-card-cta {
+    margin-top: 30px;
+}
+
+.pricing-card-cta .btn {
+    width: 100%;
+}
+
+/* 5. Regra para o Grid em Desktop */
+@media (min-width: 992px) {
+    .pricing-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* 6. Helper para seções com onda (para o padding-bottom) */
+.secao-com-onda-inferior {
+    position: relative;
+    /* Ajusta o padding para a onda não sobrepor o conteúdo */
+    padding-bottom: 100px; 
+}
+.wave-divider-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    line-height: 0;
+}
