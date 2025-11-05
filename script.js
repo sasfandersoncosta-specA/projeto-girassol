@@ -197,17 +197,36 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // No final do script.js
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    // O Service Worker deve estar na raiz do projeto.
-    navigator.serviceWorker.register('/sw.js') 
-      .then(registration => {
-        console.log('Service Worker registrado:', registration);
-      })
-      .catch(error => {
-        console.log('Falha ao registrar Service Worker:', error);
-      });
-  });
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js").then(registration => {
+            console.log("Service Worker registrado com sucesso:", registration);
+
+            // Lógica para verificar se há uma nova versão do SW esperando
+            registration.addEventListener("updatefound", () => {
+                const newWorker = registration.installing;
+                console.log("Nova versão do Service Worker encontrada, instalando...");
+
+                newWorker.addEventListener("statechange", () => {
+                    // O novo SW foi instalado e está esperando para ativar
+                    if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+                        console.log("Nova versão pronta para ativar. Recarregando a página...");
+                        
+                        // Força a ativação do novo Service Worker
+                        newWorker.postMessage({ action: 'skipWaiting' });
+
+                        // Recarrega a página para que o novo SW assuma o controle
+                        // Usamos um pequeno delay para garantir que o SW tenha tempo de ativar.
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 100);
+                    }
+                });
+            });
+        }).catch(error => {
+            console.error("Falha ao registrar o Service Worker:", error);
+        });
+    });
 }
 
 window.addEventListener('load', () => {

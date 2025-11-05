@@ -862,7 +862,7 @@ exports.uploadCrpDocument = async (req, res) => {
         });
 
         res.status(200).json({
-            message: 'Documento enviado com sucesso! Nossa equipe irá analisá-lo em breve.',
+            message: 'Documento enviado com sucesso!',
         });
     } catch (error) {
         console.error('Erro no upload do documento CRP:', error);

@@ -568,12 +568,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.href = '../login.html';
             });
         }
-        const initialLink = document.querySelector('.sidebar-nav li[data-page="psi_visao_geral.html"]');
+        // CORREÇÃO: O seletor agora busca o link 'a' e a lógica é ajustada
+        const initialLink = document.querySelector('.sidebar-nav a[data-page="psi_visao_geral.html"]');
         if (initialLink) {
-            navLinks.forEach(item => item.classList.remove('active'));
-            initialLink.classList.add('active');
+            // Remove 'active' de todos os 'li'
+            navLinks.forEach(item => item.parentElement.classList.remove('active'));
+            // Adiciona 'active' ao 'li' pai do link inicial
+            initialLink.parentElement.classList.add('active');
+            // Carrega a página usando o atributo do link 'a'
             loadPage(initialLink.getAttribute('data-page'));
         } else {
+            // Fallback caso o link inicial não seja encontrado
             loadPage('psi_visao_geral.html');
         }
     }
