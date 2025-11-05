@@ -447,12 +447,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 mainContent.innerHTML = html;
                 
                 // Roteador de Lógica: (Agora com o Header de Boas-vindas)
-                if (pageUrl.endsWith('psi_visao_geral.html')) {
+                if (pageUrl.includes('psi_visao_geral.html')) {
                     const welcomeEl = document.getElementById('psi-welcome-subtitle');
                     if (welcomeEl && psychologistData) {
                         welcomeEl.textContent = `Bem-vindo(a), ${psychologistData.nome.split(' ')[0]}!`;
                     }
-                } else if (pageUrl.endsWith('psi_meu_perfil.html')) {
+                } else if (pageUrl.includes('psi_meu_perfil.html')) {
                     inicializarLogicaDoPerfil();
                 } else if (pageUrl.includes('psi_caixa_de_entrada.html')) {
                     inicializarLogicaDaCaixaDeEntrada();

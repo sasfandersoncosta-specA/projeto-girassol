@@ -74,7 +74,7 @@ exports.registerPsychologist = async (req, res) => {
         });
 
         // 5. Retorna sucesso
-        res.status(201).json({ message: 'Psicólogo cadastrado com sucesso! Seu perfil será revisado pela nossa equipe.', userId: newPsychologist.id });
+        res.status(201).json({ message: 'Psicólogo cadastrado com sucesso!', userId: newPsychologist.id });
 
     } catch (error) {
         console.error('Erro ao registrar psicólogo:', error);
