@@ -201,6 +201,64 @@ document.addEventListener('DOMContentLoaded', function() {
         const btnSalvar = document.getElementById('btn-salvar');
         const viewPublicProfileLink = document.getElementById('view-public-profile-link');
 
+        // --- FUNÇÃO PARA INICIALIZAR MULTISELECTS (MOVIDA PARA CIMA) ---
+        function initializeMultiselect(containerId, selectedValues = []) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const display = container.querySelector('.multiselect-display');
+            const optionsContainer = container.querySelector('.multiselect-options');
+            const isSingleSelect = container.dataset.singleSelect === 'true';
+
+            // Limpa o estado anterior
+            display.innerHTML = '';
+            optionsContainer.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+
+            // Garante que selectedValues seja sempre um array
+            const values = Array.isArray(selectedValues) ? selectedValues : [selectedValues].filter(Boolean);
+
+            // Popula com os valores salvos
+            values.forEach(value => {
+                const option = optionsContainer.querySelector(`.option[data-value="${value}"]`);
+                if (option) {
+                    addTag(option.textContent, value);
+                    option.classList.add('selected');
+                }
+            });
+
+            function addTag(text, value) {
+                if (isSingleSelect) {
+                    display.innerHTML = ''; // Limpa antes de adicionar
+                }
+                const tag = document.createElement('span');
+                tag.className = 'tag';
+                tag.textContent = text;
+                tag.dataset.value = value;
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-tag';
+                removeBtn.innerHTML = '&times;';
+                removeBtn.onclick = () => {
+                    const option = optionsContainer.querySelector(`.option[data-value="${value}"]`);
+                    if (option) option.classList.remove('selected');
+                    tag.remove();
+                };
+                tag.appendChild(removeBtn);
+                display.appendChild(tag);
+            }
+
+            // Adiciona o listener de clique nas opções
+            optionsContainer.addEventListener('click', (e) => {
+                if (container.classList.contains('disabled')) return;
+
+                const option = e.target.closest('.option');
+                if (!option) return;
+
+                option.classList.toggle('selected');
+                display.innerHTML = ''; // Recria as tags
+                optionsContainer.querySelectorAll('.option.selected').forEach(opt => addTag(opt.textContent, opt.dataset.value));
+            });
+        }
+
         // Aplica a máscara de telefone
         const telefoneInput = document.getElementById('telefone');
         if (telefoneInput && window.IMask) {
@@ -259,7 +317,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
         // CORREÇÃO: Popula os multiselects com os dados do psicólogo
         initializeMultiselect('temas_atuacao_multiselect', psychologistData.temas_atuacao);
-        initializeMultiselect('abordagens_tecnicas_multiselect', Array.isArray(psychologistData.abordagens_tecnicas) ? psychologistData.abordagens_tecnicas : [psychologistData.abordagens_tecnicas].filter(Boolean));
+        initializeMultiselect('abordagens_tecnicas_multiselect', psychologistData.abordagens_tecnicas);
         initializeMultiselect('genero_identidade_multiselect', [psychologistData.genero_identidade].filter(Boolean));
         initializeMultiselect('praticas_vivencias_multiselect', psychologistData.praticas_vivencias);
         initializeMultiselect('disponibilidade_periodo_multiselect', psychologistData.disponibilidade_periodo);
@@ -314,63 +372,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const widget = document.getElementById('verification-widget');
         const statusText = document.getElementById('verification-status-text');
         const description = document.getElementById('verification-description');
-        
-        // --- NOVA FUNÇÃO PARA INICIALIZAR MULTISELECTS ---
-        function initializeMultiselect(containerId, selectedValues = []) {
-            const container = document.getElementById(containerId);
-            if (!container) return;
-
-            const display = container.querySelector('.multiselect-display');
-            const optionsContainer = container.querySelector('.multiselect-options');
-            const isSingleSelect = container.dataset.singleSelect === 'true';
-
-            // Limpa o estado anterior
-            display.innerHTML = '';
-            optionsContainer.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
-
-            // Popula com os valores salvos
-            selectedValues.forEach(value => {
-                const option = optionsContainer.querySelector(`.option[data-value="${value}"]`);
-                if (option) {
-                    addTag(option.textContent, value);
-                    option.classList.add('selected');
-                }
-            });
-
-            function addTag(text, value) {
-                if (isSingleSelect) {
-                    display.innerHTML = ''; // Limpa antes de adicionar
-                }
-                const tag = document.createElement('span');
-                tag.className = 'tag';
-                tag.textContent = text;
-                tag.dataset.value = value;
-                const removeBtn = document.createElement('button');
-                removeBtn.className = 'remove-tag';
-                removeBtn.innerHTML = '&times;';
-                removeBtn.onclick = () => {
-                    const option = optionsContainer.querySelector(`.option[data-value="${value}"]`);
-                    if (option) option.classList.remove('selected');
-                    tag.remove();
-                };
-                tag.appendChild(removeBtn);
-                display.appendChild(tag);
-            }
-
-            // Adiciona o listener de clique nas opções
-            optionsContainer.addEventListener('click', (e) => {
-                if (container.classList.contains('disabled')) return; // Não faz nada se estiver desabilitado
-
-                const option = e.target.closest('.option');
-                if (!option) return;
-
-                option.classList.toggle('selected');
-                display.innerHTML = ''; // Recria as tags
-                optionsContainer.querySelectorAll('.option.selected').forEach(opt => {
-                    addTag(opt.textContent, opt.dataset.value);
-                });
-            });
-        }
 
         if (widget && psychologistData) {
             widget.style.display = 'block';
