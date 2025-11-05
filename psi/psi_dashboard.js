@@ -195,61 +195,105 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     function inicializarLogicaDoPerfil() {
-        // --- LÓGICA DE HABILITAÇÃO DO FORMULÁRIO ---
         const form = document.getElementById('perfil-form');
         const fieldset = document.getElementById('form-fieldset');
         const btnAlterar = document.getElementById('btn-alterar');
         const btnSalvar = document.getElementById('btn-salvar');
+        const viewPublicProfileLink = document.getElementById('view-public-profile-link');
+    
+        // Função para popular os campos do formulário
+        function populateForm(data) {
+            if (!data) return;
+    
+            // Popula inputs simples
+            form.elements['nome'].value = data.nome || '';
+            form.elements['cpf'].value = data.cpf || '';
+            form.elements['email'].value = data.email || '';
+            form.elements['crp'].value = data.crp || '';
+            form.elements['telefone'].value = data.telefone || '';
+            form.elements['agenda_online_url'].value = data.agenda_online_url || '';
+            form.elements['bio'].value = data.bio || '';
+            form.elements['valor_sessao_numero'].value = data.valor_sessao_numero || '';
+    
+            // Lógica para o link do perfil público
+            if (data.slug && viewPublicProfileLink) {
+                viewPublicProfileLink.href = `/psi/${data.slug}`;
+                viewPublicProfileLink.style.display = 'inline-block';
+            }
+        }
+    
+        // Função para coletar dados do formulário, incluindo os multiselects
+        function getFormData() {
+            const getMultiselectValues = (id) => {
+                const container = document.getElementById(id);
+                if (!container) return [];
+                return Array.from(container.querySelectorAll('.tag')).map(tag => tag.dataset.value);
+            };
+    
+            const data = {
+                nome: form.elements['nome'].value,
+                email: form.elements['email'].value,
+                cpf: form.elements['cpf'].value,
+                crp: form.elements['crp'].value,
+                telefone: form.elements['telefone'].value,
+                agenda_online_url: form.elements['agenda_online_url'].value,
+                bio: form.elements['bio'].value,
+                valor_sessao_numero: parseFloat(form.elements['valor_sessao_numero'].value) || null,
+                temas_atuacao: getMultiselectValues('temas_atuacao_multiselect'),
+                abordagens_tecnicas: getMultiselectValues('abordagens_tecnicas_multiselect'),
+                genero_identidade: getMultiselectValues('genero_identidade_multiselect')[0] || null,
+                praticas_vivencias: getMultiselectValues('praticas_vivencias_multiselect'),
+                disponibilidade_periodo: getMultiselectValues('disponibilidade_periodo_multiselect'),
+            };
+            return data;
+        }
+    
+        // Popula o formulário com os dados já existentes
+        populateForm(psychologistData);
+    
+        // --- LÓGICA DE HABILITAÇÃO DO FORMULÁRIO ---
         if (btnAlterar && btnSalvar && fieldset) {
             btnAlterar.addEventListener('click', () => {
                 fieldset.disabled = false;
                 btnAlterar.classList.add('hidden');
                 btnSalvar.classList.remove('hidden');
-                showToast('Modo de edição ativado.', 'success');
+                showToast('Modo de edição ativado.', 'info');
             });
-
-
+    
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                // (Adicione a lógica de 'fetch' para salvar os dados da API aqui)
-                const updatedData = {
-                    nome: form.elements['nome'].value,
-                    email: form.elements['email'].value,
-                    // Adicione outros campos que podem ser atualizados
-                };
-
+                const updatedData = getFormData();
+    
                 try {
                     const response = await apiFetch(`${API_BASE_URL}/api/psychologists/me`, {
                         method: 'PUT',
                         body: updatedData
                     });
-
+    
+                    const result = await response.json();
+    
                     if (response.ok) {
-                        // Após salvar:
                         fieldset.disabled = true;
                         btnSalvar.classList.add('hidden');
                         btnAlterar.classList.remove('hidden');
-                        showToast('Perfil atualizado com sucesso!', 'success');
-                        // Atualiza os dados locais para refletir a mudança na UI
-                        psychologistData = { ...psychologistData, ...updatedData };
+                        showToast(result.message || 'Perfil atualizado com sucesso!', 'success');
+                        // Atualiza os dados locais para refletir a mudança na UI e no nome da sidebar
+                        psychologistData = result.psychologist;
+                        document.getElementById('psi-sidebar-name').textContent = psychologistData.nome;
                     } else {
-                        const errorResult = await response.json();
-                        throw new Error(errorResult.error || 'Falha ao atualizar o perfil.');
+                        throw new Error(result.error || 'Falha ao atualizar o perfil.');
                     }
                 } catch (error) {
                     showToast(error.message, 'error');
                 }
-
-
             });
-
         }
-
+    
         // --- 3. LÓGICA DE VERIFICAÇÃO (Problema 3) ---
         const widget = document.getElementById('verification-widget');
         const statusText = document.getElementById('verification-status-text');
         const description = document.getElementById('verification-description');
-    
+        
         if (widget && psychologistData) {
             widget.style.display = 'block';
             if (psychologistData.status === 'active') {
