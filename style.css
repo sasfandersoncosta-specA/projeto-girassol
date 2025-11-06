@@ -3433,6 +3433,7 @@ body.pagina-dashboard {
     border: 1px solid #eee;
     position: sticky;
     top: 100px; /* (Header tem 80px) + 20px de margem */
+    text-align: center; /* LINHA ADICIONADA */
 }
 .conversion-card h3 {
     font-size: 1rem;

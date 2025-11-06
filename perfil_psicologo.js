@@ -43,12 +43,26 @@ async function fetchProfileData(id) {
         document.getElementById('psi-crp').textContent = `CRP: ${data.crp}`;
 
         // 3. Preenche o Card de Conversão (Preço, Modalidade)
-        document.getElementById('psi-valor').textContent = data.valor_sessao_faixa || 'A consultar';
+        document.getElementById('psi-valor').textContent = data.valor_sessao_numero ? `R$ ${data.valor_sessao_numero.toFixed(2)}` : 'A consultar';
         document.getElementById('psi-modalidade').textContent = data.modalidade || 'Não informado';
         
+        // 4. Configura o botão do WhatsApp (Req. 3)
+        const ctaButton = document.getElementById('btn-agendar-whatsapp');
+        if (data.telefone) {
+            // Limpa o telefone para conter apenas números
+            const telefoneLimpo = data.telefone.replace(/\D/g, '');
+            const nomeProfissional = data.nome.split(' ')[0]; // Pega só o primeiro nome
+            const mensagem = encodeURIComponent(`Olá, ${nomeProfissional}! Vi seu perfil na Jano e gostaria de agendar uma conversa.`);
+            
+            ctaButton.href = `https://wa.me/55${telefoneLimpo}?text=${mensagem}`;
+            ctaButton.target = "_blank"; // Abre em nova aba
+        } else {
+            // Se não tem telefone, o botão não faz nada (ou pode sumir)
+            ctaButton.href = "#";
+            ctaButton.style.opacity = "0.5";
+            ctaButton.style.cursor = "not-allowed";
+        }
         // 4. Preenche as Tags (usando uma função auxiliar)
-        populateTags('psi-tags-especialidades', data.temas_atuacao, 'tag');
-        populateTags('psi-tags-abordagens', data.abordagens_tecnicas, 'small-tag');
         
         // 5. Preenche a Aba "Sobre Mim"
         document.getElementById('psi-bio').textContent = data.bio || 'Este profissional ainda não escreveu uma biografia.';

@@ -790,40 +790,43 @@ exports.getShowcasePsychologists = async (req, res) => {
 
 // ----------------------------------------------------------------------
 // Rota: GET /api/psychologists/:id
-// DESCRIÇÃO: Busca o perfil de um psicólogo específico.
+// DESCRIÇÃO: Busca o perfil de um psicólogo específico. (CORRIGIDO)
 // ----------------------------------------------------------------------
 exports.getPsychologistProfile = async (req, res) => {
     try {
         const { id } = req.params;
+
+        // 1. Busca o psicólogo (SEM O INCLUDE QUE ESTAVA QUEBRANDO)
         const psychologist = await db.Psychologist.findByPk(id, {
-            attributes: { exclude: ['senha'] },
-            include: [{
-                model: db.Review,
-                as: 'reviews',
-                attributes: ['rating', 'comment', 'createdAt'],
-                include: [{
-                    model: db.Patient,
-                    as: 'patient',
-                    attributes: ['nome']
-                }]
-            }]
+            attributes: { exclude: ['senha'] }
         });
 
         if (!psychologist) {
             return res.status(404).json({ error: 'Psicólogo não encontrado.' });
         }
 
-        // Calculate average rating and count
-        const reviews = psychologist.reviews || [];
+        // 2. Busca as avaliações (reviews) SEPARADAMENTE
+        const reviews = await db.Review.findAll({
+            where: { psychologistId: id },
+            include: [{
+                model: db.Patient,
+                as: 'patient',
+                attributes: ['nome']
+            }],
+            order: [['createdAt', 'DESC']]
+        });
+
+        // 3. Calcula a média (igual a antes)
         const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
         const average_rating = reviews.length > 0 ? (totalRating / reviews.length).toFixed(1) : null;
         const review_count = reviews.length;
 
+        // 4. Monta o objeto de resposta final
         const psychologistData = {
             ...psychologist.toJSON(),
             average_rating,
             review_count,
-            reviews: undefined // Remove raw reviews if not needed directly in the main profile object
+            reviews: reviews // Anexa as avaliações
         };
 
         res.status(200).json(psychologistData);
