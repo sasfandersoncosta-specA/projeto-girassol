@@ -1,61 +1,45 @@
 const express = require('express');
 const router = express.Router();
 const psychologistController = require('../controllers/psychologistController');
-const { protect } = require('../middleware/authMiddleware'); // Importa o Middleware
-const { uploadProfilePhoto, uploadCrpDocument } = require('../middleware/upload'); // Importa a configuração de upload
+const { protect } = require('../middleware/authMiddleware');
+const { uploadProfilePhoto, uploadCrpDocument } = require('../middleware/upload');
 
 // ===============================================
 // ROTAS PÚBLICAS (Não exigem login)
 // ===============================================
 router.post('/register', psychologistController.registerPsychologist);
 router.post('/login', psychologistController.loginPsychologist);
-
-// Rota para o pré-cadastro e verificação de demanda
 router.post('/check-demand', psychologistController.checkDemand);
-
-// Rota para adicionar à lista de espera (pública)
 router.post('/add-to-waitlist', psychologistController.addToWaitlist);
 
-// --- CORREÇÃO AQUI ---
-// Rotas públicas para visualizar perfis (MOVEMOS PARA CIMA)
-router.get('/slug/:slug', psychologistController.getProfileBySlug);
-router.get('/:id', psychologistController.getPsychologistProfile);
-router.get('/:id/reviews', psychologistController.getPsychologistReviews);
-
+// ROTA PÚBLICA /SHOWCASE (Estava faltando)
+router.get('/showcase', psychologistController.getShowcasePsychologists);
 
 // ===============================================
 // ROTAS PROTEGIDAS (Exigem login)
-// ===============================================
+// =MUDANÇA DE ORDEM==============================
 router.use(protect); // Aplica o middleware a todas as rotas abaixo
 
-// Rotas para buscar dados (devem vir antes de /:id para evitar conflito)
-router.get('/matches', psychologistController.getPatientMatches);
-
-// Rotas para o perfil do psicólogo logado
+// Rotas "ME" (devem vir primeiro na seção protegida para não conflitarem com /:id)
 router.get('/me', psychologistController.getPsychologistData);
 router.put('/me', psychologistController.updatePsychologistProfile);
-
-// Rota para upload da foto de perfil
 router.put('/me/photo', uploadProfilePhoto.single('profilePhoto'), psychologistController.updateProfilePhoto);
-
-// Rota para upload do documento CRP
 router.put('/me/crp-document', uploadCrpDocument.single('crpDocument'), psychologistController.uploadCrpDocument);
-
-// Rota para buscar a contagem de mensagens não lidas
 router.get('/me/unread-count', psychologistController.getUnreadMessageCount);
-
-// Rota para visualizar a lista de espera (Acesso PRIVADO)
-router.get('/waiting-list', psychologistController.getWaitingList);
-
-// Rota para convidar manualmente da lista de espera (Acesso PRIVADO)
-router.post('/waiting-list/invite', psychologistController.inviteFromWaitlist);
-
-// Rota para alterar a senha do psicólogo (Acesso PRIVADO)
 router.put('/me/password', psychologistController.updatePsychologistPassword);
-
-// Rota para EXCLUIR a conta do psicólogo (Acesso PRIVADO)
 router.delete('/me', psychologistController.deletePsychologistAccount);
 
-// (As rotas públicas que estavam aqui foram movidas para cima)
+// Outras rotas protegidas
+router.get('/matches', psychologistController.getPatientMatches);
+router.get('/waiting-list', psychologistController.getWaitingList);
+router.post('/waiting-list/invite', psychologistController.inviteFromWaitlist);
+
+// ===============================================
+// ROTAS PÚBLICAS GENÉRICAS (Devem ir por último)
+// ===============================================
+// (Movidas de cima para baixo, para não conflitarem com /me ou /showcase)
+router.get('/slug/:slug', psychologistController.getProfileBySlug);
+router.get('/:id', psychologistController.getPsychologistProfile);
+router.get('/:id/reviews', psychologistController.getPsychologistReviews);
 
 module.exports = router;
