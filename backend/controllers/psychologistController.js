@@ -503,24 +503,36 @@ exports.getUnreadMessageCount = async (req, res) => {
 
 // ----------------------------------------------------------------------
 // Rota: PUT /api/psychologists/me/photo (Rota Protegida)
-// DESCRIÇÃO: Faz o upload de uma nova foto de perfil.
+// DESCRIÇÃO: Faz o upload de uma nova foto de perfil. (CORRIGIDO)
 // ----------------------------------------------------------------------
 exports.updateProfilePhoto = async (req, res) => {
     try {
-        const psychologist = req.psychologist;
+        // 1. Verifica se o middleware anexou o ID
+        if (!req.psychologist || !req.psychologist.id) {
+            return res.status(401).json({ error: 'Não autorizado, psicólogo não identificado.' });
+        }
 
+        // 2. Verifica se o arquivo foi enviado pelo Multer
         if (!req.file) {
             return res.status(400).json({ error: 'Nenhum arquivo de imagem foi enviado.' });
         }
 
-        // A URL da imagem no Cloudinary está em req.file.path
+        // 3. A URL da imagem no Cloudinary (ou outro storage)
         const fotoUrl = req.file.path;
 
-        await psychologist.update({ fotoUrl });
+        // 4. (A CORREÇÃO) Busca a instância completa do psicólogo no DB
+        const psychologistToUpdate = await db.Psychologist.findByPk(req.psychologist.id);
+
+        if (!psychologistToUpdate) {
+            return res.status(404).json({ error: 'Psicólogo não encontrado no banco de dados.' });
+        }
+
+        // 5. Atualiza a instância recém-buscada
+        await psychologistToUpdate.update({ fotoUrl });
 
         res.status(200).json({
             message: 'Foto de perfil atualizada com sucesso!',
-            fotoUrl: fotoUrl
+            fotoUrl: fotoUrl // Envia a nova URL de volta para o frontend
         });
 
     } catch (error) {
