@@ -505,6 +505,10 @@ exports.getUnreadMessageCount = async (req, res) => {
 // Rota: PUT /api/psychologists/me/photo (Rota Protegida)
 // DESCRIÇÃO: Faz o upload de uma nova foto de perfil. (CORRIGIDO)
 // ----------------------------------------------------------------------
+// ----------------------------------------------------------------------
+// Rota: PUT /api/psychologists/me/photo (Rota Protegida)
+// DESCRIÇÃO: Faz o upload de uma nova foto de perfil. (CORRIGIDO)
+// ----------------------------------------------------------------------
 exports.updateProfilePhoto = async (req, res) => {
     try {
         // 1. Verifica se o middleware anexou o ID
@@ -540,7 +544,6 @@ exports.updateProfilePhoto = async (req, res) => {
         res.status(500).json({ error: 'Erro interno no servidor ao fazer upload da foto.' });
     }
 };
-
 // ----------------------------------------------------------------------
 // Rota: DELETE /api/psychologists/me (Rota Protegida)
 // DESCRIÇÃO: Exclui a conta do psicólogo logado após confirmar a senha.
