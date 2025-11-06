@@ -321,11 +321,15 @@ exports.getWaitingList = async (req, res) => {
 // DESCRIÇÃO: Atualiza os dados do perfil do psicólogo logado.
 // ----------------------------------------------------------------------
 exports.updatePsychologistProfile = async (req, res) => {
-    try {
-        const psychologist = req.psychologist;
-
-        if (!psychologist) {
+    try {        
+        if (!req.psychologist || !req.psychologist.id) {
             return res.status(404).json({ error: 'Psicólogo não encontrado ou não autenticado.' });
+        }
+
+        // CORREÇÃO: Busca a instância completa do psicólogo no banco de dados.
+        const psychologistToUpdate = await db.Psychologist.findByPk(req.psychologist.id);
+        if (!psychologistToUpdate) {
+            return res.status(404).json({ error: 'Psicólogo não encontrado no banco de dados.' });
         }
 
         const {
@@ -340,7 +344,7 @@ exports.updatePsychologistProfile = async (req, res) => {
         }
 
         // Verifica se o novo email já está em uso por outro psicólogo
-        if (email.toLowerCase() !== psychologist.email.toLowerCase()) {
+        if (email.toLowerCase() !== psychologistToUpdate.email.toLowerCase()) {
             const existingEmail = await db.Psychologist.findOne({ where: { email } });
             if (existingEmail) {
                 return res.status(409).json({ error: 'Este email já está em uso por outra conta.' });
@@ -348,14 +352,14 @@ exports.updatePsychologistProfile = async (req, res) => {
         }
 
         // Verifica se o novo CPF já está em uso por outro psicólogo
-        if (cpf && cpf !== psychologist.cpf) {
+        if (cpf && cpf !== psychologistToUpdate.cpf) {
             const existingCpf = await db.Psychologist.findOne({ where: { cpf } });
             if (existingCpf) {
                 return res.status(409).json({ error: 'Este CPF já está em uso por outra conta.' });
             }
         }
 
-        const updatedPsychologist = await psychologist.update({
+        const updatedPsychologist = await psychologistToUpdate.update({
             nome, email, crp, cpf, telefone, bio,
             valor_sessao_numero, temas_atuacao, abordagens_tecnicas,
             genero_identidade, praticas_vivencias, disponibilidade_periodo,
@@ -861,17 +865,21 @@ exports.getProfileBySlug = async (req, res) => {
 // ----------------------------------------------------------------------
 exports.uploadCrpDocument = async (req, res) => {
     try {
-        const psychologist = req.psychologist;
+        if (!req.psychologist || !req.psychologist.id) {
+            return res.status(401).json({ error: 'Não autorizado, psicólogo não identificado.' });
+        }
 
         if (!req.file) {
             return res.status(400).json({ error: 'Nenhum arquivo foi enviado.' });
         }
 
+        // CORREÇÃO: Busca a instância completa do psicólogo no banco de dados.
+        const psychologistToUpdate = await db.Psychologist.findByPk(req.psychologist.id);
+
         // A URL segura do arquivo no Cloudinary é fornecida em req.file.path
         const crpDocumentUrl = req.file.path;
 
-        // Atualiza o perfil do psicólogo com a URL do documento e muda o status para 'pending'
-        await psychologist.update({
+        await psychologistToUpdate.update({
             crpDocumentUrl: crpDocumentUrl,
             status: 'pending' // Garante que o perfil entre em modo de revisão
         });
