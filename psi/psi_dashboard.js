@@ -28,11 +28,12 @@ document.addEventListener('DOMContentLoaded', function() {
     async function fetchPsychologistData() {
         // Adiciona um pequeno delay para dar tempo ao navegador de estabilizar o localStorage
         await new Promise(resolve => setTimeout(resolve, 100));
-
+ 
+        // CORREÇÃO AQUI: Garante que o nome da chave é 'girassol_token'
         const token = localStorage.getItem('girassol_token');
         console.log('Token Lido:', token); // Log para depuração
-
         return new Promise(async (resolvePromise) => {
+            // CORREÇÃO AQUI: Garante que o 'if' usa a variável 'token' correta
             if (!token) {
                 window.location.href = '../login.html';
                 resolvePromise(false); 
@@ -53,6 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } catch (error) {
                 console.error('Falha na autenticação:', error.message);
+                // CORREÇÃO AQUI: Garante que o nome da chave é 'girassol_token'
                 localStorage.removeItem('girassol_token');
                 window.location.href = '../login.html';
                 resolvePromise(false); // Falha
