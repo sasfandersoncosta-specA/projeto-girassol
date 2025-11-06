@@ -4,7 +4,9 @@ const psychologistController = require('../controllers/psychologistController');
 const { protect } = require('../middleware/authMiddleware'); // Importa o Middleware
 const { uploadProfilePhoto, uploadCrpDocument } = require('../middleware/upload'); // Importa a configuração de upload
 
-// Rotas públicas de autenticação
+// ===============================================
+// ROTAS PÚBLICAS (Não exigem login)
+// ===============================================
 router.post('/register', psychologistController.registerPsychologist);
 router.post('/login', psychologistController.loginPsychologist);
 
@@ -14,7 +16,16 @@ router.post('/check-demand', psychologistController.checkDemand);
 // Rota para adicionar à lista de espera (pública)
 router.post('/add-to-waitlist', psychologistController.addToWaitlist);
 
-// Rotas protegidas (exigem autenticação)
+// --- CORREÇÃO AQUI ---
+// Rotas públicas para visualizar perfis (MOVEMOS PARA CIMA)
+router.get('/slug/:slug', psychologistController.getProfileBySlug);
+router.get('/:id', psychologistController.getPsychologistProfile);
+router.get('/:id/reviews', psychologistController.getPsychologistReviews);
+
+
+// ===============================================
+// ROTAS PROTEGIDAS (Exigem login)
+// ===============================================
 router.use(protect); // Aplica o middleware a todas as rotas abaixo
 
 // Rotas para buscar dados (devem vir antes de /:id para evitar conflito)
@@ -45,11 +56,6 @@ router.put('/me/password', psychologistController.updatePsychologistPassword);
 // Rota para EXCLUIR a conta do psicólogo (Acesso PRIVADO)
 router.delete('/me', psychologistController.deletePsychologistAccount);
 
-// Rota pública para buscar perfil por SLUG (NOVA)
-router.get('/slug/:slug', psychologistController.getProfileBySlug);
-
-// Rotas públicas com parâmetro (devem vir por último)
-router.get('/:id', psychologistController.getPsychologistProfile);
-router.get('/:id/reviews', psychologistController.getPsychologistReviews);
+// (As rotas públicas que estavam aqui foram movidas para cima)
 
 module.exports = router;
