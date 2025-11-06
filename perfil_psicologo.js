@@ -1,16 +1,17 @@
 // Arquivo: perfil_psicologo.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Pega o ID do psicólogo da URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const psychologistId = urlParams.get('id'); // Espera uma URL como: .../perfil_psicologo.html?id=123
+    // 1. Pega o SLUG do psicólogo do caminho da URL
+    // Ex: "https://dominio.com/ana-silva" -> slug = "ana-silva"
+    const path = window.location.pathname;
+    const slug = path.substring(path.lastIndexOf('/') + 1);
 
-    if (psychologistId) {
-        fetchProfileData(psychologistId);
+    if (slug) {
+        fetchProfileData(slug);
     } else {
-        // Lidar com o caso de ID não encontrado
+        // Lidar com o caso de slug não encontrado
         document.getElementById('psi-nome').textContent = "Perfil não encontrado";
-        document.getElementById('psi-bio').textContent = "O ID do psicólogo não foi fornecido na URL.";
+        document.getElementById('psi-bio').textContent = "O endereço do perfil do psicólogo não foi fornecido na URL.";
     }
 
     // 2. Configura a lógica das Abas (Tabs)
@@ -26,10 +27,10 @@ document.addEventListener('DOMContentLoaded', () => {
 /**
  * Busca os dados do psicólogo na API e preenche a página. (VERSÃO CORRIGIDA)
  */
-async function fetchProfileData(id) {
+async function fetchProfileData(slug) {
     try {
-        // ROTA DO BACKEND
-        const response = await fetch(`/api/psychologists/${id}`);
+        // ROTA DO BACKEND (agora usando o slug)
+        const response = await fetch(`/api/psychologists/slug/${slug}`);
         
         if (!response.ok) {
             throw new Error('Perfil não encontrado ou erro no servidor.');

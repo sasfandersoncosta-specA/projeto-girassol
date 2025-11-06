@@ -43,9 +43,17 @@ app.use('/api/admin', adminRoutes); // Adicionado
 // Esta linha deve vir DEPOIS das rotas da API.
 app.use(express.static(path.join(__dirname, '..')));
 
-// --- ROTA DE PERFIL PÚBLICO (SLUG) ---
-// Captura URLs de primeiro nível (ex: /dr-anderson) que não são arquivos.
-app.get('/:slug', psychologistController.getProfileBySlug);
+// --- ROTA DE PERFIL PÚBLICO POR SLUG (NOVA ABORDAGEM) ---
+// Esta rota captura qualquer URL de primeiro nível que não seja um arquivo estático ou uma rota de API.
+// Ela serve a página HTML do perfil, e o JavaScript dessa página se encarrega de buscar os dados.
+app.get('/:slug', (req, res, next) => {
+    // Lista de slugs que não devem ser tratados como perfis
+    const reservedPaths = ['api', 'assets', 'css', 'js', 'patient', 'psi'];
+    if (reservedPaths.some(p => req.params.slug.startsWith(p)) || req.params.slug.includes('.')) {
+        return next(); // Passa para o próximo middleware se for um arquivo ou rota de API
+    }
+    res.sendFile(path.join(__dirname, '..', 'perfil_psicologo.html'));
+});
 
 // --- ROTAS DE FRONT-END (Catch-all) ---
 // Esta rota deve ser a ÚLTIMA. Ela captura qualquer requisição GET que não foi

@@ -45,6 +45,9 @@ router.put('/me/password', psychologistController.updatePsychologistPassword);
 // Rota para EXCLUIR a conta do psicólogo (Acesso PRIVADO)
 router.delete('/me', psychologistController.deletePsychologistAccount);
 
+// Rota pública para buscar perfil por SLUG (NOVA)
+router.get('/slug/:slug', psychologistController.getProfileBySlug);
+
 // Rotas públicas com parâmetro (devem vir por último)
 router.get('/:id', psychologistController.getPsychologistProfile);
 router.get('/:id/reviews', psychologistController.getPsychologistReviews);

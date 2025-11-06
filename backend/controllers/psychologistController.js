@@ -822,28 +822,27 @@ exports.getPsychologistProfile = async (req, res) => {
 };
 
 // ----------------------------------------------------------------------
-// Rota: GET /:slug
-// DESCRIÇÃO: Busca um perfil por um "slug" (nome amigável) e redireciona.
+// Rota: GET /api/psychologists/slug/:slug (NOVA ROTA)
+// DESCRIÇÃO: Busca os dados de um perfil por seu "slug" (URL amigável).
 // ----------------------------------------------------------------------
 exports.getProfileBySlug = async (req, res) => {
     try {
         const { slug } = req.params;
 
         const psychologist = await db.Psychologist.findOne({
-            where: {
-                slug: slug, // Busca diretamente pelo slug
-                status: 'active' // Garante que apenas perfis ativos sejam encontrados
-            }
+            where: { slug, status: 'active' },
+            attributes: { exclude: ['senha', 'resetPasswordToken', 'resetPasswordExpires'] }
         });
 
         if (psychologist) {
-            // Redireciona para a página de perfil correta com o ID
-            res.redirect(`/perfil_psicologo.html?id=${psychologist.id}`);
+            // Retorna os dados do psicólogo em formato JSON
+            res.status(200).json(psychologist);
         } else {
-            res.status(404).send('Perfil não encontrado');
+            res.status(404).json({ error: 'Perfil não encontrado.' });
         }
     } catch (error) {
-        res.status(500).send('Erro no servidor');
+        console.error('Erro ao buscar perfil por slug:', error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };
 
