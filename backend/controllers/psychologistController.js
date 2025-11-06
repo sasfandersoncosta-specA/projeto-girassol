@@ -790,43 +790,28 @@ exports.getShowcasePsychologists = async (req, res) => {
 
 // ----------------------------------------------------------------------
 // Rota: GET /api/psychologists/:id
-// DESCRIÇÃO: Busca o perfil de um psicólogo específico. (CORRIGIDO)
+// DESCRIÇÃO: Busca o perfil de um psicólogo específico. (CORRIGIDO E SIMPLIFICADO)
 // ----------------------------------------------------------------------
 exports.getPsychologistProfile = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // 1. Busca o psicólogo (SEM O INCLUDE QUE ESTAVA QUEBRANDO)
+        // 1. Busca o psicólogo (SEM NENHUM 'INCLUDE')
         const psychologist = await db.Psychologist.findByPk(id, {
-            attributes: { exclude: ['senha'] }
+            attributes: { exclude: ['senha', 'resetPasswordToken', 'resetPasswordExpires'] }
         });
 
         if (!psychologist) {
             return res.status(404).json({ error: 'Psicólogo não encontrado.' });
         }
 
-        // 2. Busca as avaliações (reviews) SEPARADAMENTE
-        const reviews = await db.Review.findAll({
-            where: { psychologistId: id },
-            include: [{
-                model: db.Patient,
-                as: 'patient',
-                attributes: ['nome']
-            }],
-            order: [['createdAt', 'DESC']]
-        });
-
-        // 3. Calcula a média (igual a antes)
-        const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
-        const average_rating = reviews.length > 0 ? (totalRating / reviews.length).toFixed(1) : null;
-        const review_count = reviews.length;
-
-        // 4. Monta o objeto de resposta final
+        // 2. Por enquanto, envia o perfil sem as avaliações
+        // (Vamos adicionar as avaliações de volta em uma etapa futura, se necessário)
         const psychologistData = {
             ...psychologist.toJSON(),
-            average_rating,
-            review_count,
-            reviews: reviews // Anexa as avaliações
+            average_rating: 0, // Placeholder
+            review_count: 0,   // Placeholder
+            reviews: []        // Placeholder
         };
 
         res.status(200).json(psychologistData);

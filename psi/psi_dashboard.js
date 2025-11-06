@@ -322,7 +322,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
             // Lógica para o link do perfil público
             if (data.slug && viewPublicProfileLink) {
-                // CORREÇÃO: Aponta para a rota da API (/) que lida com o slug
                 viewPublicProfileLink.href = `/${data.slug}`;
                 viewPublicProfileLink.style.display = 'inline-block';
             }

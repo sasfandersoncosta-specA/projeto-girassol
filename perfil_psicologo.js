@@ -23,9 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
 /**
  * Busca os dados do psicólogo na API e preenche a página.
  */
+/**
+ * Busca os dados do psicólogo na API e preenche a página. (VERSÃO CORRIGIDA)
+ */
 async function fetchProfileData(id) {
     try {
-        // ROTA DO BACKEND (do seu controller)
+        // ROTA DO BACKEND
         const response = await fetch(`/api/psychologists/${id}`);
         
         if (!response.ok) {
@@ -37,44 +40,47 @@ async function fetchProfileData(id) {
         // 1. Preenche o Título da Página
         document.title = `${data.nome} - Psicólogo(a) na Jano`;
 
-        // 2. Preenche o Cabeçalho do Perfil (Info)
+        // 2. Preenche o Cabeçalho do Perfil (Info) (REQ. 2)
         document.getElementById('psi-foto').src = data.fotoUrl || 'assets/images/default-avatar.png';
         document.getElementById('psi-nome').textContent = data.nome;
         document.getElementById('psi-crp').textContent = `CRP: ${data.crp}`;
 
-        // 3. Preenche o Card de Conversão (Preço, Modalidade)
-        document.getElementById('psi-valor').textContent = data.valor_sessao_numero ? `R$ ${data.valor_sessao_numero.toFixed(2)}` : 'A consultar';
+        // 3. Preenche o Card de Conversão (REQ. 2 e 3)
+        // Usa 'valor_sessao_numero' do dashboard
+        document.getElementById('psi-valor').textContent = data.valor_sessao_numero ? `R$ ${parseFloat(data.valor_sessao_numero).toFixed(2)}` : 'A consultar';
         document.getElementById('psi-modalidade').textContent = data.modalidade || 'Não informado';
         
-        // 4. Configura o botão do WhatsApp (Req. 3)
+        // Configura o botão do WhatsApp
         const ctaButton = document.getElementById('btn-agendar-whatsapp');
         if (data.telefone) {
-            // Limpa o telefone para conter apenas números
-            const telefoneLimpo = data.telefone.replace(/\D/g, '');
-            const nomeProfissional = data.nome.split(' ')[0]; // Pega só o primeiro nome
+            const telefoneLimpo = data.telefone.replace(/\D/g, ''); // Remove máscara ( ) -
+            const nomeProfissional = data.nome.split(' ')[0];
             const mensagem = encodeURIComponent(`Olá, ${nomeProfissional}! Vi seu perfil na Jano e gostaria de agendar uma conversa.`);
             
             ctaButton.href = `https://wa.me/55${telefoneLimpo}?text=${mensagem}`;
             ctaButton.target = "_blank"; // Abre em nova aba
         } else {
-            // Se não tem telefone, o botão não faz nada (ou pode sumir)
             ctaButton.href = "#";
             ctaButton.style.opacity = "0.5";
             ctaButton.style.cursor = "not-allowed";
         }
-        // 4. Preenche as Tags (usando uma função auxiliar)
         
-        // 5. Preenche a Aba "Sobre Mim"
+        // 4. Preenche as Tags (usando a função auxiliar) (REQ. 2)
+        populateTags('psi-tags-especialidades', data.temas_atuacao, 'tag');
+        populateTags('psi-tags-abordagens', data.abordagens_tecnicas, 'small-tag');
+        
+        // 5. Preenche a Aba "Sobre Mim" (REQ. 1 e 2)
         document.getElementById('psi-bio').textContent = data.bio || 'Este profissional ainda não escreveu uma biografia.';
         populateTags('psi-tags-praticas', data.praticas_vivencias, 'tag');
 
-        // 6. Preenche a Aba "Avaliações"
+        // 6. Preenche a Aba "Avaliações" (com os placeholders)
         renderRatingSummary(data.average_rating, data.review_count);
         renderReviews(data.reviews || []);
 
     } catch (error) {
         console.error('Erro ao buscar dados do perfil:', error);
         document.getElementById('psi-nome').textContent = "Erro ao carregar perfil";
+        document.getElementById('psi-bio').textContent = "Não foi possível carregar os dados. Tente atualizar a página.";
     }
 }
 
