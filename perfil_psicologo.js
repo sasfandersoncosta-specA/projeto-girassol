@@ -1,24 +1,17 @@
 // Arquivo: perfil_psicologo.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Pega o SLUG do psicólogo do caminho da URL
-    // Ex: "https://dominio.com/ana-silva" -> slug = "ana-silva"
     const path = window.location.pathname;
     const slug = path.substring(path.lastIndexOf('/') + 1);
 
     if (slug) {
         fetchProfileData(slug);
     } else {
-        // Lidar com o caso de slug não encontrado
         document.getElementById('psi-nome').textContent = "Perfil não encontrado";
         document.getElementById('psi-bio').textContent = "O endereço do perfil do psicólogo não foi fornecido na URL.";
     }
 
-    // 2. Configura a lógica das Abas (Tabs)
     setupTabs();
-
-    // 3. Verifica se o paciente está logado para mostrar o form de avaliação
-    checkPatientLoginStatus(psychologistId);
 });
 
 /**
@@ -77,6 +70,9 @@ async function fetchProfileData(slug) {
         // 6. Preenche a Aba "Avaliações" (com os placeholders)
         renderRatingSummary(data.average_rating, data.review_count);
         renderReviews(data.reviews || []);
+
+        // ✅ Após preencher todos os dados:
+        checkPatientLoginStatus(data.id); // data.id vem do banco, via backend
 
     } catch (error) {
         console.error('Erro ao buscar dados do perfil:', error);
