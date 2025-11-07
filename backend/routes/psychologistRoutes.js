@@ -16,6 +16,13 @@ router.post('/add-to-waitlist', psychologistController.addToWaitlist);
 router.get('/showcase', psychologistController.getShowcasePsychologists);
 
 // ===============================================
+// ROTAS PÚBLICAS GENÉRICAS (Devem vir ANTES do 'protect')
+// ===============================================
+router.get('/slug/:slug', psychologistController.getProfileBySlug);
+router.get('/:id', psychologistController.getPsychologistProfile);
+router.get('/:id/reviews', psychologistController.getPsychologistReviews);
+
+// ===============================================
 // ROTAS PROTEGIDAS (Exigem login)
 // =MUDANÇA DE ORDEM==============================
 router.use(protect); // Aplica o middleware a todas as rotas abaixo
@@ -33,13 +40,5 @@ router.delete('/me', psychologistController.deletePsychologistAccount);
 router.get('/matches', psychologistController.getPatientMatches);
 router.get('/waiting-list', psychologistController.getWaitingList);
 router.post('/waiting-list/invite', psychologistController.inviteFromWaitlist);
-
-// ===============================================
-// ROTAS PÚBLICAS GENÉRICAS (Devem ir por último)
-// ===============================================
-// (Movidas de cima para baixo, para não conflitarem com /me ou /showcase)
-router.get('/slug/:slug', psychologistController.getProfileBySlug);
-router.get('/:id', psychologistController.getPsychologistProfile);
-router.get('/:id/reviews', psychologistController.getPsychologistReviews);
 
 module.exports = router;
