@@ -17,14 +17,16 @@ router.get('/showcase', psychologistController.getShowcasePsychologists);
 // ROTAS PÚBLICAS DE PERFIL (Movidas para cima para não serem protegidas)
 router.get('/slug/:slug', psychologistController.getProfileBySlug);
 router.get('/:id/reviews', psychologistController.getPsychologistReviews);
+// IMPORTANTE: A rota /:id deve ser a ÚLTIMA das rotas públicas genéricas
+// para não capturar rotas como /showcase ou /matches (se fossem públicas).
 router.get('/:id', psychologistController.getPsychologistProfileById);
 
 // ===============================================
 // ROTAS PROTEGIDAS (Exigem login)
-// =MUDANÇA DE ORDEM==============================
+// ===============================================
 router.use(protect); // Aplica o middleware a TODAS as rotas abaixo
 
-// Rotas "ME" (devem vir primeiro na seção protegida para não conflitarem com /:id)
+// Rotas "ME" (devem vir primeiro na seção protegida para não conflitarem com /:id que agora é pública)
 router.get('/me', psychologistController.getAuthenticatedPsychologistProfile);
 router.put('/me', psychologistController.updatePsychologistProfile);
 router.put('/me/photo', uploadProfilePhoto.single('profilePhoto'), psychologistController.updateProfilePhoto);
@@ -37,8 +39,5 @@ router.delete('/me', psychologistController.deletePsychologistAccount);
 router.get('/matches', psychologistController.getPatientMatches);
 router.get('/waiting-list', psychologistController.getWaitingList);
 router.post('/waiting-list/invite', psychologistController.inviteFromWaitlist);
-
-// ===============================================
-// ROTAS PÚBLICAS GENÉRICAS (Devem ir por último)
 
 module.exports = router;
