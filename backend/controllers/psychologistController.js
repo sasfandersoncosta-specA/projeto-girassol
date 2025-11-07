@@ -151,14 +151,25 @@ exports.resetPassword = async (req, res) => {
 exports.loginPsychologist = async (req, res) => {
     try {
         const { email, senha } = req.body;
+        console.log(`[LOGIN_PSY] 1. Tentativa de login recebida para o e-mail: ${email}`);
 
         if (!email || !senha) {
+            console.log(`[LOGIN_PSY] 2. Falha: E-mail ou senha não fornecidos na requisição.`);
             return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
         }
 
         const psychologist = await db.Psychologist.findOne({ where: { email: email } });
 
-        if (psychologist && (await bcrypt.compare(senha, psychologist.senha))) {
+        if (!psychologist) {
+            console.log(`[LOGIN_PSY] 2. Falha: Nenhum psicólogo encontrado com o e-mail ${email}.`);
+            return res.status(401).json({ error: 'Email ou senha inválidos.' });
+        }
+
+        console.log(`[LOGIN_PSY] 2. Sucesso: Psicólogo ${email} encontrado. Comparando senhas...`);
+        const isPasswordMatch = await bcrypt.compare(senha, psychologist.senha);
+
+        if (isPasswordMatch) {
+            console.log(`[LOGIN_PSY] 3. Sucesso: Senha correta para ${email}. Gerando token.`);
             res.status(200).json({
                 id: psychologist.id,
                 nome: psychologist.nome,
@@ -166,6 +177,7 @@ exports.loginPsychologist = async (req, res) => {
                 token: generateToken(psychologist.id)
             });
         } else {
+            console.log(`[LOGIN_PSY] 3. Falha: Senha incorreta para o e-mail ${email}.`);
             res.status(401).json({ error: 'Email ou senha inválidos.' });
         }
     } catch (error) {

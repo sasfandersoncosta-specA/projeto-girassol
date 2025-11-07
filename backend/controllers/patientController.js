@@ -121,14 +121,25 @@ exports.resetPassword = async (req, res) => {
 exports.loginPatient = async (req, res) => {
     try {
         const { email, senha } = req.body;
+        console.log(`[LOGIN_PAT] 1. Tentativa de login recebida para o e-mail: ${email}`);
 
         if (!email || !senha) {
+            console.log(`[LOGIN_PAT] 2. Falha: E-mail ou senha não fornecidos na requisição.`);
             return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
         }
 
         const patient = await db.Patient.findOne({ where: { email } });
 
-        if (patient && (await bcrypt.compare(senha, patient.senha))) {
+        if (!patient) {
+            console.log(`[LOGIN_PAT] 2. Falha: Nenhum paciente encontrado com o e-mail ${email}.`);
+            return res.status(401).json({ error: 'Email ou senha inválidos.' });
+        }
+
+        console.log(`[LOGIN_PAT] 2. Sucesso: Paciente ${email} encontrado. Comparando senhas...`);
+        const isPasswordMatch = await bcrypt.compare(senha, patient.senha);
+
+        if (isPasswordMatch) {
+            console.log(`[LOGIN_PAT] 3. Sucesso: Senha correta para ${email}. Gerando token.`);
             res.status(200).json({
                 id: patient.id,
                 nome: patient.nome,
@@ -136,6 +147,7 @@ exports.loginPatient = async (req, res) => {
                 token: generateToken(patient.id),
             });
         } else {
+            console.log(`[LOGIN_PAT] 3. Falha: Senha incorreta para o e-mail ${email}.`);
             res.status(401).json({ error: 'Email ou senha inválidos.' });
         }
     } catch (error) {
