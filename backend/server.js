@@ -21,6 +21,9 @@ const psychologistController = require('./controllers/psychologistController');
 const seedTestData = require('./controllers/seed_test_data'); // Caminho corrigido
 
 const app = express();
+
+// LINHA NOVA PARA FORÇAR O DEPLOY
+console.log('[DEPLOY_SYNC] Forçando atualização de build - v1.8');
 const server = http.createServer(app); // 3. Cria um servidor http a partir do app express
 
 initSocket(server); // 4. Inicializa o Socket.IO com o servidor http
