@@ -191,10 +191,10 @@ function setupTabs() {
  * Verifica se é um paciente logado e mostra o formulário de avaliação
  */
 function checkPatientLoginStatus(psychologistId) {
-    // ASSUMINDO que você salva o token do PACIENTE no localStorage
-    const patientToken = localStorage.getItem('patientToken');
+    // CORREÇÃO: Usa a chave 'girassol_token', que é a mesma usada no login.js
+    const token = localStorage.getItem('girassol_token');
     
-    if (patientToken) {
+    if (token) {
         document.getElementById('review-form-wrapper').style.display = 'block';
         
         // Adiciona o listener para o submit do formulário
@@ -216,7 +216,7 @@ function checkPatientLoginStatus(psychologistId) {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${patientToken}`
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
                         psychologistId: psychologistId,

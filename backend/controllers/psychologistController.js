@@ -189,15 +189,15 @@ exports.loginPsychologist = async (req, res) => {
 // Rota: GET /api/psychologists/me (Rota Protegida)
 // DESCRIÇÃO: Busca os dados do psicólogo logado.
 // ----------------------------------------------------------------------
-exports.getPsychologistProfile = async (req, res) => {
+exports.getAuthenticatedPsychologistProfile = async (req, res) => {
   try {
-    const psychologistId = req.user?.id; // vem do middleware
+    const psychologistId = req.psychologist?.id; // vem do middleware
     if (!psychologistId) {
       return res.status(401).json({ error: 'Não autorizado.' });
     }
  
     const psychologist = await db.Psychologist.findByPk(psychologistId, {
-      attributes: { exclude: ['senha', 'resetPasswordToken', 'resetPasswordExpires'] }
+      attributes: { exclude: ['senha', 'cpf', 'updatedAt', 'resetPasswordToken', 'resetPasswordExpires'] }
     });
  
     if (!psychologist) {
@@ -810,7 +810,7 @@ exports.getShowcasePsychologists = async (req, res) => {
 // Rota: GET /api/psychologists/:id
 // DESCRIÇÃO: Busca o perfil de um psicólogo específico. (CORRIGIDO E SIMPLIFICADO)
 // ----------------------------------------------------------------------
-exports.getPsychologistProfile = async (req, res) => {
+exports.getPsychologistProfileById = async (req, res) => {
     try {
         const { id } = req.params;
 
