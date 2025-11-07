@@ -830,7 +830,7 @@ exports.getProfileBySlug = async (req, res) => {
         const { slug } = req.params;
 
         const psychologist = await db.Psychologist.findOne({
-            where: { slug, status: 'active' },
+            where: { slug },
             attributes: { exclude: ['senha', 'resetPasswordToken', 'resetPasswordExpires'] }
         });
 
