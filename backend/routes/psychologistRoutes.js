@@ -14,6 +14,10 @@ router.post('/add-to-waitlist', psychologistController.addToWaitlist);
 
 // ROTA PÚBLICA /SHOWCASE (Estava faltando)
 router.get('/showcase', psychologistController.getShowcasePsychologists);
+// ROTAS PÚBLICAS DE PERFIL (Movidas para cima para não serem protegidas)
+router.get('/slug/:slug', psychologistController.getProfileBySlug);
+router.get('/:id/reviews', psychologistController.getPsychologistReviews);
+router.get('/:id', psychologistController.getPsychologistProfileById);
 
 // ===============================================
 // ROTAS PROTEGIDAS (Exigem login)
@@ -36,10 +40,5 @@ router.post('/waiting-list/invite', psychologistController.inviteFromWaitlist);
 
 // ===============================================
 // ROTAS PÚBLICAS GENÉRICAS (Devem ir por último)
-// ===============================================
-// (Movidas de cima para baixo, para não conflitarem com /me ou /showcase)
-router.get('/slug/:slug', psychologistController.getProfileBySlug);
-router.get('/:id', psychologistController.getPsychologistProfileById);
-router.get('/:id/reviews', psychologistController.getPsychologistReviews);
 
 module.exports = router;

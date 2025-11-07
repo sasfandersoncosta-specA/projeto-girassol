@@ -848,12 +848,33 @@ exports.getProfileBySlug = async (req, res) => {
 
         const psychologist = await db.Psychologist.findOne({
             where: { slug },
-            attributes: { exclude: ['senha', 'resetPasswordToken', 'resetPasswordExpires'] }
+            attributes: { exclude: ['senha', 'resetPasswordToken', 'resetPasswordExpires', 'cpf'] },
+            include: [{
+                model: db.Review,
+                as: 'reviews',
+                attributes: ['id', 'rating', 'comment', 'createdAt'],
+                include: [{
+                    model: db.Patient,
+                    as: 'patient',
+                    attributes: ['nome']
+                }]
+            }]
         });
 
         if (psychologist) {
-            // Retorna os dados do psicólogo em formato JSON
-            res.status(200).json(psychologist);
+            // Calcula a média das avaliações
+            const reviews = psychologist.reviews || [];
+            const reviewCount = reviews.length;
+            const averageRating = reviewCount > 0
+                ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviewCount
+                : 0;
+
+            // Adiciona os dados calculados ao objeto de resposta
+            const responseData = psychologist.toJSON();
+            responseData.review_count = reviewCount;
+            responseData.average_rating = parseFloat(averageRating.toFixed(1));
+
+            res.status(200).json(responseData);
         } else {
             res.status(404).json({ error: 'Perfil não encontrado.' });
         }
