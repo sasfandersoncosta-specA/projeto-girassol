@@ -144,6 +144,21 @@ exports.resetPassword = async (req, res) => {
     }
 };
 
+/**
+ * Função auxiliar para extrair valores mínimo e máximo de uma faixa de preço.
+ * Ex: "R$ 91 - R$ 150" => { min: 91, max: 150 }
+ * @param {string} rangeString A faixa de preço.
+ * @returns {{min: number, max: number}}
+ */
+const parsePriceRange = (rangeString) => {
+    if (!rangeString || typeof rangeString !== 'string') return { min: 0, max: 9999 };
+    const numbers = rangeString.match(/\d+/g);
+    if (!numbers || numbers.length === 0) return { min: 0, max: 9999 };
+    const min = parseInt(numbers[0], 10);
+    const max = numbers.length > 1 ? parseInt(numbers[1], 10) : min;
+    return { min, max };
+};
+
 // ----------------------------------------------------------------------
 // Rota: POST /api/psychologists/login
 // DESCRIÇÃO: Autentica um psicólogo e retorna um token JWT.
