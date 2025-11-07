@@ -28,7 +28,7 @@ router.get('/:id/reviews', psychologistController.getPsychologistReviews);
 router.use(protect); // Aplica o middleware a todas as rotas abaixo
 
 // Rotas "ME" (devem vir primeiro na seção protegida para não conflitarem com /:id)
-router.get('/me', psychologistController.getPsychologistData);
+router.get('/me', psychologistController.getPsychologistProfile);
 router.put('/me', psychologistController.updatePsychologistProfile);
 router.put('/me/photo', uploadProfilePhoto.single('profilePhoto'), psychologistController.updateProfilePhoto);
 router.put('/me/crp-document', uploadCrpDocument.single('crpDocument'), psychologistController.uploadCrpDocument);
