@@ -178,20 +178,26 @@ exports.loginPsychologist = async (req, res) => {
 // DESCRIÇÃO: Busca os dados do psicólogo logado.
 // ----------------------------------------------------------------------
 exports.getPsychologistData = async (req, res) => {
-    try {
-        // O middleware de autenticação já nos deu o psicólogo em `req.psychologist`
-        if (req.psychologist) {
-            // Retorna os dados do psicólogo (já sem a senha)
-            res.status(200).json(req.psychologist);
-        } else {
-            res.status(404).json({ error: 'Psicólogo não encontrado.' });
-        }
-    } catch (error) {
-        console.error('Erro ao buscar dados do psicólogo:', error);
-        res.status(500).json({ error: 'Erro interno no servidor.' });
+  try {
+    const psychologistId = req.psychologist?.id; // ID obtido do token decodificado
+    if (!psychologistId) {
+      return res.status(401).json({ error: 'Não autorizado.' });
     }
-};
 
+    const psychologist = await db.Psychologist.findByPk(psychologistId, {
+      attributes: { exclude: ['senha', 'resetPasswordToken', 'resetPasswordExpires'] }
+    });
+
+    if (!psychologist) {
+      return res.status(404).json({ error: 'Perfil não encontrado.' });
+    }
+
+    res.status(200).json(psychologist);
+  } catch (error) {
+    console.error('Erro ao buscar perfil do psicólogo:', error);
+    res.status(500).json({ error: 'Erro interno no servidor.' });
+  }
+};
 /**
  * Função auxiliar para extrair valores mínimo e máximo de uma faixa de preço.
  * Ex: "R$ 91 - R$ 150" => { min: 91, max: 150 }
