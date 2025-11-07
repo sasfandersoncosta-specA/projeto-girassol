@@ -602,6 +602,20 @@ exports.deletePsychologistAccount = async (req, res) => {
 };
 
 // ----------------------------------------------------------------------
+// Função Auxiliar: Mapeia preferências do paciente para o psicólogo
+// ----------------------------------------------------------------------
+const mapPatientPracticesToPsychologist = (patientPractices) => {
+    if (!patientPractices) return [];
+    const mapping = {
+        "Que tenha uma perspectiva feminista": "Feminista",
+        "Que faça parte da comunidade LGBTQIAPN+": "LGBTQIAPN+ friendly",
+        "Que seja uma pessoa não-branca": "Antirracista"
+    };
+    return patientPractices
+        .map(practice => mapping[practice])
+        .filter(mapped => mapped); // Filtra valores indefinidos
+};
+// ----------------------------------------------------------------------
 // Rota: GET /api/psychologists/matches (Rota Protegida)
 // DESCRIÇÃO: Encontra psicólogos compatíveis com as preferências do paciente logado.
 // ----------------------------------------------------------------------
@@ -852,6 +866,27 @@ exports.getProfileBySlug = async (req, res) => {
         }
     } catch (error) {
         console.error('Erro ao buscar perfil por slug:', error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
+};
+
+// ----------------------------------------------------------------------
+// Rota: GET /api/psychologists/:id
+// DESCRIÇÃO: Busca os dados de um perfil por seu ID. (FUNÇÃO ADICIONADA)
+// ----------------------------------------------------------------------
+exports.getPsychologistProfileById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const psychologist = await db.Psychologist.findByPk(id, {
+            attributes: { exclude: ['senha', 'resetPasswordToken', 'resetPasswordExpires', 'cpf'] }
+        });
+        if (psychologist) {
+            res.status(200).json(psychologist);
+        } else {
+            res.status(404).json({ error: 'Perfil não encontrado.' });
+        }
+    } catch (error) {
+        console.error('Erro ao buscar perfil por ID:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };
