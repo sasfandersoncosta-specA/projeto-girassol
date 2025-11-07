@@ -160,12 +160,27 @@ exports.loginPatient = async (req, res) => {
 // Rota: GET /api/patients/me
 // DESCRIÇÃO: Busca os dados do paciente logado.
 // ----------------------------------------------------------------------
-exports.getPatientData = async (req, res) => {
-    // O middleware `protect` já anexa `req.patient`
-    if (req.patient) {
-        res.status(200).json(req.patient);
-    } else {
-        res.status(404).json({ error: 'Paciente não encontrado.' });
+exports.getPatientData = async (req, res) => {    
+    try {
+        // 1. O middleware 'protect' anexa o usuário em req.patient.id
+        if (!req.patient || !req.patient.id) {
+            return res.status(401).json({ error: 'Paciente não autenticado.' });
+        }
+
+        // 2. Busca o paciente no banco de dados usando o ID do token
+        const patient = await db.Patient.findByPk(req.patient.id, {
+            // 3. Exclui campos sensíveis para não enviá-los ao frontend
+            attributes: { exclude: ['senha', 'resetPasswordToken', 'resetPasswordExpires'] }
+        });
+
+        if (!patient) {
+            return res.status(404).json({ error: 'Paciente não encontrado.' });
+        }
+
+        res.status(200).json(patient);
+    } catch (error) {
+        console.error('Erro ao buscar dados do paciente (/me):', error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };
 

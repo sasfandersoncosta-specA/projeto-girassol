@@ -401,6 +401,16 @@ exports.updatePsychologistProfile = async (req, res) => {
 };
 
 // ----------------------------------------------------------------------
+// Função Auxiliar: Envia e-mail de convite (Placeholder)
+// ----------------------------------------------------------------------
+const sendInvitationEmail = async (candidate, invitationLink) => {
+    // TODO: Integrar com o emailService real.
+    // Por enquanto, apenas loga no console para não quebrar a aplicação.
+    console.log('--- E-MAIL DE CONVITE (SIMULAÇÃO) ---');
+    console.log(`Para: ${candidate.email}`);
+    console.log(`Link: ${invitationLink}`);
+};
+// ----------------------------------------------------------------------
 // Rota: POST /api/psychologists/waiting-list/invite (Rota Protegida - Admin)
 // DESCRIÇÃO: Envia um convite manual para um profissional na lista de espera.
 // ----------------------------------------------------------------------
@@ -602,6 +612,21 @@ exports.deletePsychologistAccount = async (req, res) => {
         console.error('Erro ao excluir conta do psicólogo:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });
     }
+};
+
+// ----------------------------------------------------------------------
+// Função Auxiliar: Mapeia preferências do paciente para o psicólogo
+// ----------------------------------------------------------------------
+const mapPatientPracticesToPsychologist = (patientPractices) => {
+    if (!patientPractices) return [];
+    const mapping = {
+        "Que tenha uma perspectiva feminista": "Feminista",
+        "Que faça parte da comunidade LGBTQIAPN+": "LGBTQIAPN+ friendly",
+        "Que seja uma pessoa não-branca": "Antirracista"
+    };
+    return patientPractices
+        .map(practice => mapping[practice])
+        .filter(mapped => mapped); // Filtra valores indefinidos
 };
 
 // ----------------------------------------------------------------------
@@ -834,6 +859,29 @@ exports.getProfileBySlug = async (req, res) => {
         }
     } catch (error) {
         console.error('Erro ao buscar perfil por slug:', error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
+};
+
+// ----------------------------------------------------------------------
+// Rota: GET /api/psychologists/:id
+// DESCRIÇÃO: Busca os dados de um perfil por seu ID. (FUNÇÃO ADICIONADA)
+// ----------------------------------------------------------------------
+exports.getPsychologistProfileById = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const psychologist = await db.Psychologist.findByPk(id, {
+            attributes: { exclude: ['senha', 'resetPasswordToken', 'resetPasswordExpires', 'cpf'] }
+        });
+
+        if (psychologist) {
+            res.status(200).json(psychologist);
+        } else {
+            res.status(404).json({ error: 'Perfil não encontrado.' });
+        }
+    } catch (error) {
+        console.error('Erro ao buscar perfil por ID:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };

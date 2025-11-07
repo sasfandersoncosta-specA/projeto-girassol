@@ -35,6 +35,8 @@ router.delete('/psychologists/:id', adminController.deletePsychologist);
 
 // Rota para buscar todos os pacientes
 router.get('/patients', adminController.getAllPatients);
+// Rota para deletar um paciente específico
+router.delete('/patients/:id', adminController.deletePatient);
 
 // Rota para buscar todas as avaliações (reviews)
 router.get('/reviews', adminController.getAllReviews);

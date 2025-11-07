@@ -534,7 +534,7 @@ exports.getAllMessages = async (req, res) => {
         const messages = await db.Message.findAll({
             include: [
                 { model: db.Patient, as: 'senderPatient', attributes: ['nome', 'id'] },
-                { model: dbZ.Psychologist, as: 'senderPsychologist', attributes: ['nome', 'id'] },
+                { model: db.Psychologist, as: 'senderPsychologist', attributes: ['nome', 'id'] },
                 { model: db.Patient, as: 'recipientPatient', attributes: ['nome', 'id'] },
                 { model: db.Psychologist, as: 'recipientPsychologist', attributes: ['nome', 'id'] }
             ],
