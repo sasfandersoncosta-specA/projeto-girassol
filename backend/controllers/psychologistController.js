@@ -185,31 +185,6 @@ exports.loginPsychologist = async (req, res) => {
         res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };
-// ----------------------------------------------------------------------
-// Rota: GET /api/psychologists/me (Rota Protegida)
-// DESCRIÇÃO: Busca os dados do psicólogo logado.
-// ----------------------------------------------------------------------
-exports.getAuthenticatedPsychologistProfile = async (req, res) => {
-  try {
-    const psychologistId = req.psychologist?.id; // vem do middleware
-    if (!psychologistId) {
-      return res.status(401).json({ error: 'Não autorizado.' });
-    }
- 
-    const psychologist = await db.Psychologist.findByPk(psychologistId, {
-      attributes: { exclude: ['senha', 'cpf', 'updatedAt', 'resetPasswordToken', 'resetPasswordExpires'] }
-    });
- 
-    if (!psychologist) {
-      return res.status(404).json({ error: 'Perfil não encontrado.' });
-    }
- 
-    res.status(200).json(psychologist);
-  } catch (error) {
-    console.error('Erro ao buscar perfil do psicólogo:', error);
-    res.status(500).json({ error: 'Erro interno no servidor.' });
-  }
-};
 /**
  * Função auxiliar para extrair valores mínimo e máximo de uma faixa de preço.
  * Ex: "R$ 91 - R$ 150" => { min: 91, max: 150 }
@@ -802,39 +777,6 @@ exports.getShowcasePsychologists = async (req, res) => {
         res.status(200).json(psychologists);
     } catch (error) {
         console.error('Erro ao buscar psicólogos para vitrine:', error);
-        res.status(500).json({ error: 'Erro interno no servidor.' });
-    }
-};
-
-// ----------------------------------------------------------------------
-// Rota: GET /api/psychologists/:id
-// DESCRIÇÃO: Busca o perfil de um psicólogo específico. (CORRIGIDO E SIMPLIFICADO)
-// ----------------------------------------------------------------------
-exports.getPsychologistProfileById = async (req, res) => {
-    try {
-        const { id } = req.params;
-
-        // 1. Busca o psicólogo (SEM NENHUM 'INCLUDE')
-        const psychologist = await db.Psychologist.findByPk(id, {
-            attributes: { exclude: ['senha', 'resetPasswordToken', 'resetPasswordExpires'] }
-        });
-
-        if (!psychologist) {
-            return res.status(404).json({ error: 'Psicólogo não encontrado.' });
-        }
-
-        // 2. Por enquanto, envia o perfil sem as avaliações
-        // (Vamos adicionar as avaliações de volta em uma etapa futura, se necessário)
-        const psychologistData = {
-            ...psychologist.toJSON(),
-            average_rating: 0, // Placeholder
-            review_count: 0,   // Placeholder
-            reviews: []        // Placeholder
-        };
-
-        res.status(200).json(psychologistData);
-    } catch (error) {
-        console.error('Erro ao buscar perfil do psicólogo:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };

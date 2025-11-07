@@ -21,7 +21,7 @@ router.get('/showcase', psychologistController.getShowcasePsychologists);
 router.use(protect); // Aplica o middleware a TODAS as rotas abaixo
 
 // Rotas "ME" (devem vir primeiro na seção protegida para não conflitarem com /:id)
-router.get('/me', psychologistController.getPsychologistProfile);
+router.get('/me', psychologistController.getAuthenticatedPsychologistProfile);
 router.put('/me', psychologistController.updatePsychologistProfile);
 router.put('/me/photo', uploadProfilePhoto.single('profilePhoto'), psychologistController.updateProfilePhoto);
 router.put('/me/crp-document', uploadCrpDocument.single('crpDocument'), psychologistController.uploadCrpDocument);
@@ -39,7 +39,7 @@ router.post('/waiting-list/invite', psychologistController.inviteFromWaitlist);
 // ===============================================
 // (Movidas de cima para baixo, para não conflitarem com /me ou /showcase)
 router.get('/slug/:slug', psychologistController.getProfileBySlug);
-router.get('/:id', psychologistController.getPsychologistProfile);
+router.get('/:id', psychologistController.getPsychologistProfileById);
 router.get('/:id/reviews', psychologistController.getPsychologistReviews);
 
 module.exports = router;
