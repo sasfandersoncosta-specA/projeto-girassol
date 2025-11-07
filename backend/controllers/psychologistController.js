@@ -185,6 +185,38 @@ exports.loginPsychologist = async (req, res) => {
         res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };
+
+// ----------------------------------------------------------------------
+// Rota: GET /api/psychologists/me (Rota Protegida)
+// DESCRIÇÃO: Busca os dados do perfil do psicólogo logado (pelo token).
+// ----------------------------------------------------------------------
+exports.getAuthenticatedPsychologistProfile = async (req, res) => {
+    try {
+        // 'req.psychologist' é anexado pelo seu middleware 'protect'
+        if (!req.psychologist || !req.psychologist.id) {
+            return res.status(401).json({ error: 'Psicólogo não autenticado.' });
+        }
+
+        const psychologistId = req.psychologist.id;
+
+        const psychologist = await db.Psychologist.findByPk(psychologistId, {
+            // Exclui campos sensíveis que o frontend não precisa ver
+            attributes: { 
+                exclude: ['senha', 'resetPasswordToken', 'resetPasswordExpires', 'cpf'] 
+            }
+        });
+
+        if (!psychologist) {
+            return res.status(404).json({ error: 'Perfil do psicólogo não encontrado.' });
+        }
+
+        res.status(200).json(psychologist);
+
+    } catch (error) {
+        console.error('Erro ao buscar perfil do psicólogo autenticado (/me):', error);
+        res.status(500).json({ error: 'Erro interno do servidor.' });
+    }
+};
 /**
  * Função auxiliar para extrair valores mínimo e máximo de uma faixa de preço.
  * Ex: "R$ 91 - R$ 150" => { min: 91, max: 150 }
