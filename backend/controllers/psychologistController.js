@@ -217,6 +217,7 @@ exports.getAuthenticatedPsychologistProfile = async (req, res) => {
         res.status(500).json({ error: 'Erro interno do servidor.' });
     }
 };
+
 /**
  * Função auxiliar para extrair valores mínimo e máximo de uma faixa de preço.
  * Ex: "R$ 91 - R$ 150" => { min: 91, max: 150 }
