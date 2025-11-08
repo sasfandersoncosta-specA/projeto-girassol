@@ -171,7 +171,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         goToSlide(passoAnterior);
-    } if (target.matches('.choice-button')) { const isMulti = target.classList.contains('multi-choice'); if (isMulti) { target.classList.toggle('selected'); } else { const parent = target.closest('.choices-container'); parent.querySelectorAll('.choice-button').forEach(btn => btn.classList.remove('selected')); target.classList.add('selected'); collectAnswer(); if (currentQuestion.id === 'idade' && target.dataset.value === 'Menor de 18 anos') { goToSlide(questions.findIndex(q => q.id === 'erro-idade')); } else {
+   if (currentQuestion.id === 'idade' && target.dataset.value === 'Menor de 18 anos') {
+                // Em vez de ir para o slide, redireciona para a página
+                window.location.href = 'menor_de_idade.html';
+            } else {
             let proximoPasso = currentStep + 1;
             if (currentQuestion.id === 'modalidade_atendimento') {
                 const modalidade = userAnswers['modalidade_atendimento'];
