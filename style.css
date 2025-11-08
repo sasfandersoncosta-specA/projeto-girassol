@@ -19,6 +19,16 @@ h1, h2, h3, h4, h5, h6 {
     font-family: 'New Kansas', serif;
     font-weight: 700;
 }
+
+#error-state.hidden {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
 /* --- DECLARAÇÃO DA FONTE CUSTOMIZADA (NEW KANSAS) --- */
 @font-face {
     font-family: 'New Kansas';
