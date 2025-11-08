@@ -14,7 +14,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const showError = (message) => {
         loadingElement.classList.add('hidden');
         profileContainer.classList.add('hidden');
-        errorElement.querySelector('p').textContent = message;
+        const errorParagraph = errorElement.querySelector('p');
+        if (errorParagraph) errorParagraph.textContent = message;
         errorElement.classList.remove('hidden');
     };
 
