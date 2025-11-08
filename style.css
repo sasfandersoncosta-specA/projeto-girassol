@@ -10,11 +10,18 @@
 /* --- Reset Básico e Fontes Globais --- */
 body {
     margin: 0;
-    font-family: 'Montserrat Alternates', sans-serif;
-    font-size: 15px; /* Reduzido de 16px (padrão) para uma base mais compacta */
+    font-family: 'Lato', 'Montserrat', Arial, Helvetica, sans-serif;
+    font-size: 15px;
     background-color: #fdfaf6;
+    color: #222;
     
 }
+
+.profile-tags span, .profile-body-tabs, .profile-body-tabs nav, .profile-body-tabs .tab-content, #profile-container, .conversion-card, .card {
+    font-family: inherit;
+    color: #222;
+}
+
 h1, h2, h3, h4, h5, h6 {
     font-family: 'New Kansas', serif;
     font-weight: 700;
