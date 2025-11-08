@@ -12,6 +12,15 @@ router.post('/login', psychologistController.loginPsychologist);
 router.post('/check-demand', psychologistController.checkDemand);
 router.post('/add-to-waitlist', psychologistController.addToWaitlist);
 router.get('/showcase', psychologistController.getShowcasePsychologists);
+// Rota de Match (pode ser acessada por usuários logados ou anônimos)
+router.get('/matches', psychologistController.getPatientMatches);
+
+// ROTAS PÚBLICAS COM PARÂMETROS (Devem vir antes do 'protect' e depois das rotas fixas)
+router.get('/slug/:slug', psychologistController.getProfileBySlug);
+router.get('/:id/reviews', psychologistController.getPsychologistReviews);
+// IMPORTANTE: A rota /:id deve ser a ÚLTIMA das rotas públicas para não capturar
+// caminhos como /showcase, /matches, etc.
+router.get('/:id', psychologistController.getPsychologistProfileById);
 
 // ===============================================
 // ROTAS PROTEGIDAS (Exigem login)
@@ -28,15 +37,7 @@ router.put('/me/password', psychologistController.updatePsychologistPassword);
 router.delete('/me', psychologistController.deletePsychologistAccount);
  
 // Outras rotas protegidas
-router.get('/matches', psychologistController.getPatientMatches);
 router.get('/waiting-list', psychologistController.getWaitingList);
 router.post('/waiting-list/invite', psychologistController.inviteFromWaitlist);
-
-// ===============================================
-// ROTAS PÚBLICAS COM PARÂMETROS (Devem vir por último)
-// ===============================================
-router.get('/slug/:slug', psychologistController.getProfileBySlug);
-router.get('/:id/reviews', psychologistController.getPsychologistReviews);
-router.get('/:id', psychologistController.getPsychologistProfileById);
 
 module.exports = router;
