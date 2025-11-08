@@ -833,23 +833,23 @@ exports.getProfileBySlug = async (req, res) => {
         const { slug } = req.params;
 
         const psychologist = await db.Psychologist.findOne({
-            where: { slug },
+            where: { slug, status: 'active' }, // GARANTE QUE APENAS PERFIS ATIVOS SEJAM PÚBLICOS
             attributes: { exclude: ['senha', 'resetPasswordToken', 'resetPasswordExpires', 'cpf'] },
-            include: [{
-                model: db.Review,
-                as: 'reviews',
-                attributes: ['id', 'rating', 'comment', 'createdAt'],
+        });
+
+        if (psychologist) {
+            // Busca as avaliações separadamente para incluir no resultado
+            const reviews = await db.Review.findAll({
+                where: { psychologistId: psychologist.id, status: 'approved' }, // Apenas avaliações aprovadas
                 include: [{
                     model: db.Patient,
                     as: 'patient',
                     attributes: ['nome']
-                }]
-            }]
-        });
+                }],
+                order: [['createdAt', 'DESC']]
+            });
 
-        if (psychologist) {
             // Calcula a média das avaliações
-            const reviews = psychologist.reviews || [];
             const reviewCount = reviews.length;
             const averageRating = reviewCount > 0
                 ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviewCount
@@ -859,6 +859,7 @@ exports.getProfileBySlug = async (req, res) => {
             const responseData = psychologist.toJSON();
             responseData.review_count = reviewCount;
             responseData.average_rating = parseFloat(averageRating.toFixed(1));
+            responseData.reviews = reviews; // Adiciona as avaliações ao objeto de resposta
 
             res.status(200).json(responseData);
         } else {
