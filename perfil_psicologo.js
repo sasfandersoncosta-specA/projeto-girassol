@@ -2,6 +2,7 @@
 // Compatível com URLs públicas no formato: dominio.com/nome-do-psicologo
 
 document.addEventListener('DOMContentLoaded', async () => {
+    const loginUrl = 'login.html';
     const profileContainer = document.getElementById('profile-container');
     const loadingElement = document.getElementById('loading-state');
     const errorElement = document.getElementById('error-state');
@@ -27,6 +28,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         errorElement.classList.remove('visivel'); // <-- NOVO, remove a classe que força mostrar
         profileContainer.classList.remove('hidden');
     };
+
+    // --- FUNÇÃO PARA MOSTRAR NOTIFICAÇÕES (TOAST) ---
+    const showToast = (message, type = 'success') => {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+
+        container.appendChild(toast);
+
+        // Remove o toast do DOM após a animação de saída
+        setTimeout(() => toast.remove(), 4500);
+    }
 
     const populateProfile = (profile) => {
         const setText = (id, text) => {
@@ -89,6 +105,57 @@ document.addEventListener('DOMContentLoaded', async () => {
         fillTags('psi-tags-abordagens', profile.abordagens_tecnicas);
         fillTags('psi-tags-praticas', profile.praticas_vivencias);
 
+        // --- NOVO: Popula links de redes sociais ---
+        const socialLinksContainer = document.getElementById('psi-social-links');
+        if (socialLinksContainer) {
+            socialLinksContainer.innerHTML = ''; // Limpa antes de adicionar
+            const createSocialLink = (url, icon, label) => {
+                if (!url) return '';
+                return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="social-link" title="${label}"><img src="/assets/icons/${icon}.svg" alt="${label}"></a>`;
+            };
+            
+            let socialHTML = '';
+            socialHTML += createSocialLink(profile.linkedinUrl, 'linkedin-icon', 'LinkedIn');
+            socialHTML += createSocialLink(profile.instagramUrl, 'instagram-icon', 'Instagram');
+            socialHTML += createSocialLink(profile.websiteUrl, 'website-icon', 'Site Pessoal');
+            
+            socialLinksContainer.innerHTML = socialHTML;
+        }
+
+        // --- NOVO: Adiciona o botão de favoritar ---
+        const favoritePlaceholder = document.getElementById('favorite-heart-placeholder');
+        const token = localStorage.getItem('girassol_token');
+        if (favoritePlaceholder && token) { // Só mostra o coração se o usuário estiver logado
+            const heartIcon = profile.isFavorited ? '♥' : '♡';
+            const heartClass = profile.isFavorited ? 'heart-icon favorited' : 'heart-icon';
+            favoritePlaceholder.innerHTML = `<span class="${heartClass}" data-id="${profile.id}" role="button" aria-label="Favoritar">${heartIcon}</span>`;
+            setupFavoriteButton();
+        } else if (favoritePlaceholder) {
+            // Mostra um coração "deslogado" que leva ao login
+            favoritePlaceholder.innerHTML = `<a href="${loginUrl}" class="heart-icon" role="button" aria-label="Faça login para favoritar">♡</a>`;
+        }
+
+        // --- NOVO: Configura botões de compartilhamento ---
+        const profileUrl = window.location.href;
+        const profileName = profile.nome || 'um profissional incrível';
+        const shareText = `Confira o perfil de ${profileName} na Girassol: ${profileUrl}`;
+
+        document.getElementById('share-whatsapp').onclick = () => {
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
+        };
+        document.getElementById('share-facebook').onclick = () => {
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(profileUrl)}`, '_blank');
+        };
+        document.getElementById('share-email').onclick = () => {
+            window.location.href = `mailto:?subject=Recomendação de Psicólogo(a): ${profile.nome}&body=${encodeURIComponent(shareText)}`;
+        };
+        document.getElementById('share-copy').onclick = () => {
+            navigator.clipboard.writeText(profileUrl).then(() => {
+                showToast('Link copiado para a área de transferência!', 'success');
+            });
+        };
+
+
         const reviewsContainer = document.getElementById('reviews-list-container');
         const tabBtnAvaliacoes = document.getElementById('tab-btn-avaliacoes');
         if (reviewsContainer) {
@@ -117,6 +184,46 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    // --- NOVO: Lógica para o botão de favoritar ---
+    const setupFavoriteButton = () => {
+        const button = document.querySelector('#favorite-heart-placeholder .heart-icon');
+        if (!button || button.tagName === 'A') return; // Não adiciona listener se for um link para login
+
+        button.addEventListener('click', async () => {
+            const psychologistId = button.dataset.id;
+            const token = localStorage.getItem('girassol_token');
+
+            if (!token) {
+                window.location.href = loginUrl;
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/patients/me/favorites`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ psychologistId })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    // Atualiza a UI instantaneamente
+                    button.textContent = data.favorited ? '♥' : '♡';
+                    button.classList.toggle('favorited', data.favorited);
+                    showToast(data.message, 'success');
+                } else {
+                    throw new Error('Falha ao favoritar');
+                }
+            } catch (error) {
+                console.error("Erro ao favoritar:", error);
+                showToast("Erro ao salvar favorito. Tente novamente.", 'error');
+            }
+        });
+    }
+
     // --- Extração de slug para URLs públicas tipo dominio.com/nome-do-psicologo ---
     const extractSlug = () => {
         const parts = window.location.pathname.split('/').filter(Boolean);
@@ -135,7 +242,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            const res = await fetch(`${API_BASE_URL}/api/psychologists/slug/${encodeURIComponent(slug)}`);
+            const token = localStorage.getItem('girassol_token');
+            const headers = {};
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            const res = await fetch(`${API_BASE_URL}/api/psychologists/slug/${encodeURIComponent(slug)}`, {
+                headers: headers
+            });
 
             if (res.status === 404) {
                 showError('Perfil não encontrado. Este profissional pode não estar mais na plataforma.');
