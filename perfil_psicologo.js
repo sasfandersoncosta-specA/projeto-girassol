@@ -105,7 +105,7 @@ const populateProfile = (profile) => {
             reviewElement.className = 'review-card'; // Use a classe correta
             reviewElement.innerHTML = `
                 <div class="review-card-header">
-                    <strong>${review.patient.nome}</strong>
+                    <strong>${review.patient ? review.patient.nome : 'Paciente anônimo'}</strong>
                     <span class="review-rating">★ ${review.rating}</span>
                 </div>
                 <p>"${review.comment}"</p>
