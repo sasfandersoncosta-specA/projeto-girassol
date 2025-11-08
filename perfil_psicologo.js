@@ -1,6 +1,8 @@
 // perfil_psicologo.js — versão final e corrigida
 // Compatível com URLs públicas no formato: dominio.com/nome-do-psicologo
 
+const API_BASE_URL = 'https://projeto-girassol.onrender.com';
+
 document.addEventListener('DOMContentLoaded', async () => {
     const profileContainer = document.getElementById('profile-container');
     const loadingElement = document.getElementById('loading-state');

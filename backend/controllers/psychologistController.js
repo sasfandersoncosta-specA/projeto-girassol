@@ -756,47 +756,55 @@ exports.getShowcasePsychologists = async (req, res) => {
 // Rota: GET /api/psychologists/slug/:slug (NOVA ROTA)
 // ----------------------------------------------------------------------
 exports.getProfileBySlug = async (req, res) => {
-    try {
-        const { slug } = req.params;
+  try {
+    const { slug } = req.params;
+    console.log(`[GET_PROFILE_BY_SLUG] Buscando slug: "${slug}"`);
+    
+    // Busca case-insensitive (aceita maiúsculas e minúsculas)
+    const psychologist = await db.Psychologist.findOne({
+      where: { 
+        slug: { [Op.iLike]: slug },
+        status: 'active' 
+      },
+      attributes: { exclude: ['senha', 'resetPasswordToken', 'resetPasswordExpires', 'cpf'] },
+    });
 
-        const psychologist = await db.Psychologist.findOne({
-            where: { slug, status: 'active' }, // GARANTE QUE APENAS PERFIS ATIVOS SEJAM PÚBLICOS
-            attributes: { exclude: ['senha', 'resetPasswordToken', 'resetPasswordExpires', 'cpf'] },
-        });
+    if (psychologist) {
+      console.log(`[GET_PROFILE_BY_SLUG] Psicólogo encontrado: ${psychologist.nome}`);
+      
+      // Busca as reviews do psicólogo
+      const reviews = await db.Review.findAll({
+        where: { psychologistId: psychologist.id },
+        include: [{
+          model: db.Patient,
+          as: 'patient',
+          attributes: ['nome']
+        }],
+        order: [['createdAt', 'DESC']]
+      });
 
-        if (psychologist) {
-            // Busca as avaliações separadamente para incluir no resultado
-            const reviews = await db.Review.findAll({
-                where: { psychologistId: psychologist.id, status: 'approved' }, // Apenas avaliações aprovadas
-                include: [{
-                    model: db.Patient,
-                    as: 'patient',
-                    attributes: ['nome']
-                }],
-                order: [['createdAt', 'DESC']]
-            });
+      const responseData = {
+        ...psychologist.toJSON(),
+        reviews: reviews.map(r => ({
+          id: r.id,
+          rating: r.rating,
+          comment: r.comment,
+          patientName: r.patient?.nome || 'Anônimo',
+          createdAt: r.createdAt
+        }))
+      };
 
-            // Calcula a média das avaliações
-            const reviewCount = reviews.length;
-            const averageRating = reviewCount > 0
-                ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviewCount
-                : 0;
-
-            // Adiciona os dados calculados ao objeto de resposta
-            const responseData = psychologist.toJSON();
-            responseData.review_count = reviewCount;
-            responseData.average_rating = parseFloat(averageRating.toFixed(1));
-            responseData.reviews = reviews; // Adiciona as avaliações ao objeto de resposta
-
-            res.status(200).json(responseData);
-        } else {
-            res.status(404).json({ error: 'Perfil não encontrado.' });
-        }
-    } catch (error) {
-        console.error('Erro ao buscar perfil por slug:', error);
-        res.status(500).json({ error: 'Erro interno no servidor.' });
-   }
+      res.status(200).json(responseData);
+    } else {
+      console.log(`[GET_PROFILE_BY_SLUG] Nenhum psicólogo encontrado com slug "${slug}" e status "active"`);
+      res.status(404).json({ error: 'Perfil não encontrado.' });
+    }
+  } catch (error) {
+    console.error('[GET_PROFILE_BY_SLUG] Erro:', error);
+    res.status(500).json({ error: 'Erro interno no servidor.' });
+  }
 };
+
 
 // ----------------------------------------------------------------------
 // Rota: GET /api/psychologists/:id
