@@ -747,7 +747,7 @@ exports.getShowcasePsychologists = async (req, res) => {
 
         res.status(200).json(psychologists);
     } catch (error) {
-        console.error('Erro ao buscar psicólogos para vitrine:', error);
+        console.error('Erro ao buscar psicólogos para vitrine:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };
@@ -867,6 +867,6 @@ exports.getPsychologistReviews = async (req, res) => {
         res.status(200).json(reviews);
     } catch (error) {
         console.error('Erro ao buscar avaliações do psicólogo:', error);
-s       res.status(500).json({ error: 'Erro interno no servidor.' });
+       res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };
