@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const showError = (message) => {
         loadingElement.classList.add('hidden');
         profileContainer.classList.add('hidden');
+        errorElement.querySelector('p').textContent = message;
         const errorParagraph = errorElement.querySelector('p');
         if (errorParagraph) errorParagraph.textContent = message;
         errorElement.classList.remove('hidden');
@@ -124,8 +125,9 @@ const populateProfile = (profile) => {
     const fetchProfileData = async () => {
         showLoading();
 
-        // 1. Pega o slug do parâmetro da URL (ex: ?slug=nome-do-psi)
-        const slug = new URLSearchParams(window.location.search).get('slug');
+        // 1. Pega o slug da URL (CORRIGIDO)
+const pathParts = window.location.pathname.split('/');
+const slug = pathParts[pathParts.length - 1]; // Pega a última parte da URL
 
         if (!slug) {
             showError('Perfil não especificado. Verifique o link e tente novamente.');
