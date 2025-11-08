@@ -106,9 +106,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const fetchProfileData = async () => {
         showLoading();
 
-        // 1. Pega o slug da URL
-        const params = new URLSearchParams(window.location.search);
-        const slug = params.get('slug');
+        // 1. Pega o slug da URL (CORRIGIDO)
+const pathParts = window.location.pathname.split('/');
+const slug = pathParts[pathParts.length - 1]; // Pega a última parte da URL
 
         if (!slug) {
             showError('Perfil não especificado. Verifique o link e tente novamente.');
