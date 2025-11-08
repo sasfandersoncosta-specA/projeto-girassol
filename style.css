@@ -3230,6 +3230,7 @@ body.pagina-dashboard {
 
 .pricing-card-cta .btn {
     width: 100%;
+    text-align: center; /* Centraliza o texto do botão */
 }
 
 /* 5. Regra para o Grid em Desktop */
@@ -3467,6 +3468,15 @@ body.pagina-dashboard {
     margin-top: 25px;
     border-top: 1px solid #eee;
     padding-top: 20px;
+}
+
+.conversion-card .btn {
+  margin: 0 auto;                /* centraliza horizontalmente */
+  text-align: center;            /* centraliza texto dentro */
+  display: block;                /* ocupa a largura disponível */
+  width: 100%;                   /* ocupa toda a largura do card */
+  max-width: 320px;              /* impede que o botão fique "gigante" em telas grandes */
+  box-sizing: border-box;
 }
 
 /* Sistema de Abas */
