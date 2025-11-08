@@ -18,11 +18,18 @@ async function carregarVitrineTerapeutas() {
         // Mapeia os psicólogos para os elementos de imagem existentes
         const imagens = container.querySelectorAll('.foto-terapeuta');
         psicologos.forEach((psi, index) => {
-            if (imagens[index]) {
-                imagens[index].src = psi.fotoUrl;
-                imagens[index].alt = `Foto de ${psi.nome}`;
-            }
-        });
+    if (imagens[index]) {
+        imagens[index].src = psi.fotoUrl;
+        imagens[index].alt = `Foto de ${psi.nome}`;
+
+        // 🔗 adiciona o link para o perfil público
+        const link = imagens[index].closest('a');
+        if (link) {
+            link.href = `/${psi.slug}`;
+            link.title = psi.nome;
+        }
+    }
+});
     } catch (error) {
         console.error("Erro ao carregar vitrine de terapeutas:", error);
         // Em caso de erro, as imagens de placeholder do HTML serão mantidas.
