@@ -25,7 +25,7 @@ body {
 h1, h2, h3, h4, h5, h6 {
     font-family: 'New Kansas', serif;
     font-weight: 700;
-}
+}   
 
 #error-state.hidden {
   display: none !important;
@@ -3588,3 +3588,13 @@ body.pagina-dashboard {
     color: var(--cinza-texto);
     margin: 0;
 }
+.form-group { margin-bottom: 1em; }
+.form-status { min-height:1.5em; font-size:1em; }
+.btn-login { width: 100%; max-width: 240px; margin: 0 auto; display: block; }
+body, input, textarea, select, button {
+  font-family: Lato, Montserrat, Arial, sans-serif;
+  font-size: 1em;
+  color: #154734;
+}
+label { font-weight: 700; }
+.map-container iframe { border-radius:8px; }

@@ -33,10 +33,17 @@
                         <h3>Informações de Contato</h3>
                         <p>Para dúvidas gerais, parcerias ou suporte, utilize um dos canais abaixo.</p>
                         <ul>
-                            <li><strong>Email:</strong><br> contato@projetogirassol.com.br</li>
-                            <li><strong>WhatsApp Business:</strong><br> (11) 9XXXX-XXXX</li>
-                            <li><strong>Horário de Atendimento:</strong><br> Segunda a Sexta, das 9h às 18h.</li>
-                        </ul>
+  <li>✉️ <strong>Email:</strong><br>
+    <a href="mailto:contato@projetogirassol.com.br">contato@projetogirassol.com.br</a>
+  </li>
+  <li>📱 <strong>WhatsApp Business:</strong><br>
+    <a href="https://wa.me/5511912345678" target="_blank">(11) 9XXXX-XXXX</a>
+  </li>
+  <li>⏰ <strong>Horário de Atendimento:</strong><br>
+    Segunda a Sexta, das 9h às 18h.
+  </li>
+</ul>
+
                     </div>
                     <form class="form-contato">
                         <div class="form-group">
@@ -60,6 +67,7 @@
                             <label for="mensagem">Sua Mensagem</label>
                             <textarea id="mensagem" name="mensagem" rows="6" required></textarea>
                         </div>
+                        <div class="form-status" aria-live="polite" style="min-height:1.5em;color:#198754;font-size:1em;"></div>
                         <button type="submit" class="btn-login">Enviar Mensagem</button>
                     </form>
                 </div>
@@ -75,5 +83,26 @@
     <div id="footer-placeholder"></div>
 
     <script src="script.js"></script>
+
+    <script>
+document.querySelector('.form-contato').onsubmit = function(e) {
+  e.preventDefault();
+  var nome = this.nome.value.trim();
+  var email = this["email-contato"].value.trim();
+  var mensagem = this.mensagem.value.trim();
+  var status = this.querySelector('.form-status');
+  if (!nome || !email || !mensagem) {
+    status.textContent = 'Preencha todos os campos obrigatórios.';
+    status.style.color = '#e22';
+    return false;
+  }
+  this.querySelector('button').disabled = true;
+  status.textContent = 'Mensagem enviada! Obrigado 😃';
+  status.style.color = '#198754';
+  setTimeout(() => { this.querySelector('button').disabled = false; status.textContent=''; }, 1700);
+  this.reset();
+};
+</script>
+
     </body>
 </html>
