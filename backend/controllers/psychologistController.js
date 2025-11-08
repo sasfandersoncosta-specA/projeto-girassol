@@ -747,7 +747,7 @@ exports.getShowcasePsychologists = async (req, res) => {
 
         res.status(200).json(psychologists);
     } catch (error) {
-  S     console.error('Erro ao buscar psicólogos para vitrine:', error);
+        console.error('Erro ao buscar psicólogos para vitrine:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };
@@ -795,7 +795,7 @@ exports.getProfileBySlug = async (req, res) => {
     } catch (error) {
         console.error('Erro ao buscar perfil por slug:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });
-  s }
+   }
 };
 
 // ----------------------------------------------------------------------
