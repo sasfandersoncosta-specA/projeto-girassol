@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadingElement.classList.remove('hidden');
         profileContainer.classList.add('hidden');
         errorElement.classList.add('hidden');
+        errorElement.classList.remove('visivel'); // <-- NOVO, remove a classe que força mostrar
     };
 
     const showError = (message) => {
@@ -23,6 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const showProfile = () => {
         loadingElement.classList.add('hidden');
         errorElement.classList.add('hidden');
+        errorElement.classList.remove('visivel'); // <-- NOVO, remove a classe que força mostrar
         profileContainer.classList.remove('hidden');
     };
 
