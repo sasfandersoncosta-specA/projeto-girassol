@@ -650,7 +650,7 @@ exports.getPatientMatches = async (req, res) => {
 
         psychologists.sort((a, b) => b.dataValues.score - a.dataValues.score);
 
-s       const IDEAL_MATCH_THRESHOLD = 20; 
+        const IDEAL_MATCH_THRESHOLD = 20; 
         const NEAR_MATCH_THRESHOLD = 10;  
 
         const relevantPsychologists = psychologists.filter(psy => psy.dataValues.score > 0).sort((a, b) => b.dataValues.score - a.dataValues.score);
