@@ -34,13 +34,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="pro-card-content">
                     <h3>${profile.nome}</h3>
                     <p class="crp">CRP ${profile.crp}</p>
-                    <div class="rating">★★★★☆ (Novo na plataforma)</div>
+                    <div class="rating">${
+                        profile.review_count > 0
+                            ? `★ ${profile.average_rating.toFixed(1)} (${profile.review_count} ${profile.review_count > 1 ? 'avaliações' : 'avaliação'})`
+                            : 'Novo na plataforma'
+                    }</div>
                     <div class="compatibility-tags">
                         ${tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                     </div>
                     <p class="bio-snippet">"${bio}"</p>
                     <div class="pro-card-actions">
-                        <a href="perfil_psicologo.html?id=${profile.id}" class="btn btn-principal">Ver Perfil Completo</a>
+                        <a href="perfil_psicologo.html?slug=${profile.slug}" class="btn btn-principal">Ver Perfil Completo</a>
                         <span class="${heartClass}" data-id="${profile.id}" role="button" aria-label="Favoritar">${heartIcon}</span>
                     </div>
                 </div>
