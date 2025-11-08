@@ -158,7 +158,31 @@ const slug = pathParts[pathParts.length - 1]; // Pega a última parte da URL
             showError('Ocorreu um erro ao carregar o perfil. Tente novamente mais tarde.');
         }
     };
+// ==========================================================
+// CONTROLADOR DAS ABAS (Sobre Mim / Avaliações)
+// ==========================================================
+const tabButtons = document.querySelectorAll('.tabs-nav .tab-link');
+const tabContents = document.querySelectorAll('.tab-content');
 
+tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        // Pega o nome da aba do atributo 'data-tab' (ex: "sobre" ou "avaliacoes")
+        const tabName = button.getAttribute('data-tab');
+
+        // 1. Remove a classe 'active' de TODOS os botões
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        // 2. Adiciona 'active' SÓ no botão que foi clicado
+        button.classList.add('active');
+
+        // 3. Remove a classe 'active' de TODOS os conteúdos
+        tabContents.forEach(content => content.classList.remove('active'));
+        // 4. Adiciona 'active' SÓ no conteúdo correspondente (ex: id="tab-avaliacoes")
+        document.getElementById(`tab-${tabName}`).classList.add('active');
+    });
+});
+
+// ... (Aqui vem o 'fetchProfileData();' e o '});' de fechamento)
     // Inicia o processo
     fetchProfileData();
+    
 });
