@@ -1,10 +1,12 @@
+// Arquivo: backend/routes/reviewRoutes.js
+
 const express = require('express');
 const router = express.Router();
-const reviewController = require('../controllers/reviewController');
+const { createReview } = require('../controllers/reviewController');
 const { protect } = require('../middleware/authMiddleware');
 
-// Rota para criar uma nova avaliação.
-// Apenas pacientes logados podem criar. O middleware 'protect' garante isso.
-router.post('/', protect, reviewController.createReview);
+// Define a rota POST /api/reviews
+// Ela é protegida pelo 'protect' (que anexa req.patient)
+router.post('/', protect, createReview);
 
 module.exports = router;

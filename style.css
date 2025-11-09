@@ -3639,3 +3639,24 @@ label { font-weight: 700; }
     width: auto;
     display: inline-block; 
 }
+/* =============================================================
+   CORREÇÃO: ESTILO DO FORMULÁRIO DE AVALIAÇÃO (PERFIL PÚBLICO)
+   ============================================================= */
+
+/* 1. Corrige o Textarea (caixa de comentário) */
+#review-form textarea {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-family: 'Lato', sans-serif;
+    font-size: 15px;
+    min-height: 100px;
+}
+
+/* 2. Corrige o botão "Enviar Avaliação" (para ter tamanho automático) */
+#review-form button[type="submit"] {
+    width: auto;
+    display: inline-block;
+}
