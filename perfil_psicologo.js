@@ -158,6 +158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const data = await res.json();
             populateProfile(data);
+            checkPatientLoginStatus(data.id); // Chama a verificação de login
             showProfile();
         } catch (err) {
             console.error('Erro ao carregar perfil:', err);
@@ -166,6 +167,67 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     // --- Alternância de abas ("Sobre" / "Avaliações") ---
+    /**
+     * Verifica se é um paciente logado e mostra o formulário de avaliação
+     * OU mostra o CTA de login.
+     */
+    function checkPatientLoginStatus(psychologistId) {
+        // ASSUMINDO que você salva o token do PACIENTE no localStorage
+        const patientToken = localStorage.getItem('patientToken');
+        
+        if (patientToken) {
+            // --- USUÁRIO LOGADO ---
+            document.getElementById('review-form-wrapper').style.display = 'block';
+            
+            // Adiciona o listener para o submit do formulário
+            const reviewForm = document.getElementById('review-form');
+            reviewForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const rating = new FormData(reviewForm).get('rating');
+                const comment = new FormData(reviewForm).get('comment');
+                
+                if (!rating) {
+                    alert('Por favor, selecione uma nota (de 1 a 5 estrelas).');
+                    return;
+                }
+    
+                try {
+                    // ROTA NOVA (você precisará criar no backend)
+                    const response = await fetch('/api/reviews', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${patientToken}`
+                        },
+                        body: JSON.stringify({
+                            psychologistId: psychologistId,
+                            rating: parseInt(rating),
+                            comment: comment
+                        })
+                    });
+    
+                    if (response.ok) {
+                        alert('Avaliação enviada com sucesso!');
+                        window.location.reload(); // Recarrega a página para ver a nova avaliação
+                    } else {
+                        const errorData = await response.json();
+                        alert(`Erro ao enviar avaliação: ${errorData.error}`);
+                    }
+                } catch (error) {
+                    console.error('Erro no submit da avaliação:', error);
+                    alert('Erro de conexão ao enviar avaliação.');
+                }
+            });
+        } else {
+            // --- USUÁRIO DESLOGADO (Req 1) ---
+            // Mostra o "Login Wall"
+            const loginWall = document.getElementById('login-to-review-cta');
+            if (loginWall) {
+                loginWall.style.display = 'block';
+            }
+        }
+    }
     const tabButtons = document.querySelectorAll('.tabs-nav .tab-link');
     const tabContents = document.querySelectorAll('.tab-content');
 

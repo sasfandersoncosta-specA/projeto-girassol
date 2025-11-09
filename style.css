@@ -3598,3 +3598,31 @@ body, input, textarea, select, button {
 }
 label { font-weight: 700; }
 .map-container iframe { border-radius:8px; }
+/* =============================================================
+   ESTILO DO "LOGIN WALL" (Página de Perfil)
+   ============================================================= */
+
+.login-wall-box {
+    background-color: #f8f9fa; /* Cinza claro */
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 25px;
+    margin: 20px 0 30px 0;
+    text-align: center;
+}
+.login-wall-box h4 {
+    font-family: 'New Kansas', serif;
+    color: var(--verde-escuro);
+    font-size: 1.5rem;
+    margin-top: 0;
+}
+.login-wall-box p {
+    font-size: 1.1rem;
+    color: var(--cinza-texto);
+}
+.login-wall-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
