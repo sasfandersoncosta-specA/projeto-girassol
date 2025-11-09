@@ -309,71 +309,70 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     
         // Função para popular os campos do formulário
-function populateForm(data) {
-    if (!data) return;
+// Função para popular os campos do formulário
+        function populateForm(data) {
+            if (!data) return;
+    
+            // Popula inputs simples
+            form.elements['nome'].value = data.nome || '';
+            form.elements['cpf'].value = data.cpf || '';
+            form.elements['email'].value = data.email || '';
+            form.elements['crp'].value = data.crp || '';
+            form.elements['telefone'].value = data.telefone || '';
+            form.elements['agenda_online_url'].value = data.agenda_online_url || '';
+            form.elements['bio'].value = data.bio || '';
+            form.elements['valor_sessao_numero'].value = data.valor_sessao_numero || '';
 
-    // Popula inputs simples
-    form.elements['nome'].value = data.nome || '';
-    form.elements['cpf'].value = data.cpf || '';
-    form.elements['email'].value = data.email || '';
-    form.elements['crp'].value = data.crp || '';
-    form.elements['telefone'].value = data.telefone || '';
-    form.elements['agenda_online_url'].value = data.agenda_online_url || '';
-    form.elements['bio'].value = data.bio || '';
-    form.elements['valor_sessao_numero'].value = data.valor_sessao_numero || '';
+            // --- ATUALIZAÇÃO (REDES SOCIAIS) ---
+            form.elements['linkedin_url'].value = data.linkedin_url || '';
+            form.elements['instagram_url'].value = data.instagram_url || '';
+            form.elements['facebook_url'].value = data.facebook_url || '';
+            form.elements['tiktok_url'].value = data.tiktok_url || '';
+            form.elements['x_url'].value = data.x_url || '';
 
-    // --- INÍCIO DA ATUALIZAÇÃO (REDES SOCIAIS) ---
-    form.elements['linkedin_url'].value = data.linkedin_url || '';
-    form.elements['instagram_url'].value = data.instagram_url || '';
-    form.elements['facebook_url'].value = data.facebook_url || '';
-    form.elements['tiktok_url'].value = data.tiktok_url || '';
-    form.elements['x_url'].value = data.x_url || '';
-    // --- FIM DA ATUALIZAÇÃO ---
-
-    // Popula os multiselects (já corrigido)
-    if (form.elements['nome']) { 
-        initializeMultiselect('temas_atuacao_multiselect', data.temas_atuacao);
-        initializeMultiselect('abordagens_tecnicas_multiselect', Array.isArray(data.abordagens_tecnicas) ? data.abordagens_tecnicas : [data.abordagens_tecnicas].filter(Boolean));
-        initializeMultiselect('genero_identidade_multiselect', [data.genero_identidade].filter(Boolean));
-        initializeMultiselect('praticas_vivencias_multiselect', data.praticas_vivencias);
-        initializeMultiselect('disponibilidade_periodo_multiselect', data.disponibilidade_periodo);
-    }
-}
-
+            // Popula os multiselects (já corrigido)
+            if (form.elements['nome']) { 
+                initializeMultiselect('temas_atuacao_multiselect', data.temas_atuacao);
+                initializeMultiselect('abordagens_tecnicas_multiselect', Array.isArray(data.abordagens_tecnicas) ? data.abordagens_tecnicas : [data.abordagens_tecnicas].filter(Boolean));
+                initializeMultiselect('genero_identidade_multiselect', [data.genero_identidade].filter(Boolean));
+                initializeMultiselect('praticas_vivencias_multiselect', data.praticas_vivencias);
+                initializeMultiselect('disponibilidade_periodo_multiselect', data.disponibilidade_periodo);
+            }
+        }
+    
         // Função para coletar dados do formulário, incluindo os multiselects
-function getFormData() {
-    const getMultiselectValues = (id) => {
-        const container = document.getElementById(id);
-        if (!container) return [];
-        return Array.from(container.querySelectorAll('.tag')).map(tag => tag.dataset.value);
-    };
+        function getFormData() {
+            const getMultiselectValues = (id) => {
+                const container = document.getElementById(id);
+                if (!container) return [];
+                return Array.from(container.querySelectorAll('.tag')).map(tag => tag.dataset.value);
+            };
+    
+            const data = {
+                nome: form.elements['nome'].value,
+                email: form.elements['email'].value,
+                cpf: form.elements['cpf'].value,
+                crp: form.elements['crp'].value,
+                telefone: form.elements['telefone'].value,
+                agenda_online_url: form.elements['agenda_online_url'].value,
+                bio: form.elements['bio'].value,
+                valor_sessao_numero: parseFloat(form.elements['valor_sessao_numero'].value) || null,
 
-    const data = {
-        nome: form.elements['nome'].value,
-        email: form.elements['email'].value,
-        cpf: form.elements['cpf'].value,
-        crp: form.elements['crp'].value,
-        telefone: form.elements['telefone'].value,
-        agenda_online_url: form.elements['agenda_online_url'].value,
-        bio: form.elements['bio'].value,
-        valor_sessao_numero: parseFloat(form.elements['valor_sessao_numero'].value) || null,
+                // --- ATUALIZAÇÃO (REDES SOCIAIS) ---
+                linkedin_url: form.elements['linkedin_url'].value,
+                instagram_url: form.elements['instagram_url'].value,
+                facebook_url: form.elements['facebook_url'].value,
+                tiktok_url: form.elements['tiktok_url'].value,
+                x_url: form.elements['x_url'].value,
 
-        // --- INÍCIO DA ATUALIZAÇÃO (REDES SOCIAIS) ---
-        linkedin_url: form.elements['linkedin_url'].value,
-        instagram_url: form.elements['instagram_url'].value,
-        facebook_url: form.elements['facebook_url'].value,
-        tiktok_url: form.elements['tiktok_url'].value,
-        x_url: form.elements['x_url'].value,
-        // --- FIM DA ATUALIZAÇÃO ---
-
-        temas_atuacao: getMultiselectValues('temas_atuacao_multiselect'),
-        abordagens_tecnicas: getMultiselectValues('abordagens_tecnicas_multiselect'),
-        genero_identidade: getMultiselectValues('genero_identidade_multiselect')[0] || null,
-        praticas_vivencias: getMultiselectValues('praticas_vivencias_multiselect'),
-        disponibilidade_periodo: getMultiselectValues('disponibilidade_periodo_multiselect'),
-    };
-    return data;
-}
+                temas_atuacao: getMultiselectValues('temas_atuacao_multiselect'),
+                abordagens_tecnicas: getMultiselectValues('abordagens_tecnicas_multiselect'),
+                genero_identidade: getMultiselectValues('genero_identidade_multiselect')[0] || null,
+                praticas_vivencias: getMultiselectValues('praticas_vivencias_multiselect'),
+                disponibilidade_periodo: getMultiselectValues('disponibilidade_periodo_multiselect'),
+            };
+            return data;
+        }
     
         // Popula o formulário com os dados já existentes
         populateForm(psychologistData);
