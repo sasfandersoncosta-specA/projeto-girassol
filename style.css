@@ -3621,8 +3621,8 @@ label { font-weight: 700; }
     color: var(--cinza-texto);
 }
 .login-wall-actions {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
+    /* display: flex, justify-content, e gap removidos */
     margin-top: 20px;
+    /* O .login-wall-box (container pai) já tem 'text-align: center',
+       o que vai centralizar este único botão perfeitamente. */
 }
