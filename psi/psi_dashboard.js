@@ -338,6 +338,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 initializeMultiselect('praticas_vivencias_multiselect', data.praticas_vivencias);
                 initializeMultiselect('disponibilidade_periodo_multiselect', data.disponibilidade_periodo);
             }
+
+            // Lógica para o link do perfil público (CORRIGIDA COM FALLBACK)
+            if (viewPublicProfileLink && data.id) {
+                if (data.slug) {
+                    // 1. Se tem slug, usa a rota pública de slug
+                    viewPublicProfileLink.href = `/${data.slug}`; 
+                } else {
+                    // 2. Se não tem slug (fallback), usa a rota de ID
+                    viewPublicProfileLink.href = `/perfil_psicologo.html?id=${data.id}`;
+                }
+                // 3. Mostra o botão
+                viewPublicProfileLink.style.display = 'inline-block';
+            }
         }
     
         // Função para coletar dados do formulário, incluindo os multiselects
