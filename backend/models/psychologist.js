@@ -104,6 +104,21 @@ module.exports = (sequelize, DataTypes) => {
     disponibilidade_periodo: {
       type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: true
+    },
+    linkedin_url: {
+        type: DataTypes.STRING
+    },
+    instagram_url: {
+        type: DataTypes.STRING
+    },
+    facebook_url: {
+        type: DataTypes.STRING
+    },
+    tiktok_url: {
+        type: DataTypes.STRING
+    },
+    x_url: {
+        type: DataTypes.STRING
     }
   }, {
     sequelize,

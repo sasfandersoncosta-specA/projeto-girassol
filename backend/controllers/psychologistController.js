@@ -318,56 +318,55 @@ exports.getWaitingList = async (req, res) => {
 
 // ----------------------------------------------------------------------
 // Rota: PUT /api/psychologists/me (Rota Protegida)
+// DESCRIÇÃO: Atualiza os dados do perfil do psicólogo logado. (ATUALIZADO)
 // ----------------------------------------------------------------------
 exports.updatePsychologistProfile = async (req, res) => {
-    try {        
-        if (!req.psychologist || !req.psychologist.id) {
-            return res.status(404).json({ error: 'Psicólogo não encontrado ou não autenticado.' });
-        }
+    try {
+        // CORREÇÃO: Busca a instância completa primeiro
+        const psychologistToUpdate = await db.Psychologist.findByPk(req.psychologist.id);
 
-        const psychologistToUpdate = await db.Psychologist.findByPk(req.psychologist.id);
-        if (!psychologistToUpdate) {
-            return res.status(404).json({ error: 'Psicólogo não encontrado no banco de dados.' });
-        }
+        if (!psychologistToUpdate) {
+            return res.status(404).json({ error: 'Psicólogo não encontrado ou não autenticado.' });
+        }
 
-        const {
-            nome, email, crp, cpf, telefone, bio, fotoUrl,
-            valor_sessao_numero, temas_atuacao, abordagens_tecnicas,
-            genero_identidade, praticas_vivencias, disponibilidade_periodo
-        } = req.body;
+        const {
+            nome, email, crp, cpf, telefone, bio, 
+            agenda_online_url, // Adicionado
+            linkedin_url, instagram_url, facebook_url, tiktok_url, x_url, // Adicionado
+            valor_sessao_numero, temas_atuacao, abordagens_tecnicas,
+            genero_identidade, praticas_vivencias, disponibilidade_periodo
+        } = req.body;
 
-        if (!nome || !email || !crp) {
-            return res.status(400).json({ error: 'Nome, email e CRP são obrigatórios.' });
-        }
+        // Validações básicas (pode ser expandido com Joi/Yup)
+        if (!nome || !email || !crp) {
+            return res.status(400).json({ error: 'Nome, email e CRP são obrigatórios.' });
+        }
 
-        if (email.toLowerCase() !== psychologistToUpdate.email.toLowerCase()) {
-            const existingEmail = await db.Psychologist.findOne({ where: { email } });
-            if (existingEmail) {
-                return res.status(409).json({ error: 'Este email já está em uso por outra conta.' });
-            }
-        }
+        // Verifica se o novo email já está em uso por outro psicólogo
+        if (email.toLowerCase() !== psychologistToUpdate.email.toLowerCase()) {
+            const existingEmail = await db.Psychologist.findOne({ where: { email } });
+            if (existingEmail) {
+                return res.status(409).json({ error: 'Este email já está em uso por outra conta.' });
+            }
+        }
 
-        if (cpf && cpf !== psychologistToUpdate.cpf) {
-            const existingCpf = await db.Psychologist.findOne({ where: { cpf } });
-            if (existingCpf) {
-                return res.status(409).json({ error: 'Este CPF já está em uso por outra conta.' });
-            }
-        }
+        // Atualiza a instância
+        const updatedPsychologist = await psychologistToUpdate.update({
+            nome, email, crp, cpf, telefone, bio,
+            agenda_online_url,
+            linkedin_url, instagram_url, facebook_url, tiktok_url, x_url, // Adicionado
+            valor_sessao_numero, temas_atuacao, abordagens_tecnicas,
+            genero_identidade, praticas_vivencias, disponibilidade_periodo,
+            slug: generateSlug(nome), 
+            status: psychologistToUpdate.status === 'pending_initial' ? 'pending_review' : psychologistToUpdate.status // Lógica de status
+        });
 
-        const updatedPsychologist = await psychologistToUpdate.update({
-            nome, email, crp, cpf, telefone, bio,
-            valor_sessao_numero, temas_atuacao, abordagens_tecnicas,
-            genero_identidade, praticas_vivencias, disponibilidade_periodo,
-            slug: generateSlug(nome), 
-            status: 'active' 
-        });
+        res.status(200).json({ message: 'Perfil atualizado com sucesso!', psychologist: updatedPsychologist });
 
-        res.status(200).json({ message: 'Perfil atualizado com sucesso!', psychologist: updatedPsychologist });
-
-    } catch (error) {
-        console.error('Erro ao atualizar perfil do psicólogo:', error);
-        res.status(500).json({ error: 'Erro interno no servidor ao atualizar perfil.' });
-    }
+    } catch (error) {
+        console.error('Erro ao atualizar perfil do psicólogo:', error);
+        res.status(500).json({ error: 'Erro interno no servidor ao atualizar perfil.' });
+    }
 };
 
 // ----------------------------------------------------------------------
@@ -808,22 +807,51 @@ exports.getProfileBySlug = async (req, res) => {
 
 // ----------------------------------------------------------------------
 // Rota: GET /api/psychologists/:id
+// DESCRIÇÃO: Busca o perfil de um psicólogo específico. (CORRIGIDO)
 // ----------------------------------------------------------------------
-exports.getPsychologistProfileById = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const psychologist = await db.Psychologist.findByPk(id, {
-            attributes: { exclude: ['senha', 'resetPasswordToken', 'resetPasswordExpires', 'cpf'] }
-        });
-        if (psychologist) {
-            res.status(200).json(psychologist);
-        } else {
-            res.status(404).json({ error: 'Perfil não encontrado.' });
-        }
-    } catch (error) {
-        console.error('Erro ao buscar perfil por ID:', error);
-        res.status(500).json({ error: 'Erro interno no servidor.' });
-    }
+exports.getPsychologistProfile = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // 1. Busca o psicólogo (SEM O INCLUDE QUE ESTAVA QUEBRANDO)
+        const psychologist = await db.Psychologist.findByPk(id, {
+            attributes: { exclude: ['senha', 'resetPasswordToken', 'resetPasswordExpires'] }
+        });
+
+        if (!psychologist) {
+            return res.status(404).json({ error: 'Psicólogo não encontrado.' });
+        }
+
+        // 2. Busca as avaliações (reviews) SEPARADAMENTE
+        const reviews = await db.Review.findAll({
+            where: { psychologistId: id },
+            include: [{
+                model: db.Patient,
+                as: 'patient',
+                attributes: ['nome']
+            }],
+            order: [['createdAt', 'DESC']]
+        });
+
+        // 3. Calcula a média (Req 1)
+        const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+        const average_rating = reviews.length > 0 ? (totalRating / reviews.length).toFixed(1) : 0;
+        const review_count = reviews.length;
+
+        // 4. Monta o objeto de resposta final
+        const psychologistData = {
+            ...psychologist.toJSON(),
+            average_rating,
+            review_count,
+            reviews: reviews // Anexa as avaliações
+        };
+
+        res.status(200).json(psychologistData);
+
+    } catch (error) {
+        console.error('Erro ao buscar perfil do psicólogo:', error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
 };
 
 // ----------------------------------------------------------------------

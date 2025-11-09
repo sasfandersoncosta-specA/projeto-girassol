@@ -3660,3 +3660,47 @@ label { font-weight: 700; }
     width: auto;
     display: inline-block;
 }
+/* =============================================================
+   PERFIL PÚBLICO: ÍCONES DE AÇÃO (SOCIAL, SHARE, BLOG)
+   ============================================================= */
+
+.profile-action-icons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+    padding: 15px 0;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+}
+
+.icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: #f1f3f5; /* Cinza claro */
+    color: var(--cinza-texto);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.icon-btn:hover {
+    background-color: #e9ecef;
+    color: var(--verde-escuro);
+    transform: scale(1.1);
+}
+
+.icon-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Container dos links sociais (para o caso de 5 ícones) */
+#psi-social-links {
+    display: contents; /* Faz os 'a' tags de dentro agirem como filhos do flex */
+}

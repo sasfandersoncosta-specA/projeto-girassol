@@ -42,7 +42,7 @@ app.use('/api/messaging', messageRoutes); // Adicionado
 app.use('/api/demand', demandRoutes); // Adicionado
 app.use('/api/usuarios', usuarioRoutes); // Adicionado conforme solicitado
 app.use('/api/admin', adminRoutes); // Adicionado
-app.use('/api/reviews', reviewRoutes);
+app.use('/api/reviews', reviewRoutes); // Adicionado
 
 // --- SERVIR ARQUIVOS ESTÁTICOS (FRONT-END) ---
 // Esta linha deve vir DEPOIS das rotas da API.
