@@ -167,77 +167,77 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     // --- Alternância de abas ("Sobre" / "Avaliações") ---
-    /**
-     * Verifica se é um paciente logado e mostra o formulário de avaliação
-     * OU mostra o CTA de login.
-     */
-    function checkPatientLoginStatus(psychologistId) {
-        // ASSUMINDO que você salva o token do PACIENTE no localStorage
-        const patientToken = localStorage.getItem('patientToken');
-        
-        if (patientToken) {
-            // --- USUÁRIO LOGADO ---
-            document.getElementById('review-form-wrapper').style.display = 'block';
-            
-            // Adiciona o listener para o submit do formulário
-            const reviewForm = document.getElementById('review-form');
-            reviewForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                const rating = new FormData(reviewForm).get('rating');
-                const comment = new FormData(reviewForm).get('comment');
-                
-                if (!rating) {
-                    alert('Por favor, selecione uma nota (de 1 a 5 estrelas).');
-                    return;
-                }
+/**
+ * Verifica se é um paciente logado e mostra o formulário de avaliação
+ * OU mostra o CTA de login.
+ */
+function checkPatientLoginStatus(psychologistId) {
     
-                try {
-                    // ROTA NOVA (você precisará criar no backend)
-                    const response = await fetch('/api/reviews', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${patientToken}`
-                        },
-                        body: JSON.stringify({
-                            psychologistId: psychologistId,
-                            rating: parseInt(rating),
-                            comment: comment
-                        })
-                    });
-    
-                    if (response.ok) {
-                        alert('Avaliação enviada com sucesso!');
-                        window.location.reload(); // Recarrega a página para ver a nova avaliação
-                    } else {
-                        const errorData = await response.json();
-                        alert(`Erro ao enviar avaliação: ${errorData.error}`);
-                    }
-                } catch (error) {
-                    console.error('Erro no submit da avaliação:', error);
-                    alert('Erro de conexão ao enviar avaliação.');
-                }
-            });
-        } else {
-            // --- USUÁRIO DESLOGADO (Req 1) ---
-            // Mostra o "Login Wall"
-            const loginWall = document.getElementById('login-to-review-cta');
-            if (loginWall) {
-                loginWall.style.display = 'block';
+    // --- INÍCIO DA CORREÇÃO ---
+    // 1. Procura pelo token E pelo role corretos
+    const token = localStorage.getItem('girassol_token');
+    const role = localStorage.getItem('girassol_role');
+    // --- FIM DA CORREÇÃO ---
 
-                // --- INÍCIO DA CORREÇÃO ---
-                // Pega o botão de login dentro do "wall"
-                const loginButton = document.getElementById('login-wall-btn');
-                if (loginButton) {
-                    // Passa a URL atual (ex: /perfil.html?id=4) como um parâmetro
-                    const redirectUrl = encodeURIComponent(window.location.href);
-                    loginButton.href = `login.html?return_url=${redirectUrl}`;
+    // 2. Verifica se o token existe E se o usuário é um PACIENTE
+    if (token && role === 'patient') {
+        // --- USUÁRIO LOGADO COMO PACIENTE ---
+        document.getElementById('review-form-wrapper').style.display = 'block';
+        
+        // Adiciona o listener para o submit do formulário
+        const reviewForm = document.getElementById('review-form');
+        reviewForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const rating = new FormData(reviewForm).get('rating');
+            const comment = new FormData(reviewForm).get('comment');
+            
+            if (!rating) {
+                alert('Por favor, selecione uma nota (de 1 a 5 estrelas).');
+                return;
+            }
+
+            try {
+                // ROTA NOVA (você precisará criar no backend)
+                const response = await fetch('/api/reviews', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` // Usa o token correto
+                    },
+                    body: JSON.stringify({
+                        psychologistId: psychologistId,
+                        rating: parseInt(rating),
+                        comment: comment
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Avaliação enviada com sucesso!');
+                    window.location.reload(); 
+                } else {
+                    const errorData = await response.json();
+                    alert(`Erro ao enviar avaliação: ${errorData.error}`);
                 }
-                // --- FIM DA CORREÇÃO ---
+            } catch (error) {
+                console.error('Erro no submit da avaliação:', error);
+                alert('Erro de conexão ao enviar avaliação.');
+            }
+        });
+    } else {
+        // --- USUÁRIO DESLOGADO (ou é um psicólogo) ---
+        const loginWall = document.getElementById('login-to-review-cta');
+        if (loginWall) {
+            loginWall.style.display = 'block';
+
+            const loginButton = document.getElementById('login-wall-btn');
+            if (loginButton) {
+                const redirectUrl = encodeURIComponent(window.location.href);
+                loginButton.href = `login.html?return_url=${redirectUrl}`;
             }
         }
     }
+}
     const tabButtons = document.querySelectorAll('.tabs-nav .tab-link');
     const tabContents = document.querySelectorAll('.tab-content');
 

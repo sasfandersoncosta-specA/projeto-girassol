@@ -108,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (response.ok) {
                     showMessage('Login bem-sucedido! Redirecionando...', false);
                     localStorage.setItem('girassol_token', data.token);
+                    localStorage.setItem('girassol_role', role); // <-- LINHA ADICIONADA
 
                     // --- INÍCIO DA CORREÇÃO ---
                     // 1. Procura por um parâmetro 'return_url' na URL
