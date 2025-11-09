@@ -321,10 +321,6 @@ document.addEventListener('DOMContentLoaded', function() {
             form.elements['agenda_online_url'].value = data.agenda_online_url || '';
             form.elements['bio'].value = data.bio || '';
             form.elements['valor_sessao_numero'].value = data.valor_sessao_numero || '';
-            // NOVO: Popula campos de redes sociais
-            form.elements['linkedinUrl'].value = data.linkedinUrl || '';
-            form.elements['instagramUrl'].value = data.instagramUrl || '';
-            form.elements['websiteUrl'].value = data.websiteUrl || '';
     
             // Lógica para o link do perfil público
             if (data.slug && viewPublicProfileLink) {
@@ -351,10 +347,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 bio: form.elements['bio'].value,
                 valor_sessao_numero: parseFloat(form.elements['valor_sessao_numero'].value) || null,
                 temas_atuacao: getMultiselectValues('temas_atuacao_multiselect'),
-                // NOVO: Coleta dados de redes sociais
-                linkedinUrl: form.elements['linkedinUrl'].value,
-                instagramUrl: form.elements['instagramUrl'].value,
-                websiteUrl: form.elements['websiteUrl'].value,
                 abordagens_tecnicas: getMultiselectValues('abordagens_tecnicas_multiselect'),
                 genero_identidade: getMultiselectValues('genero_identidade_multiselect')[0] || null,
                 praticas_vivencias: getMultiselectValues('praticas_vivencias_multiselect'),

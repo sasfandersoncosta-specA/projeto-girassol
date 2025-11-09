@@ -196,6 +196,10 @@
 
                 // --- LÓGICA DE IDADE (CORRIGIDA E NO LUGAR CERTO) ---
                 if (currentQuestion.id === 'idade' && target.dataset.value === 'Menor de 18 anos') {
+                    
+                    // LINHA ADICIONADA: Salva o nome para a próxima página
+                    sessionStorage.setItem('jano_user_name', userAnswers.nome || ''); 
+                    
                     // Em vez de ir para o slide, redireciona para a página
                     window.location.href = 'menor_de_idade.html';
                 } else {
