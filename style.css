@@ -3742,3 +3742,22 @@ label { font-weight: 700; }
 #psi-social-links {
     display: contents; /* Faz os 'a' tags de dentro agirem como filhos do flex */
 }
+/* =============================================================
+   PERFIL PÚBLICO: SELO DE VERIFICAÇÃO
+   ============================================================= */
+
+.verification-badge {
+    display: inline-block;
+    background-color: var(--verde-escuro);
+    color: var(--branco-puro);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    line-height: 25px; /* Alinha o '✓' verticalmente */
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-left: 10px;
+    vertical-align: middle; /* Alinha o selo com o texto */
+    transform: translateY(-2px); /* Ajuste fino */
+}

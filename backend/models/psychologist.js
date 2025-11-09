@@ -106,19 +106,24 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true
     },
     linkedin_url: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        allowNull: true
     },
     instagram_url: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        allowNull: true
     },
     facebook_url: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        allowNull: true
     },
     tiktok_url: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        allowNull: true
     },
     x_url: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        allowNull: true
     }
   }, {
     sequelize,

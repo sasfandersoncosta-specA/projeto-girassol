@@ -35,7 +35,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (el) el.textContent = text;
         };
 
-        setText('psi-nome', profile.nome || 'Nome não disponível');
+        // 2. Preenche o Cabeçalho do Perfil (Info)
+        const nomeElement = document.getElementById('psi-nome');
+        nomeElement.textContent = profile.nome || 'Nome não disponível'; // Define o nome
+
+        // REQ 1: Adiciona o Selo de Verificado
+        if (profile.status === 'active') {
+            const badge = document.createElement('span');
+            badge.className = 'verification-badge';
+            badge.title = 'Perfil Verificado';
+            badge.innerHTML = '✓';
+            nomeElement.appendChild(badge);
+        }
         setText('psi-crp', profile.crp ? `CRP: ${profile.crp}` : 'CRP não informado');
 
         const foto = document.getElementById('psi-foto');
