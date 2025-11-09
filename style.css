@@ -3626,3 +3626,16 @@ label { font-weight: 700; }
     /* O .login-wall-box (container pai) já tem 'text-align: center',
        o que vai centralizar este único botão perfeitamente. */
 }
+
+/* =============================================================
+   CORREÇÃO DE LAYOUT: Botão de Login no Perfil Público
+   ============================================================= */
+
+/* * Alvo: O botão dentro da caixa de 'login wall'.
+ * Ação: Força a largura a ser automática (auto) e o display
+ * a ser inline-block, para que o 'text-align: center' do pai funcione.
+*/
+.login-wall-actions .btn {
+    width: auto;
+    display: inline-block; 
+}

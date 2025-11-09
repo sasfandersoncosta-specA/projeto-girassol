@@ -107,9 +107,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 4. Tratamento da Resposta
                 if (response.ok) {
                     showMessage('Login bem-sucedido! Redirecionando...', false);
-                    localStorage.setItem('girassol_token', data.token); 
+                    localStorage.setItem('girassol_token', data.token);
+
+                    // --- INÍCIO DA CORREÇÃO ---
+                    // 1. Procura por um parâmetro 'return_url' na URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const returnUrl = urlParams.get('return_url');
+                    // --- FIM DA CORREÇÃO ---
 
                     setTimeout(() => {
+                        // --- CORREÇÃO 2: Verifica o 'returnUrl' PRIMEIRO ---
+                        if (returnUrl) {
+                            window.location.href = returnUrl; // Volta para a página de perfil
+                            return;
+                        }
+                        // --- FIM DA CORREÇÃO 2 ---
+
                         if (role === 'psychologist') {
                             window.location.href = window.location.origin + dashboardPath;
                             return;

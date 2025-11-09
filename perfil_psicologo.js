@@ -225,6 +225,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             const loginWall = document.getElementById('login-to-review-cta');
             if (loginWall) {
                 loginWall.style.display = 'block';
+
+                // --- INÍCIO DA CORREÇÃO ---
+                // Pega o botão de login dentro do "wall"
+                const loginButton = document.getElementById('login-wall-btn');
+                if (loginButton) {
+                    // Passa a URL atual (ex: /perfil.html?id=4) como um parâmetro
+                    const redirectUrl = encodeURIComponent(window.location.href);
+                    loginButton.href = `login.html?return_url=${redirectUrl}`;
+                }
+                // --- FIM DA CORREÇÃO ---
             }
         }
     }
