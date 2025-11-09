@@ -1,4 +1,4 @@
-// Arquivo: backend/routes/psychologistRoutes.js (VERSÃO 100% CORRIGIDA)
+// Arquivo: backend/routes/psychologistRoutes.js (VERSÃO CORRIGIDA)
 
 const express = require('express');
 const router = express.Router();
@@ -13,15 +13,10 @@ router.post('/register', psychologistController.registerPsychologist);
 router.post('/login', psychologistController.loginPsychologist);
 router.post('/check-demand', psychologistController.checkDemand);
 router.post('/add-to-waitlist', psychologistController.addToWaitlist);
-
-// Rota pública para a vitrine (home page)
 router.get('/showcase', psychologistController.getShowcasePsychologists);
-
-// Rotas públicas para visualizar perfis (slug e id)
 router.get('/slug/:slug', psychologistController.getProfileBySlug);
-// CORREÇÃO: Chamando a função correta 'getPsychologistProfile' (sem o 'ById')
-router.get('/:id', psychologistController.getPsychologistProfile); 
 router.get('/:id/reviews', psychologistController.getPsychologistReviews);
+// A rota /:id é movida para o final para não conflitar com /me
 
 // ===============================================
 // ROTAS PROTEGIDAS (Exigem login)
@@ -29,7 +24,7 @@ router.get('/:id/reviews', psychologistController.getPsychologistReviews);
 router.use(protect); // Aplica o middleware a TODAS as rotas abaixo
 
 // Rotas "ME" (do usuário logado)
-router.get('/me', psychologistController.getAuthenticatedPsychologistProfile); // Nome correto da sua função
+router.get('/me', psychologistController.getAuthenticatedPsychologistProfile);
 router.put('/me', psychologistController.updatePsychologistProfile);
 router.put('/me/photo', uploadProfilePhoto.single('profilePhoto'), psychologistController.updateProfilePhoto);
 router.put('/me/crp-document', uploadCrpDocument.single('crpDocument'), psychologistController.uploadCrpDocument);
@@ -41,5 +36,11 @@ router.delete('/me', psychologistController.deletePsychologistAccount);
 router.get('/matches', psychologistController.getPatientMatches);
 router.get('/waiting-list', psychologistController.getWaitingList);
 router.post('/waiting-list/invite', psychologistController.inviteFromWaitlist);
+
+// ===============================================
+// ROTA PÚBLICA GENÉRICA (DEVE SER A ÚLTIMA DE TODAS)
+// ===============================================
+// Esta rota captura qualquer coisa que não foi pega acima (ex: /1, /23)
+router.get('/:id', psychologistController.getPsychologistProfile);
 
 module.exports = router;
