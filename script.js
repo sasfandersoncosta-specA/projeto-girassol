@@ -198,7 +198,12 @@ document.addEventListener("DOMContentLoaded", () => {
         carregarComponente('/components/header.html', 'header-placeholder'), 
         carregarComponente('/components/footer.html', 'footer-placeholder') 
     ]).then(() => {
-        inicializarScripts(); if (document.getElementById('vitrine-terapeutas')) { carregarVitrineTerapeutas(); }
+        inicializarScripts(); 
+        if (document.getElementById('vitrine-terapeutas')) { 
+            carregarVitrineTerapeutas(); 
+        }
+        // Se a função de inicialização da página de perguntas existir, chame-a.
+        if (typeof inicializarPaginaPerguntas === 'function') { inicializarPaginaPerguntas(); }
         
     });
 });
