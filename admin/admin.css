@@ -2143,3 +2143,9 @@ body.pagina-dashboard {
 .profile-photo-label:hover .profile-photo-preview {
     filter: brightness(0.8); /* Escurece a imagem no hover para indicar ação */
 }
+/* --- CORREÇÃO (Q&A): Quebra de Linha em Texto Vazado --- */
+.lista-moderacao .avaliacao-texto {
+    white-space: normal;      /* Permite que o texto quebre a linha */
+    word-break: break-word;   /* Força a quebra de palavras muito longas */
+    overflow-wrap: break-word;/* Garante a quebra em todos os navegadores */
+}

@@ -131,7 +131,7 @@ exports.createAnswer = async (req, res) => {
 };
 
 // =====================================================================
-// FUNÇÕES DE MODERAÇÃO (QUE ESTÃO FALTANDO)
+// FUNÇÕES DE MODERAÇÃO (QUE ESTAVAM FALTANDO)
 // =====================================================================
 
 /**
