@@ -44,7 +44,6 @@ router.delete('/patients/:id', adminController.deletePatient);
 router.get('/reviews', adminController.getAllReviews);
 // Novas rotas para moderação de avaliações
 router.get('/reviews/pending', adminController.getPendingReviews);
-router.put('/reviews/:id/moderate', adminController.moderateReview);
 
 
 // Rota para buscar os logs do sistema
@@ -77,8 +76,6 @@ router.get('/charts/new-users', adminController.getNewUsersPerMonth);
 
 // Rota para dados financeiros
 router.get('/financials', adminController.getFinancials);
-// Rota para moderar uma avaliação específica
-router.put('/reviews/:reviewId/moderate', reviewController.moderateReview);
 
 // --- ROTAS DE MODERAÇÃO DE PERGUNTAS (Q&A) ---
 
