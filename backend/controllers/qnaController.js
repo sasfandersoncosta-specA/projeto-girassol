@@ -171,10 +171,6 @@ exports.moderateQuestion = async (req, res) => {
 
         await question.update({ status: status });
 
-        // TODO: Se 'approved', disparar notificação para os psicólogos.
-        // (A lógica de notificação no createQuestion já avisa,
-        // mas uma segunda notificação aqui pode ser útil)
-
         res.status(200).json({ message: `Pergunta ${status === 'approved' ? 'aprovada' : 'rejeitada'}.`, question });
     
     } catch (error) {
