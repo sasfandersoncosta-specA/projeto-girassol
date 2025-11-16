@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
+const reviewController = require('../controllers/reviewController');
+const qnaController = require('../controllers/qnaController'); // Importa o controlador de Q&A
 const { protect, admin } = require('../middleware/authMiddleware'); // Corrigido para importar ambos
 const upload = require('../config/upload'); // Importa a configuração de upload
 
@@ -75,5 +77,16 @@ router.get('/charts/new-users', adminController.getNewUsersPerMonth);
 
 // Rota para dados financeiros
 router.get('/financials', adminController.getFinancials);
+// Rota para moderar uma avaliação específica
+router.put('/reviews/:reviewId/moderate', reviewController.moderateReview);
+
+// --- ROTAS DE MODERAÇÃO DE PERGUNTAS (Q&A) ---
+
+// Rota para buscar todas as perguntas com status 'pending_review'
+router.get('/qna/pending', qnaController.getPendingQuestions);
+
+// Rota para moderar (aprovar/rejeitar) uma pergunta específica
+router.put('/qna/:questionId/moderate', qnaController.moderateQuestion);
+
 
 module.exports = router;

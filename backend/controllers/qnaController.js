@@ -131,3 +131,50 @@ exports.createAnswer = async (req, res) => {
         res.status(500).json({ message: 'Erro interno do servidor ao processar a resposta.' });
     }
 };
+
+/**
+ * [ADMIN] Busca todas as perguntas pendentes de revisão.
+ */
+exports.getPendingQuestions = async (req, res) => {
+    try {
+        const pendingQuestions = await Question.findAll({
+            where: { status: 'pending_review' },
+            order: [['createdAt', 'ASC']], // Da mais antiga para a mais nova
+        });
+        res.status(200).json(pendingQuestions);
+    } catch (error) {
+        console.error("Erro ao buscar perguntas pendentes:", error);
+        res.status(500).json({ message: 'Erro interno do servidor.' });
+    }
+};
+
+/**
+ * [ADMIN] Modera uma pergunta, atualizando seu status.
+ */
+exports.moderateQuestion = async (req, res) => {
+    const { questionId } = req.params;
+    const { status } = req.body; // 'approved' ou 'rejected'
+
+    if (!['approved', 'rejected'].includes(status)) {
+        return res.status(400).json({ message: 'Status de moderação inválido.' });
+    }
+
+    try {
+        const question = await Question.findByPk(questionId);
+
+        if (!question) {
+            return res.status(404).json({ message: 'Pergunta não encontrada.' });
+        }
+
+        if (question.status !== 'pending_review') {
+            return res.status(400).json({ message: 'Esta pergunta já foi moderada.' });
+        }
+
+        await question.update({ status });
+
+        res.status(200).json({ message: `Pergunta ${status === 'approved' ? 'aprovada' : 'rejeitada'} com sucesso.` });
+    } catch (error) {
+        console.error("Erro ao moderar pergunta:", error);
+        res.status(500).json({ message: 'Erro interno do servidor.' });
+    }
+};

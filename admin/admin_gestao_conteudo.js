@@ -6,7 +6,12 @@ window.initializePage = function() {
     const loadingState = document.getElementById('reviews-loading-state');
     const emptyState = document.getElementById('reviews-empty-state');
 
-    if (!reviewsList || !token) {
+    // Seletores para a nova seção de Q&A
+    const questionsList = document.getElementById('pending-questions-list');
+    const questionsLoadingState = document.getElementById('questions-loading-state');
+    const questionsEmptyState = document.getElementById('questions-empty-state');
+
+    if (!token) {
         console.error("Elementos essenciais ou token não encontrados.");
         return;
     }
@@ -117,6 +122,113 @@ window.initializePage = function() {
         }
     });
 
+    // --- LÓGICA PARA MODERAÇÃO DE PERGUNTAS (Q&A) ---
+
+    /**
+     * Renderiza um item de pergunta na lista de moderação.
+     * @param {object} question - O objeto da pergunta.
+     */
+    function renderQuestionItem(question) {
+        const listItem = document.createElement('li');
+        listItem.setAttribute('data-question-id', question.id);
+
+        listItem.innerHTML = `
+            <div class="avaliacao-info">
+                <span class="avaliacao-autor">Pergunta Anônima</span>
+                <span class="avaliacao-data">${new Date(question.createdAt).toLocaleDateString('pt-BR')}</span>
+            </div>
+            <p class="avaliacao-texto"><strong>${question.title}</strong></p>
+            <p class="avaliacao-texto" style="margin-top: 4px;">${question.content}</p>
+            <div class="moderacao-acoes">
+                <button class="btn-tabela btn-aprovar" data-action="approved">Aprovar</button>
+                <button class="btn-tabela btn-reprovar" data-action="rejected">Rejeitar</button>
+            </div>
+        `;
+        return listItem;
+    }
+
+    /**
+     * Busca as perguntas pendentes da API e as renderiza.
+     */
+    async function fetchPendingQuestions() {
+        if (!questionsList) return;
+        questionsLoadingState.style.display = 'block';
+        questionsEmptyState.style.display = 'none';
+        questionsList.innerHTML = '';
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/admin/qna/pending`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!response.ok) throw new Error('Falha ao buscar perguntas pendentes.');
+
+            const questions = await response.json();
+            questionsLoadingState.style.display = 'none';
+ 
+            if (questions.length === 0) {
+                questionsEmptyState.style.display = 'block';
+            } else {
+                questions.forEach(question => {
+                    questionsList.appendChild(renderQuestionItem(question));
+                });
+            }
+
+        } catch (error) {
+            questionsLoadingState.style.display = 'none';
+            questionsEmptyState.textContent = `Erro ao carregar perguntas: ${error.message}`;
+            questionsEmptyState.style.display = 'block';
+        }
+    }
+
+    /**
+     * Lida com o clique nos botões de moderação de perguntas.
+     * @param {string} questionId - O ID da pergunta.
+     * @param {string} action - 'approved' ou 'rejected'.
+     */
+    async function handleQuestionModeration(questionId, action) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/admin/qna/${questionId}/moderate`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ status: action })
+            });
+
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message);
+
+            const itemToRemove = questionsList.querySelector(`[data-question-id="${questionId}"]`);
+            if (itemToRemove) {
+                itemToRemove.style.transition = 'opacity 0.5s, transform 0.5s';
+                itemToRemove.style.opacity = '0';
+                itemToRemove.style.transform = 'translateX(20px)';
+                setTimeout(() => {
+                    itemToRemove.remove();
+                    if (questionsList.children.length === 0) {
+                        questionsEmptyState.style.display = 'block';
+                    }
+                }, 500);
+            }
+
+        } catch (error) {
+            alert(`Erro ao moderar pergunta: ${error.message}`);
+        }
+    }
+
+    if (questionsList) {
+        questionsList.addEventListener('click', (e) => {
+            if (e.target.matches('.btn-aprovar, .btn-reprovar')) {
+                const questionItem = e.target.closest('li');
+                const questionId = questionItem.dataset.questionId;
+                const action = e.target.dataset.action;
+                handleQuestionModeration(questionId, action);
+            }
+        });
+    }
+
     // Inicia o carregamento dos dados
     function initializeStaticPageManagement() {
         const editButtons = document.querySelectorAll('.widget .btn-tabela');
@@ -134,5 +246,6 @@ window.initializePage = function() {
     }
 
     fetchPendingReviews();
+    fetchPendingQuestions();
     initializeStaticPageManagement(); // Adiciona a inicialização dos botões de edição
 };
