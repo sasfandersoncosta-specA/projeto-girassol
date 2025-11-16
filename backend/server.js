@@ -18,7 +18,6 @@ const demandRoutes = require('./routes/demandRoutes'); // Adicionado para salvar
 const usuarioRoutes = require('./routes/usuarioRoutes'); // Adicionado conforme solicitado
 const adminRoutes = require('./routes/adminRoutes'); // Adicionado para o dashboard
 const reviewRoutes = require('./routes/reviewRoutes'); //
-const qnaRoutes = require('./routes/qnaRoutes'); // Adicionado para Perguntas e Respostas
 const psychologistController = require('./controllers/psychologistController');
 const seedTestData = require('./controllers/seed_test_data'); // Caminho corrigido
 
@@ -44,7 +43,6 @@ app.use('/api/demand', demandRoutes); // Adicionado
 app.use('/api/usuarios', usuarioRoutes); // Adicionado conforme solicitado
 app.use('/api/admin', adminRoutes); // Adicionado
 app.use('/api/reviews', reviewRoutes); // Adicionado
-app.use('/api/qna', qnaRoutes); // Adicionado
 
 // --- SERVIR ARQUIVOS ESTÁTICOS (FRONT-END) ---
 // Esta linha deve vir DEPOIS das rotas da API.
