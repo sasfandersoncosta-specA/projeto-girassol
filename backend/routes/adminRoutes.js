@@ -85,8 +85,8 @@ router.put('/reviews/:reviewId/moderate', reviewController.moderateReview);
 // Rota para buscar todas as perguntas com status 'pending_review'
 router.get('/qna/pending', qnaController.getPendingQuestions);
 
-// Rota para moderar (aprovar/rejeitar) uma pergunta específica
-router.put('/qna/:questionId/moderate', qnaController.moderateQuestion);
+// Rota para moderar (aprova/rejeita) uma pergunta específica
+// router.put('/qna/:questionId/moderate', qnaController.moderateQuestion); // <-- TEMPORARIAMENTE DESATIVADA
 
 
 module.exports = router;
