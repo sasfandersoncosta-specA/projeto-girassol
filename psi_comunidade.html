@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comunidade Q&A - Dashboard Jano</title>
+    <link rel="icon" href="/assets/images/favicon.png?v=2" type="image/png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/style.css?v=1.9">
+    <link rel="stylesheet" href="/psi/css/dashboard_base.css?v=1.9">
+    <style>
+        /* Estilos específicos para a página de Q&A */
+        .question-card {
+            background-color: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+        .question-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .question-title {
+            font-family: 'New Kansas', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--verde-escuro);
+            margin-bottom: 8px;
+        }
+        .question-content {
+            color: #4b5563;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        .question-meta {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        .answer-form-container {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .answer-form-container textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: vertical;
+        }
+        .answer-form-container textarea:focus {
+            outline: none;
+            border-color: var(--verde-escuro);
+            box-shadow: 0 0 0 2px rgba(27, 67, 50, 0.2);
+        }
+        .char-counter {
+            font-size: 0.875rem;
+            color: #6b7280;
+            text-align: right;
+            margin-top: 4px;
+        }
+        .btn-responder {
+            background-color: var(--verde-escuro);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn-responder:hover {
+            background-color: #123524;
+        }
+        .btn-responder:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+        .already-answered-by-you {
+            background-color: #f0fdf4; /* Verde bem claro */
+            border-left: 4px solid #22c55e; /* Verde */
+        }
+        .answered-by-you-badge {
+            display: inline-block;
+            background-color: #22c55e;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-left: 12px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <div class="dashboard-grid">
+        <!-- O menu lateral será carregado aqui -->
+        <div id="dashboard-sidebar-placeholder"></div>
+
+        <main class="dashboard-main">
+            <!-- O header do dashboard será carregado aqui -->
+            <div id="dashboard-header-placeholder"></div>
+
+            <div class="dashboard-content">
+                <div class="content-header">
+                    <h1 class="text-3xl font-bold text-gray-800">Comunidade Q&A</h1>
+                    <p class="text-gray-600 mt-1">Responda às dúvidas da comunidade e fortaleça sua presença na plataforma.</p>
+                </div>
+
+                <!-- Filtros (funcionalidade futura) -->
+                <div class="flex items-center gap-4 mb-6">
+                    <button class="px-4 py-2 text-sm font-semibold text-white bg-verde-escuro rounded-full">Todas</button>
+                    <button class="px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-200 rounded-full">Não respondidas</button>
+                </div>
+
+                <!-- Lista de Perguntas -->
+                <div id="questions-list">
+                    <!-- As perguntas serão carregadas aqui via JS -->
+                    <p class="text-center text-gray-500 p-8">Carregando perguntas...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Template para um card de pergunta -->
+    <template id="question-template">
+        <div class="question-card">
+            <h2 class="question-title data-question-title">Título da Pergunta</h2>
+            <p class="question-content data-question-content">Conteúdo da pergunta...</p>
+            <div class="flex justify-between items-center">
+                <span class="question-meta">Perguntado por: <strong>Anônimo</strong></span>
+                <button class="btn-responder btn-toggle-answer-form">Responder</button>
+            </div>
+            <div class="answer-form-container hidden"></div>
+        </div>
+    </template>
+
+    <!-- Template para o formulário de resposta -->
+    <template id="answer-form-template">
+        <form class="answer-form">
+            <textarea class="answer-textarea" placeholder="Escreva sua resposta aqui..." required minlength="20"></textarea>
+            <div class="flex justify-between items-center mt-2">
+                <span class="char-counter">0/20 caracteres mínimos</span>
+                <button type="submit" class="btn-responder btn-submit-answer" disabled>Enviar Resposta</button>
+            </div>
+        </form>
+    </template>
+
+    <script src="/config.js?v=1.9"></script>
+    <script src="/psi/js/dashboard_loader.js?v=1.9"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('girassol_token');
+            const psychologistId = JSON.parse(atob(token.split('.')[1])).id;
+
+            const questionsList = document.getElementById('questions-list');
+            const questionTemplate = document.getElementById('question-template');
+            const answerFormTemplate = document.getElementById('answer-form-template');
+
+            async function fetchAndRenderQuestions() {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/qna/questions`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!response.ok) throw new Error('Falha ao buscar perguntas.');
+
+                    const questions = await response.json();
+                    questionsList.innerHTML = ''; // Limpa o container
+
+                    if (questions.length === 0) {
+                        questionsList.innerHTML = '<p class="text-center text-gray-500 p-8">Nenhuma pergunta disponível no momento.</p>';
+                        return;
+                    }
+
+                    questions.forEach(q => {
+                        const card = questionTemplate.content.cloneNode(true);
+                        const questionCardElement = card.querySelector('.question-card');
+                        
+                        card.querySelector('.data-question-title').textContent = q.title;
+                        card.querySelector('.data-question-content').textContent = q.content;
+
+                        const hasAnswered = q.answers.some(ans => ans.psychologist.id === psychologistId);
+                        const toggleBtn = card.querySelector('.btn-toggle-answer-form');
+
+                        if (hasAnswered) {
+                            toggleBtn.textContent = 'Você já respondeu';
+                            toggleBtn.disabled = true;
+                            questionCardElement.classList.add('already-answered-by-you');
+                            card.querySelector('.question-title').innerHTML += '<span class="answered-by-you-badge">Respondida</span>';
+                        }
+
+                        toggleBtn.addEventListener('click', () => {
+                            const formContainer = card.querySelector('.answer-form-container');
+                            const isHidden = formContainer.classList.contains('hidden');
+
+                            if (isHidden) {
+                                const formNode = answerFormTemplate.content.cloneNode(true);
+                                formContainer.innerHTML = ''; // Limpa antes de adicionar
+                                formContainer.appendChild(formNode);
+                                setupForm(formContainer.querySelector('.answer-form'), q.id);
+                                formContainer.classList.remove('hidden');
+                                toggleBtn.textContent = 'Fechar';
+                            } else {
+                                formContainer.innerHTML = '';
+                                formContainer.classList.add('hidden');
+                                toggleBtn.textContent = 'Responder';
+                            }
+                        });
+
+                        questionsList.appendChild(card);
+                    });
+
+                } catch (error) {
+                    console.error('Erro:', error);
+                    questionsList.innerHTML = '<p class="text-center text-red-500 p-8">Ocorreu um erro ao carregar as perguntas.</p>';
+                }
+            }
+
+            function setupForm(formElement, questionId) {
+                const textarea = formElement.querySelector('.answer-textarea');
+                const charCounter = formElement.querySelector('.char-counter');
+                const submitBtn = formElement.querySelector('.btn-submit-answer');
+                const minLength = 20;
+
+                textarea.addEventListener('input', () => {
+                    const count = textarea.value.length;
+                    charCounter.textContent = `${count}/${minLength} caracteres mínimos`;
+                    submitBtn.disabled = count < minLength;
+                });
+
+                formElement.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Enviando...';
+
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/api/qna/questions/${questionId}/answers`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({ content: textarea.value })
+                        });
+
+                        if (!response.ok) {
+                            const errData = await response.json();
+                            throw new Error(errData.message || 'Falha ao enviar resposta.');
+                        }
+                        
+                        // Recarrega as perguntas para mostrar o novo status
+                        fetchAndRenderQuestions();
+
+                    } catch (error) {
+                        console.error('Erro ao enviar resposta:', error);
+                        alert(`Erro: ${error.message}`);
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Enviar Resposta';
+                    }
+                });
+            }
+
+            fetchAndRenderQuestions();
+        });
+    </script>
+</body>
+</html>
