@@ -21,11 +21,7 @@ exports.createQuestion = async (req, res) => {
             status: 'pending_review', // Todas as perguntas começam pendentes de revisão
         });
 
-        // --- NOVA LÓGICA ---
-        // Envia a pergunta para a caixa de entrada dos psicólogos do plano Ecossistema.
-        // NOTA: A pergunta ainda está como 'pending_review'. A notificação é para que eles
-        // saibam que há uma nova pergunta na fila para ser respondida assim que aprovada.
-        // Uma melhoria futura seria notificar apenas após a aprovação.
+        // --- LÓGICA DE NOTIFICAÇÃO (COMO ESTAVA) ---
         const targetPlan = 'ecossistema';
         const psychologistsToNotify = await Psychologist.findAll({ where: { plano: targetPlan } });
 
@@ -33,7 +29,6 @@ exports.createQuestion = async (req, res) => {
             const messagePromises = psychologistsToNotify.map(psi => {
                 return Message.create({
                     psychologistId: psi.id, // Destinatário
-                    // senderId pode ser null para mensagens do sistema
                     subject: 'Nova pergunta da comunidade para você',
                     content: `Uma nova pergunta foi enviada por um usuário anônimo e está aguardando moderação. \n\nPergunta: "${content}"\n\nAssim que for aprovada, você poderá respondê-la no painel de Perguntas & Respostas.`,
                     isRead: false,
@@ -98,7 +93,9 @@ exports.getApprovedQuestions = async (req, res) => {
 exports.createAnswer = async (req, res) => {
     const { questionId } = req.params;
     const { content } = req.body;
-    const psychologistId = req.user.id; // Assumindo que o ID do psicólogo vem do middleware de autenticação
+    
+    // O ID vem do middleware 'protect' que anexa o 'psychologist' ao 'req'
+    const psychologistId = req.psychologist.id; 
 
     if (!content || content.length < 20) {
         return res.status(400).json({ message: 'O conteúdo da resposta deve ter pelo menos 20 caracteres.' });
@@ -110,19 +107,20 @@ exports.createAnswer = async (req, res) => {
             return res.status(404).json({ message: 'Pergunta não encontrada.' });
         }
 
-        // Opcional: Verificar se a pergunta pode ser respondida (status 'approved')
         if (question.status !== 'approved' && question.status !== 'answered') {
             return res.status(403).json({ message: 'Esta pergunta não está aberta para respostas no momento.' });
         }
 
         const newAnswer = await Answer.create({
             content,
-            questionId,
+            questionId: parseInt(questionId, 10), // Garante que é um número
             psychologistId,
         });
 
         // Atualiza o status da pergunta para 'answered'
-        await question.update({ status: 'answered' });
+        if (question.status !== 'answered') {
+             await question.update({ status: 'answered' });
+        }
 
         res.status(201).json({ message: 'Resposta enviada com sucesso!', answer: newAnswer });
 
@@ -132,14 +130,19 @@ exports.createAnswer = async (req, res) => {
     }
 };
 
+// =====================================================================
+// FUNÇÕES DE MODERAÇÃO (ESTAVAM FALTANDO)
+// =====================================================================
+
 /**
- * [ADMIN] Busca todas as perguntas pendentes de revisão.
+ * Rota: GET /api/admin/qna/pending
+ * Descrição: (Admin) Busca todas as perguntas com status 'pending_review'.
  */
 exports.getPendingQuestions = async (req, res) => {
     try {
         const pendingQuestions = await Question.findAll({
             where: { status: 'pending_review' },
-            order: [['createdAt', 'ASC']], // Da mais antiga para a mais nova
+            order: [['createdAt', 'ASC']] // Mais antigas primeiro
         });
         res.status(200).json(pendingQuestions);
     } catch (error) {
@@ -149,30 +152,31 @@ exports.getPendingQuestions = async (req, res) => {
 };
 
 /**
- * [ADMIN] Modera uma pergunta, atualizando seu status.
+ * Rota: PUT /api/admin/qna/:questionId/moderate
+ * Descrição: (Admin) Modera uma pergunta (aprova ou rejeita).
  */
 exports.moderateQuestion = async (req, res) => {
     const { questionId } = req.params;
     const { status } = req.body; // 'approved' ou 'rejected'
 
     if (!['approved', 'rejected'].includes(status)) {
-        return res.status(400).json({ message: 'Status de moderação inválido.' });
+        return res.status(400).json({ message: 'Status inválido. Use "approved" ou "rejected".' });
     }
 
     try {
         const question = await Question.findByPk(questionId);
-
         if (!question) {
             return res.status(404).json({ message: 'Pergunta não encontrada.' });
         }
 
-        if (question.status !== 'pending_review') {
-            return res.status(400).json({ message: 'Esta pergunta já foi moderada.' });
-        }
+        await question.update({ status: status });
 
-        await question.update({ status });
+        // TODO: Se 'approved', disparar notificação para os psicólogos.
+        // (A lógica de notificação no createQuestion já avisa,
+        // mas uma segunda notificação aqui pode ser útil)
 
-        res.status(200).json({ message: `Pergunta ${status === 'approved' ? 'aprovada' : 'rejeitada'} com sucesso.` });
+        res.status(200).json({ message: `Pergunta ${status === 'approved' ? 'aprovada' : 'rejeitada'}.`, question });
+    
     } catch (error) {
         console.error("Erro ao moderar pergunta:", error);
         res.status(500).json({ message: 'Erro interno do servidor.' });
