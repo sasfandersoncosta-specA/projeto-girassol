@@ -537,6 +537,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     inicializarLogicaDaCaixaDeEntrada();
                 } else if (pageUrl.includes('psi_lista_de_espera.html')) {
                     inicializarListaDeEspera();
+                } else if (pageUrl.includes('psi_comunidade.html')) {
+                    inicializarComunidadeQNA();
                 }
                 // (Adicione outras chamadas 'else if' aqui para novas páginas)
 
@@ -548,8 +550,158 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error(error);
             });
     }
+    // =====================================================================
+// Lógica da Página: COMUNIDADE Q&A
+// =====================================================================
+async function inicializarComunidadeQNA() {
+    
+    // --- Seletores ---
+    const listContainer = document.getElementById('qna-list-container');
+    const cardTemplate = document.getElementById('qna-card-template-psi');
+    const answerTemplate = document.getElementById('qna-existing-answer-template');
+    
+    const modal = document.getElementById('qna-answer-modal');
+    const modalForm = document.getElementById('qna-answer-form');
+    const modalTextarea = document.getElementById('qna-answer-textarea');
+    const modalSubmitBtn = document.getElementById('qna-submit-answer');
+    const modalCounter = document.getElementById('qna-char-counter');
+    const minLength = 50; // Mínimo para respostas
+    
+    if (!listContainer || !cardTemplate || !answerTemplate || !modal) {
+        console.error('Elementos essenciais do Q&A não encontrados.');
+        return;
+    }
+    
+    const loggedInPsiId = psychologistData.id; // psychologistData é global no dashboard.js
 
+    // --- 1. Função para Renderizar as Perguntas ---
+    function renderQuestions(questions) {
+        listContainer.innerHTML = ''; // Limpa o loader
 
+        if (questions.length === 0) {
+            listContainer.innerHTML = '<div class="card"><p>Nenhuma pergunta aguardando resposta no momento. Bom trabalho!</p></div>';
+            return;
+        }
+
+        questions.forEach(question => {
+            const card = cardTemplate.content.cloneNode(true);
+            
+            // Popula dados da pergunta
+            card.querySelector('.qna-question-title').textContent = question.title;
+            card.querySelector('.qna-question-content').textContent = question.content;
+            
+            const answersList = card.querySelector('.existing-answers-list');
+            const respondButton = card.querySelector('.btn-responder');
+            const respondedBadge = card.querySelector('.badge-respondido');
+            
+            let hasPsiAnswered = false;
+
+            // Popula respostas existentes
+            if (question.answers && question.answers.length > 0) {
+                question.answers.forEach(answer => {
+                    const answerItem = answerTemplate.content.cloneNode(true);
+                    answerItem.querySelector('.answer-psi-name').textContent = answer.psychologist.nome;
+                    answerItem.querySelector('.answer-psi-text').textContent = answer.content;
+                    answerItem.querySelector('.answer-psi-photo').src = answer.psychologist.fotoUrl || 'https://placehold.co/40x40';
+                    answersList.appendChild(answerItem);
+
+                    // Verifica se o 'psi' logado já respondeu
+                    if (answer.psychologist.id === loggedInPsiId) {
+                        hasPsiAnswered = true;
+                    }
+                });
+            } else {
+                answersList.remove(); // Remove a área de respostas se não houver nenhuma
+            }
+
+            // Controla a visibilidade do botão "Responder"
+            if (hasPsiAnswered) {
+                respondButton.classList.add('hidden');
+                respondedBadge.classList.remove('hidden');
+            } else {
+                respondButton.classList.remove('hidden');
+                respondedBadge.classList.add('hidden');
+            }
+
+            // Adiciona evento ao botão "Responder"
+            respondButton.addEventListener('click', () => {
+                modal.dataset.questionId = question.id; // Armazena o ID da pergunta no modal
+                modal.classList.add('is-visible');
+            });
+            
+            listContainer.appendChild(card);
+        });
+    }
+
+    // --- 2. Função para Carregar Perguntas da API ---
+    async function loadQuestions() {
+        try {
+            const response = await apiFetch(`${API_BASE_URL}/api/qna/questions`);
+            if (!response.ok) throw new Error('Falha ao buscar perguntas.');
+            const questions = await response.json();
+            renderQuestions(questions);
+        } catch (error) {
+            console.error(error);
+            listContainer.innerHTML = '<div class="card"><p>Erro ao carregar as perguntas. Tente recarregar a página.</p></div>';
+        }
+    }
+
+    // --- 3. Lógica do Modal de Resposta ---
+    
+    // Fechar modal
+    modal.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal-overlay') || e.target.classList.contains('modal-close') || e.target.classList.contains('modal-cancel')) {
+            modal.classList.remove('is-visible');
+            modalTextarea.value = ''; // Limpa o texto
+            modalSubmitBtn.disabled = true; // Desabilita o botão
+        }
+    });
+
+    // Contador de caracteres do modal
+    modalTextarea.addEventListener('input', () => {
+        const count = modalTextarea.value.length;
+        modalCounter.textContent = `${count}/${minLength} caracteres`;
+        modalSubmitBtn.disabled = count < minLength;
+    });
+
+    // Envio do formulário (submit da resposta)
+    modalForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const questionId = modal.dataset.questionId;
+        const content = modalTextarea.value;
+
+        if (content.length < minLength || !questionId) return;
+
+        modalSubmitBtn.disabled = true;
+        modalSubmitBtn.textContent = 'Enviando...';
+
+        try {
+            const response = await apiFetch(`${API_BASE_URL}/api/qna/questions/${questionId}/answers`, {
+                method: 'POST',
+                body: JSON.stringify({ content: content })
+            });
+
+            if (!response.ok) throw new Error('Falha ao enviar resposta.');
+            
+            showToast('Resposta enviada com sucesso!', 'success');
+            modal.classList.remove('is-visible');
+            modalTextarea.value = '';
+            
+            // Recarrega as perguntas para mostrar a nova resposta
+            loadQuestions(); 
+
+        } catch (error) {
+            console.error(error);
+            showToast('Erro ao enviar resposta. Tente novamente.', 'error');
+        } finally {
+            modalSubmitBtn.disabled = false;
+            modalSubmitBtn.textContent = 'Enviar Resposta';
+        }
+    });
+
+    // --- 4. Ponto de Entrada ---
+    loadQuestions();
+}
     // << 2. LÓGICA DE UPLOAD DE FOTO (MOVIDA E IMPLEMENTADA) >>
     async function uploadProfilePhoto(file, sidebarPhotoEl) {
         const token = localStorage.getItem('girassol_token');
