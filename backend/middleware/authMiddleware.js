@@ -1,3 +1,5 @@
+// backend/middleware/authMiddleware.js
+
 const jwt = require('jsonwebtoken');
 const db = require('../models');
 
@@ -52,4 +54,22 @@ const admin = (req, res, next) => {
     }
 };
 
-module.exports = { protect, admin };
+/**
+ * *** NOVO MIDDLEWARE ADICIONADO ***
+ * Middleware para rotas de Psicólogo.
+ * Verifica se o usuário logado é um psicólogo (ou admin).
+ * Deve ser usado DEPOIS do middleware 'protect'.
+ */
+const isPsychologist = (req, res, next) => {
+    // O 'protect' já preencheu req.psychologist se o token for de um 'psi' ou 'admin'
+    if (req.psychologist) {
+        next(); // O usuário é um psicólogo ou admin, pode prosseguir.
+    } else {
+        res.status(403).json({ error: 'Acesso negado. Rota exclusiva para psicólogos.' });
+    }
+};
+
+
+// *** EXPORT CORRIGIDO ***
+// Adicionamos 'isPsychologist' ao export
+module.exports = { protect, admin, isPsychologist };
