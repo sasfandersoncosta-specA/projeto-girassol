@@ -83,7 +83,7 @@ router.get('/financials', adminController.getFinancials);
 router.get('/qna/pending', qnaController.getPendingQuestions);
 
 // Rota para moderar (aprova/rejeita) uma pergunta específica
-// router.put('/qna/:questionId/moderate', qnaController.moderateQuestion);
+router.put('/qna/:questionId/moderate', qnaController.moderateQuestion);
 
 
 module.exports = router;

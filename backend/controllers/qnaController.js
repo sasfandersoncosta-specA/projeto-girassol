@@ -12,23 +12,21 @@ exports.createQuestion = async (req, res) => {
     }
 
     try {
-        // Gera um título a partir do conteúdo
         const title = content.substring(0, 60).trim() + (content.length > 60 ? '...' : '');
-
         const newQuestion = await Question.create({
             title,
             content,
-            status: 'pending_review', // Todas as perguntas começam pendentes de revisão
+            status: 'pending_review',
         });
 
-        // --- LÓGICA DE NOTIFICAÇÃO (COMO ESTAVA) ---
+        // Lógica de Notificação
         const targetPlan = 'ecossistema';
         const psychologistsToNotify = await Psychologist.findAll({ where: { plano: targetPlan } });
 
         if (psychologistsToNotify.length > 0) {
             const messagePromises = psychologistsToNotify.map(psi => {
                 return Message.create({
-                    psychologistId: psi.id, // Destinatário
+                    psychologistId: psi.id,
                     subject: 'Nova pergunta da comunidade para você',
                     content: `Uma nova pergunta foi enviada por um usuário anônimo e está aguardando moderação. \n\nPergunta: "${content}"\n\nAssim que for aprovada, você poderá respondê-la no painel de Perguntas & Respostas.`,
                     isRead: false,
@@ -36,7 +34,6 @@ exports.createQuestion = async (req, res) => {
             });
             await Promise.all(messagePromises);
         }
-
         res.status(201).json({ message: 'Pergunta enviada com sucesso e aguardando moderação.', question: newQuestion });
 
     } catch (error) {
@@ -46,40 +43,36 @@ exports.createQuestion = async (req, res) => {
 };
 
 /**
- * Busca todas as perguntas que foram aprovadas e suas respectivas respostas.
+ * Busca todas as perguntas aprovadas e suas respostas. (Público)
  */
 exports.getApprovedQuestions = async (req, res) => {
     try {
         const questions = await Question.findAll({
-            where: {
-                status: ['approved', 'answered'], // Busca perguntas aprovadas ou já respondidas
-            },
+            where: { status: ['approved', 'answered'] },
             include: [
                 {
                     model: Answer,
                     as: 'answers',
-                    required: false, // LEFT JOIN para incluir perguntas sem respostas
+                    required: false,
                     include: [
                         {
                             model: Psychologist,
                             as: 'psychologist',
-                            attributes: ['id', 'nome', 'crp', 'fotoUrl', 'slug'], // Seleciona os campos do psicólogo
+                            attributes: ['id', 'nome', 'crp', 'fotoUrl', 'slug'],
                         }
                     ]
                 }
             ],
             order: [
-                ['createdAt', 'DESC'], // Ordena as perguntas da mais nova para a mais antiga
-                [{ model: Answer, as: 'answers' }, 'createdAt', 'ASC'] // Ordena as respostas dentro de cada pergunta
+                ['createdAt', 'DESC'],
+                [{ model: Answer, as: 'answers' }, 'createdAt', 'ASC']
             ],
         });
 
-        // Adiciona um campo 'patient' para manter a compatibilidade com o frontend
         const formattedQuestions = questions.map(q => ({
             ...q.toJSON(),
             patient: { nome: 'Anônimo' }
         }));
-
         res.status(200).json(formattedQuestions);
     } catch (error) {
         console.error("Erro ao buscar perguntas:", error);
@@ -88,13 +81,11 @@ exports.getApprovedQuestions = async (req, res) => {
 };
 
 /**
- * Permite que um psicólogo logado envie uma resposta para uma pergunta.
+ * Permite que um psicólogo logado envie uma resposta.
  */
 exports.createAnswer = async (req, res) => {
     const { questionId } = req.params;
     const { content } = req.body;
-    
-    // O ID vem do middleware 'protect' que anexa o 'psychologist' ao 'req'
     const psychologistId = req.psychologist.id; 
 
     if (!content || content.length < 20) {
@@ -106,22 +97,19 @@ exports.createAnswer = async (req, res) => {
         if (!question) {
             return res.status(404).json({ message: 'Pergunta não encontrada.' });
         }
-
         if (question.status !== 'approved' && question.status !== 'answered') {
             return res.status(403).json({ message: 'Esta pergunta não está aberta para respostas no momento.' });
         }
 
         const newAnswer = await Answer.create({
             content,
-            questionId: parseInt(questionId, 10), // Garante que é um número
+            questionId: parseInt(questionId, 10),
             psychologistId,
         });
 
-        // Atualiza o status da pergunta para 'answered'
         if (question.status !== 'answered') {
              await question.update({ status: 'answered' });
         }
-
         res.status(201).json({ message: 'Resposta enviada com sucesso!', answer: newAnswer });
 
     } catch (error) {
@@ -131,7 +119,7 @@ exports.createAnswer = async (req, res) => {
 };
 
 // =====================================================================
-// FUNÇÕES DE MODERAÇÃO (QUE ESTAVAM FALTANDO)
+// FUNÇÕES DE MODERAÇÃO (A CAUSA DO ERRO)
 // =====================================================================
 
 /**
@@ -142,7 +130,7 @@ exports.getPendingQuestions = async (req, res) => {
     try {
         const pendingQuestions = await Question.findAll({
             where: { status: 'pending_review' },
-            order: [['createdAt', 'ASC']] // Mais antigas primeiro
+            order: [['createdAt', 'ASC']]
         });
         res.status(200).json(pendingQuestions);
     } catch (error) {
@@ -170,7 +158,6 @@ exports.moderateQuestion = async (req, res) => {
         }
 
         await question.update({ status: status });
-
         res.status(200).json({ message: `Pergunta ${status === 'approved' ? 'aprovada' : 'rejeitada'}.`, question });
     
     } catch (error) {
