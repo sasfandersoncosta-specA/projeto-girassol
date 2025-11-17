@@ -11,9 +11,8 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@700&display.swap" rel="stylesheet">
 
-    <!-- Biblioteca Choices.js para dropdowns aprimorados -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js" defer></script>
 </head>
@@ -28,8 +27,7 @@
     
     <div class="dashboard-container" id="dashboard-container" style="display: none;">
     <aside class="dashboard-sidebar">
-            <div class="sidebar-header"> <!-- Bloco de perfil movido para cá -->
-                <img src="../assets/logos/logo_duplo_branco.png" alt="Logo Girassol" class="sidebar-logo">
+            <div class="sidebar-header"> <img src="../assets/logos/logo_duplo_branco.png" alt="Logo Girassol" class="sidebar-logo">
                 <div class="sidebar-user-block">
                     <label for="profile-photo-upload" class="profile-photo-label">
                         <img src="https://placehold.co/90x90" alt="Foto do perfil" id="psi-sidebar-photo">
@@ -46,31 +44,24 @@
                     <li class="active"><a href="#" data-page="psi_visao_geral.html"><span>Visão Geral</span></a></li>
                     <li><a href="#" data-page="psi_meu_perfil.html"><span>Meu Perfil</span></a></li>
                     <li><a href="#" data-page="psi_assinatura.html"><span>Assinatura e Pagamentos</span></a></li>
-                    <li><a href="#" data-page="psi_caixa_de_entrada.html"><span>Caixa de Entrada</span></a><span id="unread-count-badge" class="notification-badge">0</span></li>
+                    <li><a href="#" data-page="psi_caixa_de_entrada.html"><span>Caixa de Entrada</span><span id="unread-count-badge" class="notification-badge" style="display: none;">0</span></a></li>
                     <li>
                         <a href="#" data-page="psi_comunidade.html">
-                            <!-- Ícone de Perguntas e Respostas -->
                             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" /></svg>
                             <span>Comunidade Q&A</span>
+                            <span id="qna-unread-count-badge" class="notification-badge" style="display: none;">0</span>
                         </a>
                     </li>
                 </ul>
             </nav>
-            <!-- O footer foi removido pois seu conteúdo subiu -->
-        </aside>
+            </aside>
 
         <main class="dashboard-main" id="main-content">
             </main>
     </div>
 
-    <!-- ===================================================================== -->
-    <!-- ELEMENTOS GLOBAIS (MODAL E TOASTS) -->
-    <!-- ===================================================================== -->
-
-    <!-- Container para notificações (toasts) -->
     <div id="toast-container"></div>
 
-    <!-- Modal de Confirmação Genérico -->
     <div id="confirmation-modal" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close">&times;</button>
@@ -85,7 +76,6 @@
         </div>
     </div>
 
-    <!-- Modal de Upload de CRP -->
     <div id="crp-upload-modal" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close">&times;</button>

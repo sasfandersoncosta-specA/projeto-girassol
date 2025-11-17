@@ -116,6 +116,31 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // =====================================================================
+    // *** NOVA FUNÇÃO DE CONTAGEM DE Q&A ***
+    // =====================================================================
+    async function fetchQnaCount() {
+        const badge = document.getElementById('qna-unread-count-badge');
+        if (!badge) return; // Se o elemento não existir, não faz nada
+
+        try {
+            // 1. Chama a nova rota da API
+            const response = await apiFetch(`${API_BASE_URL}/api/psychologists/me/qna-unanswered-count`);
+            
+            if (response.ok) {
+                const data = await response.json();
+                // 2. Atualiza o número no badge
+                badge.textContent = data.count;
+                // 3. Mostra ou esconde o badge
+                badge.style.display = data.count > 0 ? 'inline-flex' : 'none';
+            }
+        } catch (error) {
+            console.error('Erro ao buscar contagem de Q&A:', error);
+            badge.style.display = 'none';
+        }
+    }
+
+
+    // =====================================================================
     // LÓGICA DA CAIXA DE ENTRADA (INTERAÇÃO MOBILE)
     // =====================================================================
     if (mainContent) {
@@ -179,11 +204,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // ... (Esta função permanece 100% igual) ...
     }
 
-    // *** NOVA FUNÇÃO ADICIONADA ***
-    // =====================================================================
     // Lógica da Página: COMUNIDADE Q&A
-    // =====================================================================
     async function inicializarComunidadeQNA() {
+        // ... (Esta função permanece 100% igual) ...
         
         // --- Seletores ---
         const listContainer = document.getElementById('qna-list-container');
@@ -323,6 +346,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Recarrega as perguntas para mostrar a nova resposta
                 loadQuestions(); 
 
+                // *** NOVO: Atualiza a contagem de Q&A pendentes ***
+                fetchQnaCount();
+
             } catch (error) {
                 console.error(error);
                 showToast(error.message || 'Erro ao enviar resposta. Tente novamente.', 'error');
@@ -358,7 +384,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (pageUrl.includes('psi_lista_de_espera.html')) {
                     inicializarListaDeEspera();
                 }
-                // *** ADIÇÃO DA NOVA LÓGICA ***
                 else if (pageUrl.includes('psi_comunidade.html')) {
                     inicializarComunidadeQNA();
                 }
@@ -407,7 +432,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // ... (O restante da sua função initializeDashboard permanece 100% igual) ...
+        
+        // *** CHAMADAS DE CONTAGEM INICIAL ***
         fetchUnreadCount();
+        fetchQnaCount(); // <-- CHAMADA PARA A NOVA FUNÇÃO DE CONTAGEM
+        
         const navLinks = document.querySelectorAll('aside.dashboard-sidebar nav.sidebar-nav ul li a');
         
         navLinks.forEach(link => {

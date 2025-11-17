@@ -29,6 +29,7 @@ router.put('/me', psychologistController.updatePsychologistProfile);
 router.put('/me/photo', uploadProfilePhoto.single('profilePhoto'), psychologistController.updateProfilePhoto);
 router.put('/me/crp-document', uploadCrpDocument.single('crpDocument'), psychologistController.uploadCrpDocument);
 router.get('/me/unread-count', psychologistController.getUnreadMessageCount);
+router.get('/me/qna-unanswered-count', psychologistController.getUnansweredQuestionsCount);
 router.put('/me/password', psychologistController.updatePsychologistPassword);
 router.delete('/me', psychologistController.deletePsychologistAccount);
 

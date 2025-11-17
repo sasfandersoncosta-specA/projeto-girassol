@@ -906,3 +906,36 @@ exports.getPsychologistReviews = async (req, res) => {
        res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };
+// COLE ESTA FUNÇÃO NO FINAL DE backend/controllers/psychologistController.js
+
+// ----------------------------------------------------------------------
+// Rota: GET /api/psychologists/me/qna-unanswered-count (NOVA ROTA)
+// Descrição: Busca a contagem de perguntas da comunidade que o psicólogo logado ainda não respondeu.
+// ----------------------------------------------------------------------
+exports.getUnansweredQuestionsCount = async (req, res) => {
+    try {
+        const psychologistId = req.psychologist.id;
+
+        // 1. Pega os IDs de todas as perguntas que este psicólogo JÁ respondeu
+        const answeredQuestionIds = await db.Answer.findAll({
+            where: { psychologistId: psychologistId },
+            attributes: [[db.Sequelize.fn('DISTINCT', db.Sequelize.col('questionId')), 'questionId']]
+        });
+        const answeredIds = answeredQuestionIds.map(a => a.questionId);
+
+        // 2. Conta todas as perguntas que estão 'approved' ou 'answered'
+        //    E que NÃO ESTÃO na lista de perguntas já respondidas por este psicólogo
+        const count = await db.Question.count({
+            where: {
+                status: { [db.Op.in]: ['approved', 'answered'] }, // Perguntas visíveis
+                id: { [db.Op.notIn]: answeredIds } // Exclui as que o 'psi' já respondeu
+            }
+        });
+
+        res.status(200).json({ count });
+
+    } catch (error) {
+        console.error('Erro ao buscar contagem de Q&A não respondidas:', error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
+};
