@@ -1696,3 +1696,21 @@ fieldset:disabled .multiselect-tag .multiselect-display {
     cursor: not-allowed;
     opacity: 0.7;
 }
+/* --- CORREÇÃO (Q&A): Alinhamento dos botões do Modal --- */
+/* Sobrescreve o .modal-footer do style.css global 
+  APENAS para o modal de resposta do Q&A.
+*/
+#qna-answer-modal .modal-footer {
+    display: grid; /* Usa grid para criar colunas iguais */
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    justify-content: stretch; /* Garante que o grid ocupe o espaço */
+}
+
+#qna-answer-modal .modal-footer .btn {
+    width: 100%; /* Faz o botão preencher a célula do grid */
+    padding: 12px 20px;
+    font-size: 15px;
+    /* Garante que o texto dentro do botão esteja centralizado */
+    justify-content: center; 
+}
