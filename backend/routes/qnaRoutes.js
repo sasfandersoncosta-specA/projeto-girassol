@@ -11,6 +11,6 @@ router.post('/questions', qnaController.createQuestion);
 router.get('/questions', qnaController.getApprovedQuestions);
 // Rota para um psicólogo logado responder a uma pergunta
 // A rota é protegida para garantir que apenas psicólogos autenticados possam responder.
-router.post('/questions/:questionId/answers', qnaController.createAnswer);
+router.post('/questions/:questionId/answers', authMiddleware.protect, authMiddleware.isPsychologist, qnaController.createAnswer);
 
 module.exports = router;
