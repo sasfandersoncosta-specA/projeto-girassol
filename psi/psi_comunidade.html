@@ -45,21 +45,23 @@
         <div class="modal-header">
             <h2 class="modal-title">Responder Pergunta</h2>
         </div>
-        <div class="modal-body">
-            <p class="text-sm text-gray-500 mb-4">
-                Sua resposta será pública e ajudará este usuário e outros na comunidade.
-            </p>
-            <form id="qna-answer-form">
+        
+        <form id="qna-answer-form"> 
+            <div class="modal-body">
+                <p class="text-sm text-gray-500 mb-4" style="font-size: 14px; color: var(--cinza-texto); margin-bottom: 15px;">
+                    Sua resposta será pública e ajudará este usuário e outros na comunidade.
+                </p>
                 <div class="form-group">
-                    <label for="qna-answer-textarea">Sua Resposta (mín. 50 caracteres):</label>
+                    <label for="qna-answer-textarea" style="font-weight: 500; font-size: 14px;">Sua Resposta (mín. 50 caracteres):</label>
                     <textarea id="qna-answer-textarea" minlength="50" required></textarea>
                     <div id="qna-char-counter" class="char-counter-modal">0/50 caracteres</div>
                 </div>
-            </form>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secundario modal-cancel">Cancelar</button>
+                <button type="submit" class="btn btn-principal" id="qna-submit-answer" disabled>Enviar Resposta</button>
+            </div>
+        </form> 
         </div>
-        <div class="modal-footer">
-            <button class="btn btn-secundario modal-cancel">Cancelar</button>
-            <button type="submit" class="btn btn-principal" id="qna-submit-answer" disabled>Enviar Resposta</button>
-        </div>
-    </div>
 </div>
