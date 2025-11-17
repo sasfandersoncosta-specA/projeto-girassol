@@ -1714,3 +1714,141 @@ fieldset:disabled .multiselect-tag .multiselect-display {
     /* Garante que o texto dentro do botão esteja centralizado */
     justify-content: center; 
 }
+/* =============================================================
+   ESTILOS DO PAINEL DE COMUNIDADE Q&A (PSI)
+   ============================================================= */
+
+.qna-container-admin {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.qna-card-psi {
+    background-color: var(--branco-puro);
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.qna-card-header .qna-question-title {
+    font-family: 'New Kansas', serif;
+    font-size: 1.5rem;
+    color: var(--verde-escuro);
+    margin: 0 0 5px 0;
+}
+
+.qna-card-header .qna-question-author {
+    font-size: 0.9rem;
+    color: var(--cinza-texto-claro);
+    font-style: italic;
+}
+
+.qna-card-body {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f8f9fa; /* Fundo cinza claro para a pergunta */
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.qna-card-body .qna-question-content {
+    margin: 0;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* Lista de respostas de OUTROS 'psis' */
+.existing-answers-list {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    border-top: 1px solid var(--cinza-borda);
+    padding-top: 20px;
+}
+
+.answer-item {
+    display: flex;
+    gap: 12px;
+    font-size: 0.95rem;
+}
+.answer-item img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.answer-item .answer-content p {
+    margin: 5px 0 0 0;
+    line-height: 1.5;
+}
+
+.qna-card-actions {
+    margin-top: 20px;
+    border-top: 1px solid var(--cinza-borda);
+    padding-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Botão de Responder (usa classes existentes .btn .btn-principal) */
+.btn-responder {
+    padding: 10px 25px;
+    font-size: 0.9rem;
+}
+
+/* Selo "Respondido por você" */
+.badge-respondido {
+    font-weight: 500;
+    color: var(--verde-escuro);
+    font-size: 0.9rem;
+}
+.badge-respondido.hidden {
+    display: none;
+}
+.btn-responder.hidden {
+    display: none;
+}
+
+/* --- Estilos do Modal de Resposta --- */
+#qna-answer-modal textarea {
+    width: 100%;
+    min-height: 150px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    resize: vertical;
+}
+
+#qna-answer-modal .char-counter-modal {
+    font-size: 0.85rem;
+    color: var(--cinza-texto-claro);
+    text-align: right;
+    margin-top: 5px;
+}
+
+#qna-answer-modal button:disabled {
+    background-color: #ccc;
+    border-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* *** CORREÇÃO: Alinhamento dos botões do Modal *** */
+#qna-answer-modal .modal-footer {
+    display: grid; 
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    justify-content: stretch; 
+}
+
+#qna-answer-modal .modal-footer .btn {
+    width: 100%; 
+    padding: 12px 20px;
+    font-size: 15px;
+    justify-content: center; 
+}
