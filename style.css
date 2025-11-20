@@ -3761,3 +3761,29 @@ label { font-weight: 700; }
     vertical-align: middle; /* Alinha o selo com o texto */
     transform: translateY(-2px); /* Ajuste fino */
 }
+/* =============================================================
+   CORREÇÃO DE BORDA: BOTÃO ENTRAR (HEADER)
+   ============================================================= */
+
+/* 1. Estado Inicial (Fundo Verde): Força borda e texto BRANCOS */
+header:not(.header-rolagem) .botoes-acao .btn-outline {
+    border: 2px solid #ffffff !important;
+    color: #ffffff !important;
+}
+
+/* Hover no Estado Inicial: Fundo branco semitransparente */
+header:not(.header-rolagem) .botoes-acao .btn-outline:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 2. Estado de Rolagem (Fundo Branco): Força borda e texto VERDES
+   (Isso garante que fique verde igual ao botão 'Registrar', e não cinza #333) */
+header.header-rolagem .botoes-acao .btn-outline {
+    border: 2px solid var(--verde-escuro) !important;
+    color: var(--verde-escuro) !important;
+}
+
+/* Hover no Estado de Rolagem: Fundo verde bem clarinho */
+header.header-rolagem .botoes-acao .btn-outline:hover {
+    background-color: rgba(27, 67, 50, 0.05) !important;
+}
