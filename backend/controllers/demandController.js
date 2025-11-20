@@ -1,57 +1,73 @@
 const db = require('../models');
 
 /**
- * REGISTRO HÍBRIDO: 
- * 1. Usa o Sequelize para criar a linha (garante que searchParams seja salvo corretamente).
- * 2. Usa SQL direto para atualizar o Rating e Feedback (já que o Model não tem esses campos).
+ * REGISTRO DA BUSCA + AVALIAÇÃO
+ * Versão corrigida para extrair dados aninhados (avaliacao_ux)
  */
 exports.recordSearch = async (req, res) => {
     try {
-        const { rating, feedback, ...searchParams } = req.body;
+        const data = req.body;
 
-        console.log("1. Recebido:", { rating, feedback });
+        // --- 1. A EXTRAÇÃO CORRETA (O PULO DO GATO) ---
+        let rating = data.rating;
+        let feedback = data.feedback;
 
-        // PASSO 1: Criar o registro usando o Sequelize (Seguro)
-        // Isso garante que 'searchParams', 'createdAt', etc. sejam salvos do jeito certo
+        // Se não veio solto, procura dentro da caixinha 'avaliacao_ux'
+        if (!rating && data.avaliacao_ux) {
+            rating = data.avaliacao_ux.rating;
+            feedback = data.avaliacao_ux.feedback;
+        }
+
+        console.log("RECEBIDO PELO BACKEND:", { rating, feedback }); // Para debug nos logs
+
+        // Remove a avaliação dos parâmetros de busca para não sujar o JSON
+        // (Cria uma cópia dos dados sem a chave avaliacao_ux)
+        const { avaliacao_ux, ...searchParams } = data;
+
+        // --- 2. CRIAR A BUSCA (SEQUELIZE) ---
         const novaBusca = await db.DemandSearch.create({
             searchParams: searchParams
         });
 
-        // Se não tiver nota, paramos por aqui
+        // Se não tem nota nem feedback, encerra aqui
         if (!rating && !feedback) {
             return res.status(201).json({ message: 'Busca registrada (sem avaliação).' });
         }
 
+        // --- 3. SALVAR A NOTA (SQL DIRETO) ---
+        // Atualiza a linha recém-criada com os dados da avaliação
         const idGerado = novaBusca.id;
-        console.log("2. ID Gerado pelo Sequelize:", idGerado);
+        
+        // Tratamento de tipos
+        const rValue = rating ? parseInt(rating) : null;
+        const fValue = feedback ? feedback : null;
 
-        // PASSO 2: Atualizar a linha criada com a nota e feedback via SQL
-        // Tentamos o nome da tabela padrão ("DemandSearches")
         try {
+            // Tenta na tabela padrao DemandSearches
             await db.sequelize.query(
                 `UPDATE "DemandSearches" SET rating = :r, feedback = :f WHERE id = :id`,
                 {
-                    replacements: { r: parseInt(rating), f: feedback, id: idGerado },
+                    replacements: { r: rValue, f: fValue, id: idGerado },
                     type: db.sequelize.QueryTypes.UPDATE
                 }
             );
         } catch (sqlError) {
-            console.warn("Tentativa 1 falhou, tentando nome de tabela minúsculo...");
-            // Plano B: Tabela em minúsculo
+            console.warn("Tentativa 1 falhou, tentando minúsculo...");
+            // Plano B (tabela minúscula)
             await db.sequelize.query(
                 `UPDATE "demand_searches" SET rating = :r, feedback = :f WHERE id = :id`,
                 {
-                    replacements: { r: parseInt(rating), f: feedback, id: idGerado },
+                    replacements: { r: rValue, f: fValue, id: idGerado },
                     type: db.sequelize.QueryTypes.UPDATE
                 }
             );
         }
 
-        res.status(201).json({ message: 'Busca e Avaliação registradas com sucesso!' });
+        res.status(201).json({ message: 'Avaliação salva com sucesso!' });
 
     } catch (error) {
-        console.error('ERRO FATAL ao registrar:', error);
-        res.status(500).json({ error: 'Erro interno ao salvar.' });
+        console.error('ERRO NO CONTROLLER:', error);
+        res.status(500).json({ error: 'Erro interno ao processar.' });
     }
 };
 
@@ -60,12 +76,12 @@ exports.recordSearch = async (req, res) => {
  */
 exports.getRatings = async (req, res) => {
     try {
-        // Descobre o nome da tabela dinamicamente para não errar
+        // Descobre o nome da tabela
         let tableName = "DemandSearches";
         try {
             await db.sequelize.query('SELECT 1 FROM "DemandSearches" LIMIT 1');
         } catch (e) {
-            tableName = "demand_searches";
+            tableName = "demand_searches"; 
         }
 
         // Busca média
