@@ -21,6 +21,7 @@ const reviewRoutes = require('./routes/reviewRoutes'); //
 const qnaRoutes = require('./routes/qnaRoutes'); // ADICIONADO DE VOLTA
 const psychologistController = require('./controllers/psychologistController');
 const seedTestData = require('./controllers/seed_test_data'); // Caminho corrigido
+const demandController = require('./controllers/demandController');
 
 const app = express();
 
