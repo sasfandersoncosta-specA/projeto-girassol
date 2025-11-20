@@ -139,5 +139,3 @@ async function seedTestData() {
 
 // Exporta a função para que possa ser chamada pelo server.js
 module.exports = seedTestData;
-// Executa automaticamente se o script for rodado diretamente
-seedTestData();
