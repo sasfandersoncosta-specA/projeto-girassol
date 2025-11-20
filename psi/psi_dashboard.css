@@ -1852,3 +1852,44 @@ fieldset:disabled .multiselect-tag .multiselect-display {
     font-size: 15px;
     justify-content: center; 
 }
+
+/* --- AJUSTE FINO DA SIDEBAR (Igual ao Admin) --- */
+
+/* Container da lista: reduz o espaço entre os itens */
+.dashboard-sidebar .sidebar-nav ul {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Aproxima os itens (antes devia ser 20px ou mais) */
+    padding: 0 15px; /* Alinha com o botão de cima */
+    margin-top: 20px;
+}
+
+/* O Item do Link */
+.dashboard-sidebar .sidebar-nav li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 15px; /* Altura mais compacta */
+    border-radius: 8px;
+    color: #b8c2bc; /* Cor padrão do texto (cinza claro) */
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    justify-content: flex-start; /* Garante alinhamento à esquerda */
+}
+
+/* Estado Ativo e Hover */
+.dashboard-sidebar .sidebar-nav li.active a,
+.dashboard-sidebar .sidebar-nav li a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--branco-puro);
+    font-weight: 600;
+}
+
+/* Ícones do menu (se houver) */
+.dashboard-sidebar .sidebar-nav li a svg {
+    width: 20px;
+    height: 20px;
+    opacity: 0.9;
+}
