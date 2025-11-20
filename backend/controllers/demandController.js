@@ -1,92 +1,80 @@
 const db = require('../models');
 
 /**
- * Registra as respostas de um questionário como uma busca de demanda anônima.
- * VERSÃO FORÇADA (SQL DIRETO) para garantir que Rating e Feedback sejam salvos
- * mesmo sem atualizar o Model do Sequelize.
+ * REGISTRO HÍBRIDO: 
+ * 1. Usa o Sequelize para criar a linha (garante que searchParams seja salvo corretamente).
+ * 2. Usa SQL direto para atualizar o Rating e Feedback (já que o Model não tem esses campos).
  */
 exports.recordSearch = async (req, res) => {
     try {
-        // 1. Separa os dados novos (rating/feedback) do resto do JSON
         const { rating, feedback, ...searchParams } = req.body;
 
-        // 2. Prepara os valores
-        const searchParamsJson = JSON.stringify(searchParams);
-        
-        // Garante que rating seja número (ou null) e feedback string (ou null)
-        const ratingValue = rating ? parseInt(rating) : null;
-        const feedbackValue = feedback ? feedback : null;
+        console.log("1. Recebido:", { rating, feedback });
 
-        console.log("Tentando salvar:", { rating: ratingValue, feedback: feedbackValue });
-
-        // 3. SQL NA FORÇA BRUTA (Ignora o Model)
-        // Tenta inserir na tabela "DemandSearches" (padrão) ou "demand_searches" (alternativa)
-        // Usamos COALESCE para garantir data atual
-        const query = `
-            INSERT INTO "DemandSearches" 
-            ("searchParams", "rating", "feedback", "createdAt", "updatedAt")
-            VALUES 
-            (:json, :rating, :feedback, NOW(), NOW())
-        `;
-
-        await db.sequelize.query(query, {
-            replacements: { 
-                json: searchParamsJson,
-                rating: ratingValue,
-                feedback: feedbackValue
-            },
-            type: db.sequelize.QueryTypes.INSERT
+        // PASSO 1: Criar o registro usando o Sequelize (Seguro)
+        // Isso garante que 'searchParams', 'createdAt', etc. sejam salvos do jeito certo
+        const novaBusca = await db.DemandSearch.create({
+            searchParams: searchParams
         });
 
-        res.status(201).json({ message: 'Busca registrada com sucesso (SQL Direto)!' });
+        // Se não tiver nota, paramos por aqui
+        if (!rating && !feedback) {
+            return res.status(201).json({ message: 'Busca registrada (sem avaliação).' });
+        }
+
+        const idGerado = novaBusca.id;
+        console.log("2. ID Gerado pelo Sequelize:", idGerado);
+
+        // PASSO 2: Atualizar a linha criada com a nota e feedback via SQL
+        // Tentamos o nome da tabela padrão ("DemandSearches")
+        try {
+            await db.sequelize.query(
+                `UPDATE "DemandSearches" SET rating = :r, feedback = :f WHERE id = :id`,
+                {
+                    replacements: { r: parseInt(rating), f: feedback, id: idGerado },
+                    type: db.sequelize.QueryTypes.UPDATE
+                }
+            );
+        } catch (sqlError) {
+            console.warn("Tentativa 1 falhou, tentando nome de tabela minúsculo...");
+            // Plano B: Tabela em minúsculo
+            await db.sequelize.query(
+                `UPDATE "demand_searches" SET rating = :r, feedback = :f WHERE id = :id`,
+                {
+                    replacements: { r: parseInt(rating), f: feedback, id: idGerado },
+                    type: db.sequelize.QueryTypes.UPDATE
+                }
+            );
+        }
+
+        res.status(201).json({ message: 'Busca e Avaliação registradas com sucesso!' });
 
     } catch (error) {
-        console.error('Erro ao registrar busca (Tentativa 1):', error.message);
-        
-        // PLANO B: Se a tabela estiver em minúsculo (acontece em alguns bancos)
-        try {
-             const queryB = `
-                INSERT INTO "demand_searches" 
-                ("searchParams", "rating", "feedback", "createdAt", "updatedAt")
-                VALUES 
-                (:json, :rating, :feedback, NOW(), NOW())
-            `;
-            await db.sequelize.query(queryB, {
-                replacements: { json: JSON.stringify(searchParams), rating: rating, feedback: feedback },
-                type: db.sequelize.QueryTypes.INSERT
-            });
-            res.status(201).json({ message: 'Busca registrada com sucesso (Plano B)!' });
-        } catch (errorB) {
-            console.error('Erro Fatal ao salvar:', errorB);
-            res.status(500).json({ error: 'Erro ao salvar no banco.' });
-        }
+        console.error('ERRO FATAL ao registrar:', error);
+        res.status(500).json({ error: 'Erro interno ao salvar.' });
     }
 };
 
 /**
- * Retorna todas as avaliações (rating + feedback) e a média geral.
- * Tenta ler de "DemandSearches" ou "demand_searches".
+ * Busca as avaliações para o Admin
  */
 exports.getRatings = async (req, res) => {
     try {
-        // Descobre qual nome de tabela funciona
+        // Descobre o nome da tabela dinamicamente para não errar
         let tableName = "DemandSearches";
         try {
             await db.sequelize.query('SELECT 1 FROM "DemandSearches" LIMIT 1');
         } catch (e) {
-            tableName = "demand_searches"; 
+            tableName = "demand_searches";
         }
 
-        // 1. Busca a Média e o Total
+        // Busca média
         const [stats] = await db.sequelize.query(`
-            SELECT 
-                AVG(rating)::numeric(10,1) as media, 
-                COUNT(*) as total 
-            FROM "${tableName}" 
-            WHERE rating IS NOT NULL
+            SELECT AVG(rating)::numeric(10,1) as media, COUNT(*) as total 
+            FROM "${tableName}" WHERE rating IS NOT NULL
         `);
 
-        // 2. Busca os comentários
+        // Busca lista
         const [reviews] = await db.sequelize.query(`
             SELECT rating, feedback, "createdAt"
             FROM "${tableName}"
@@ -102,6 +90,6 @@ exports.getRatings = async (req, res) => {
 
     } catch (error) {
         console.error('Erro ao buscar avaliações:', error);
-        res.status(500).json({ error: 'Erro ao carregar avaliações.' });
+        res.status(500).json({ error: 'Erro ao carregar dados.' });
     }
 };
