@@ -26,6 +26,7 @@ const app = express();
 
 // LINHA NOVA PARA FORÇAR O DEPLOY
 console.log('[DEPLOY_SYNC] Forçando atualização de build - v1.8');
+console.log("NODE_ENV:", process.env.NODE_ENV);
 const server = http.createServer(app); // 3. Cria um servidor http a partir do app express
 
 initSocket(server); // 4. Inicializa o Socket.IO com o servidor http
@@ -82,14 +83,17 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 // garantindo que o schema esteja sempre atualizado com os modelos.
 // Em produção, usamos sync() sem 'force' para não perder dados.
 const startServer = async () => {
-    if (isDevelopment) {
-        // CORREÇÃO: Removido { force: true } para garantir a persistência dos dados.
-        await db.sequelize.sync(); // A opção { force: true } foi removida.
-        console.log('Banco de dados sincronizado (sem forçar).');
+    if (process.env.NODE_ENV === 'development') {
+        await db.sequelize.sync({ alter: true });
+        console.log('Banco de dados sincronizado (DEV).');
         await seedTestData();
+    } else {
+        await db.sequelize.sync(); // Produção: SEM alter, SEM force, SEM seed
+        console.log('Banco de dados sincronizado (PROD).');
     }
 
-    server.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}.`)); // 5. Inicia o servidor http
+    server.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}.`));
 };
+
 
 startServer().catch(err => console.error('Falha ao iniciar o servidor:', err));
