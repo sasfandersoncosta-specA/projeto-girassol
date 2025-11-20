@@ -1,100 +1,77 @@
 const db = require('../models');
 
 /**
- * CONTROLLER COM DEBUG E LOGS DETALHADOS
- * Grava os dados diretamente na tabela e mostra no terminal o que está acontecendo.
+ * VERSÃO FINAL DEBUG: Salva a busca e força o salvamento da avaliação.
  */
 exports.recordSearch = async (req, res) => {
     try {
-        // --- 1. DEBUG: O QUE CHEGOU? ---
-        console.log("\n========== [DEBUG START] NOVA REQUISIÇÃO ==========");
-        console.log("RAW BODY:", JSON.stringify(req.body, null, 2));
+        console.log("\n--- [DEBUG] NOVA REQUISIÇÃO DE BUSCA ---");
+        console.log("BODY COMPLETO:", JSON.stringify(req.body, null, 2));
 
         const data = req.body;
+        let rating = null;
+        let feedback = null;
 
-        // --- 2. EXTRAÇÃO DE DADOS ---
-        let rawRating = data.rating;
-        let rawFeedback = data.feedback;
-
-        // Se não veio solto, procura dentro da caixinha 'avaliacao_ux'
-        if (!rawRating && data.avaliacao_ux) {
-            console.log("[DEBUG] Encontrado objeto 'avaliacao_ux'. Extraindo...");
-            rawRating = data.avaliacao_ux.rating;
-            rawFeedback = data.avaliacao_ux.feedback;
+        // 1. Tenta achar a nota em qualquer lugar possível
+        if (data.rating) rating = data.rating;
+        if (data.feedback) feedback = data.feedback;
+        
+        // Se não achou, olha dentro do objeto avaliacao_ux
+        if (!rating && data.avaliacao_ux) {
+            console.log("[DEBUG] Encontrado objeto 'avaliacao_ux'");
+            rating = data.avaliacao_ux.rating;
+            feedback = data.avaliacao_ux.feedback;
         }
 
-        console.log(`[DEBUG] Dados extraídos -> Rating: ${rawRating} | Feedback: ${rawFeedback}`);
+        console.log(`[DEBUG] Dados Extraídos -> Rating: ${rating}, Feedback: ${feedback}`);
 
-        // --- 3. SANITIZAÇÃO ---
-        // Garante que rating seja número inteiro ou null (Postgres odeia string vazia ou NaN)
-        let ratingValue = null;
-        if (rawRating !== undefined && rawRating !== null && rawRating !== "") {
-            ratingValue = parseInt(rawRating, 10);
-        }
-
-        // Garante que feedback seja string ou null
-        let feedbackValue = null;
-        if (rawFeedback !== undefined && rawFeedback !== null && typeof rawFeedback === 'string' && rawFeedback.trim() !== "") {
-            feedbackValue = rawFeedback;
-        }
-
-        console.log(`[DEBUG] Valores finais p/ Banco -> Rating: ${ratingValue} (${typeof ratingValue}) | Feedback: ${feedbackValue}`);
-
-        // Limpa o JSON para salvar na coluna 'searchParams' sem duplicar a avaliação
+        // Limpa o objeto para salvar na coluna JSON
         const searchParams = { ...data };
-        delete searchParams.avaliacao_ux;
         delete searchParams.rating;
         delete searchParams.feedback;
+        delete searchParams.avaliacao_ux;
 
-        // --- 4. SQL DIRETO ---
-        const query = `
-            INSERT INTO "DemandSearches" 
-            ("searchParams", "rating", "feedback", "createdAt", "updatedAt")
-            VALUES 
-            (:json, :rating, :feedback, NOW(), NOW())
-        `;
+        // 2. Cria o registro no banco (Sequelize)
+        const novaBusca = await db.DemandSearch.create({
+            searchParams: searchParams
+        });
+        
+        const idGerado = novaBusca.id;
+        console.log(`[DEBUG] Busca criada com ID: ${idGerado}`);
 
-        try {
-            await db.sequelize.query(query, {
-                replacements: { 
-                    json: JSON.stringify(searchParams), 
-                    rating: ratingValue, 
-                    feedback: feedbackValue 
-                },
-                type: db.sequelize.QueryTypes.INSERT
-            });
-            console.log("[DEBUG] Sucesso no INSERT (Tabela DemandSearches)");
+        // 3. Se tiver avaliação, atualiza a linha via SQL Direto
+        if (rating || feedback) {
+            // Garante tipos corretos
+            const rValue = rating ? parseInt(rating) : null;
+            const fValue = feedback ? String(feedback) : null;
 
-        } catch (sqlError) {
-            console.warn("[DEBUG] Falha na tabela 'DemandSearches'. Tentando 'demand_searches'...", sqlError.message);
-            
-            // PLANO B
-            const queryB = `
-                INSERT INTO "demand_searches" 
-                ("searchParams", "rating", "feedback", "createdAt", "updatedAt")
-                VALUES 
-                (:json, :rating, :feedback, NOW(), NOW())
-            `;
-            await db.sequelize.query(queryB, {
-                replacements: { 
-                    json: JSON.stringify(searchParams), 
-                    rating: ratingValue, 
-                    feedback: feedbackValue 
-                },
-                type: db.sequelize.QueryTypes.INSERT
-            });
-            console.log("[DEBUG] Sucesso no INSERT (Tabela demand_searches)");
+            console.log(`[DEBUG] Tentando atualizar ID ${idGerado} com Rating ${rValue}`);
+
+            try {
+                // Tenta tabela com aspas (Padrão Sequelize)
+                await db.sequelize.query(
+                    `UPDATE "DemandSearches" SET rating = :r, feedback = :f WHERE id = :id`,
+                    { replacements: { r: rValue, f: fValue, id: idGerado } }
+                );
+                console.log("[DEBUG] Atualização SUCESSO (DemandSearches)");
+            } catch (err1) {
+                console.log("[DEBUG] Falha na tabela padrão. Tentando minúsculo...");
+                // Tenta tabela minúscula (Padrão Postgres puro)
+                await db.sequelize.query(
+                    `UPDATE "demand_searches" SET rating = :r, feedback = :f WHERE id = :id`,
+                    { replacements: { r: rValue, f: fValue, id: idGerado } }
+                );
+                console.log("[DEBUG] Atualização SUCESSO (demand_searches)");
+            }
+        } else {
+            console.log("[DEBUG] Nenhuma avaliação encontrada para salvar.");
         }
 
-        console.log("========== [DEBUG END] SUCESSO ==========\n");
-        res.status(201).json({ message: 'Busca e Avaliação salvas com sucesso!' });
+        res.status(201).json({ message: 'Busca registrada!' });
 
     } catch (error) {
-        console.error("========== [DEBUG ERROR] ==========");
-        console.error(error);
-        console.error("===================================");
-        // Não devolve erro 500 para não travar o frontend, mas avisa no log
-        res.status(201).json({ message: 'Busca salva (com alerta interno nos logs).' });
+        console.error('[DEBUG] ERRO FATAL:', error);
+        res.status(500).json({ error: 'Erro interno.' });
     }
 };
 
@@ -104,11 +81,8 @@ exports.recordSearch = async (req, res) => {
 exports.getRatings = async (req, res) => {
     try {
         let tableName = "DemandSearches";
-        try {
-            await db.sequelize.query('SELECT 1 FROM "DemandSearches" LIMIT 1');
-        } catch (e) {
-            tableName = "demand_searches"; 
-        }
+        try { await db.sequelize.query('SELECT 1 FROM "DemandSearches" LIMIT 1'); } 
+        catch (e) { tableName = "demand_searches"; }
 
         const [stats] = await db.sequelize.query(`
             SELECT AVG(rating)::numeric(10,1) as media, COUNT(*) as total 
@@ -129,7 +103,7 @@ exports.getRatings = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Erro ao buscar avaliações:', error);
+        console.error('Erro admin:', error);
         res.status(500).json({ error: 'Erro ao carregar dados.' });
     }
 };
