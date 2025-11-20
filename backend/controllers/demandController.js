@@ -6,6 +6,13 @@ const db = require('../models');
  */
 exports.recordSearch = async (req, res) => {
     try {
+        // --- CONSOLE LOGS PARA DEBUG ---
+        console.log("=======================================");
+        console.log("[DEBUG] Corpo da Requisição (req.body):");
+        console.log(JSON.stringify(req.body, null, 2)); // Mostra o JSON formatado
+        console.log("[DEBUG] Tentando extrair 'avaliacao_ux':", req.body.avaliacao_ux);
+        console.log("=======================================");
+
         const data = req.body;
 
         // --- 1. DETETIVE DE DADOS ---
