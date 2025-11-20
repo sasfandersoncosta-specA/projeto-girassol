@@ -3787,3 +3787,33 @@ header.header-rolagem .botoes-acao .btn-outline {
 header.header-rolagem .botoes-acao .btn-outline:hover {
     background-color: rgba(27, 67, 50, 0.05) !important;
 }
+/* Adicionar ao final do style.css */
+
+/* Estilo específico para a área de texto de feedback */
+.feedback-textarea {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.05); /* Fundo levemente transparente */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    color: var(--branco-puro);
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    padding: 15px;
+    resize: none; /* Impede o usuário de quebrar o layout esticando a caixa */
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.feedback-textarea:focus {
+    border-color: var(--cor-girassol);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Ajuste para o label flutuante funcionar com textarea */
+.feedback-textarea:focus + .input-label,
+.feedback-textarea:not(:placeholder-shown) + .input-label {
+    top: -10px !important; /* Sobe o label para fora da caixa */
+    background-color: var(--verde-escuro);
+    font-size: 0.8rem;
+    color: var(--cor-girassol);
+}
