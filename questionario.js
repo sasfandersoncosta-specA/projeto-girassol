@@ -48,40 +48,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 contentHTML = `<div class="${choicesClass}">${questionData.choices.map(choice => `<button class="${buttonClass}" data-value="${choice}">${choice}</button>`).join('')}</div>`; 
                 break;
             case 'rating':
-                    // Ícone SVG da Estrela
-                    const starSvg = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
-                    
-                    contentHTML = `
-                    <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
-                        
-                        <div class="rating-stars">
-                            <input type="radio" id="star5" name="avaliacao" value="5" />
-                            <label for="star5">${starSvg}</label>
-                            
-                            <input type="radio" id="star4" name="avaliacao" value="4" />
-                            <label for="star4">${starSvg}</label>
-                            
-                            <input type="radio" id="star3" name="avaliacao" value="3" />
-                            <label for="star3">${starSvg}</label>
-                            
-                            <input type="radio" id="star2" name="avaliacao" value="2" />
-                            <label for="star2">${starSvg}</label>
-                            
-                            <input type="radio" id="star1" name="avaliacao" value="1" />
-                            <label for="star1">${starSvg}</label>
-                        </div>
+                // Definição do Ícone SVG (Estrela vazada)
+                const starIcon = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
 
-                        <div class="form-group-questionario">
-                            <textarea id="input-feedback" class="feedback-textarea" placeholder=" " rows="4"></textarea>
-                            <label class="input-label">Deixe um elogio ou sugestão (Opcional)</label>
-                        </div>
-                    </div>`;
-                    break;
-            case 'welcome': 
-            case 'thank-you': 
-            case 'final': 
-            case 'error': 
-                break; 
+                contentHTML = `
+                <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+                    <div class="rating-stars">
+                        <input type="radio" id="star5" name="avaliacao" value="5" />
+                        <label for="star5">${starIcon}</label>
+                        
+                        <input type="radio" id="star4" name="avaliacao" value="4" />
+                        <label for="star4">${starIcon}</label>
+                        
+                        <input type="radio" id="star3" name="avaliacao" value="3" />
+                        <label for="star3">${starIcon}</label>
+                        
+                        <input type="radio" id="star2" name="avaliacao" value="2" />
+                        <label for="star2">${starIcon}</label>
+                        
+                        <input type="radio" id="star1" name="avaliacao" value="1" />
+                        <label for="star1">${starIcon}</label>
+                    </div>
+
+                    <div class="form-group-questionario" style="margin-top: 20px;">
+                        <textarea id="input-feedback" class="feedback-textarea" placeholder=" " rows="4"></textarea>
+                        <label class="input-label">Deixe um elogio ou sugestão (Opcional)</label>
+                    </div>
+                </div>`;
+                break;
             default: 
                 console.warn("Tipo de pergunta desconhecido:", questionData.type); 
                 contentHTML = ''; 

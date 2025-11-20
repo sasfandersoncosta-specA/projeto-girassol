@@ -1849,101 +1849,100 @@ header.header-rolagem nav a:hover {
 .shake-error {animation: shake 0.5s ease-in-out;}
 @keyframes shake {0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 50% { transform: translateX(8px); } 75% { transform: translateX(-8px); }}
 /* =====================================================================
-/* --- ESTILO DAS ESTRELAS (SVG) --- */
+//* --- CORREÇÃO VISUAL: ESTRELAS E INPUT --- */
+
 .rating-stars {
-    display: flex;
-    flex-direction: row-reverse; /* Inverte visualmente para a lógica do CSS funcionar */
+    display: flex !important; /* FORÇA o alinhamento lado a lado */
+    flex-direction: row-reverse; /* Inverte a ordem para o efeito de preenchimento funcionar */
     justify-content: center;
-    gap: 10px; /* Espaço entre as estrelas */
-    margin-bottom: 20px;
+    gap: 15px; /* Espaço entre as estrelas */
+    margin: 20px 0;
+    border: none;
 }
 
-/* Esconde o input radio nativo (A bolinha feia do print) */
+/* Esconde a bolinha do rádio, mas mantém funcional */
 .rating-stars input[type="radio"] {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-    width: 0;
-    height: 0;
+    display: none; 
 }
 
-/* Estilo base da estrela (SVG) */
+/* Estilo do SVG (A Estrela) */
 .rating-stars label {
     cursor: pointer;
-    width: 40px;
-    height: 40px;
+    width: 42px; /* Tamanho da estrela */
+    height: 42px;
     transition: transform 0.2s ease;
+    padding: 0;
+    margin: 0;
 }
 
+/* A cor da linha da estrela (quando vazia) */
 .rating-stars label svg {
     width: 100%;
     height: 100%;
-    fill: transparent; /* Fundo transparente por padrão */
-    stroke: #FFEE8C;   /* Contorno Amarelo Girassol */
-    stroke-width: 2px;
-    stroke-linejoin: round;
-    transition: fill 0.3s ease, transform 0.2s;
+    fill: transparent; 
+    stroke: #FFEE8C; /* Amarelo Girassol */
+    stroke-width: 1.5px;
+    transition: fill 0.3s ease;
 }
 
-/* EFEITO MÁGICO: Preenche a estrela clicada e todas as anteriores (que no HTML estão depois) */
+/* A Mágica: Preenche a estrela ao passar o mouse ou selecionar */
 .rating-stars input[type="radio"]:checked ~ label svg,
 .rating-stars label:hover svg,
 .rating-stars label:hover ~ label svg {
-    fill: #FFEE8C; /* Preenche de amarelo */
+    fill: #FFEE8C; /* Fica toda amarela */
 }
 
-/* Efeito de clique */
-.rating-stars label:active {
-    transform: scale(0.9);
+.rating-stars label:hover {
+    transform: scale(1.1); /* Aumenta um pouquinho ao passar o mouse */
 }
 
-/* --- CORREÇÃO DO INPUT DE TEXTO (TEXTAREA) --- */
+/* --- INPUT DE TEXTO (TEXTAREA) ESTILIZADO --- */
 .form-group-questionario {
-    position: relative;
     width: 100%;
     max-width: 500px;
-    margin-top: 20px;
+    margin: 0 auto; /* Centraliza o bloco */
+    position: relative;
 }
 
 .feedback-textarea {
     width: 100%;
-    background-color: rgba(255, 255, 255, 0.1); /* Transparente leve */
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.08); /* Fundo translúcido (efeito vidro) */
+    border: 1px solid rgba(255, 255, 255, 0.4); /* Borda suave */
     border-radius: 12px;
     color: #ffffff; /* Texto branco */
     font-family: 'Inter', sans-serif;
-    font-size: 1rem;
-    padding: 25px 15px 15px 15px; /* Espaço maior no topo para o label não bater no texto */
-    resize: none;
+    font-size: 16px;
+    padding: 25px 15px 15px 15px; /* Espaço interno */
+    resize: none; /* Impede redimensionar */
     outline: none;
-    box-sizing: border-box; /* Importante para não estourar a largura */
+    box-sizing: border-box; /* Garante que não estoure a largura */
+    transition: all 0.3s ease;
 }
 
 .feedback-textarea:focus {
-    border-color: #FFEE8C;
-    background-color: rgba(255, 255, 255, 0.15);
+    border-color: #FFEE8C; /* Borda amarela ao clicar */
+    background-color: rgba(255, 255, 255, 0.12);
 }
 
 /* Label Flutuante */
 .input-label {
     position: absolute;
     left: 15px;
-    top: 20px; /* Posição inicial */
-    color: rgba(255, 255, 255, 0.7);
-    pointer-events: none; /* O clique passa através do label e vai para o textarea */
-    transition: all 0.2s ease;
-    font-size: 1rem;
+    top: 20px;
+    color: rgba(255, 255, 255, 0.6);
+    pointer-events: none;
+    transition: 0.2s ease all;
+    font-size: 16px;
 }
 
-/* Quando foca ou tem texto, o label sobe */
+/* Animação do Label subindo */
 .feedback-textarea:focus + .input-label,
 .feedback-textarea:not(:placeholder-shown) + .input-label {
     top: 8px;
-    font-size: 0.75rem;
+    font-size: 12px;
     color: #FFEE8C;
     font-weight: bold;
 }
-/* --- Fim dos Estilos de Avaliação --- */
 /* =====================================================================
 /* PÁGINA DE RESULTADOS (ESTILOS UNIFICADOS)
    ========================================================================== */
