@@ -43,3 +43,37 @@ exports.recordSearch = async (req, res) => {
         res.status(500).json({ error: 'Erro interno do servidor ao registrar a busca.' });
     }
 };
+/**
+ * Retorna todas as avaliações (rating + feedback) e a média geral.
+ * Uso exclusivo do Dashboard Admin.
+ */
+exports.getRatings = async (req, res) => {
+    try {
+        // 1. Busca a Média e o Total
+        const [stats] = await db.sequelize.query(`
+            SELECT 
+                AVG(rating)::numeric(10,1) as media, 
+                COUNT(*) as total 
+            FROM "DemandSearches" 
+            WHERE rating IS NOT NULL
+        `);
+
+        // 2. Busca os comentários individuais (mais recentes primeiro)
+        const [reviews] = await db.sequelize.query(`
+            SELECT rating, feedback, "createdAt"
+            FROM "DemandSearches"
+            WHERE rating IS NOT NULL
+            ORDER BY "createdAt" DESC
+            LIMIT 50
+        `);
+
+        res.json({
+            stats: stats[0], // { media: "4.8", total: "15" }
+            reviews: reviews // Array com os feedbacks
+        });
+
+    } catch (error) {
+        console.error('Erro ao buscar avaliações:', error);
+        res.status(500).json({ error: 'Erro ao carregar avaliações.' });
+    }
+};
