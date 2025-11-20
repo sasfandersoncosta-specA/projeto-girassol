@@ -1,34 +1,44 @@
 const db = require('../models');
 
 /**
- * CONTROLLER BLINDADO (Versão SQL Puro)
- * Grava os dados diretamente na tabela, sem depender do Modelo do Sequelize.
+ * CONTROLLER COM DEBUG E LOGS DETALHADOS
+ * Grava os dados diretamente na tabela e mostra no terminal o que está acontecendo.
  */
 exports.recordSearch = async (req, res) => {
     try {
-        // --- CONSOLE LOGS PARA DEBUG ---
-        console.log("=======================================");
-        console.log("[DEBUG] Corpo da Requisição (req.body):");
-        console.log(JSON.stringify(req.body, null, 2)); // Mostra o JSON formatado
-        console.log("[DEBUG] Tentando extrair 'avaliacao_ux':", req.body.avaliacao_ux);
-        console.log("=======================================");
+        // --- 1. DEBUG: O QUE CHEGOU? ---
+        console.log("\n========== [DEBUG START] NOVA REQUISIÇÃO ==========");
+        console.log("RAW BODY:", JSON.stringify(req.body, null, 2));
 
         const data = req.body;
 
-        // --- 1. DETETIVE DE DADOS ---
-        // Procura a nota e o feedback onde quer que eles estejam escondidos
+        // --- 2. EXTRAÇÃO DE DADOS ---
         let rawRating = data.rating;
         let rawFeedback = data.feedback;
 
-        // Se não achou no topo, procura dentro do objeto 'avaliacao_ux' (padrão do seu frontend)
+        // Se não veio solto, procura dentro da caixinha 'avaliacao_ux'
         if (!rawRating && data.avaliacao_ux) {
+            console.log("[DEBUG] Encontrado objeto 'avaliacao_ux'. Extraindo...");
             rawRating = data.avaliacao_ux.rating;
             rawFeedback = data.avaliacao_ux.feedback;
         }
 
-        // Prepara os dados para o banco (Sanitização)
-        const rating = rawRating ? parseInt(rawRating) : null;
-        const feedback = rawFeedback ? String(rawFeedback) : null;
+        console.log(`[DEBUG] Dados extraídos -> Rating: ${rawRating} | Feedback: ${rawFeedback}`);
+
+        // --- 3. SANITIZAÇÃO ---
+        // Garante que rating seja número inteiro ou null (Postgres odeia string vazia ou NaN)
+        let ratingValue = null;
+        if (rawRating !== undefined && rawRating !== null && rawRating !== "") {
+            ratingValue = parseInt(rawRating, 10);
+        }
+
+        // Garante que feedback seja string ou null
+        let feedbackValue = null;
+        if (rawFeedback !== undefined && rawFeedback !== null && typeof rawFeedback === 'string' && rawFeedback.trim() !== "") {
+            feedbackValue = rawFeedback;
+        }
+
+        console.log(`[DEBUG] Valores finais p/ Banco -> Rating: ${ratingValue} (${typeof ratingValue}) | Feedback: ${feedbackValue}`);
 
         // Limpa o JSON para salvar na coluna 'searchParams' sem duplicar a avaliação
         const searchParams = { ...data };
@@ -36,10 +46,7 @@ exports.recordSearch = async (req, res) => {
         delete searchParams.rating;
         delete searchParams.feedback;
 
-        console.log("Tentando salvar via SQL Direto:", { rating, feedback });
-
-        // --- 2. INJEÇÃO DIRETA NO BANCO ---
-        // Tenta inserir na tabela com aspas (padrão Postgres/Sequelize)
+        // --- 4. SQL DIRETO ---
         const query = `
             INSERT INTO "DemandSearches" 
             ("searchParams", "rating", "feedback", "createdAt", "updatedAt")
@@ -51,15 +58,17 @@ exports.recordSearch = async (req, res) => {
             await db.sequelize.query(query, {
                 replacements: { 
                     json: JSON.stringify(searchParams), 
-                    rating: rating, 
-                    feedback: feedback 
+                    rating: ratingValue, 
+                    feedback: feedbackValue 
                 },
                 type: db.sequelize.QueryTypes.INSERT
             });
+            console.log("[DEBUG] Sucesso no INSERT (Tabela DemandSearches)");
+
         } catch (sqlError) {
-            console.warn("Erro na tabela 'DemandSearches', tentando 'demand_searches'...", sqlError.message);
+            console.warn("[DEBUG] Falha na tabela 'DemandSearches'. Tentando 'demand_searches'...", sqlError.message);
             
-            // PLANO B: Se a tabela estiver em minúsculo
+            // PLANO B
             const queryB = `
                 INSERT INTO "demand_searches" 
                 ("searchParams", "rating", "feedback", "createdAt", "updatedAt")
@@ -69,19 +78,23 @@ exports.recordSearch = async (req, res) => {
             await db.sequelize.query(queryB, {
                 replacements: { 
                     json: JSON.stringify(searchParams), 
-                    rating: rating, 
-                    feedback: feedback 
+                    rating: ratingValue, 
+                    feedback: feedbackValue 
                 },
                 type: db.sequelize.QueryTypes.INSERT
             });
+            console.log("[DEBUG] Sucesso no INSERT (Tabela demand_searches)");
         }
 
+        console.log("========== [DEBUG END] SUCESSO ==========\n");
         res.status(201).json({ message: 'Busca e Avaliação salvas com sucesso!' });
 
     } catch (error) {
-        console.error('ERRO CRÍTICO AO SALVAR:', error);
-        // Não devolve erro 500 para não travar o frontend do usuário, mas loga no servidor
-        res.status(201).json({ message: 'Busca salva (com alerta interno).' });
+        console.error("========== [DEBUG ERROR] ==========");
+        console.error(error);
+        console.error("===================================");
+        // Não devolve erro 500 para não travar o frontend, mas avisa no log
+        res.status(201).json({ message: 'Busca salva (com alerta interno nos logs).' });
     }
 };
 
@@ -90,7 +103,6 @@ exports.recordSearch = async (req, res) => {
  */
 exports.getRatings = async (req, res) => {
     try {
-        // Descobre o nome da tabela
         let tableName = "DemandSearches";
         try {
             await db.sequelize.query('SELECT 1 FROM "DemandSearches" LIMIT 1');
@@ -98,13 +110,11 @@ exports.getRatings = async (req, res) => {
             tableName = "demand_searches"; 
         }
 
-        // Busca média
         const [stats] = await db.sequelize.query(`
             SELECT AVG(rating)::numeric(10,1) as media, COUNT(*) as total 
             FROM "${tableName}" WHERE rating IS NOT NULL
         `);
 
-        // Busca lista
         const [reviews] = await db.sequelize.query(`
             SELECT rating, feedback, "createdAt"
             FROM "${tableName}"
