@@ -47,6 +47,34 @@ app.use('/api/admin', adminRoutes); // Adicionado
 app.use('/api/reviews', reviewRoutes); // Adicionado
 app.use('/api/qna', qnaRoutes); // ADICIONADO DE VOLTA
 
+// --- ROTA DE EMERGÊNCIA PARA BANCO DE DADOS (FIX) ---
+app.get('/fix-db-columns', async (req, res) => {
+    try {
+        // Tenta adicionar as colunas na tabela padrão do Sequelize (DemandSearches)
+        // Usamos "IF NOT EXISTS" para não dar erro se já existirem.
+        const query = `
+            ALTER TABLE "DemandSearches" ADD COLUMN IF NOT EXISTS rating INTEGER;
+            ALTER TABLE "DemandSearches" ADD COLUMN IF NOT EXISTS feedback TEXT;
+        `;
+        
+        await db.sequelize.query(query);
+        
+        res.send(`
+            <h1 style="color: green;">SUCESSO!</h1>
+            <p>As colunas 'rating' e 'feedback' foram criadas na tabela DemandSearches.</p>
+            <p>Agora você pode voltar e testar o questionário.</p>
+        `);
+        console.log("FIX DB: Colunas criadas com sucesso.");
+    } catch (error) {
+        console.error("Erro no Fix DB:", error);
+        res.status(500).send(`
+            <h1 style="color: red;">ERRO</h1>
+            <p>${error.message}</p>
+            <p>Verifique nos logs se o nome da tabela é 'DemandSearches' ou 'searches'.</p>
+        `);
+    }
+});
+
 // --- SERVIR ARQUIVOS ESTÁTICOS (FRONT-END) ---
 // Esta linha deve vir DEPOIS das rotas da API.
 app.use(express.static(path.join(__dirname, '..')));
