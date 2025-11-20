@@ -48,9 +48,6 @@ app.use('/api/admin', adminRoutes); // Adicionado
 app.use('/api/reviews', reviewRoutes); // Adicionado
 app.use('/api/qna', qnaRoutes); // ADICIONADO DE VOLTA
 
-// Rota para o Admin pegar os feedbacks
-app.get('/api/admin/feedbacks', demandController.getRatings);
-
 // --- ROTA DE EMERGÊNCIA PARA BANCO DE DADOS (FIX) ---
 app.get('/fix-db-columns', async (req, res) => {
     try {
