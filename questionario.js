@@ -70,8 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <label for="star1">${starIcon}</label>
                     </div>
 
-                    <div class="form-group-questionario" style="margin-top: 20px;">
-                        <textarea id="input-feedback" class="feedback-textarea" placeholder=" " rows="4"></textarea>
+                    <div class="form-group-questionario" style="margin-top: 5px;">
+                        <textarea id="input-feedback" class="feedback-textarea" placeholder=" " rows="2"></textarea>
                         <label class="input-label">Deixe um elogio ou sugestão (Opcional)</label>
                     </div>
                 </div>`;

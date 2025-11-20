@@ -1852,11 +1852,11 @@ header.header-rolagem nav a:hover {
 //* --- CORREÇÃO VISUAL: ESTRELAS E INPUT --- */
 
 .rating-stars {
-    display: flex !important; /* FORÇA o alinhamento lado a lado */
-    flex-direction: row-reverse; /* Inverte a ordem para o efeito de preenchimento funcionar */
+    display: flex !important;
+    flex-direction: row-reverse;
     justify-content: center;
-    gap: 15px; /* Espaço entre as estrelas */
-    margin: 20px 0;
+    gap: 15px;
+    margin: 5px 0 10px 0; /* Reduzi drasticamente as margens verticais */
     border: none;
 }
 
