@@ -124,44 +124,53 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =====================================================================
-    // FUNÇÃO finalize
+    // FUNÇÃO finalize (CORRIGIDA PARA ESPERAR O SALVAMENTO)
     // =====================================================================
     async function finalize() {
-        // 1. Coleta a última resposta
+        // 1. Garante que a última resposta (rating + feedback) foi coletada
         collectAnswer();
 
-        // 2. Mostra a tela final VISUALMENTE
+        // 2. Mostra a tela de "final" enquanto processa
         goToSlide(questions.findIndex(q => q.id === 'final'));
 
-        // Registra a busca anônima em paralelo (sem esperar)
-        recordAnonymousSearch();
-
         try {
-            // 3. O TRUQUE DO TEMPO: 
-            // Usamos Promise.all para esperar DUAS coisas acontecerem:
-            // A: O servidor responder com os matches.
-            // B: Um timer de 3 segundos (3000ms) acabar.
-            // O código só avança quando OS DOIS terminarem.
-            const [response] = await Promise.all([
+            // Prepara os dados da busca anônima
+            const { nome, whatsapp, ...demandAnswers } = userAnswers;
+            
+            // 3. O GRANDE SEGREDO: Promise.all espera TUDO terminar
+            // - Espera o Match dos psicólogos
+            // - Espera SALVAR a avaliação no banco (demand/searches)
+            // - Espera um timer visual de 3 segundos
+            const [matchResponse, searchResponse] = await Promise.all([
+                // Requisição A: Match
                 fetch(`${API_BASE_URL}/api/psychologists/match`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(userAnswers),
                 }),
-                new Promise(resolve => setTimeout(resolve, 3000)) // <--- AQUI VOCÊ CONTROLA O TEMPO (3000 = 3s)
+                // Requisição B: Salvar Busca e Avaliação (AQUI ESTAVA O ERRO ANTES)
+                fetch(`${API_BASE_URL}/api/demand/searches`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(demandAnswers), // Envia rating dentro de avaliacao_ux
+                }),
+                // Timer Visual
+                new Promise(resolve => setTimeout(resolve, 3000))
             ]);
 
-            if (!response.ok) {
-                throw new Error('Falha ao buscar recomendações da API.');
+            if (!matchResponse.ok) {
+                throw new Error('Falha ao buscar recomendações.');
             }
 
-            const matchData = await response.json();
+            const matchData = await matchResponse.json();
+
+            // 4. Armazena e Redireciona
             sessionStorage.setItem('matchResults', JSON.stringify(matchData));
             window.location.href = 'resultados.html';
 
         } catch (error) {
             console.error("Erro ao finalizar:", error);
-            // Mesmo com erro, esperamos um pouco para não piscar a tela
+            // Fallback em caso de erro
             setTimeout(() => {
                 sessionStorage.setItem('matchResults', JSON.stringify({ matchTier: 'none', results: [] }));
                 window.location.href = 'resultados.html';
