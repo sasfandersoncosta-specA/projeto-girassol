@@ -5,10 +5,15 @@ const db = require('../models');
  */
 exports.recordSearch = async (req, res) => {
     try {
-        console.log("\n--- [DEBUG] NOVA REQUISIÇÃO DE BUSCA ---");
-        console.log("BODY COMPLETO:", JSON.stringify(req.body, null, 2));
+        let data = req.body;
 
-        const data = req.body;
+        // --- NORMALIZAÇÃO DO INPUT (A CORREÇÃO DEFINITIVA) ---
+        // Se o body for uma string (vindo do sendBeacon), faz o parse para JSON.
+        // Se já for um objeto (vindo de um fetch normal), usa diretamente.
+        if (typeof data === 'string') {
+            data = JSON.parse(data);
+        }
+
         let rating = null;
         let feedback = null;
 
@@ -18,12 +23,9 @@ exports.recordSearch = async (req, res) => {
         
         // Se não achou, olha dentro do objeto avaliacao_ux
         if (!rating && data.avaliacao_ux) {
-            console.log("[DEBUG] Encontrado objeto 'avaliacao_ux'");
             rating = data.avaliacao_ux.rating;
             feedback = data.avaliacao_ux.feedback;
         }
-
-        console.log(`[DEBUG] Dados Extraídos -> Rating: ${rating}, Feedback: ${feedback}`);
 
         // Limpa o objeto para salvar na coluna JSON
         const searchParams = { ...data };
@@ -37,7 +39,6 @@ exports.recordSearch = async (req, res) => {
         });
         
         const idGerado = novaBusca.id;
-        console.log(`[DEBUG] Busca criada com ID: ${idGerado}`);
 
         // 3. Se tiver avaliação, atualiza a linha via SQL Direto
         if (rating || feedback) {
@@ -45,26 +46,19 @@ exports.recordSearch = async (req, res) => {
             const rValue = rating ? parseInt(rating) : null;
             const fValue = feedback ? String(feedback) : null;
 
-            console.log(`[DEBUG] Tentando atualizar ID ${idGerado} com Rating ${rValue}`);
-
             try {
                 // Tenta tabela com aspas (Padrão Sequelize)
                 await db.sequelize.query(
                     `UPDATE "DemandSearches" SET rating = :r, feedback = :f WHERE id = :id`,
                     { replacements: { r: rValue, f: fValue, id: idGerado } }
                 );
-                console.log("[DEBUG] Atualização SUCESSO (DemandSearches)");
             } catch (err1) {
-                console.log("[DEBUG] Falha na tabela padrão. Tentando minúsculo...");
                 // Tenta tabela minúscula (Padrão Postgres puro)
                 await db.sequelize.query(
                     `UPDATE "demand_searches" SET rating = :r, feedback = :f WHERE id = :id`,
                     { replacements: { r: rValue, f: fValue, id: idGerado } }
                 );
-                console.log("[DEBUG] Atualização SUCESSO (demand_searches)");
             }
-        } else {
-            console.log("[DEBUG] Nenhuma avaliação encontrada para salvar.");
         }
 
         res.status(201).json({ message: 'Busca registrada!' });

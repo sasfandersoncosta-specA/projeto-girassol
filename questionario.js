@@ -127,9 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // FUNÇÃO finalize (CORRIGIDA PARA ESPERAR O SALVAMENTO)
     // =====================================================================
     async function finalize() {
-        // DEBUG
-        console.log("DEBUG userAnswers ANTES do finalize():", JSON.parse(JSON.stringify(userAnswers)));
-
         // 1. Garante que a última resposta (rating + feedback) foi coletada
         collectAnswer();
 
@@ -149,8 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     `${API_BASE_URL}/api/demand/searches`,
                     blob
                 );
-
-                console.log("Beacon enviado?", sent);
             } catch (beaconErr) {
                 console.error("Falha no Beacon, mas não vai travar:", beaconErr);
             }

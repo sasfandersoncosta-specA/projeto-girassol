@@ -15,6 +15,7 @@ router.post('/check-demand', psychologistController.checkDemand);
 router.post('/add-to-waitlist', psychologistController.addToWaitlist);
 router.get('/showcase', psychologistController.getShowcasePsychologists);
 router.get('/slug/:slug', psychologistController.getProfileBySlug);
+router.post('/match', psychologistController.getAnonymousMatches); // <-- ROTA ADICIONADA
 router.get('/:id/reviews', psychologistController.getPsychologistReviews);
 // A rota /:id é movida para o final para não conflitar com /me
 

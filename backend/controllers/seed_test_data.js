@@ -12,8 +12,7 @@ async function seedTestData() {
             .replace(/\s+/g, '-');
     };
     try {
-        // --- Cria as tabelas no banco de dados (se ainda não existirem) ---
-        await db.sequelize.sync({ force: true });
+        // A sincronização do banco de dados agora é feita exclusivamente no server.js antes de chamar esta função.
         console.log("Tabelas sincronizadas com sucesso no banco de dados Render.");
 
         // --- 1. Criar um Paciente de Teste ---

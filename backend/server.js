@@ -35,6 +35,9 @@ initSocket(server); // 4. Inicializa o Socket.IO com o servidor http
 // Middlewares (Configurações essenciais)
 app.use(cors()); // Permite requisições de origens diferentes (seu frontend)
 app.use(express.json()); // Permite que o servidor entenda JSON no corpo das requisições
+// --- CORREÇÃO PARA SEND BEACON ---
+// Adiciona um parser para o tipo 'application/json' que o sendBeacon envia como Blob.
+app.use(express.text({ type: 'application/json' }));
 app.use(express.urlencoded({ extended: true })); // Permite entender dados de formulários
 
 // --- ROTAS DA API ---
