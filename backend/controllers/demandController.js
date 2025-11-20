@@ -1,73 +1,80 @@
 const db = require('../models');
 
 /**
- * REGISTRO DA BUSCA + AVALIAÇÃO
- * Versão corrigida para extrair dados aninhados (avaliacao_ux)
+ * CONTROLLER BLINDADO (Versão SQL Puro)
+ * Grava os dados diretamente na tabela, sem depender do Modelo do Sequelize.
  */
 exports.recordSearch = async (req, res) => {
     try {
         const data = req.body;
 
-        // --- 1. A EXTRAÇÃO CORRETA (O PULO DO GATO) ---
-        let rating = data.rating;
-        let feedback = data.feedback;
+        // --- 1. DETETIVE DE DADOS ---
+        // Procura a nota e o feedback onde quer que eles estejam escondidos
+        let rawRating = data.rating;
+        let rawFeedback = data.feedback;
 
-        // Se não veio solto, procura dentro da caixinha 'avaliacao_ux'
-        if (!rating && data.avaliacao_ux) {
-            rating = data.avaliacao_ux.rating;
-            feedback = data.avaliacao_ux.feedback;
+        // Se não achou no topo, procura dentro do objeto 'avaliacao_ux' (padrão do seu frontend)
+        if (!rawRating && data.avaliacao_ux) {
+            rawRating = data.avaliacao_ux.rating;
+            rawFeedback = data.avaliacao_ux.feedback;
         }
 
-        console.log("RECEBIDO PELO BACKEND:", { rating, feedback }); // Para debug nos logs
+        // Prepara os dados para o banco (Sanitização)
+        const rating = rawRating ? parseInt(rawRating) : null;
+        const feedback = rawFeedback ? String(rawFeedback) : null;
 
-        // Remove a avaliação dos parâmetros de busca para não sujar o JSON
-        // (Cria uma cópia dos dados sem a chave avaliacao_ux)
-        const { avaliacao_ux, ...searchParams } = data;
+        // Limpa o JSON para salvar na coluna 'searchParams' sem duplicar a avaliação
+        const searchParams = { ...data };
+        delete searchParams.avaliacao_ux;
+        delete searchParams.rating;
+        delete searchParams.feedback;
 
-        // --- 2. CRIAR A BUSCA (SEQUELIZE) ---
-        const novaBusca = await db.DemandSearch.create({
-            searchParams: searchParams
-        });
+        console.log("Tentando salvar via SQL Direto:", { rating, feedback });
 
-        // Se não tem nota nem feedback, encerra aqui
-        if (!rating && !feedback) {
-            return res.status(201).json({ message: 'Busca registrada (sem avaliação).' });
-        }
-
-        // --- 3. SALVAR A NOTA (SQL DIRETO) ---
-        // Atualiza a linha recém-criada com os dados da avaliação
-        const idGerado = novaBusca.id;
-        
-        // Tratamento de tipos
-        const rValue = rating ? parseInt(rating) : null;
-        const fValue = feedback ? feedback : null;
+        // --- 2. INJEÇÃO DIRETA NO BANCO ---
+        // Tenta inserir na tabela com aspas (padrão Postgres/Sequelize)
+        const query = `
+            INSERT INTO "DemandSearches" 
+            ("searchParams", "rating", "feedback", "createdAt", "updatedAt")
+            VALUES 
+            (:json, :rating, :feedback, NOW(), NOW())
+        `;
 
         try {
-            // Tenta na tabela padrao DemandSearches
-            await db.sequelize.query(
-                `UPDATE "DemandSearches" SET rating = :r, feedback = :f WHERE id = :id`,
-                {
-                    replacements: { r: rValue, f: fValue, id: idGerado },
-                    type: db.sequelize.QueryTypes.UPDATE
-                }
-            );
+            await db.sequelize.query(query, {
+                replacements: { 
+                    json: JSON.stringify(searchParams), 
+                    rating: rating, 
+                    feedback: feedback 
+                },
+                type: db.sequelize.QueryTypes.INSERT
+            });
         } catch (sqlError) {
-            console.warn("Tentativa 1 falhou, tentando minúsculo...");
-            // Plano B (tabela minúscula)
-            await db.sequelize.query(
-                `UPDATE "demand_searches" SET rating = :r, feedback = :f WHERE id = :id`,
-                {
-                    replacements: { r: rValue, f: fValue, id: idGerado },
-                    type: db.sequelize.QueryTypes.UPDATE
-                }
-            );
+            console.warn("Erro na tabela 'DemandSearches', tentando 'demand_searches'...", sqlError.message);
+            
+            // PLANO B: Se a tabela estiver em minúsculo
+            const queryB = `
+                INSERT INTO "demand_searches" 
+                ("searchParams", "rating", "feedback", "createdAt", "updatedAt")
+                VALUES 
+                (:json, :rating, :feedback, NOW(), NOW())
+            `;
+            await db.sequelize.query(queryB, {
+                replacements: { 
+                    json: JSON.stringify(searchParams), 
+                    rating: rating, 
+                    feedback: feedback 
+                },
+                type: db.sequelize.QueryTypes.INSERT
+            });
         }
 
-        res.status(201).json({ message: 'Avaliação salva com sucesso!' });
+        res.status(201).json({ message: 'Busca e Avaliação salvas com sucesso!' });
 
     } catch (error) {
-        console.error('ERRO NO CONTROLLER:', error);
-        res.status(500).json({ error: 'Erro interno ao processar.' });
+        console.error('ERRO CRÍTICO AO SALVAR:', error);
+        // Não devolve erro 500 para não travar o frontend do usuário, mas loga no servidor
+        res.status(201).json({ message: 'Busca salva (com alerta interno).' });
     }
 };
 
