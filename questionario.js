@@ -127,6 +127,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // FUNÇÃO finalize (CORRIGIDA PARA ESPERAR O SALVAMENTO)
     // =====================================================================
     async function finalize() {
+        // DEBUG
+        console.log("DEBUG userAnswers ANTES do finalize():", JSON.parse(JSON.stringify(userAnswers)));
+
         // 1. Garante que a última resposta (rating + feedback) foi coletada
         collectAnswer();
 
@@ -134,47 +137,54 @@ document.addEventListener('DOMContentLoaded', () => {
         goToSlide(questions.findIndex(q => q.id === 'final'));
 
         try {
-            // Prepara os dados da busca anônima
+            // Separa dados
             const { nome, whatsapp, ...demandAnswers } = userAnswers;
-            
-            // 3. O GRANDE SEGREDO: Promise.all espera TUDO terminar
-            // - Espera o Match dos psicólogos
-            // - Espera SALVAR a avaliação no banco (demand/searches)
-            // - Espera um timer visual de 3 segundos
-            const [matchResponse, searchResponse] = await Promise.all([
-                // Requisição A: Match
-                fetch(`${API_BASE_URL}/api/psychologists/match`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(userAnswers),
-                }),
-                // Requisição B: Salvar Busca e Avaliação (AQUI ESTAVA O ERRO ANTES)
-                fetch(`${API_BASE_URL}/api/demand/searches`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(demandAnswers), // Envia rating dentro de avaliacao_ux
-                }),
-                // Timer Visual
-                new Promise(resolve => setTimeout(resolve, 3000))
-            ]);
+
+            // --- ENVIO VIA SEND BEACON (não trava o redirect) ---
+            try {
+                const payload = JSON.stringify(demandAnswers);
+                const blob = new Blob([payload], { type: "application/json" });
+
+                const sent = navigator.sendBeacon(
+                    `${API_BASE_URL}/api/demand/searches`,
+                    blob
+                );
+
+                console.log("Beacon enviado?", sent);
+            } catch (beaconErr) {
+                console.error("Falha no Beacon, mas não vai travar:", beaconErr);
+            }
+
+            // --- FETCH DO MATCH (PRECISA DO RESULTADO) ---
+            const matchResponse = await fetch(`${API_BASE_URL}/api/psychologists/match`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userAnswers),
+            });
 
             if (!matchResponse.ok) {
-                throw new Error('Falha ao buscar recomendações.');
+                throw new Error("Falha ao buscar recomendações");
             }
 
             const matchData = await matchResponse.json();
 
-            // 4. Armazena e Redireciona
+            // Timer de UX para não parecer "instantâneo"
+            await new Promise(r => setTimeout(r, 1200));
+
+            // Salva
             sessionStorage.setItem('matchResults', JSON.stringify(matchData));
+
+            // Redireciona tranquilamente
             window.location.href = 'resultados.html';
 
         } catch (error) {
-            console.error("Erro ao finalizar:", error);
+            console.error("Erro no finalize():", error);
+
             // Fallback em caso de erro
             setTimeout(() => {
                 sessionStorage.setItem('matchResults', JSON.stringify({ matchTier: 'none', results: [] }));
                 window.location.href = 'resultados.html';
-            }, 2000);
+            }, 1500);
         }
     }
     
