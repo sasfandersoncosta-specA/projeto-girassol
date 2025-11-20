@@ -28,22 +28,108 @@ body.pagina-dashboard {
 }
 
 .dashboard-container { display: flex; min-height: 100vh; }
-.dashboard-sidebar { width: 240px; background-color: var(--verde-escuro); color: var(--branco-puro); display: flex; flex-direction: column; padding: 20px; flex-shrink: 0; } /* Largura reduzida */
-.sidebar-header { text-align: center; margin-bottom: 15px; }
-.sidebar-logo { width: 140px; margin-bottom: 20px; }
-.sidebar-user-block { display: flex; align-items: center; gap: 15px; text-align: left; padding: 15px; background-color: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 15px; }
-.sidebar-user-block img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; }
-.sidebar-user-block .profile-photo-label {
-    cursor: pointer;
-    display: block;
-    border-radius: 50%; /* Mantém o formato redondo para o cursor */
+/* ==========================================================================
+   SIDEBAR (ESTILO IDÊNTICO AO ADMIN)
+   ========================================================================== */
+
+.dashboard-sidebar {
+    background-color: var(--verde-escuro);
+    color: var(--branco-puro);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    position: relative;
+    height: 100vh; /* Garante altura total */
+    box-sizing: border-box;
 }
-.sidebar-user-block .user-info p { margin: 0; font-weight: 500; color: var(--branco-puro); }
-.sidebar-user-block .user-info a { font-size: 12px; color: #FFEE8C; } /* Fonte reduzida */
-.sidebar-nav { flex-grow: 1; margin-top: 15px; }
-.sidebar-nav ul { list-style: none; padding: 0; }
-.sidebar-nav li a { display: flex; justify-content: space-between; align-items: center; color: #adb5bd; text-decoration: none; padding: 15px; border-radius: 8px; transition: all 0.2s ease-in-out; font-weight: 500; }
-.sidebar-nav li.active a, .sidebar-nav li a:hover { background-color: rgba(255, 255, 255, 0.1); color: var(--branco-puro); }
+
+/* Efeito de Ruído (Opcional, igual ao Admin) */
+.dashboard-sidebar::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 600 600' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.06;
+    z-index: 0;
+}
+
+/* Conteúdo acima do ruído */
+.sidebar-header, .sidebar-nav, .sidebar-footer {
+    position: relative; 
+    z-index: 1;
+}
+
+/* --- Cabeçalho da Sidebar --- */
+.sidebar-header {
+    padding-bottom: 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sidebar-logo { 
+    height: 35px; 
+    margin-bottom: 20px;
+    display: block;
+}
+
+/* Foto e Nome do Psicólogo */
+.sidebar-user-block {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+#psi-sidebar-photo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.2);
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+.user-info p {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--branco-puro);
+}
+
+.user-info .sidebar-logout {
+    font-size: 0.8rem;
+    color: var(--cor-girassol);
+    text-decoration: none;
+    opacity: 0.8;
+}
+
+/* --- Botão "Ver como Paciente" (Ajustado ao Layout Admin) --- */
+#btn-view-public-profile {
+    /* Mantém o estilo pílula amarelo, mas ajusta margens */
+    margin-top: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* --- Navegação (CÓDIGO DO ADMIN APLICADO) --- */
+.sidebar-nav {
+    flex-grow: 1;
+    margin-top: 20px;
+    overflow-y: auto; /* Permite rolar se a tela for pequena */
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-nav li {
+    margin-bottom: 5px; /* Espaçamento sutil entre itens */
+}
+
 .notificacao { background-color: #E63946; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; display: inline-flex; justify-content: center; align-items: center; }
 .badge-breve { background-color: #457B9D; border-radius: 10px; font-size: 10px; padding: 3px 6px; text-transform: uppercase; }
 .dashboard-main { flex-grow: 1; padding: 40px; overflow-y: auto; }
@@ -1851,45 +1937,4 @@ fieldset:disabled .multiselect-tag .multiselect-display {
     padding: 12px 20px;
     font-size: 15px;
     justify-content: center; 
-}
-
-/* --- AJUSTE FINO DA SIDEBAR (Igual ao Admin) --- */
-
-/* Container da lista: reduz o espaço entre os itens */
-.dashboard-sidebar .sidebar-nav ul {
-    display: flex;
-    flex-direction: column;
-    gap: 8px; /* Aproxima os itens (antes devia ser 20px ou mais) */
-    padding: 0 15px; /* Alinha com o botão de cima */
-    margin-top: 20px;
-}
-
-/* O Item do Link */
-.dashboard-sidebar .sidebar-nav li a {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 15px; /* Altura mais compacta */
-    border-radius: 8px;
-    color: #b8c2bc; /* Cor padrão do texto (cinza claro) */
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.95rem;
-    transition: all 0.2s ease;
-    justify-content: flex-start; /* Garante alinhamento à esquerda */
-}
-
-/* Estado Ativo e Hover */
-.dashboard-sidebar .sidebar-nav li.active a,
-.dashboard-sidebar .sidebar-nav li a:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: var(--branco-puro);
-    font-weight: 600;
-}
-
-/* Ícones do menu (se houver) */
-.dashboard-sidebar .sidebar-nav li a svg {
-    width: 20px;
-    height: 20px;
-    opacity: 0.9;
 }
