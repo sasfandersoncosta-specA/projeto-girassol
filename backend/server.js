@@ -83,7 +83,7 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 // garantindo que o schema esteja sempre atualizado com os modelos.
 // Em produção, usamos sync() sem 'force' para não perder dados.
 const startServer = async () => {
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV !== 'production') {
         await db.sequelize.sync({ alter: true });
         console.log('Banco de dados sincronizado (DEV).');
         await seedTestData();
