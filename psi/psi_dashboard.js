@@ -417,6 +417,25 @@ document.addEventListener('DOMContentLoaded', function() {
         if (sidebarNameEl && sidebarPhotoEl && psychologistData) {
             sidebarNameEl.textContent = psychologistData.nome; 
             sidebarPhotoEl.src = psychologistData.fotoUrl || 'https://placehold.co/40x40/1B4332/FFFFFF?text=Psi';
+
+            // --- [NOVO] LÓGICA DO BOTÃO 'VER COMO PACIENTE' ---
+            const btnPublicProfile = document.getElementById('btn-view-public-profile');
+            if (btnPublicProfile) {
+                if (psychologistData.slug) {
+                    // Se tiver slug, cria o link para o perfil público
+                    btnPublicProfile.href = `/${psychologistData.slug}`;
+                    btnPublicProfile.style.opacity = '1';
+                    btnPublicProfile.style.pointerEvents = 'auto';
+                    btnPublicProfile.title = "Visualizar seu perfil público";
+                } else {
+                    // Se não tiver slug (perfil incompleto), desabilita visualmente
+                    btnPublicProfile.href = '#';
+                    btnPublicProfile.style.opacity = '0.5';
+                    btnPublicProfile.style.cursor = 'not-allowed';
+                    btnPublicProfile.title = "Complete seu perfil para gerar o link público";
+                }
+            }
+            // --------------------------------------------------
         }
 
         // --- LÓGICA PARA TROCA DE FOTO DE PERFIL (AGORA IMPLEMENTADA) ---
