@@ -17,7 +17,7 @@ window.initializePage = async function() {
 
     try {
         // 2. FAZ O FETCH ENVIANDO O TOKEN NO HEADER
-        const response = await fetch('/api/admin/feedbacks', {
+        const response = await fetch('/api/demand/ratings', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
