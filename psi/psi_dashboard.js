@@ -1,4 +1,4 @@
-// Arquivo: psi_dashboard.js (VERSÃO FINAL CORRIGIDA)
+// Arquivo: psi_dashboard.js (VERSÃO CORRIGIDA: ARRAY TO STRING)
 
 document.addEventListener('DOMContentLoaded', function() {
     
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // =====================================================================
-    // HELPERS: MÁSCARAS E MULTISELECTS (AGORA NO ESCOPO CERTO)
+    // HELPERS: MÁSCARAS E MULTISELECTS
     // =====================================================================
     
     function setupMasks() {
@@ -113,10 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const optionsContainer = dropdown.querySelector('.multiselect-options');
             const options = dropdown.querySelectorAll('.option');
             const fieldId = dropdown.id; 
-            
-            // Remove '_multiselect' para pegar a chave do JSON
             const dataKey = fieldId.replace('_multiselect', '');
-            
             let selectedValues = [];
 
             // 1. Carregar dados iniciais
@@ -193,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // =====================================================================
-    // LÓGICA DA PÁGINA: MEU PERFIL (COMPLETA)
+    // LÓGICA DA PÁGINA: MEU PERFIL (CORRIGIDA)
     // =====================================================================
     function inicializarLogicaDoPerfil() {
         const form = document.getElementById('perfil-form');
@@ -203,19 +200,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (!form || !fieldset || !btnAlterar || !btnSalvar) return;
 
-        // 1. Inicializa Máscaras
         setupMasks();
 
-        // 2. Preencher campos com dados existentes
+        // Preencher campos
         if (psychologistData) {
-            // Campos de texto simples
             const fields = ['nome', 'cpf', 'email', 'crp', 'telefone', 'bio', 'valor_sessao_numero', 'agenda_online_url'];
             fields.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = psychologistData[id] || '';
             });
 
-            // Redes Sociais (Remove prefixos para exibição)
             const setSocial = (id, prefix) => {
                 let val = psychologistData[id] || '';
                 if(val) {
@@ -231,11 +225,10 @@ document.addEventListener('DOMContentLoaded', function() {
             setSocial('tiktok_url', 'tiktok.com/@');
             setSocial('x_url', 'x.com/');
 
-            // Inicializa Multiselects
             setupMultiselects(psychologistData);
         }
 
-        // 3. Ação Botão Alterar
+        // Botão Alterar
         btnAlterar.addEventListener('click', (e) => {
             e.preventDefault();
             fieldset.disabled = false;
@@ -244,7 +237,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.multiselect-tag').forEach(el => el.classList.remove('disabled'));
         });
 
-        // 4. Ação Botão Salvar (Submit)
+        // Botão Salvar (Submit)
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             btnSalvar.textContent = "Salvando...";
@@ -253,18 +246,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const formData = new FormData(form);
             const dataToUpdate = Object.fromEntries(formData.entries());
 
-            // Reconstrói URLs das Redes Sociais
             if(dataToUpdate.linkedin_url) dataToUpdate.linkedin_url = `https://linkedin.com/in/${dataToUpdate.linkedin_url}`;
             if(dataToUpdate.instagram_url) dataToUpdate.instagram_url = `https://instagram.com/${dataToUpdate.instagram_url}`;
             if(dataToUpdate.facebook_url) dataToUpdate.facebook_url = `https://facebook.com/${dataToUpdate.facebook_url}`;
             if(dataToUpdate.tiktok_url) dataToUpdate.tiktok_url = `https://tiktok.com/@${dataToUpdate.tiktok_url}`;
             if(dataToUpdate.x_url) dataToUpdate.x_url = `https://x.com/${dataToUpdate.x_url}`;
 
-            // Coleta dados dos Multiselects
+            // --- CORREÇÃO AQUI: TRANSFORMA ARRAY EM STRING ---
             document.querySelectorAll('.multiselect-tag').forEach(dropdown => {
                 const key = dropdown.id.replace('_multiselect', '');
-                // Salva como string separada por vírgula (padrão SQL simples) ou array dependendo do seu backend
-                dataToUpdate[key] = dropdown.getValues(); 
+                const valores = dropdown.getValues();
+                dataToUpdate[key] = valores.length > 0 ? valores.join(',') : ''; 
             });
 
             try {
@@ -277,15 +269,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 showToast('Perfil atualizado com sucesso!', 'success');
                 
-                // Atualiza dados locais
                 psychologistData = { ...psychologistData, ...dataToUpdate };
                 
-                // Bloqueia formulário novamente
                 fieldset.disabled = true;
                 btnSalvar.classList.add('hidden');
                 btnAlterar.classList.remove('hidden');
                 
-                // Atualiza sidebar
                 const sidebarNameEl = document.getElementById('psi-sidebar-name');
                 if(sidebarNameEl) sidebarNameEl.textContent = psychologistData.nome;
 
@@ -298,7 +287,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // 5. Botão Excluir Conta
+        // Botão Excluir Conta
         const btnExcluirLink = document.getElementById('btn-excluir-conta');
         if (btnExcluirLink) {
             btnExcluirLink.addEventListener('click', (e) => {
@@ -309,17 +298,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // =====================================================================
-    // LÓGICA DA PÁGINA: EXCLUIR CONTA
+    // LÓGICA DA PÁGINA: EXCLUIR CONTA (OFFBOARDING)
     // =====================================================================
     async function inicializarLogicaExclusao() {
-        // Nome do profissional
         if (psychologistData && psychologistData.nome) {
             const primeiroNome = psychologistData.nome.split(' ')[0];
             const elNome = document.getElementById('nome-profissional-saida');
             if (elNome) elNome.textContent = primeiroNome;
         }
 
-        // Stats Mockados (Futuramente buscar da API)
         const statsMock = { dias: 142, views: 1205, contatos: 48, comunidade: 15 };
         const elDias = document.getElementById('stat-dias');
         if(elDias) {
@@ -361,7 +348,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // =====================================================================
-    // UPLOAD DE FOTO E NAVEGAÇÃO (MANTIDOS)
+    // UPLOAD DE FOTO E NAVEGAÇÃO
     // =====================================================================
     async function uploadProfilePhoto(file, sidebarPhotoEl) {
         const formData = new FormData();
@@ -388,9 +375,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function fetchUnreadCount() { /* ... mantido ... */ }
-    function fetchQnaCount() { /* ... mantido ... */ }
-    
+    function fetchUnreadCount() { /* ... */ }
+    function fetchQnaCount() { /* ... */ }
     function inicializarLogicaDaCaixaDeEntrada() { }
     function inicializarListaDeEspera() { }
     async function inicializarComunidadeQNA() { console.log("Q&A OK"); }
@@ -446,7 +432,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Navegação
         const navLinks = document.querySelectorAll('.sidebar-nav a');
         navLinks.forEach(link => {
             link.addEventListener('click', function(e) {
