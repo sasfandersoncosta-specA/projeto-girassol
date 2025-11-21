@@ -401,3 +401,97 @@ button[disabled] { background: #e9ecef !important; color: #adb5bd; cursor: not-a
     .plano-acoes { align-items: flex-start; margin-top: 15px; }
     .plano-card--ativo { transform: none; }
 }
+/* ==========================================================================
+   AJUSTES FINAIS: CAIXA DE ENTRADA
+   ========================================================================== */
+
+/* 1. Ajuste do Cabeçalho Verde (Flexbox para alinhar botão) */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Permite quebrar no mobile */
+    gap: 20px;
+}
+
+/* Botão do Cabeçalho (Estilo Transparente/Branco) */
+.btn-header-action {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: var(--branco-puro);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+.btn-header-action:hover {
+    background-color: var(--branco-puro);
+    color: var(--verde-escuro);
+}
+
+/* 2. Ajuste da Largura da Lista de Mensagens */
+.inbox-container {
+    /* Garante altura fixa para ter rolagem interna */
+    height: calc(100vh - 240px); 
+    min-height: 500px;
+}
+
+.inbox-sidebar {
+    width: 320px; /* Largura fixa confortável */
+    flex-shrink: 0; /* Impede que a lista seja esmagada */
+    background-color: #fcfcfc;
+}
+
+/* Item da Lista */
+.message-item {
+    padding: 18px 20px;
+    border-bottom: 1px solid #eee;
+    transition: background 0.2s;
+}
+.message-item.active {
+    background-color: #e8f5e9; /* Verde bem claro */
+    border-left: 4px solid var(--verde-escuro);
+}
+
+/* 3. Conteúdo da Mensagem */
+.inbox-content {
+    padding: 40px; /* Mais espaço para leitura */
+    background-color: var(--branco-puro);
+}
+
+.message-header h2 {
+    margin-top: 0;
+    font-size: 1.8rem;
+    color: var(--verde-escuro);
+    line-height: 1.3;
+}
+
+.meta-info {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    font-size: 0.9rem;
+    color: #777;
+}
+
+.meta-badge {
+    background-color: var(--cor-girassol);
+    color: var(--verde-escuro);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+.message-body {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: #444;
+}
+
+/* Ajuste para Mobile */
+@media (max-width: 768px) {
+    .main-header { flex-direction: column; align-items: flex-start; }
+    .btn-header-action { width: 100%; }
+    .inbox-container { height: auto; min-height: auto; }
+}

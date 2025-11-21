@@ -1,6 +1,9 @@
 <header class="main-header">
-    <h1>Caixa de Entrada</h1>
-    <button id="btn-abrir-feedback" class="btn-rapido">Enviar Feedback ou Dúvida</button>
+    <div class="header-text">
+        <h1>Caixa de Entrada</h1>
+        <p class="subtitulo-header">Gerencie suas mensagens e comunicados.</p>
+    </div>
+    <button id="btn-abrir-feedback" class="btn btn-header-action">Enviar Feedback ou Dúvida</button>
 </header>
 
 <div class="inbox-container">
@@ -13,7 +16,7 @@
             </li>
             <li class="message-item unread">
                 <div class="message-sender">Admin Jano</div>
-                <div class="message-subject">Workshop: Técnicas de Marketing para Psicólogos</div>
+                <div class="message-subject">Workshop: Técnicas de Marketing</div>
                 <div class="message-date">Ontem</div>
             </li>
             <li class="message-item">
@@ -25,21 +28,25 @@
     </aside>
 
     <main class="inbox-content">
-        <main class="inbox-content">
-    <button class="btn-voltar-inbox">&larr; Voltar para a lista</button>
+        <button class="btn-voltar-inbox">&larr; Voltar para a lista</button>
 
-    <div class="message-header">
-        <h2>Atualização Importante nos Termos de Uso</h2>
         <div class="message-header">
             <h2>Atualização Importante nos Termos de Uso</h2>
-            <p>De: <strong>Admin Jano</strong> | Data: <strong>Hoje</strong></p>
+            <div class="meta-info">
+                <span class="meta-badge">Admin Jano</span>
+                <span class="meta-date">Hoje, 10:30</span>
+            </div>
         </div>
+
         <div class="message-body">
             <p>Prezado(a) profissional,</p>
             <p>Gostaríamos de informar que nossos Termos de Uso foram atualizados para refletir as novas funcionalidades da plataforma. As mudanças visam garantir maior segurança e transparência para todos os usuários.</p>
             <p>Por favor, revise os novos termos clicando no link abaixo. A continuação do uso da plataforma implica na aceitação das novas condições.</p>
+            <div style="margin: 30px 0;">
+                <a href="#" style="color: var(--verde-escuro); font-weight: bold; text-decoration: underline;">Ler Novos Termos de Uso &rarr;</a>
+            </div>
             <p>Agradecemos a sua atenção.</p>
-            <p>Atenciosamente,<br>Equipe Jano</p>
+            <p>Atenciosamente,<br><strong>Equipe Jano</strong></p>
         </div>
     </main>
 </div>
@@ -50,8 +57,11 @@
         <h2>Enviar Mensagem para o Admin</h2>
         <p>Use este espaço para enviar suas dúvidas, sugestões ou feedback.</p>
         <form>
-            <textarea id="feedback-textarea" rows="8" placeholder="Digite sua mensagem aqui..."></textarea>
-            <button type="submit" class="btn-salvar">Enviar Mensagem</button>
+            <textarea id="feedback-textarea" rows="6" placeholder="Digite sua mensagem aqui..."></textarea>
+            <div class="form-acoes">
+                <button type="button" class="btn btn-secundario modal-cancel">Cancelar</button>
+                <button type="submit" class="btn btn-principal">Enviar Mensagem</button>
+            </div>
         </form>
     </div>
 </div>
