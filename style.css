@@ -3976,3 +3976,53 @@ header.header-rolagem .botoes-acao .btn-outline:hover {
     font-size: 0.9rem;
     color: #666;
 }
+/* ==========================================================================
+   AJUSTE FINO: ÍCONES SOCIAIS NO CARD LATERAL (PEQUENOS)
+   ========================================================================== */
+
+/* 1. Container da linha de ícones */
+.conversion-card .social-share-row {
+    display: flex;
+    flex-wrap: wrap;       /* Permite quebrar linha se tiver muitos ícones */
+    justify-content: center;
+    gap: 8px;              /* Espaço menor entre eles (era 15px) */
+    margin-top: 20px;
+    padding: 0;            /* Remove padding extra */
+    background: transparent; /* Remove fundo branco */
+    border: none;          /* Remove bordas do container */
+    box-shadow: none;
+}
+
+/* 2. Estilo Unificado para Social E Compartilhar */
+.conversion-card #psi-social-links .icon-btn,
+.conversion-card .icon-btn-modern {
+    width: 36px;           /* Tamanho reduzido (era 42px) */
+    height: 36px;
+    border-radius: 50%;    /* FORÇA O REDONDO */
+    border: 1px solid #e0e0e0;
+    background-color: #fff;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;            /* Garante que o ícone fique centralizado */
+    transition: all 0.2s ease;
+    flex-shrink: 0;        /* Impede que o botão amasse */
+}
+
+/* 3. Efeito Hover (Verde) */
+.conversion-card #psi-social-links .icon-btn:hover,
+.conversion-card .icon-btn-modern:hover {
+    background-color: var(--verde-escuro) !important;
+    color: #ffffff !important;
+    border-color: var(--verde-escuro) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(27, 67, 50, 0.15);
+}
+
+/* 4. Ajuste do tamanho do SVG interno */
+.conversion-card .icon-btn svg,
+.conversion-card .icon-btn-modern svg {
+    width: 16px;  /* Ícone menor para caber no botão */
+    height: 16px;
+}
