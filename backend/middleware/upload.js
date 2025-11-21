@@ -1,38 +1,39 @@
+// backend/middleware/upload.js
 const multer = require('multer');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const cloudinary = require('cloudinary').v2;
+const path = require('path');
+const fs = require('fs');
 
-// Configura o Cloudinary com as suas credenciais do .env
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// Garante que a pasta de uploads exista
+const uploadDir = 'uploads';
+if (!fs.existsSync(uploadDir)){
+    fs.mkdirSync(uploadDir);
+}
 
-// Configuração de armazenamento para FOTOS DE PERFIL
-const profilePhotoStorage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: 'girassol/profile_photos',
-        allowed_formats: ['jpg', 'png', 'jpeg'],
-        transformation: [{ width: 500, height: 500, crop: 'limit' }],
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/');
     },
+    filename: function (req, file, cb) {
+        // Cria um nome único: id-do-psi-data-nomeoriginal
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
 });
 
-// Configuração de armazenamento para DOCUMENTOS CRP
-const crpDocumentStorage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: 'girassol/crp_documents',
-        allowed_formats: ['jpg', 'png', 'pdf'],
-    },
-});
-
-// Cria as instâncias do Multer para cada tipo de upload
-const uploadProfilePhoto = multer({ storage: profilePhotoStorage });
-const uploadCrpDocument = multer({ storage: crpDocumentStorage });
-
-module.exports = {
-    uploadProfilePhoto,
-    uploadCrpDocument,
+const fileFilter = (req, file, cb) => {
+    // Aceita apenas imagens
+    if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+    } else {
+        cb(new Error('Apenas arquivos de imagem são permitidos!'), false);
+    }
 };
+
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 } // Limite de 5MB
+});
+
+// Exporta dois middlewares: um para foto de perfil, outro para documento
+exports.uploadProfilePhoto = upload;
+exports.uploadCrpDocument = upload;

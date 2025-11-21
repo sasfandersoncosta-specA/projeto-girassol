@@ -354,11 +354,30 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
+        // (CÓDIGO NOVO - COLE ISTO NO LUGAR)
         const uploadInput = document.getElementById('profile-photo-upload');
         if (uploadInput && imgEl) {
-            uploadInput.onchange = (e) => {
-                if(e.target.files[0]) uploadProfilePhoto(e.target.files[0], imgEl);
-            };
+            // Usamos addEventListener que é mais seguro que .onchange
+            uploadInput.addEventListener('change', (e) => {
+                // 1. IMPEDE que o evento se propague e cause o envio do formulário principal
+                e.preventDefault(); 
+                e.stopPropagation();
+
+                console.log("Tentando upload de foto..."); // Log para debug
+
+                // 2. Verifica se o arquivo existe antes de tentar enviar
+                if (e.target.files && e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    
+                    // Opcional: verificação rápida de tipo/tamanho no front
+                    if (!file.type.startsWith('image/')) {
+                        showToast('Por favor, selecione apenas arquivos de imagem.', 'error');
+                        return;
+                    }
+
+                    uploadProfilePhoto(file, imgEl);
+                }
+            });
         }
 
         document.querySelectorAll('.sidebar-nav a').forEach(l => {

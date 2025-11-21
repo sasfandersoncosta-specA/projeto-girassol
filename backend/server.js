@@ -118,6 +118,9 @@ app.get('/fix-db-exit', async (req, res) => {
 // --- SERVIR ARQUIVOS ESTÁTICOS (FRONT-END) ---
 app.use(express.static(path.join(__dirname, '..')));
 
+// Permite acessar as fotos enviadas na URL /uploads/nome-da-foto.jpg
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.get('/:slug', (req, res, next) => {
     const reservedPaths = ['api', 'assets', 'css', 'js', 'patient', 'psi', 'fix-db-columns', 'fix-db-exit'];
     if (reservedPaths.some(p => req.params.slug.startsWith(p)) || req.params.slug.includes('.')) {
