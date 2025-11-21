@@ -317,55 +317,68 @@ exports.getWaitingList = async (req, res) => {
 
 
 // ----------------------------------------------------------------------
-// Rota: PUT /api/psychologists/me (Rota Protegida)
-// DESCRIÇÃO: Atualiza os dados do perfil do psicólogo logado. (ATUALIZADO)
+// Rota: PUT /api/psychologists/me (VERSÃO DIAGNÓSTICO)
 // ----------------------------------------------------------------------
 exports.updatePsychologistProfile = async (req, res) => {
     try {
-        // CORREÇÃO: Busca a instância completa primeiro
+        console.log("\n--- [DEBUG] INICIANDO ATUALIZAÇÃO DE PERFIL ---");
+        
         const psychologistToUpdate = await db.Psychologist.findByPk(req.psychologist.id);
+        if (!psychologistToUpdate) return res.status(404).json({ error: 'Psi não encontrado.' });
 
-        if (!psychologistToUpdate) {
-            return res.status(404).json({ error: 'Psicólogo não encontrado ou não autenticado.' });
-        }
+        const body = req.body;
 
-        const {
-            nome, email, crp, cpf, telefone, bio, 
-            agenda_online_url, // Adicionado
-            linkedin_url, instagram_url, facebook_url, tiktok_url, x_url, // Adicionado
-            valor_sessao_numero, temas_atuacao, abordagens_tecnicas,
-            genero_identidade, praticas_vivencias, disponibilidade_periodo
-        } = req.body;
+        // --- ANÁLISE FORENSE DOS DADOS ---
+        console.log("1. DADOS BRUTOS RECEBIDOS:", JSON.stringify(body, null, 2));
 
-        // Validações básicas (pode ser expandido com Joi/Yup)
-        if (!nome || !email || !crp) {
-            return res.status(400).json({ error: 'Nome, email e CRP são obrigatórios.' });
-        }
+        const arrayFields = ['temas_atuacao', 'abordagens_tecnicas', 'praticas_vivencias', 'disponibilidade_periodo'];
+        const stringFields = ['genero_identidade'];
 
-        // Verifica se o novo email já está em uso por outro psicólogo
-        if (email.toLowerCase() !== psychologistToUpdate.email.toLowerCase()) {
-            const existingEmail = await db.Psychologist.findOne({ where: { email } });
-            if (existingEmail) {
-                return res.status(409).json({ error: 'Este email já está em uso por outra conta.' });
-            }
-        }
-
-        // Atualiza a instância
-        const updatedPsychologist = await psychologistToUpdate.update({
-            nome, email, crp, cpf, telefone, bio,
-            agenda_online_url,
-            linkedin_url, instagram_url, facebook_url, tiktok_url, x_url, // Adicionado
-            valor_sessao_numero, temas_atuacao, abordagens_tecnicas,
-            genero_identidade, praticas_vivencias, disponibilidade_periodo,
-            slug: generateSlug(nome), 
-            status: psychologistToUpdate.status === 'pending_initial' ? 'pending_review' : psychologistToUpdate.status // Lógica de status
+        console.log("2. VERIFICAÇÃO DE TIPOS:");
+        arrayFields.forEach(field => {
+            const val = body[field];
+            console.log(`   - ${field}: Valor="${val}" | Tipo=${typeof val} | É Array? ${Array.isArray(val)}`);
+        });
+        
+        stringFields.forEach(field => {
+            const val = body[field];
+            console.log(`   - ${field}: Valor="${val}" | Tipo=${typeof val} | É Array? ${Array.isArray(val)}`);
         });
 
-        res.status(200).json({ message: 'Perfil atualizado com sucesso!', psychologist: updatedPsychologist });
+        // --- TENTATIVA DE CORREÇÃO AUTOMÁTICA (SANITIZAÇÃO) ---
+        // Se o banco espera Array mas veio String, converte.
+        const safeArrays = {};
+        arrayFields.forEach(field => {
+            let val = body[field];
+            if (!val) {
+                safeArrays[field] = [];
+            } else if (Array.isArray(val)) {
+                safeArrays[field] = val;
+            } else if (typeof val === 'string') {
+                // Se vier "Ansiedade,Depressão", vira ["Ansiedade", "Depressão"]
+                safeArrays[field] = val.split(',').map(s => s.trim()).filter(s => s);
+            } else {
+                safeArrays[field] = [];
+            }
+        });
+
+        console.log("3. DADOS SANITIZADOS (PARA O BANCO):", JSON.stringify(safeArrays, null, 2));
+
+        // Atualiza
+        const updatedPsychologist = await psychologistToUpdate.update({
+            ...body, // Pega campos normais (nome, email...)
+            ...safeArrays, // Sobrescreve com os arrays corrigidos
+            slug: generateSlug(body.nome || psychologistToUpdate.nome)
+        });
+
+        console.log("--- [DEBUG] SUCESSO NA ATUALIZAÇÃO! ---\n");
+        res.status(200).json({ message: 'Perfil atualizado!', psychologist: updatedPsychologist });
 
     } catch (error) {
-        console.error('Erro ao atualizar perfil do psicólogo:', error);
-        res.status(500).json({ error: 'Erro interno no servidor ao atualizar perfil.' });
+        console.error("\n--- [DEBUG] ERRO FATAL NO SEQUELIZE ---");
+        console.error("Mensagem:", error.message);
+        console.error("Stack:", error.stack); 
+        res.status(500).json({ error: 'Erro interno (ver logs).' });
     }
 };
 
