@@ -33,6 +33,7 @@ router.get('/me/unread-count', psychologistController.getUnreadMessageCount);
 router.get('/me/qna-unanswered-count', psychologistController.getUnansweredQuestionsCount);
 router.put('/me/password', psychologistController.updatePsychologistPassword);
 router.delete('/me', psychologistController.deletePsychologistAccount);
+router.post('/me/exit-survey', authMiddleware, psychologistController.saveExitSurvey);
 
 // Outras rotas protegidas (ex: matches)
 router.get('/matches', psychologistController.getPatientMatches);

@@ -939,3 +939,36 @@ exports.getUnansweredQuestionsCount = async (req, res) => {
         res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 };
+// ... (código existente) ...
+
+/**
+ * Salva a pesquisa de saída do Psicólogo
+ */
+exports.saveExitSurvey = async (req, res) => {
+    try {
+        const { motivo, avaliacao, sugestao } = req.body;
+        // Tenta pegar o ID do psi logado (se o middleware de auth estiver ativo)
+        const psychologistId = req.user ? req.user.id : null; 
+
+        console.log("Salvando Exit Survey:", req.body);
+
+        await db.sequelize.query(`
+            INSERT INTO "ExitSurveys" ("psychologistId", "motivo", "avaliacao", "sugestao", "createdAt", "updatedAt")
+            VALUES (:uid, :mot, :aval, :sug, NOW(), NOW())
+        `, {
+            replacements: { 
+                uid: psychologistId, 
+                mot: motivo, 
+                aval: avaliacao ? parseInt(avaliacao) : null, 
+                sug: sugestao 
+            },
+            type: db.sequelize.QueryTypes.INSERT
+        });
+
+        res.json({ message: "Feedback salvo." });
+    } catch (error) {
+        console.error("Erro ao salvar exit survey:", error);
+        // Não retorna erro 500 para não travar a exclusão da conta
+        res.json({ message: "Seguindo..." }); 
+    }
+};

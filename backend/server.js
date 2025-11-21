@@ -1,131 +1,147 @@
-// backend/server.js
+// backend/server.js (O ÚNICO E VERDADEIRO)
 
 require('dotenv').config();
 const express = require('express');
-const http = require('http'); // 1. Importa o módulo http
-const path = require('path'); // Adicionado para lidar com caminhos de arquivo
-const { initSocket } = require('./config/socket'); // 2. Importa nosso inicializador de socket
+const http = require('http');
+const path = require('path');
+const { initSocket } = require('./config/socket');
 const cors = require('cors');
 
-// Carrega o arquivo 'index.js' de dentro da pasta 'models/' para gerenciar o banco
+// Banco de Dados
 const db = require('./models');
 
-// Importa os arquivos de rota
+// Importação de Rotas
 const patientRoutes = require('./routes/patientRoutes');
 const psychologistRoutes = require('./routes/psychologistRoutes');
-const messageRoutes = require('./routes/messageRoutes'); // Adicionado
-const demandRoutes = require('./routes/demandRoutes'); // Adicionado para salvar buscas
-const usuarioRoutes = require('./routes/usuarioRoutes'); // Adicionado conforme solicitado
-const adminRoutes = require('./routes/adminRoutes'); // Adicionado para o dashboard
-const reviewRoutes = require('./routes/reviewRoutes'); //
-const qnaRoutes = require('./routes/qnaRoutes'); // ADICIONADO DE VOLTA
-const psychologistController = require('./controllers/psychologistController');
-const seedTestData = require('./controllers/seed_test_data'); // Caminho corrigido
+const messageRoutes = require('./routes/messageRoutes');
+const demandRoutes = require('./routes/demandRoutes');
+const usuarioRoutes = require('./routes/usuarioRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
+const qnaRoutes = require('./routes/qnaRoutes');
+
+// Importação de Controllers (Necessário para rotas diretas aqui)
 const demandController = require('./controllers/demandController');
+const seedTestData = require('./controllers/seed_test_data');
 
 const app = express();
 
-// LINHA NOVA PARA FORÇAR O DEPLOY
-console.log('[DEPLOY_SYNC] Forçando atualização de build - v1.8');
-console.log("NODE_ENV:", process.env.NODE_ENV);
-const server = http.createServer(app); // 3. Cria um servidor http a partir do app express
+console.log('[DEPLOY_SYNC] Versão Final Integrada - v3.0 (Exit Survey + Admin)');
+const server = http.createServer(app);
 
-initSocket(server); // 4. Inicializa o Socket.IO com o servidor http
+initSocket(server);
 
-// Middlewares (Configurações essenciais)
-app.use(cors()); // Permite requisições de origens diferentes (seu frontend)
-app.use(express.json()); // Permite que o servidor entenda JSON no corpo das requisições
-// --- CORREÇÃO PARA SEND BEACON ---
-// Adiciona um parser para o tipo 'application/json' que o sendBeacon envia como Blob.
+// --- MIDDLEWARES ---
+app.use(cors());
+app.use(express.json());
+// IMPORTANTE: Permite ler JSON enviado via sendBeacon (Blob)
 app.use(express.text({ type: 'application/json' }));
-app.use(express.urlencoded({ extended: true })); // Permite entender dados de formulários
+app.use(express.urlencoded({ extended: true }));
 
 // --- ROTAS DA API ---
-// Todas as requisições que começam com /api/ são tratadas aqui primeiro.
-app.use('/api/patients', patientRoutes); // Todas as rotas de Pacientes (Registro, Login, Dados Pessoais)
-app.use('/api/psychologists', psychologistRoutes); // Todas as rotas de Profissionais (Registro, Login, etc)
-app.use('/api/messaging', messageRoutes); // Adicionado
-app.use('/api/demand', demandRoutes); // Adicionado
-app.use('/api/usuarios', usuarioRoutes); // Adicionado conforme solicitado
-app.use('/api/admin', adminRoutes); // Adicionado
-app.use('/api/reviews', reviewRoutes); // Adicionado
-app.use('/api/qna', qnaRoutes); // ADICIONADO DE VOLTA
+app.use('/api/patients', patientRoutes);
+app.use('/api/psychologists', psychologistRoutes);
+app.use('/api/messaging', messageRoutes);
+app.use('/api/demand', demandRoutes);
+app.use('/api/usuarios', usuarioRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/qna', qnaRoutes);
 
-// --- ROTA DE EMERGÊNCIA PARA BANCO DE DADOS (FIX) ---
+// --- ROTA ADMIN: FEEDBACKS DE USUÁRIOS ---
+app.get('/api/admin/feedbacks', demandController.getRatings);
+
+// --- ROTA ADMIN: PESQUISAS DE SAÍDA (PSI) ---
+app.get('/api/admin/exit-surveys', async (req, res) => {
+    try {
+        // Verifica se a tabela existe antes de tentar ler
+        try {
+            await db.sequelize.query('SELECT 1 FROM "ExitSurveys" LIMIT 1');
+        } catch (e) {
+            return res.json({ stats: { total: 0, media: 0, principal_motivo: '-' }, list: [] });
+        }
+
+        const [stats] = await db.sequelize.query(`
+            SELECT 
+                COUNT(*) as total,
+                AVG(avaliacao)::numeric(10,1) as media,
+                mode() WITHIN GROUP (ORDER BY motivo) as principal_motivo
+            FROM "ExitSurveys"
+        `);
+        
+        const [list] = await db.sequelize.query(`
+            SELECT * FROM "ExitSurveys" ORDER BY "createdAt" DESC LIMIT 50
+        `);
+        
+        res.json({ stats: stats[0] || {}, list: list || [] });
+    } catch (error) {
+        console.error("Erro Admin Exit:", error);
+        res.status(500).json({ error: "Erro interno" });
+    }
+});
+
+// --- ROTAS DE EMERGÊNCIA (DATABASE FIXES) ---
+
+// 1. Cria colunas para Avaliação do Usuário (DemandSearches)
 app.get('/fix-db-columns', async (req, res) => {
     try {
-        // Tenta adicionar as colunas na tabela padrão do Sequelize (DemandSearches)
-        // Usamos "IF NOT EXISTS" para não dar erro se já existirem.
-        const query = `
+        await db.sequelize.query(`
             ALTER TABLE "DemandSearches" ADD COLUMN IF NOT EXISTS rating INTEGER;
             ALTER TABLE "DemandSearches" ADD COLUMN IF NOT EXISTS feedback TEXT;
-        `;
-        
-        await db.sequelize.query(query);
-        
-        res.send(`
-            <h1 style="color: green;">SUCESSO!</h1>
-            <p>As colunas 'rating' e 'feedback' foram criadas na tabela DemandSearches.</p>
-            <p>Agora você pode voltar e testar o questionário.</p>
         `);
-        console.log("FIX DB: Colunas criadas com sucesso.");
+        res.send('<h1 style="color: green;">SUCESSO: Colunas de Busca criadas!</h1>');
     } catch (error) {
-        console.error("Erro no Fix DB:", error);
-        res.status(500).send(`
-            <h1 style="color: red;">ERRO</h1>
-            <p>${error.message}</p>
-            <p>Verifique nos logs se o nome da tabela é 'DemandSearches' ou 'searches'.</p>
+        res.status(500).send('ERRO: ' + error.message);
+    }
+});
+
+// 2. Cria tabela para Saída de Psicólogos (ExitSurveys)
+app.get('/fix-db-exit', async (req, res) => {
+    try {
+        await db.sequelize.query(`
+            CREATE TABLE IF NOT EXISTS "ExitSurveys" (
+                "id" SERIAL PRIMARY KEY,
+                "psychologistId" INTEGER,
+                "motivo" VARCHAR(255),
+                "avaliacao" INTEGER,
+                "sugestao" TEXT,
+                "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                "updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
         `);
+        res.send('<h1 style="color: green;">SUCESSO: Tabela ExitSurveys criada!</h1>');
+    } catch (error) {
+        res.status(500).send('ERRO: ' + error.message);
     }
 });
 
 // --- SERVIR ARQUIVOS ESTÁTICOS (FRONT-END) ---
-// Esta linha deve vir DEPOIS das rotas da API.
 app.use(express.static(path.join(__dirname, '..')));
 
-// --- ROTA DE PERFIL PÚBLICO POR SLUG (NOVA ABORDAGEM) ---
-// Esta rota captura qualquer URL de primeiro nível que não seja um arquivo estático ou uma rota de API.
-// Ela serve a página HTML do perfil, e o JavaScript dessa página se encarrega de buscar os dados.
 app.get('/:slug', (req, res, next) => {
-    // Lista de slugs que não devem ser tratados como perfis
-    const reservedPaths = ['api', 'assets', 'css', 'js', 'patient', 'psi'];
+    const reservedPaths = ['api', 'assets', 'css', 'js', 'patient', 'psi', 'fix-db-columns', 'fix-db-exit'];
     if (reservedPaths.some(p => req.params.slug.startsWith(p)) || req.params.slug.includes('.')) {
-        return next(); // Passa para o próximo middleware se for um arquivo ou rota de API
+        return next();
     }
     res.sendFile(path.join(__dirname, '..', 'perfil_psicologo.html'));
 });
 
-// --- ROTAS DE FRONT-END (Catch-all) ---
-// Esta rota deve ser a ÚLTIMA. Ela captura qualquer requisição GET que não foi
-// tratada pelas rotas da API ou pelos arquivos estáticos.
 app.get(/(.*)/, (req, res) => {
-  // CORREÇÃO: O caminho para o index.html deve subir um nível a partir da pasta 'backend'.
-  // O arquivo está na raiz do projeto, não em 'backend/public/'.
   res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
-// Sincronização com o Banco
-// db.sequelize.sync() lê os modelos e cria/atualiza as tabelas se necessário
+// Inicialização do Servidor
 const PORT = process.env.PORT || 3001;
-// Força a recriação do banco de dados se o ambiente NÃO for de produção.
-// Isso garante que o schema esteja sempre atualizado durante o desenvolvimento.
-const isDevelopment = process.env.NODE_ENV !== 'production';
-
-// Em desenvolvimento, usamos { force: true } para recriar o banco a cada reinicialização,
-// garantindo que o schema esteja sempre atualizado com os modelos.
-// Em produção, usamos sync() sem 'force' para não perder dados.
 const startServer = async () => {
     if (process.env.NODE_ENV !== 'production') {
         await db.sequelize.sync({ alter: true });
         console.log('Banco de dados sincronizado (DEV).');
         await seedTestData();
     } else {
-        await db.sequelize.sync(); // Produção: SEM alter, SEM force, SEM seed
+        await db.sequelize.sync();
         console.log('Banco de dados sincronizado (PROD).');
     }
-
     server.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}.`));
 };
-
 
 startServer().catch(err => console.error('Falha ao iniciar o servidor:', err));
