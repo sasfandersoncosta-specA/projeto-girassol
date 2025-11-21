@@ -1,4 +1,4 @@
-// Arquivo: psi_dashboard.js (VERSÃO CORRIGIDA: ARRAY TO STRING)
+// Arquivo: psi_dashboard.js (VERSÃO BLINDADA CONTRA FALHAS DE UI)
 
 document.addEventListener('DOMContentLoaded', function() {
     
@@ -97,7 +97,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const telInput = document.getElementById('telefone');
         const crpInput = document.getElementById('crp');
 
-        // Verifica se a biblioteca IMask foi carregada
         if (typeof IMask !== 'undefined') {
             if (cpfInput) IMask(cpfInput, { mask: '000.000.000-00' });
             if (telInput) IMask(telInput, { mask: '(00) 00000-0000' });
@@ -107,14 +106,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function setupMultiselects(dataInicial) {
         const dropdowns = document.querySelectorAll('.multiselect-tag');
+        console.log(`[DEBUG] Configurando ${dropdowns.length} multiselects...`);
 
         dropdowns.forEach(dropdown => {
+            // Anexa a função getValues DIRETAMENTE ao elemento DOM
+            // Isso garante que ela exista mesmo se a lógica interna falhar
+            dropdown.getValues = () => {
+                // Fallback seguro se selectedValues não estiver definido
+                return dropdown._selectedValues || [];
+            };
+
             const display = dropdown.querySelector('.multiselect-display');
             const optionsContainer = dropdown.querySelector('.multiselect-options');
             const options = dropdown.querySelectorAll('.option');
             const fieldId = dropdown.id; 
             const dataKey = fieldId.replace('_multiselect', '');
-            let selectedValues = [];
+            
+            // Armazena no elemento para persistência
+            dropdown._selectedValues = [];
 
             // 1. Carregar dados iniciais
             if (dataInicial && dataInicial[dataKey]) {
@@ -122,14 +131,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     ? dataInicial[dataKey] 
                     : (typeof dataInicial[dataKey] === 'string' ? dataInicial[dataKey].split(',') : []);
                 
-                selectedValues = savedData.map(s => s.trim()).filter(s => s);
+                dropdown._selectedValues = savedData.map(s => s.trim()).filter(s => s);
                 renderTags();
             }
 
-            // Função interna de renderização
             function renderTags() {
+                if (!display) return;
                 display.innerHTML = '';
-                selectedValues.forEach(val => {
+                dropdown._selectedValues.forEach(val => {
                     const tag = document.createElement('span');
                     tag.className = 'tag';
                     tag.innerHTML = `${val} <button type="button" class="remove-tag" data-val="${val}">&times;</button>`;
@@ -137,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 
                 options.forEach(opt => {
-                    if (selectedValues.includes(opt.dataset.value)) {
+                    if (dropdown._selectedValues.includes(opt.dataset.value)) {
                         opt.classList.add('selected');
                     } else {
                         opt.classList.remove('selected');
@@ -145,12 +154,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
 
-            // Eventos
-            display.addEventListener('click', (e) => {
-                if (e.target.classList.contains('remove-tag')) return;
-                if (dropdown.closest('fieldset').disabled) return; 
-                dropdown.classList.toggle('open');
-            });
+            // Eventos (com verificação de existência)
+            if (display) {
+                display.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('remove-tag')) {
+                        if (dropdown.closest('fieldset').disabled) return;
+                        const val = e.target.dataset.val;
+                        dropdown._selectedValues = dropdown._selectedValues.filter(v => v !== val);
+                        renderTags();
+                        return;
+                    }
+                    if (dropdown.closest('fieldset').disabled) return; 
+                    dropdown.classList.toggle('open');
+                });
+            }
 
             options.forEach(opt => {
                 opt.addEventListener('click', () => {
@@ -158,34 +175,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     const isSingle = dropdown.dataset.singleSelect === "true";
 
                     if (isSingle) {
-                        selectedValues = [val]; 
+                        dropdown._selectedValues = [val]; 
                         dropdown.classList.remove('open');
                     } else {
-                        if (selectedValues.includes(val)) {
-                            selectedValues = selectedValues.filter(v => v !== val);
+                        if (dropdown._selectedValues.includes(val)) {
+                            dropdown._selectedValues = dropdown._selectedValues.filter(v => v !== val);
                         } else {
-                            selectedValues.push(val);
+                            dropdown._selectedValues.push(val);
                         }
                     }
                     renderTags();
                 });
             });
 
-            display.addEventListener('click', (e) => {
-                if (e.target.classList.contains('remove-tag')) {
-                    if (dropdown.closest('fieldset').disabled) return;
-                    const val = e.target.dataset.val;
-                    selectedValues = selectedValues.filter(v => v !== val);
-                    renderTags();
-                }
-            });
-
             document.addEventListener('click', (e) => {
                 if (!dropdown.contains(e.target)) dropdown.classList.remove('open');
             });
-            
-            // Método para extrair dados no final
-            dropdown.getValues = () => selectedValues;
         });
     }
 
@@ -198,7 +203,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const btnAlterar = document.getElementById('btn-alterar');
         const btnSalvar = document.getElementById('btn-salvar');
 
-        if (!form || !fieldset || !btnAlterar || !btnSalvar) return;
+        if (!form || !fieldset || !btnAlterar || !btnSalvar) {
+            console.error("[DEBUG] Elementos do formulário não encontrados.");
+            return;
+        }
 
         setupMasks();
 
@@ -240,32 +248,54 @@ document.addEventListener('DOMContentLoaded', function() {
         // Botão Salvar (Submit)
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            console.log("[DEBUG] Botão Salvar Clicado. Iniciando coleta...");
+            
             btnSalvar.textContent = "Salvando...";
             btnSalvar.disabled = true;
 
-            const formData = new FormData(form);
-            const dataToUpdate = Object.fromEntries(formData.entries());
-
-            if(dataToUpdate.linkedin_url) dataToUpdate.linkedin_url = `https://linkedin.com/in/${dataToUpdate.linkedin_url}`;
-            if(dataToUpdate.instagram_url) dataToUpdate.instagram_url = `https://instagram.com/${dataToUpdate.instagram_url}`;
-            if(dataToUpdate.facebook_url) dataToUpdate.facebook_url = `https://facebook.com/${dataToUpdate.facebook_url}`;
-            if(dataToUpdate.tiktok_url) dataToUpdate.tiktok_url = `https://tiktok.com/@${dataToUpdate.tiktok_url}`;
-            if(dataToUpdate.x_url) dataToUpdate.x_url = `https://x.com/${dataToUpdate.x_url}`;
-
-            // --- CORREÇÃO AQUI: TRANSFORMA ARRAY EM STRING ---
-            document.querySelectorAll('.multiselect-tag').forEach(dropdown => {
-                const key = dropdown.id.replace('_multiselect', '');
-                const valores = dropdown.getValues();
-                dataToUpdate[key] = valores.length > 0 ? valores.join(',') : ''; 
-            });
-
             try {
+                const formData = new FormData(form);
+                const dataToUpdate = Object.fromEntries(formData.entries());
+
+                // Reconstrói URLs
+                if(dataToUpdate.linkedin_url) dataToUpdate.linkedin_url = `https://linkedin.com/in/${dataToUpdate.linkedin_url}`;
+                if(dataToUpdate.instagram_url) dataToUpdate.instagram_url = `https://instagram.com/${dataToUpdate.instagram_url}`;
+                if(dataToUpdate.facebook_url) dataToUpdate.facebook_url = `https://facebook.com/${dataToUpdate.facebook_url}`;
+                if(dataToUpdate.tiktok_url) dataToUpdate.tiktok_url = `https://tiktok.com/@${dataToUpdate.tiktok_url}`;
+                if(dataToUpdate.x_url) dataToUpdate.x_url = `https://x.com/${dataToUpdate.x_url}`;
+
+                // Coleta dados dos Multiselects (BLINDADO)
+                const multiselects = document.querySelectorAll('.multiselect-tag');
+                console.log(`[DEBUG] Processando ${multiselects.length} multiselects...`);
+
+                multiselects.forEach(dropdown => {
+                    const key = dropdown.id.replace('_multiselect', '');
+                    
+                    // Verifica se a função existe antes de chamar
+                    if (typeof dropdown.getValues === 'function') {
+                        const valores = dropdown.getValues();
+                        // Garante que é um array antes de dar join
+                        dataToUpdate[key] = Array.isArray(valores) ? valores.join(',') : '';
+                    } else {
+                        console.warn(`[DEBUG] Função getValues não encontrada para ${key}. Ignorando.`);
+                        // Tenta recuperar do fallback se existir
+                        if (dropdown._selectedValues) {
+                            dataToUpdate[key] = dropdown._selectedValues.join(',');
+                        }
+                    }
+                });
+
+                console.log("[DEBUG] Dados prontos para envio:", dataToUpdate);
+
                 const response = await apiFetch(`${API_BASE_URL}/api/psychologists/me`, {
                     method: 'PUT',
                     body: JSON.stringify(dataToUpdate)
                 });
 
-                if (!response.ok) throw new Error('Erro ao atualizar perfil.');
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.error || 'Erro ao atualizar perfil.');
+                }
 
                 showToast('Perfil atualizado com sucesso!', 'success');
                 
@@ -279,15 +309,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 if(sidebarNameEl) sidebarNameEl.textContent = psychologistData.nome;
 
             } catch (error) {
-                console.error(error);
-                showToast('Erro ao salvar. Tente novamente.', 'error');
+                console.error("[DEBUG] Erro no salvamento:", error);
+                showToast(`Erro: ${error.message}`, 'error');
             } finally {
                 btnSalvar.textContent = "Salvar Alterações";
                 btnSalvar.disabled = false;
             }
         });
 
-        // Botão Excluir Conta
+        // Botão Excluir
         const btnExcluirLink = document.getElementById('btn-excluir-conta');
         if (btnExcluirLink) {
             btnExcluirLink.addEventListener('click', (e) => {
@@ -298,7 +328,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // =====================================================================
-    // LÓGICA DA PÁGINA: EXCLUIR CONTA (OFFBOARDING)
+    // LÓGICA DA PÁGINA: EXCLUIR CONTA
     // =====================================================================
     async function inicializarLogicaExclusao() {
         if (psychologistData && psychologistData.nome) {
