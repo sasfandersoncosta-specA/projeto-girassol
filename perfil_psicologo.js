@@ -311,19 +311,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             const abordagensHtml = generateTagsHtml(profile.abordagens_tecnicas, 'practice-tag');
             const praticasHtml = generateTagsHtml(profile.praticas_vivencias, 'practice-tag'); 
             // ---------------------------
-            // Injeta o HTML na aba de baixo
+            // Injeta o HTML na aba de baixo (ORDEM E TÍTULOS CORRIGIDOS)
             tabSobre.innerHTML = `
                 <div class="about-section-modern">
                     
+                    <h3 class="practices-title">Abordagem</h3>
+                    <div class="practices-container" style="margin-bottom: 30px;">
+                        ${abordagensHtml}
+                    </div>
+
                     <h3 class="practices-title">Especialidades e Temas</h3>
                     <div class="practices-container" style="margin-bottom: 30px;">
                         ${especialidadesHtml}
                     </div>
-                    <h3 class="practices-title">Abordagem Técnica</h3>
-                    <div class="practices-container" style="margin-bottom: 30px;">
-                        ${abordagensHtml}
-                    </div>
-                    <h3 class="practices-title">Práticas e Vivências</h3>
+
+                    <h3 class="practices-title">Práticas e Vivências Afirmativas</h3>
                     <div class="practices-container">
                         ${praticasHtml}
                     </div>
