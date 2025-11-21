@@ -289,3 +289,115 @@ h1, h2, h3, h4 { font-family: 'New Kansas', serif; color: var(--verde-escuro); }
     .btn-voltar-inbox { display: block; margin-bottom: 15px; }
 }
 @media (min-width: 993px) { .menu-toggle { display: none; } .btn-voltar-inbox { display: none; } }
+/* ==========================================================================
+   PÁGINA: ASSINATURA E PAGAMENTOS (RESTAURAÇÃO DO LAYOUT)
+   ========================================================================== */
+
+/* 1. Cabeçalho Verde (Igual Visão Geral) */
+.main-header {
+    background-color: var(--verde-escuro);
+    color: var(--branco-puro);
+    padding: 40px;
+    border-radius: 16px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+.main-header h1 { 
+    color: var(--branco-puro); /* Força branco no fundo verde */
+    margin: 0 0 10px 0; 
+}
+.subtitulo-header {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* 2. Card de Plano Atual (Topo) */
+.plano-atual-card {
+    background-color: var(--branco-puro);
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    margin-bottom: 40px;
+    border-left: 6px solid var(--cor-girassol); /* Detalhe amarelo */
+    display: flex;
+    justify-content: space-between; /* Separa texto dos links */
+    align-items: center;
+    flex-wrap: wrap; /* Permite quebrar no mobile */
+    gap: 20px;
+}
+
+.plano-info h3 { 
+    font-size: 0.9rem; text-transform: uppercase; color: var(--cinza-texto-claro); margin: 0 0 5px 0; letter-spacing: 1px;
+}
+.plano-nome { 
+    font-family: 'New Kansas', serif; font-size: 2rem; color: var(--verde-escuro); margin: 0; 
+}
+.plano-preco { font-weight: bold; color: var(--cinza-texto); margin: 5px 0; }
+.plano-data { font-size: 0.9rem; color: var(--cinza-texto-claro); margin: 0; }
+
+.plano-acoes { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.plano-acoes a { color: var(--verde-escuro); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+.plano-acoes a:hover { text-decoration: underline; }
+
+/* 3. Grid de Planos (Lado a Lado) */
+.planos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Cria colunas automáticas */
+    gap: 30px;
+    align-items: start; /* Alinha cards pelo topo */
+}
+
+/* Card Individual */
+.plano-card {
+    background-color: var(--branco-puro);
+    border: 1px solid var(--cinza-borda);
+    border-radius: 16px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+}
+.plano-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+
+/* Destaque do Plano Ativo */
+.plano-card--ativo { border: 2px solid var(--verde-escuro); transform: scale(1.02); }
+.plano-card--ativo:hover { transform: scale(1.02) translateY(-5px); }
+
+.selo-plano-atual {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    background-color: var(--verde-escuro); color: var(--branco-puro);
+    padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase;
+}
+
+/* Conteúdo do Card */
+.plano-card h2 { text-align: center; margin-top: 10px; }
+.plano-card .preco { 
+    text-align: center; font-size: 2.5rem; font-weight: 700; color: var(--verde-escuro); margin: 15px 0; 
+}
+.plano-card .preco span { font-size: 1rem; color: var(--cinza-texto-claro); font-weight: 400; }
+
+.beneficios-lista { list-style: none; padding: 0; margin: 20px 0; }
+.beneficios-lista li {
+    padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: var(--cinza-texto); display: flex; gap: 10px;
+}
+.beneficios-lista li::before { content: "✓"; color: var(--verde-escuro); font-weight: bold; }
+
+/* Botões dos Planos */
+.plano-cta button { width: 100%; padding: 12px; border-radius: 25px; font-weight: 700; cursor: pointer; border: none; transition: all 0.2s; }
+
+.btn-mudar-plano { background: transparent; border: 2px solid var(--verde-escuro) !important; color: var(--verde-escuro); }
+.btn-mudar-plano:hover { background: rgba(27, 67, 50, 0.05); }
+
+.btn-upgrade { background: var(--verde-escuro) !important; color: var(--branco-puro); }
+.btn-upgrade:hover { background: #143d2e !important; }
+
+button[disabled] { background: #e9ecef !important; color: #adb5bd; cursor: not-allowed; border: none; }
+
+/* Responsividade Mobile para Assinatura */
+@media (max-width: 768px) {
+    .plano-atual-card { flex-direction: column; align-items: flex-start; }
+    .plano-acoes { align-items: flex-start; margin-top: 15px; }
+    .plano-card--ativo { transform: none; }
+}
