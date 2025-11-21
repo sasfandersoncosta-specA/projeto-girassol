@@ -227,10 +227,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             foto.alt = `Foto de ${profile.nome}`;
         }
 
-        setText('psi-bio', profile.bio || 'Biografia não disponível.');
-        setText('psi-valor', profile.valor_sessao_numero
-            ? `R$ ${parseFloat(profile.valor_sessao_numero).toFixed(2).replace('.', ',')}`
-            : 'Valor a combinar');
+        setText('psi-valor', profile.valor_sessao_numero ? `R$ ${parseFloat(profile.valor_sessao_numero).toFixed(2).replace('.', ',')}` : 'Valor a combinar');
 
         const modalidadeEl = document.getElementById('psi-modalidade');
         if (modalidadeEl) modalidadeEl.textContent = profile.modalidade || 'Online e Presencial';
@@ -283,10 +280,40 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         fillTags('psi-tags-especialidades', profile.temas_atuacao);
         fillTags('psi-tags-abordagens', profile.abordagens_tecnicas);
-        fillTags('psi-tags-praticas', profile.praticas_vivencias);
 
         renderSocialLinks(profile);
         renderRatingSummary(profile);
+
+        // --- POPULA ABA SOBRE (LAYOUT MODERNO) ---
+        const tabSobre = document.getElementById('tab-sobre');
+        if (tabSobre) {
+            const bioText = profile.bio || 'Este profissional ainda não adicionou uma biografia.';
+            
+            // Gera tags de práticas com o novo estilo
+            let praticasHtml = '';
+            if (profile.praticas_vivencias && profile.praticas_vivencias.length > 0) {
+                const praticasList = Array.isArray(profile.praticas_vivencias) 
+                    ? profile.praticas_vivencias 
+                    : profile.praticas_vivencias.split(',');
+                
+                praticasHtml = praticasList.map(p => 
+                    `<span class="practice-tag">${p.trim()}</span>`
+                ).join('');
+            } else {
+                praticasHtml = '<span style="color:#999; font-style:italic;">Nenhuma informação adicionada.</span>';
+            }
+
+            // Injeta o HTML Estruturado
+            tabSobre.innerHTML = `
+                <div class="about-section-modern">
+                    <div class="bio-card">
+                        <p class="bio-text">${bioText.replace(/\n/g, '<br>')}</p>
+                    </div>
+                    <h3 class="practices-title">Práticas e Vivências</h3>
+                    <div class="practices-container">${praticasHtml}</div>
+                </div>
+            `;
+        }
 
         const reviewsContainer = document.getElementById('reviews-list-container');
         const tabBtnAvaliacoes = document.getElementById('tab-btn-avaliacoes');

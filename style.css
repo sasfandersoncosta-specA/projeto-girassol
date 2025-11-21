@@ -4084,3 +4084,92 @@ header.header-rolagem .botoes-acao .btn-outline:hover {
 @keyframes fadeOut {
     to { opacity: 0; transform: translateY(-10px); }
 }
+/* ==========================================================================
+   ESTILO MODERNO: SEÇÃO SOBRE MIM
+   ========================================================================== */
+
+/* Container principal da aba Sobre */
+.about-section-modern {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: left; /* Texto alinhado à esquerda é mais moderno e legível */
+}
+
+/* O Bloco da Biografia */
+.bio-card {
+    background-color: #ffffff;
+    border-left: 5px solid var(--verde-escuro); /* Detalhe da marca */
+    padding: 30px 40px;
+    border-radius: 0 16px 16px 0;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.03); /* Sombra muito suave */
+    margin-bottom: 40px;
+    position: relative;
+}
+
+/* Detalhe decorativo (aspas) */
+.bio-card::before {
+    content: '“';
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    font-family: 'New Kansas', serif;
+    font-size: 4rem;
+    color: var(--cor-girassol);
+    opacity: 0.4;
+    line-height: 0;
+}
+
+.bio-text {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #444;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+/* Subtítulo de Práticas */
+.practices-title {
+    font-family: 'New Kansas', serif;
+    font-size: 1.5rem;
+    color: var(--verde-escuro);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.practices-title::after {
+    content: '';
+    flex-grow: 1;
+    height: 1px;
+    background-color: #e0e0e0;
+}
+
+/* Container das Tags de Prática */
+.practices-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Tag específica para Práticas (pode ser diferente das outras se quiser) */
+.practice-tag {
+    background-color: #f0f7f4; /* Verde menta bem claro */
+    color: var(--verde-escuro);
+    border: 1px solid rgba(27, 67, 50, 0.1);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.practice-tag::before {
+    content: '•';
+    color: var(--cor-girassol);
+    font-size: 1.2rem;
+    line-height: 0;
+}
