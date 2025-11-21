@@ -3495,9 +3495,13 @@ body.pagina-dashboard {
     font-weight: bold;
 }
 .small-tag {
-    background-color: #f1f3f5; /* Cinza claro */
-    font-size: 0.8rem;
-    padding: 4px 10px;
+    background-color: #f1f3f5;
+    color: #555;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-flex;
 }
 
 

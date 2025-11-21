@@ -278,39 +278,53 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         };
 
-        fillTags('psi-tags-especialidades', profile.temas_atuacao);
-        fillTags('psi-tags-abordagens', profile.abordagens_tecnicas);
-
         renderSocialLinks(profile);
         renderRatingSummary(profile);
 
-        // --- POPULA ABA SOBRE (LAYOUT MODERNO) ---
+        // 1. Preenche o Texto da Bio no Topo (Novo Local)
+        const bioElement = document.getElementById('psi-bio-text');
+        if (bioElement) {
+            bioElement.innerHTML = profile.bio 
+                ? profile.bio.replace(/\n/g, '<br>') 
+                : 'Este profissional ainda não adicionou uma biografia.';
+        }
+
+        // 2. Popula a Aba "Detalhes" (Antiga Aba Sobre) com Especialidades e Práticas
         const tabSobre = document.getElementById('tab-sobre');
         if (tabSobre) {
-            const bioText = profile.bio || 'Este profissional ainda não adicionou uma biografia.';
             
-            // Gera tags de práticas com o novo estilo
-            let praticasHtml = '';
-            if (profile.praticas_vivencias && profile.praticas_vivencias.length > 0) {
-                const praticasList = Array.isArray(profile.praticas_vivencias) 
-                    ? profile.praticas_vivencias 
-                    : profile.praticas_vivencias.split(',');
+            // Helper para gerar HTML de tags
+            const generateTagsHtml = (itemsStringOrArray, cssClass = 'tag') => {
+                if (!itemsStringOrArray || itemsStringOrArray.length === 0) {
+                    return '<span style="color:#999; font-style:italic;">Nenhuma informação.</span>';
+                }
+                const list = Array.isArray(itemsStringOrArray) 
+                    ? itemsStringOrArray 
+                    : itemsStringOrArray.split(',');
                 
-                praticasHtml = praticasList.map(p => 
-                    `<span class="practice-tag">${p.trim()}</span>`
-                ).join('');
-            } else {
-                praticasHtml = '<span style="color:#999; font-style:italic;">Nenhuma informação adicionada.</span>';
-            }
+                return list.map(item => `<span class="${cssClass}">${item.trim()}</span>`).join('');
+            };
 
-            // Injeta o HTML Estruturado
+            const especialidadesHtml = generateTagsHtml(profile.temas_atuacao, 'tag');
+            const abordagensHtml = generateTagsHtml(profile.abordagens_tecnicas, 'small-tag');
+            const praticasHtml = generateTagsHtml(profile.praticas_vivencias, 'practice-tag'); // Usa o estilo moderno que criamos antes
+
+            // Injeta o HTML na aba de baixo
             tabSobre.innerHTML = `
                 <div class="about-section-modern">
-                    <div class="bio-card">
-                        <p class="bio-text">${bioText.replace(/\n/g, '<br>')}</p>
+                    
+                    <h3 class="practices-title">Especialidades e Temas</h3>
+                    <div class="practices-container" style="margin-bottom: 30px;">
+                        ${especialidadesHtml}
+                    </div>
+                    <h3 class="practices-title">Abordagem Técnica</h3>
+                    <div class="practices-container" style="margin-bottom: 30px;">
+                        ${abordagensHtml}
                     </div>
                     <h3 class="practices-title">Práticas e Vivências</h3>
-                    <div class="practices-container">${praticasHtml}</div>
+                    <div class="practices-container">
+                        ${praticasHtml}
+                    </div>
                 </div>
             `;
         }
