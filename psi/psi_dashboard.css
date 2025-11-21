@@ -587,8 +587,9 @@ button[disabled] { background: #e9ecef !important; color: #adb5bd; cursor: not-a
 .rating-exit-stars {
     display: flex;
     flex-direction: row-reverse;
-    justify-content: flex-start; /* Alinha à esquerda */
+    justify-content: flex-end; /* Alinha à esquerda */
     gap: 10px;
+    width: fit-content;
 }
 .rating-exit-stars input { display: none; }
 .rating-exit-stars label {

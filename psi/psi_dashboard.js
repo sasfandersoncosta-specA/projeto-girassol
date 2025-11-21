@@ -197,6 +197,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // LÓGICA DA PÁGINA: EXCLUIR CONTA (OFFBOARDING)
     // =====================================================================
     async function inicializarLogicaExclusao() {
+        
+        // --- [NOVO] Preenche o nome no título ---
+        if (psychologistData && psychologistData.nome) {
+            // Pega só o primeiro nome para ficar mais pessoal
+            const primeiroNome = psychologistData.nome.split(' ')[0];
+            const elNome = document.getElementById('nome-profissional-saida');
+            if (elNome) elNome.textContent = primeiroNome;
+        }
         // 1. Simula carregamento de estatísticas
         const statsMock = {
             dias: 142,
