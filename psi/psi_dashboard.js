@@ -1,4 +1,4 @@
-// Arquivo: psi_dashboard.js (VERSÃO FINAL FUNCIONAL)
+// Arquivo: psi_dashboard.js (VERSÃO FINAL ORGANIZADA E CORRIGIDA)
 
 document.addEventListener('DOMContentLoaded', function() {
     
@@ -64,7 +64,6 @@ document.addEventListener('DOMContentLoaded', function() {
             throw new Error("Token não encontrado.");
         }
         
-        // Se for FormData, não define Content-Type (o navegador define o boundary)
         const isFormData = options.body instanceof FormData;
         const headers = {
             'Authorization': `Bearer ${token}`,
@@ -119,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // =====================================================================
-    // LÓGICA DA PÁGINA: MEU PERFIL (IMPLEMENTADO)
+    // LÓGICA DA PÁGINA: MEU PERFIL (CORRIGIDA)
     // =====================================================================
     function inicializarLogicaDoPerfil() {
         const form = document.getElementById('perfil-form');
@@ -145,7 +144,6 @@ document.addEventListener('DOMContentLoaded', function() {
             fieldset.disabled = false;
             btnAlterar.classList.add('hidden');
             btnSalvar.classList.remove('hidden');
-            // Habilita visualmente os multiselects se houver
             document.querySelectorAll('.multiselect-tag').forEach(el => el.classList.remove('disabled'));
         });
 
@@ -161,20 +159,18 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 const response = await apiFetch(`${API_BASE_URL}/api/psychologists/me`, {
                     method: 'PUT',
-                    body: JSON.stringify(dataToUpdate) // apiFetch adiciona Content-Type json
+                    body: JSON.stringify(dataToUpdate)
                 });
 
                 if (!response.ok) throw new Error('Erro ao atualizar perfil.');
 
                 showToast('Perfil atualizado com sucesso!', 'success');
                 
-                // Atualiza estado local e UI
                 psychologistData = { ...psychologistData, ...dataToUpdate };
                 fieldset.disabled = true;
                 btnSalvar.classList.add('hidden');
                 btnAlterar.classList.remove('hidden');
                 
-                // Atualiza nome na sidebar se mudou
                 const sidebarNameEl = document.getElementById('psi-sidebar-name');
                 if(sidebarNameEl) sidebarNameEl.textContent = psychologistData.nome;
 
@@ -186,38 +182,98 @@ document.addEventListener('DOMContentLoaded', function() {
                 btnSalvar.disabled = false;
             }
         });
-    }
-            // Botão que leva para a página de estatísticas de saída
-                const btnExcluirLink = document.getElementById('btn-excluir-conta');
-                if (btnExcluirLink) {
-                btnExcluirLink.addEventListener('click', (e) => {
+
+        // 4. Botão Excluir Conta (Redireciona para página de saída)
+        const btnExcluirLink = document.getElementById('btn-excluir-conta');
+        if (btnExcluirLink) {
+            btnExcluirLink.addEventListener('click', (e) => {
                 e.preventDefault();
-                loadPage('psi_excluir_conta.html'); // Carrega a nova página
+                loadPage('psi_excluir_conta.html');
             });
         }
+    }
 
     // =====================================================================
-    // LÓGICA DE UPLOAD DE FOTO (IMPLEMENTADO)
+    // LÓGICA DA PÁGINA: EXCLUIR CONTA (OFFBOARDING)
+    // =====================================================================
+    async function inicializarLogicaExclusao() {
+        // 1. Simula carregamento de estatísticas
+        const statsMock = {
+            dias: 142,
+            views: 1205,
+            contatos: 48,
+            comunidade: 15
+        };
+
+        const elDias = document.getElementById('stat-dias');
+        if(elDias) {
+            document.getElementById('stat-dias').innerText = statsMock.dias;
+            document.getElementById('stat-views').innerText = statsMock.views;
+            document.getElementById('stat-contatos').innerText = statsMock.contatos;
+            document.getElementById('stat-comunidade').innerText = statsMock.comunidade;
+        }
+
+        // 2. Lógica do Formulário de Exclusão Final
+        const form = document.getElementById('exit-form');
+        if(form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                if (!confirm("Tem certeza absoluta? Esta ação apagará todos os seus dados e não pode ser desfeita.")) {
+                    return;
+                }
+
+                const formData = new FormData(form);
+                const exitData = {
+                    motivo: formData.get('motivo'),
+                    sugestao: formData.get('sugestao'),
+                    avaliacao: document.querySelector('input[name="avaliacao"]:checked')?.value || null
+                };
+
+                try {
+                    // Envia o feedback
+                    await apiFetch(`${API_BASE_URL}/api/psychologists/me/exit-survey`, {
+                        method: 'POST',
+                        body: JSON.stringify(exitData)
+                    }).catch(err => console.warn("Feedback não enviado, prosseguindo...", err));
+
+                    // Exclui a conta
+                    await apiFetch(`${API_BASE_URL}/api/psychologists/me`, {
+                        method: 'DELETE'
+                    });
+
+                    alert("Sua conta foi excluída. Esperamos te ver novamente!");
+                    localStorage.removeItem('girassol_token');
+                    window.location.href = '../index.html';
+
+                } catch (error) {
+                    console.error("Erro ao excluir:", error);
+                    showToast('Erro ao excluir conta. Entre em contato com o suporte.', 'error');
+                }
+            });
+        }
+    }
+
+    // =====================================================================
+    // LÓGICA DE UPLOAD DE FOTO
     // =====================================================================
     async function uploadProfilePhoto(file, sidebarPhotoEl) {
         const formData = new FormData();
         formData.append('foto', file);
 
-        // Feedback visual imediato (opcional)
         const originalSrc = sidebarPhotoEl.src;
         sidebarPhotoEl.style.opacity = '0.5';
 
         try {
             const response = await apiFetch(`${API_BASE_URL}/api/psychologists/me/foto`, {
                 method: 'POST',
-                body: formData // apiFetch detecta FormData e não põe JSON header
+                body: formData 
             });
 
             if (!response.ok) throw new Error('Falha no upload da imagem.');
 
             const data = await response.json();
             
-            // Atualiza a foto na tela e nos dados globais
             sidebarPhotoEl.src = data.fotoUrl;
             sidebarPhotoEl.style.opacity = '1';
             psychologistData.fotoUrl = data.fotoUrl;
@@ -236,13 +292,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // =====================================================================
     function inicializarLogicaDaCaixaDeEntrada() { /* Lógica futura */ }
     function inicializarListaDeEspera() { /* Lógica futura */ }
-    
-    async function inicializarComunidadeQNA() {
-        // ... (Mantenha aqui sua lógica de Q&A que já estava pronta) ...
-        // Se você não tiver o código do Q&A aqui, me avise que eu reenvio o bloco completo.
-        // Por enquanto, assumindo que você vai colar o bloco do Q&A se precisar.
-        console.log("Q&A Inicializado");
-    }
+    async function inicializarComunidadeQNA() { console.log("Q&A Inicializado"); }
 
     // =====================================================================
     // GERENCIADOR DE PÁGINAS (ROTEADOR)
@@ -264,10 +314,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     inicializarListaDeEspera();
                 } else if (pageUrl.includes('psi_comunidade.html')) {
                     inicializarComunidadeQNA();
-                }else if (pageUrl.includes('psi_excluir_conta.html')) {
+                } else if (pageUrl.includes('psi_excluir_conta.html')) {
                     inicializarLogicaExclusao();
-        }
-                
+                }
             })
             .catch(error => {
                 mainContent.innerHTML = `<div class="card"><h2>Erro</h2><p>Não foi possível carregar a seção.</p></div>`;
@@ -288,7 +337,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if(sidebarNameEl) sidebarNameEl.textContent = psychologistData.nome;
             if(sidebarPhotoEl) sidebarPhotoEl.src = psychologistData.fotoUrl || 'https://placehold.co/70x70/1B4332/FFFFFF?text=Psi';
 
-            // --- LÓGICA DO BOTÃO 'VER COMO PACIENTE' ---
             const btnPublicProfile = document.getElementById('btn-view-public-profile');
             if (btnPublicProfile) {
                 if (psychologistData.slug) {
@@ -303,7 +351,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Upload de Foto
         const photoUploadInput = document.getElementById('profile-photo-upload');
         if (photoUploadInput && sidebarPhotoEl) {
             photoUploadInput.addEventListener('change', (event) => {
@@ -312,7 +359,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Navegação e Contagens
         fetchUnreadCount();
         fetchQnaCount();
         
@@ -320,78 +366,13 @@ document.addEventListener('DOMContentLoaded', function() {
         navLinks.forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
-                // Remove active de todos e adiciona no atual (buscando o li pai)
                 document.querySelectorAll('.sidebar-nav li').forEach(li => li.classList.remove('active'));
                 this.closest('li').classList.add('active');
                 
                 loadPage(this.getAttribute('data-page'));
             });
         });
-        // Lógica da Página: EXCLUIR CONTA (OFFBOARDING)
-    async function inicializarLogicaExclusao() {
-        // 1. Simula carregamento de estatísticas (ou busca da API se tiver endpoint)
-        // Idealmente: const stats = await apiFetch('/api/psychologists/me/stats');
-        const statsMock = {
-            dias: 142,
-            views: 1205,
-            contatos: 48,
-            comunidade: 15
-        };
 
-        // Preenche os dados na tela
-        document.getElementById('stat-dias').innerText = statsMock.dias;
-        document.getElementById('stat-views').innerText = statsMock.views;
-        document.getElementById('stat-contatos').innerText = statsMock.contatos;
-        document.getElementById('stat-comunidade').innerText = statsMock.comunidade;
-
-        // 2. Lógica do Formulário de Exclusão Final
-        const form = document.getElementById('exit-form');
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            // Confirmação final (Browser native é mais seguro aqui para evitar clique acidental)
-            if (!confirm("Tem certeza absoluta? Esta ação apagará todos os seus dados e não pode ser desfeita.")) {
-                return;
-            }
-
-            const formData = new FormData(form);
-            const exitData = {
-                motivo: formData.get('motivo'),
-                sugestao: formData.get('sugestao'),
-                avaliacao: document.querySelector('input[name="avaliacao"]:checked')?.value || null
-            };
-
-            try {
-                // Envia o feedback antes de excluir
-                await apiFetch(`${API_BASE_URL}/api/psychologists/me/exit-survey`, {
-                    method: 'POST',
-                    body: JSON.stringify(exitData)
-                });
-
-                // Chama a rota de exclusão real
-                await apiFetch(`${API_BASE_URL}/api/psychologists/me`, {
-                    method: 'DELETE'
-                });
-
-                alert("Sua conta foi excluída. Esperamos te ver novamente!");
-                localStorage.removeItem('girassol_token');
-                window.location.href = '../index.html';
-
-            } catch (error) {
-                console.error("Erro ao excluir:", error);
-                // Se a API de exit-survey não existir, tenta excluir direto
-                try {
-                    await apiFetch(`${API_BASE_URL}/api/psychologists/me`, { method: 'DELETE' });
-                    localStorage.removeItem('girassol_token');
-                    window.location.href = '../index.html';
-                } catch (errDelete) {
-                    showToast('Erro ao excluir conta. Entre em contato com o suporte.', 'error');
-                }
-            }
-        });
-    }
-
-        // Carrega página inicial
         loadPage('psi_visao_geral.html');
     }
 
