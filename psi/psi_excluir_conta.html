@@ -1,0 +1,73 @@
+<div class="main-header" style="background-color: #E63946;">
+    <div class="header-content">
+        <h1 style="color: white;">É uma pena ver você partir...</h1>
+        <p class="subtitulo-header" style="color: rgba(255,255,255,0.9);">Antes de ir, confira o impacto que você gerou na plataforma.</p>
+    </div>
+</div>
+
+<div class="widget">
+    <h3>Sua Jornada no Girassol</h3>
+    <div class="exit-stats-grid">
+        <div class="exit-stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-value" id="stat-dias">Carregando...</div>
+            <div class="stat-label">Dias com a gente</div>
+        </div>
+        <div class="exit-stat-card">
+            <div class="stat-icon">👁️</div>
+            <div class="stat-value" id="stat-views">--</div>
+            <div class="stat-label">Visualizações de Perfil</div>
+        </div>
+        <div class="exit-stat-card">
+            <div class="stat-icon">💬</div>
+            <div class="stat-value" id="stat-contatos">--</div>
+            <div class="stat-label">Contatos no WhatsApp</div>
+        </div>
+        <div class="exit-stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-value" id="stat-comunidade">--</div>
+            <div class="stat-label">Interações na Comunidade</div>
+        </div>
+    </div>
+</div>
+
+<div class="widget" style="margin-top: 30px;">
+    <h3>Por que você está nos deixando?</h3>
+    <p style="margin-bottom: 20px; color: #666;">Sua opinião é fundamental para melhorarmos.</p>
+    
+    <form id="exit-form">
+        <div class="form-group">
+            <label for="motivo-saida">Selecione o principal motivo:</label>
+            <select id="motivo-saida" name="motivo" class="filtro-select" required>
+                <option value="" disabled selected>Selecione uma opção...</option>
+                <option value="custo">Achei o valor da assinatura alto</option>
+                <option value="pouco_retorno">Recebi poucos contatos de pacientes</option>
+                <option value="plataforma_dificil">Achei a plataforma difícil de usar</option>
+                <option value="migracao">Estou migrando para outra plataforma</option>
+                <option value="pausa">Vou dar uma pausa nos atendimentos</option>
+                <option value="outro">Outro motivo</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Qual nota você daria para sua experiência geral?</label>
+            <div class="rating-exit-stars">
+                <input type="radio" id="star5" name="avaliacao" value="5" /><label for="star5" title="Excelente">★</label>
+                <input type="radio" id="star4" name="avaliacao" value="4" /><label for="star4" title="Muito Bom">★</label>
+                <input type="radio" id="star3" name="avaliacao" value="3" /><label for="star3" title="Bom">★</label>
+                <input type="radio" id="star2" name="avaliacao" value="2" /><label for="star2" title="Ruim">★</label>
+                <input type="radio" id="star1" name="avaliacao" value="1" /><label for="star1" title="Péssimo">★</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="sugestao-saida">O que poderíamos ter feito diferente?</label>
+            <textarea id="sugestao-saida" name="sugestao" rows="4" placeholder="Deixe sua sugestão ou crítica aqui..."></textarea>
+        </div>
+
+        <div class="form-actions" style="justify-content: space-between; margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px;">
+            <button type="button" class="btn btn-secundario" onclick="location.reload()">Desisti, quero ficar!</button>
+            <button type="submit" class="btn btn-perigo-final">Confirmar Exclusão</button>
+        </div>
+    </form>
+</div>

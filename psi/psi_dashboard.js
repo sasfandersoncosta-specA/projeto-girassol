@@ -187,6 +187,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+            // Botão que leva para a página de estatísticas de saída
+                const btnExcluirLink = document.getElementById('btn-excluir-conta');
+                if (btnExcluirLink) {
+                btnExcluirLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                loadPage('psi_excluir_conta.html'); // Carrega a nova página
+            });
+        }
 
     // =====================================================================
     // LÓGICA DE UPLOAD DE FOTO (IMPLEMENTADO)
@@ -256,7 +264,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     inicializarListaDeEspera();
                 } else if (pageUrl.includes('psi_comunidade.html')) {
                     inicializarComunidadeQNA();
-                }
+                }else if (pageUrl.includes('psi_excluir_conta.html')) {
+                    inicializarLogicaExclusao();
+        }
+                
             })
             .catch(error => {
                 mainContent.innerHTML = `<div class="card"><h2>Erro</h2><p>Não foi possível carregar a seção.</p></div>`;
@@ -316,6 +327,69 @@ document.addEventListener('DOMContentLoaded', function() {
                 loadPage(this.getAttribute('data-page'));
             });
         });
+        // Lógica da Página: EXCLUIR CONTA (OFFBOARDING)
+    async function inicializarLogicaExclusao() {
+        // 1. Simula carregamento de estatísticas (ou busca da API se tiver endpoint)
+        // Idealmente: const stats = await apiFetch('/api/psychologists/me/stats');
+        const statsMock = {
+            dias: 142,
+            views: 1205,
+            contatos: 48,
+            comunidade: 15
+        };
+
+        // Preenche os dados na tela
+        document.getElementById('stat-dias').innerText = statsMock.dias;
+        document.getElementById('stat-views').innerText = statsMock.views;
+        document.getElementById('stat-contatos').innerText = statsMock.contatos;
+        document.getElementById('stat-comunidade').innerText = statsMock.comunidade;
+
+        // 2. Lógica do Formulário de Exclusão Final
+        const form = document.getElementById('exit-form');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Confirmação final (Browser native é mais seguro aqui para evitar clique acidental)
+            if (!confirm("Tem certeza absoluta? Esta ação apagará todos os seus dados e não pode ser desfeita.")) {
+                return;
+            }
+
+            const formData = new FormData(form);
+            const exitData = {
+                motivo: formData.get('motivo'),
+                sugestao: formData.get('sugestao'),
+                avaliacao: document.querySelector('input[name="avaliacao"]:checked')?.value || null
+            };
+
+            try {
+                // Envia o feedback antes de excluir
+                await apiFetch(`${API_BASE_URL}/api/psychologists/me/exit-survey`, {
+                    method: 'POST',
+                    body: JSON.stringify(exitData)
+                });
+
+                // Chama a rota de exclusão real
+                await apiFetch(`${API_BASE_URL}/api/psychologists/me`, {
+                    method: 'DELETE'
+                });
+
+                alert("Sua conta foi excluída. Esperamos te ver novamente!");
+                localStorage.removeItem('girassol_token');
+                window.location.href = '../index.html';
+
+            } catch (error) {
+                console.error("Erro ao excluir:", error);
+                // Se a API de exit-survey não existir, tenta excluir direto
+                try {
+                    await apiFetch(`${API_BASE_URL}/api/psychologists/me`, { method: 'DELETE' });
+                    localStorage.removeItem('girassol_token');
+                    window.location.href = '../index.html';
+                } catch (errDelete) {
+                    showToast('Erro ao excluir conta. Entre em contato com o suporte.', 'error');
+                }
+            }
+        });
+    }
 
         // Carrega página inicial
         loadPage('psi_visao_geral.html');
