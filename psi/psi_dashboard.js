@@ -1,15 +1,12 @@
-// Arquivo: psi_dashboard.js (VERSÃO FINAL CORRIGIDA: ARRAY PURO PARA O BANCO)
+// Arquivo: psi_dashboard.js (VERSÃO FINAL E DEFINITIVA)
 
 document.addEventListener('DOMContentLoaded', function() {
     
-    // --- SELETORES GLOBAIS ---
     let psychologistData = null; 
     const mainContent = document.getElementById('main-content');
     const toastContainer = document.getElementById('toast-container');
 
-    // =====================================================================
-    // FUNÇÃO AUXILIAR: SHOW TOAST
-    // =====================================================================
+    // --- TOAST ---
     function showToast(message, type = 'success') {
         if (!toastContainer) return;
         const toast = document.createElement('div');
@@ -19,9 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => toast.remove(), 4000);
     }
 
-    // =====================================================================
-    // FUNÇÃO DE SEGURANÇA E BUSCA DE DADOS INICIAL
-    // =====================================================================
+    // --- AUTH ---
     async function fetchPsychologistData() {
         await new Promise(resolve => setTimeout(resolve, 100));
         const token = localStorage.getItem('girassol_token');
@@ -32,21 +27,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 resolvePromise(false); 
                 return;
             }
-
             try {
                 const response = await fetch(`${API_BASE_URL}/api/psychologists/me`, {
                     headers: { 'Authorization': `Bearer ${token}` },
                     signal: AbortSignal.timeout(8000) 
                 });
-
                 if (response.ok) {
                     psychologistData = await response.json();
                     resolvePromise(true);
                 } else {
-                    throw new Error("Sessão inválida ou expirada.");
+                    throw new Error("Sessão inválida.");
                 }
             } catch (error) {
-                console.error('Falha na autenticação:', error.message);
+                console.error('Auth Error:', error.message);
                 localStorage.removeItem('girassol_token');
                 window.location.href = '../login.html';
                 resolvePromise(false);
@@ -54,32 +47,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // =====================================================================
-    // FUNÇÃO AUXILIAR PARA CHAMADAS DE API (API FETCHER)
-    // =====================================================================
     async function apiFetch(url, options = {}) {
         const token = localStorage.getItem('girassol_token');
-        if (!token) {
-            window.location.href = '../login.html';
-            throw new Error("Token não encontrado.");
-        }
+        if (!token) throw new Error("Token não encontrado.");
         
         const isFormData = options.body instanceof FormData;
         const headers = {
             'Authorization': `Bearer ${token}`,
             ...options.headers
         };
-        
-        if (!isFormData) {
-            headers['Content-Type'] = 'application/json';
-        }
+        if (!isFormData) headers['Content-Type'] = 'application/json';
 
-        const config = {
-            ...options,
-            headers: headers,
-        };
-
-        const response = await fetch(url, config);
+        const response = await fetch(url, { ...options, headers });
         if (response.status === 401) {
             localStorage.removeItem('girassol_token');
             window.location.href = '../login.html';
@@ -88,42 +67,33 @@ document.addEventListener('DOMContentLoaded', function() {
         return response;
     }
 
-    // =====================================================================
-    // HELPERS: MÁSCARAS E MULTISELECTS
-    // =====================================================================
-    
+    // --- HELPERS ---
     function setupMasks() {
-        const cpfInput = document.getElementById('cpf');
-        const telInput = document.getElementById('telefone');
-        const crpInput = document.getElementById('crp');
-
-        if (typeof IMask !== 'undefined') {
-            if (cpfInput) IMask(cpfInput, { mask: '000.000.000-00' });
-            if (telInput) IMask(telInput, { mask: '(00) 00000-0000' });
-            if (crpInput) IMask(crpInput, { mask: '00/000000' }); 
-        }
+        if (typeof IMask === 'undefined') return;
+        const cpf = document.getElementById('cpf');
+        const tel = document.getElementById('telefone');
+        const crp = document.getElementById('crp');
+        if (cpf) IMask(cpf, { mask: '000.000.000-00' });
+        if (tel) IMask(tel, { mask: '(00) 00000-0000' });
+        if (crp) IMask(crp, { mask: '00/000000' }); 
     }
 
     function setupMultiselects(dataInicial) {
-        const dropdowns = document.querySelectorAll('.multiselect-tag');
-
-        dropdowns.forEach(dropdown => {
+        document.querySelectorAll('.multiselect-tag').forEach(dropdown => {
             const display = dropdown.querySelector('.multiselect-display');
-            const optionsContainer = dropdown.querySelector('.multiselect-options');
             const options = dropdown.querySelectorAll('.option');
-            const fieldId = dropdown.id; 
-            const dataKey = fieldId.replace('_multiselect', '');
+            const dataKey = dropdown.id.replace('_multiselect', '');
             
-            // Armazena no elemento para persistência
             dropdown._selectedValues = [];
 
-            // 1. Carregar dados iniciais
+            // Carregar dados
             if (dataInicial && dataInicial[dataKey]) {
-                const savedData = Array.isArray(dataInicial[dataKey]) 
-                    ? dataInicial[dataKey] 
-                    : (typeof dataInicial[dataKey] === 'string' ? dataInicial[dataKey].split(',') : []);
-                
-                dropdown._selectedValues = savedData.map(s => s.trim()).filter(s => s);
+                // Se for string única (ex: 'Feminino'), converte pra array pra exibir a tag
+                let savedData = dataInicial[dataKey];
+                if (!Array.isArray(savedData)) {
+                    savedData = typeof savedData === 'string' ? savedData.split(',') : [savedData];
+                }
+                dropdown._selectedValues = savedData.map(s => s && s.trim()).filter(s => s);
                 renderTags();
             }
 
@@ -136,13 +106,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     tag.innerHTML = `${val} <button type="button" class="remove-tag" data-val="${val}">&times;</button>`;
                     display.appendChild(tag);
                 });
-                
                 options.forEach(opt => {
-                    if (dropdown._selectedValues.includes(opt.dataset.value)) {
-                        opt.classList.add('selected');
-                    } else {
-                        opt.classList.remove('selected');
-                    }
+                    opt.classList.toggle('selected', dropdown._selectedValues.includes(opt.dataset.value));
                 });
             }
 
@@ -156,8 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         renderTags();
                         return;
                     }
-                    if (dropdown.closest('fieldset').disabled) return; 
-                    dropdown.classList.toggle('open');
+                    if (!dropdown.closest('fieldset').disabled) dropdown.classList.toggle('open');
                 });
             }
 
@@ -165,16 +129,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 opt.addEventListener('click', () => {
                     const val = opt.dataset.value;
                     const isSingle = dropdown.dataset.singleSelect === "true";
-
                     if (isSingle) {
                         dropdown._selectedValues = [val]; 
                         dropdown.classList.remove('open');
                     } else {
-                        if (dropdown._selectedValues.includes(val)) {
-                            dropdown._selectedValues = dropdown._selectedValues.filter(v => v !== val);
-                        } else {
-                            dropdown._selectedValues.push(val);
-                        }
+                        if (dropdown._selectedValues.includes(val)) dropdown._selectedValues = dropdown._selectedValues.filter(v => v !== val);
+                        else dropdown._selectedValues.push(val);
                     }
                     renderTags();
                 });
@@ -184,41 +144,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!dropdown.contains(e.target)) dropdown.classList.remove('open');
             });
             
-            // Método para extrair dados no final
             dropdown.getValues = () => dropdown._selectedValues || [];
         });
     }
 
-    // =====================================================================
-    // LÓGICA DA PÁGINA: MEU PERFIL (CORRIGIDA)
-    // =====================================================================
+    // --- PÁGINA: MEU PERFIL ---
     function inicializarLogicaDoPerfil() {
         const form = document.getElementById('perfil-form');
         const fieldset = document.getElementById('form-fieldset');
         const btnAlterar = document.getElementById('btn-alterar');
         const btnSalvar = document.getElementById('btn-salvar');
 
-        if (!form || !fieldset || !btnAlterar || !btnSalvar) return;
+        if (!form) return;
 
         setupMasks();
 
         // Preencher campos
         if (psychologistData) {
-            const fields = ['nome', 'cpf', 'email', 'crp', 'telefone', 'bio', 'valor_sessao_numero', 'agenda_online_url'];
-            fields.forEach(id => {
+            ['nome', 'cpf', 'email', 'crp', 'telefone', 'bio', 'valor_sessao_numero', 'agenda_online_url'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = psychologistData[id] || '';
             });
 
             const setSocial = (id, prefix) => {
                 let val = psychologistData[id] || '';
-                if(val) {
-                    val = val.replace('https://', '').replace('http://', '').replace('www.', '');
-                    val = val.replace(prefix, '');
-                }
+                val = val.replace('https://', '').replace('http://', '').replace('www.', '').replace(prefix, '');
                 if(document.getElementById(id)) document.getElementById(id).value = val;
             };
-            
             setSocial('linkedin_url', 'linkedin.com/in/');
             setSocial('instagram_url', 'instagram.com/');
             setSocial('facebook_url', 'facebook.com/');
@@ -228,7 +180,6 @@ document.addEventListener('DOMContentLoaded', function() {
             setupMultiselects(psychologistData);
         }
 
-        // Botão Alterar
         btnAlterar.addEventListener('click', (e) => {
             e.preventDefault();
             fieldset.disabled = false;
@@ -237,59 +188,59 @@ document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.multiselect-tag').forEach(el => el.classList.remove('disabled'));
         });
 
-        // Botão Salvar (Submit)
+        // SUBMIT DO FORMULÁRIO (AQUI ESTÁ A CORREÇÃO)
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             btnSalvar.textContent = "Salvando...";
             btnSalvar.disabled = true;
 
             const formData = new FormData(form);
-            const dataToUpdate = Object.fromEntries(formData.entries());
+            const data = Object.fromEntries(formData.entries());
 
-            // Tratamento de Número
-            if (dataToUpdate.valor_sessao_numero) {
-                dataToUpdate.valor_sessao_numero = parseFloat(dataToUpdate.valor_sessao_numero);
-            } else {
-                dataToUpdate.valor_sessao_numero = null;
-            }
+            // Conversão de Número
+            data.valor_sessao_numero = data.valor_sessao_numero ? parseFloat(data.valor_sessao_numero) : null;
 
-            // Reconstrói URLs
-            if(dataToUpdate.linkedin_url) dataToUpdate.linkedin_url = `https://linkedin.com/in/${dataToUpdate.linkedin_url}`;
-            if(dataToUpdate.instagram_url) dataToUpdate.instagram_url = `https://instagram.com/${dataToUpdate.instagram_url}`;
-            if(dataToUpdate.facebook_url) dataToUpdate.facebook_url = `https://facebook.com/${dataToUpdate.facebook_url}`;
-            if(dataToUpdate.tiktok_url) dataToUpdate.tiktok_url = `https://tiktok.com/@${dataToUpdate.tiktok_url}`;
-            if(dataToUpdate.x_url) dataToUpdate.x_url = `https://x.com/${dataToUpdate.x_url}`;
+            // Redes Sociais
+            if(data.linkedin_url) data.linkedin_url = `https://linkedin.com/in/${data.linkedin_url}`;
+            if(data.instagram_url) data.instagram_url = `https://instagram.com/${data.instagram_url}`;
+            if(data.facebook_url) data.facebook_url = `https://facebook.com/${data.facebook_url}`;
+            if(data.tiktok_url) data.tiktok_url = `https://tiktok.com/@${data.tiktok_url}`;
+            if(data.x_url) data.x_url = `https://x.com/${data.x_url}`;
 
-            // --- CORREÇÃO FINAL: ENVIA ARRAY PURO PARA O POSTGRES ---
+            // --- CORREÇÃO DOS MULTISELECTS ---
             document.querySelectorAll('.multiselect-tag').forEach(dropdown => {
                 const key = dropdown.id.replace('_multiselect', '');
-                // NÃO USA .join(',') - O banco quer ['A', 'B']
-                dataToUpdate[key] = dropdown.getValues(); 
+                const valores = dropdown.getValues(); 
+                
+                // Campos que o banco exige String Única
+                const singleFields = ['genero_identidade', 'disponibilidade_periodo']; 
+
+                if (singleFields.includes(key)) {
+                    data[key] = valores.length > 0 ? valores[0] : ''; 
+                } else {
+                    data[key] = valores; // Array para os outros
+                }
             });
 
             try {
-                console.log("Enviando:", dataToUpdate); // Debug
-
                 const response = await apiFetch(`${API_BASE_URL}/api/psychologists/me`, {
-                    method: 'PUT',
-                    body: JSON.stringify(dataToUpdate)
+                    method: 'PUT', body: JSON.stringify(data)
                 });
 
                 if (!response.ok) {
-                    const errData = await response.json();
-                    throw new Error(errData.error || 'Erro ao atualizar.');
+                    const err = await response.json();
+                    throw new Error(err.error || 'Erro ao atualizar.');
                 }
 
                 showToast('Perfil atualizado com sucesso!', 'success');
-                
-                psychologistData = { ...psychologistData, ...dataToUpdate };
+                psychologistData = { ...psychologistData, ...data };
                 
                 fieldset.disabled = true;
                 btnSalvar.classList.add('hidden');
                 btnAlterar.classList.remove('hidden');
                 
-                const sidebarNameEl = document.getElementById('psi-sidebar-name');
-                if(sidebarNameEl) sidebarNameEl.textContent = psychologistData.nome;
+                const sidebarName = document.getElementById('psi-sidebar-name');
+                if(sidebarName) sidebarName.textContent = psychologistData.nome;
 
             } catch (error) {
                 console.error(error);
@@ -300,165 +251,127 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Botão Excluir
-        const btnExcluirLink = document.getElementById('btn-excluir-conta');
-        if (btnExcluirLink) {
-            btnExcluirLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                loadPage('psi_excluir_conta.html');
-            });
-        }
+        // Excluir Conta
+        const btnDel = document.getElementById('btn-excluir-conta');
+        if (btnDel) btnDel.onclick = (e) => { e.preventDefault(); loadPage('psi_excluir_conta.html'); };
     }
 
-    // =====================================================================
-    // LÓGICA DA PÁGINA: EXCLUIR CONTA
-    // =====================================================================
+    // --- PÁGINA: EXCLUIR ---
     async function inicializarLogicaExclusao() {
         if (psychologistData && psychologistData.nome) {
-            const primeiroNome = psychologistData.nome.split(' ')[0];
-            const elNome = document.getElementById('nome-profissional-saida');
-            if (elNome) elNome.textContent = primeiroNome;
+            const el = document.getElementById('nome-profissional-saida');
+            if (el) el.textContent = psychologistData.nome.split(' ')[0];
         }
-
-        const statsMock = { dias: 142, views: 1205, contatos: 48, comunidade: 15 };
-        const elDias = document.getElementById('stat-dias');
-        if(elDias) {
-            document.getElementById('stat-dias').innerText = statsMock.dias;
-            document.getElementById('stat-views').innerText = statsMock.views;
-            document.getElementById('stat-contatos').innerText = statsMock.contatos;
-            document.getElementById('stat-comunidade').innerText = statsMock.comunidade;
-        }
+        
+        // Mock Stats
+        document.getElementById('stat-dias').textContent = 142;
+        document.getElementById('stat-views').textContent = 1205;
+        document.getElementById('stat-contatos').textContent = 48;
+        document.getElementById('stat-comunidade').textContent = 15;
 
         const form = document.getElementById('exit-form');
         if(form) {
-            form.addEventListener('submit', async (e) => {
+            form.onsubmit = async (e) => {
                 e.preventDefault();
-                if (!confirm("Tem certeza absoluta? Esta ação apagará todos os seus dados e não pode ser desfeita.")) return;
+                if (!confirm("Tem certeza absoluta?")) return;
 
-                const formData = new FormData(form);
+                const fd = new FormData(form);
                 const exitData = {
-                    motivo: formData.get('motivo'),
-                    sugestao: formData.get('sugestao'),
-                    avaliacao: document.querySelector('input[name="avaliacao"]:checked')?.value || null
+                    motivo: fd.get('motivo'),
+                    sugestao: fd.get('sugestao'),
+                    avaliacao: document.querySelector('input[name="avaliacao"]:checked')?.value
                 };
 
                 try {
                     await apiFetch(`${API_BASE_URL}/api/psychologists/me/exit-survey`, {
                         method: 'POST', body: JSON.stringify(exitData)
-                    }).catch(err => console.warn("Feedback fail:", err));
+                    }).catch(e => console.warn(e));
 
                     await apiFetch(`${API_BASE_URL}/api/psychologists/me`, { method: 'DELETE' });
-
-                    alert("Sua conta foi excluída. Esperamos te ver novamente!");
+                    alert("Conta excluída.");
                     localStorage.removeItem('girassol_token');
                     window.location.href = '../index.html';
-                } catch (error) {
-                    console.error("Erro ao excluir:", error);
-                    showToast('Erro ao excluir conta.', 'error');
+                } catch (err) {
+                    showToast('Erro ao excluir.', 'error');
                 }
-            });
+            };
         }
     }
 
-    // =====================================================================
-    // UPLOAD DE FOTO E NAVEGAÇÃO
-    // =====================================================================
-    async function uploadProfilePhoto(file, sidebarPhotoEl) {
-        const formData = new FormData();
-        formData.append('foto', file);
-        const originalSrc = sidebarPhotoEl.src;
-        sidebarPhotoEl.style.opacity = '0.5';
+    // --- UPLOAD ---
+    async function uploadProfilePhoto(file, imgEl) {
+        const fd = new FormData();
+        fd.append('foto', file);
+        const oldSrc = imgEl.src;
+        imgEl.style.opacity = '0.5';
 
         try {
-            const response = await apiFetch(`${API_BASE_URL}/api/psychologists/me/foto`, {
-                method: 'POST', body: formData 
+            const res = await apiFetch(`${API_BASE_URL}/api/psychologists/me/foto`, {
+                method: 'POST', body: fd 
             });
-            if (!response.ok) throw new Error('Falha no upload.');
-            const data = await response.json();
-            
-            sidebarPhotoEl.src = data.fotoUrl;
-            sidebarPhotoEl.style.opacity = '1';
+            if (!res.ok) throw new Error('Falha upload');
+            const data = await res.json();
+            imgEl.src = data.fotoUrl;
+            imgEl.style.opacity = '1';
             psychologistData.fotoUrl = data.fotoUrl;
-            showToast('Foto de perfil atualizada!', 'success');
-        } catch (error) {
-            console.error(error);
-            sidebarPhotoEl.src = originalSrc;
-            sidebarPhotoEl.style.opacity = '1';
-            showToast('Erro ao enviar foto.', 'error');
+            showToast('Foto atualizada!');
+        } catch (e) {
+            imgEl.src = oldSrc;
+            imgEl.style.opacity = '1';
+            showToast('Erro no upload.', 'error');
         }
     }
 
-    function fetchUnreadCount() { /* ... */ }
-    function fetchQnaCount() { /* ... */ }
-    function inicializarLogicaDaCaixaDeEntrada() { }
-    function inicializarListaDeEspera() { }
-    async function inicializarComunidadeQNA() { console.log("Q&A OK"); }
-
-    function loadPage(pageUrl) {
-        if (!pageUrl) return;
+    // --- ROTEADOR ---
+    function loadPage(url) {
+        if (!url) return;
         mainContent.innerHTML = '<div style="padding:40px; text-align:center; color:#888;">Carregando...</div>';
-
-        fetch(pageUrl)
-            .then(response => response.ok ? response.text() : Promise.reject(`Erro: ${pageUrl}`))
+        fetch(url).then(r => r.ok ? r.text() : Promise.reject(url))
             .then(html => {
                 mainContent.innerHTML = html;
-                if (pageUrl.includes('psi_meu_perfil.html')) inicializarLogicaDoPerfil();
-                else if (pageUrl.includes('psi_caixa_de_entrada.html')) inicializarLogicaDaCaixaDeEntrada();
-                else if (pageUrl.includes('psi_lista_de_espera.html')) inicializarListaDeEspera();
-                else if (pageUrl.includes('psi_comunidade.html')) inicializarComunidadeQNA();
-                else if (pageUrl.includes('psi_excluir_conta.html')) inicializarLogicaExclusao();
+                if (url.includes('meu_perfil')) inicializarLogicaDoPerfil();
+                else if (url.includes('excluir_conta')) inicializarLogicaExclusao();
+                // Adicione outros inits se precisar
             })
-            .catch(error => {
-                mainContent.innerHTML = `<div class="card"><h2>Erro</h2><p>Não foi possível carregar a seção.</p></div>`;
-                console.error(error);
-            });
+            .catch(e => mainContent.innerHTML = '<p>Erro ao carregar.</p>');
     }
 
+    // --- INIT ---
     function initializeDashboard() {
         document.getElementById('dashboard-container').style.display = 'flex';
-        const sidebarPhotoEl = document.getElementById('psi-sidebar-photo');
-        const sidebarNameEl = document.getElementById('psi-sidebar-name');
+        const imgEl = document.getElementById('psi-sidebar-photo');
+        const nameEl = document.getElementById('psi-sidebar-name');
         
         if (psychologistData) {
-            if(sidebarNameEl) sidebarNameEl.textContent = psychologistData.nome;
-            if(sidebarPhotoEl) sidebarPhotoEl.src = psychologistData.fotoUrl || 'https://placehold.co/70x70/1B4332/FFFFFF?text=Psi';
-
-            const btnPublicProfile = document.getElementById('btn-view-public-profile');
-            if (btnPublicProfile) {
-                if (psychologistData.slug) {
-                    btnPublicProfile.href = `/${psychologistData.slug}`;
-                    btnPublicProfile.style.opacity = '1';
-                    btnPublicProfile.style.pointerEvents = 'auto';
-                } else {
-                    btnPublicProfile.href = '#';
-                    btnPublicProfile.style.opacity = '0.5';
-                    btnPublicProfile.style.cursor = 'not-allowed';
-                }
+            if(nameEl) nameEl.textContent = psychologistData.nome;
+            if(imgEl) imgEl.src = psychologistData.fotoUrl || 'https://placehold.co/70x70/1B4332/FFFFFF?text=Psi';
+            
+            const btnLink = document.getElementById('btn-view-public-profile');
+            if(btnLink && psychologistData.slug) {
+                btnLink.href = `/${psychologistData.slug}`;
+                btnLink.style.opacity = '1';
+                btnLink.style.pointerEvents = 'auto';
             }
         }
 
-        const photoUploadInput = document.getElementById('profile-photo-upload');
-        if (photoUploadInput && sidebarPhotoEl) {
-            photoUploadInput.addEventListener('change', (event) => {
-                const file = event.target.files[0];
-                if (file) uploadProfilePhoto(file, sidebarPhotoEl);
-            });
+        const uploadInput = document.getElementById('profile-photo-upload');
+        if (uploadInput && imgEl) {
+            uploadInput.onchange = (e) => {
+                if(e.target.files[0]) uploadProfilePhoto(e.target.files[0], imgEl);
+            };
         }
 
-        const navLinks = document.querySelectorAll('.sidebar-nav a');
-        navLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
+        document.querySelectorAll('.sidebar-nav a').forEach(l => {
+            l.onclick = (e) => {
                 e.preventDefault();
                 document.querySelectorAll('.sidebar-nav li').forEach(li => li.classList.remove('active'));
-                this.closest('li').classList.add('active');
-                loadPage(this.getAttribute('data-page'));
-            });
+                l.closest('li').classList.add('active');
+                loadPage(l.getAttribute('data-page'));
+            };
         });
 
         loadPage('psi_visao_geral.html');
     }
 
-    fetchPsychologistData().then(success => {
-        if (success) initializeDashboard();
-    });
+    fetchPsychologistData().then(ok => { if (ok) initializeDashboard(); });
 });
