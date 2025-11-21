@@ -4026,3 +4026,61 @@ header.header-rolagem .botoes-acao .btn-outline:hover {
     width: 16px;  /* Ícone menor para caber no botão */
     height: 16px;
 }
+/* ==========================================================================
+   NOTIFICAÇÕES MODERNAS (TOAST)
+   ========================================================================== */
+#toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.toast {
+    min-width: 300px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background-color: var(--branco-puro);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideInRight 0.3s ease-out forwards;
+    border-left: 5px solid transparent;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    opacity: 0; /* Começa invisível p/ animação */
+}
+
+/* Tipos de Toast */
+.toast.success {
+    border-left-color: var(--verde-escuro);
+}
+.toast.success::before {
+    content: '✓';
+    display: flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; background: #e8f5e9; color: var(--verde-escuro);
+    border-radius: 50%; font-weight: bold; font-size: 14px;
+}
+
+.toast.error {
+    border-left-color: #E63946;
+}
+.toast.error::before {
+    content: '!';
+    display: flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; background: #fce8e6; color: #E63946;
+    border-radius: 50%; font-weight: bold;
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeOut {
+    to { opacity: 0; transform: translateY(-10px); }
+}

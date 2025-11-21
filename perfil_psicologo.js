@@ -1,11 +1,27 @@
-// perfil_psicologo.js — Versão Final (Social + Ratings + Login Wall Restaurado)
+// perfil_psicologo.js — Versão Final (Toast + Média Corrigida)
 
 document.addEventListener('DOMContentLoaded', async () => {
     const profileContainer = document.getElementById('profile-container');
     const loadingElement = document.getElementById('loading-state');
     const errorElement = document.getElementById('error-state');
+    const toastContainer = document.getElementById('toast-container');
 
-    // --- FUNÇÕES DE ESTADO DA TELA ---
+    // --- FUNÇÃO DE NOTIFICAÇÃO (TOAST) ---
+    const showToast = (message, type = 'success') => {
+        if (!toastContainer) return;
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<span>${message}</span>`;
+        toastContainer.appendChild(toast);
+
+        // Remove após 4 segundos
+        setTimeout(() => {
+            toast.style.animation = 'fadeOut 0.5s forwards';
+            setTimeout(() => toast.remove(), 500);
+        }, 4000);
+    };
+
+    // --- ESTADOS DA TELA ---
     const showLoading = () => {
         loadingElement.classList.remove('hidden');
         profileContainer.classList.add('hidden');
@@ -66,20 +82,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    // --- 2. RENDERIZA MÉDIA DE AVALIAÇÃO ---
+    // --- 2. RENDERIZA MÉDIA DE AVALIAÇÃO (CORRIGIDA PARA CALCULAR SEMPRE) ---
     const renderRatingSummary = (profile) => {
         const container = document.getElementById('psi-rating-summary');
         if (!container) return;
 
-        const avg = profile.average_rating ? parseFloat(profile.average_rating) : 0;
-        const count = profile.review_count ? parseInt(profile.review_count) : (profile.reviews ? profile.reviews.length : 0);
+        let avg = 0;
+        let count = 0;
 
+        // Tenta usar dados do backend ou calcula manualmente via lista de reviews
+        if (profile.reviews && profile.reviews.length > 0) {
+            count = profile.reviews.length;
+            const total = profile.reviews.reduce((sum, r) => sum + parseFloat(r.rating || 0), 0);
+            avg = total / count;
+        } 
+        else if (profile.average_rating) {
+            avg = parseFloat(profile.average_rating);
+            count = parseInt(profile.review_count);
+        }
+
+        // Se ainda assim for 0, mostra "Novo"
         if (count === 0) {
-            container.style.display = 'none';
+            container.innerHTML = `
+                <span style="color:#ddd; font-size: 1.2rem;">★</span>
+                <span style="color:#999; font-size:0.9rem; margin-left: 5px; font-style: italic;">Novo na plataforma</span>
+            `;
+            container.style.display = 'flex';
             return;
         }
 
-        container.style.display = 'flex';
+        // Renderiza as estrelas douradas
         let starsHtml = '';
         for (let i = 1; i <= 5; i++) {
             if (i <= Math.round(avg)) {
@@ -90,42 +122,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         container.innerHTML = `
-            <span style="font-size: 1.2rem; margin-right:5px;">${starsHtml}</span>
-            <span class="rating-hero-score">${avg.toFixed(1)}</span>
-            <span style="margin: 0 5px; color: #ccc;">•</span>
-            <span class="rating-hero-count" onclick="document.getElementById('tab-btn-avaliacoes').click()">${count} avaliações</span>
+            <div style="display: flex; align-items: center; gap: 5px; cursor: pointer;" onclick="document.getElementById('tab-btn-avaliacoes').click()">
+                <span style="font-size: 1.2rem; letter-spacing: 1px;">${starsHtml}</span>
+                <span style="font-weight: bold; color:#333; margin-left: 4px;">${avg.toFixed(1)}</span>
+                <span style="color:#777; font-size: 0.9rem; text-decoration: underline;">(${count} avaliações)</span>
+            </div>
         `;
+        container.style.display = 'flex';
     };
 
-    // --- 3. VERIFICAÇÃO DE LOGIN PARA AVALIAR (RESTAURADA) ---
+    // --- 3. VERIFICAÇÃO DE LOGIN PARA AVALIAR ---
     function checkPatientLoginStatus(psychologistId) {
         const token = localStorage.getItem('girassol_token');
-        // Verifica se tem token (não estamos validando role rigorosamente no front para simplificar, 
-        // mas o backend vai bloquear se não for paciente)
         
         if (token) {
-            // USUÁRIO LOGADO -> MOSTRA FORMULÁRIO
+            // LOGADO
             const formWrapper = document.getElementById('review-form-wrapper');
             const loginCta = document.getElementById('login-to-review-cta');
-            
             if (formWrapper) formWrapper.style.display = 'block';
             if (loginCta) loginCta.style.display = 'none';
 
-            // Configura o submit do formulário
             const reviewForm = document.getElementById('review-form');
             if (reviewForm) {
-                // Remove listeners antigos para não duplicar
                 const newForm = reviewForm.cloneNode(true);
                 reviewForm.parentNode.replaceChild(newForm, reviewForm);
 
                 newForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    
                     const ratingEl = document.querySelector('input[name="rating"]:checked');
                     const commentEl = document.getElementById('review-comment');
                     
                     if (!ratingEl) {
-                        alert('Por favor, selecione uma nota.');
+                        showToast('Por favor, selecione uma nota.', 'error');
                         return;
                     }
 
@@ -144,28 +172,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                         });
 
                         if (response.ok) {
-                            alert('Avaliação enviada com sucesso!');
-                            window.location.reload();
+                            showToast('Avaliação enviada com sucesso!', 'success');
+                            setTimeout(() => window.location.reload(), 1500);
                         } else {
                             const err = await response.json();
-                            alert('Erro ao enviar: ' + (err.error || 'Tente novamente.'));
+                            showToast(err.error || 'Erro ao enviar.', 'error');
                         }
                     } catch (error) {
-                        console.error(error);
-                        alert('Erro de conexão.');
+                        showToast('Erro de conexão.', 'error');
                     }
                 });
             }
-
         } else {
-            // USUÁRIO DESLOGADO -> MOSTRA BOTÃO DE LOGIN
+            // DESLOGADO
             const formWrapper = document.getElementById('review-form-wrapper');
             const loginCta = document.getElementById('login-to-review-cta');
-            
             if (formWrapper) formWrapper.style.display = 'none';
             if (loginCta) {
                 loginCta.style.display = 'block';
-                // Atualiza o link de login para voltar pra cá depois
                 const btn = document.getElementById('login-wall-btn');
                 if (btn) {
                     const returnUrl = encodeURIComponent(window.location.href);
@@ -211,7 +235,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const modalidadeEl = document.getElementById('psi-modalidade');
         if (modalidadeEl) modalidadeEl.textContent = profile.modalidade || 'Online e Presencial';
 
-        // Localização (Novo)
         const locEl = document.getElementById('psi-localizacao');
         if (locEl) {
             locEl.innerHTML = '';
@@ -243,6 +266,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const container = document.getElementById(id);
             if (!container) return;
             container.innerHTML = '';
+            
             let tags = [];
             if (Array.isArray(items)) tags = items;
             else if (typeof items === 'string') tags = items.split(',');
@@ -254,8 +278,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     span.textContent = item.trim();
                     container.appendChild(span);
                 });
-            } else {
-                container.innerHTML = '<span style="color:#999; font-size:0.9rem;">Não informado</span>';
             }
         };
 
@@ -266,7 +288,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderSocialLinks(profile);
         renderRatingSummary(profile);
 
-        // Avaliações (Lista)
         const reviewsContainer = document.getElementById('reviews-list-container');
         const tabBtnAvaliacoes = document.getElementById('tab-btn-avaliacoes');
         
@@ -294,10 +315,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        // --- CHAMA A VERIFICAÇÃO DE LOGIN ---
         checkPatientLoginStatus(profile.id);
     };
 
+    // --- SETUP SHARE ---
     const setupShareButton = () => {
         const btn = document.getElementById('share-profile-btn');
         if(!btn) return;
@@ -308,11 +329,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 url: window.location.href
             };
             if (navigator.share) {
-                try { await navigator.share(shareData); }
-                catch(e) {}
+                try { await navigator.share(shareData); } catch(e) {}
             } else {
                 navigator.clipboard.writeText(window.location.href);
-                alert('Link copiado!');
+                showToast('Link copiado!', 'success');
             }
         });
     };
@@ -327,10 +347,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const fetchProfile = async () => {
         showLoading();
         const slug = extractSlug();
-        
-        if (!slug) {
-            // Lógica local/erro
-        }
+        if (!slug) {} // Lógica local
 
         try {
             const res = await fetch(`${API_BASE_URL}/api/psychologists/slug/${encodeURIComponent(slug)}`);
