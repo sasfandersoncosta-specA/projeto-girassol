@@ -779,3 +779,195 @@ button[disabled] { background: #e9ecef !important; color: #adb5bd; cursor: not-a
     border-color: var(--verde-escuro);
     box-shadow: 0 0 0 2px rgba(27, 67, 50, 0.1);
 }
+
+/* ==========================================================================
+   MODERN INBOX (CAIXA DE ENTRADA)
+   ========================================================================== */
+
+/* Container Principal */
+.inbox-container {
+    display: flex;
+    height: calc(100vh - 180px); /* Ajusta altura para caber na tela */
+    min-height: 500px;
+    background-color: var(--branco-puro);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    border: 1px solid var(--cinza-borda);
+    overflow: hidden;
+}
+
+/* --- SIDEBAR (Lista de Mensagens) --- */
+.inbox-sidebar {
+    width: 320px;
+    border-right: 1px solid var(--cinza-borda);
+    background-color: #fcfcfc;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.sidebar-search {
+    padding: 15px;
+    border-bottom: 1px solid var(--cinza-borda);
+}
+
+.message-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+}
+
+.message-item {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    position: relative;
+}
+
+.message-item:hover {
+    background-color: #f1f3f5;
+}
+
+/* Item Ativo (Selecionado) */
+.message-item.active {
+    background-color: #fff;
+    border-left: 4px solid var(--verde-escuro);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Avatar (Bolinha com iniciais) */
+.sender-avatar {
+    width: 35px; height: 35px;
+    background-color: var(--verde-escuro);
+    color: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: bold;
+    flex-shrink: 0;
+}
+
+.message-info {
+    flex-grow: 1;
+    min-width: 0; /* Garante que o texto corte com ellipsis */
+}
+
+.message-top {
+    display: flex; justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.sender-name { font-weight: 600; font-size: 0.9rem; color: #333; }
+.message-time { font-size: 0.75rem; color: #888; }
+
+.message-subject {
+    font-size: 0.9rem; color: #333;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin-bottom: 4px;
+}
+
+/* Estilo para Não Lido */
+.message-item.unread .message-subject { font-weight: 700; }
+.message-item.unread .sender-name { color: var(--verde-escuro); }
+.message-item.unread::after {
+    content: ''; position: absolute; right: 15px; top: 50%;
+    width: 8px; height: 8px; background-color: var(--cor-girassol);
+    border-radius: 50%;
+}
+
+.message-preview {
+    font-size: 0.8rem; color: #888;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+
+/* --- CONTEÚDO (Leitura) --- */
+.inbox-content {
+    flex-grow: 1;
+    padding: 0;
+    background-color: var(--branco-puro);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.email-wrapper {
+    padding: 40px;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.email-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    border-bottom: 1px solid var(--cinza-borda);
+    padding-bottom: 20px; margin-bottom: 30px;
+}
+
+.email-meta { display: flex; gap: 15px; align-items: center; }
+.sender-avatar-large {
+    width: 48px; height: 48px;
+    background-color: var(--verde-escuro); color: white;
+    border-radius: 50%; font-size: 1.2rem; font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+}
+
+.email-meta-text h2 {
+    font-family: 'New Kansas', serif;
+    font-size: 1.5rem; color: var(--verde-escuro);
+    margin: 0 0 5px 0;
+}
+.email-meta-text p { font-size: 0.9rem; color: #666; margin: 0; }
+
+.email-body { font-size: 1rem; line-height: 1.7; color: #444; }
+.email-body p { margin-bottom: 15px; }
+
+/* Caixa de Destaque no Email */
+.highlight-box {
+    background-color: #f0fdf4;
+    border-left: 4px solid var(--verde-escuro);
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 4px;
+    font-size: 0.95rem;
+}
+
+.btn-link {
+    color: var(--verde-escuro);
+    font-weight: bold;
+    text-decoration: none;
+    border-bottom: 2px solid var(--cor-girassol);
+    padding-bottom: 2px;
+    transition: all 0.2s;
+}
+.btn-link:hover { background-color: var(--cor-girassol); color: var(--verde-escuro); }
+
+/* Botão do Header (Branco/Transparente) */
+.btn-outline-light {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.5);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-outline-light:hover {
+    background: white;
+    color: var(--verde-escuro);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .inbox-container { flex-direction: column; height: auto; }
+    .inbox-sidebar { width: 100%; border-right: none; border-bottom: 1px solid #eee; height: 300px; }
+    .email-wrapper { padding: 20px; }
+    .email-meta { flex-direction: column; align-items: flex-start; }
+    .email-header { flex-direction: column; gap: 15px; }
+}
