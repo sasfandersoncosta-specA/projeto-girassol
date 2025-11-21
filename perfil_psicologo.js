@@ -305,10 +305,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return list.map(item => `<span class="${cssClass}">${item.trim()}</span>`).join('');
             };
 
-            const especialidadesHtml = generateTagsHtml(profile.temas_atuacao, 'tag');
-            const abordagensHtml = generateTagsHtml(profile.abordagens_tecnicas, 'small-tag');
-            const praticasHtml = generateTagsHtml(profile.praticas_vivencias, 'practice-tag'); // Usa o estilo moderno que criamos antes
-
+            // --- AQUI ESTÁ A MUDANÇA ---
+            // Agora TODOS usam 'practice-tag' para ter o mesmo visual moderno
+            const especialidadesHtml = generateTagsHtml(profile.temas_atuacao, 'practice-tag');
+            const abordagensHtml = generateTagsHtml(profile.abordagens_tecnicas, 'practice-tag');
+            const praticasHtml = generateTagsHtml(profile.praticas_vivencias, 'practice-tag'); 
+            // ---------------------------
             // Injeta o HTML na aba de baixo
             tabSobre.innerHTML = `
                 <div class="about-section-modern">
