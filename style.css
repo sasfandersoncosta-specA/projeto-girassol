@@ -3917,16 +3917,11 @@ header.header-rolagem .botoes-acao .btn-outline:hover {
 
 /* Container da linha de ícones (Redes + Share) */
 .social-share-row {
-    display: inline-flex; /* Faz o fundo branco abraçar os ícones */
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    background-color: #ffffff;
-    padding: 8px 20px;
-    border-radius: 50px; /* Formato pílula */
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    border: 1px solid #eee;
-    margin-bottom: 30px;
+    background-color: transparent; /* Fundo transparente */
+    box-shadow: none; /* Sem sombra */
+    border: none; /* Sem borda */
+    padding: 0;
+    margin-bottom: 20px;
 }
 
 /* Agrupamento dos ícones sociais */
@@ -3938,32 +3933,46 @@ header.header-rolagem .botoes-acao .btn-outline:hover {
 /* Estilo Moderno dos Botões Redondos */
 .icon-btn-modern, 
 #psi-social-links .icon-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 1px solid #f0f0f0;
+    width: 42px;
+    height: 42px;
     background-color: #fff;
+    border: 1px solid #e0e0e0;
     color: #555;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 0;
-    text-decoration: none; /* Remove sublinhado de links */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
 }
 
 .icon-btn-modern:hover,
 #psi-social-links .icon-btn:hover {
-    background-color: var(--verde-escuro);
-    color: white;
-    border-color: var(--verde-escuro);
-    transform: translateY(-2px);
+    background-color: var(--verde-escuro) !important;
+    color: #ffffff !important;
+    border-color: var(--verde-escuro) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(27, 67, 50, 0.2);
 }
 
 /* Pequeno traço separador */
 .vertical-divider {
-    width: 1px;
-    height: 20px;
-    background-color: #ddd;
+    display: none;
+}
+.conversion-card .profile-tags .tag,
+.conversion-card .profile-tags span {
+    background-color: transparent;
+    color: var(--cinza-texto);
+    font-weight: 400;
+    padding: 0;
+    font-size: 0.95rem;
+    border-radius: 0;
+    display: block; /* Quebra linha */
+    text-align: center;
+    font-style: italic;
+}
+.location-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 5px;
+    font-size: 0.9rem;
+    color: #666;
 }
