@@ -66,38 +66,55 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    // --- 2. RENDERIZA MÉDIA DE AVALIAÇÃO ---
+    // --- 2. RENDERIZA MÉDIA DE AVALIAÇÃO (Versão Cálculo Automático) ---
     const renderRatingSummary = (profile) => {
         const container = document.getElementById('psi-rating-summary');
         if (!container) return;
 
-        const avg = profile.average_rating ? parseFloat(profile.average_rating) : 0;
-        const count = profile.review_count ? parseInt(profile.review_count) : (profile.reviews ? profile.reviews.length : 0);
+        let avg = 0;
+        let count = 0;
 
+        // 1. Tenta pegar dados prontos do backend
+        if (profile.average_rating) {
+            avg = parseFloat(profile.average_rating);
+            count = parseInt(profile.review_count);
+        } 
+        // 2. Se não vier pronto, CALCULA AGORA usando a lista de reviews
+        else if (profile.reviews && profile.reviews.length > 0) {
+            count = profile.reviews.length;
+            // Soma todas as notas e divide pela quantidade
+            const total = profile.reviews.reduce((sum, r) => sum + parseInt(r.rating || 0), 0);
+            avg = total / count;
+        }
+
+        // 3. Se não tiver nenhuma avaliação, mostra "Novo"
         if (count === 0) {
-            container.style.display = 'none'; // Esconde se não tiver avaliação
+            container.innerHTML = `
+                <span style="color:#ddd; font-size: 1.2rem;">★</span>
+                <span style="color:#999; font-size:0.9rem; margin-left: 5px; font-style: italic;">Novo na plataforma</span>
+            `;
+            container.style.display = 'flex'; 
             return;
         }
 
-        // Mostra o container
-        container.style.display = 'flex';
-
-        // Gera estrelas
+        // 4. Renderiza as Estrelas
         let starsHtml = '';
         for (let i = 1; i <= 5; i++) {
+            // Pinta a estrela se o índice for menor ou igual à média arredondada
             if (i <= Math.round(avg)) {
                 starsHtml += '<span style="color:#f39c12;">★</span>';
             } else {
                 starsHtml += '<span style="color:#ddd;">★</span>';
             }
         }
-
         container.innerHTML = `
-            <span style="font-size: 1.2rem; margin-right:5px;">${starsHtml}</span>
-            <span class="rating-hero-score">${avg.toFixed(1)}</span>
-            <span style="margin: 0 5px; color: #ccc;">•</span>
-            <span class="rating-hero-count" onclick="document.getElementById('tab-btn-avaliacoes').click()">${count} avaliações</span>
+            <div style="display: flex; align-items: center; gap: 5px; cursor: pointer;" onclick="document.querySelector('[data-tab=\'avaliacoes\']').click()">
+                <span style="font-size: 1.2rem; letter-spacing: 1px;">${starsHtml}</span>
+                <span style="font-weight: bold; color:#333; margin-left: 4px;">${avg.toFixed(1)}</span>
+                <span style="color:#777; font-size: 0.9rem; text-decoration: underline;">(${count} avaliações)</span>
+            </div>
         `;
+        container.style.display = 'flex';
     };
 
     // --- 3. PREENCHE O PERFIL (ATUALIZADO COM LOCALIZAÇÃO E MÉDIA) ---
