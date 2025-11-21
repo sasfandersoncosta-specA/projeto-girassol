@@ -1,7 +1,6 @@
-// perfil_psicologo.js — Versão Final (Social + Ratings + Share)
+// perfil_psicologo.js — Versão Final (Social + Ratings + Login Wall Restaurado)
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const loginUrl = 'login.html';
     const profileContainer = document.getElementById('profile-container');
     const loadingElement = document.getElementById('loading-state');
     const errorElement = document.getElementById('error-state');
@@ -29,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         profileContainer.classList.remove('hidden');
     };
 
-    // --- 1. RENDERIZA REDES SOCIAIS (LIMPA - SEM CORES INLINE) ---
+    // --- 1. RENDERIZA REDES SOCIAIS ---
     const renderSocialLinks = (profile) => {
         const container = document.getElementById('psi-social-links');
         if (!container) return;
@@ -50,74 +49,133 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const a = document.createElement('a');
                 a.href = profile[net.key];
                 a.target = '_blank';
-                a.className = 'icon-btn'; // Usa classe genérica
+                a.className = 'icon-btn'; 
                 a.innerHTML = net.icon;
-                // REMOVIDO O JS DE CORES - O CSS CUIDARÁ DISSO
                 container.appendChild(a);
                 hasLinks = true;
             }
         });
         
-        // Esconde se vazio
-        const divisor = document.querySelector('.social-share-row');
-        if (!hasLinks && divisor) {
-            // Opcional: esconder a linha toda se não tiver redes sociais? 
-            // Por enquanto deixamos visível apenas o botão de share
+        const divisor = document.querySelector('.social-share-row .vertical-divider');
+        if (!hasLinks) {
+            if (divisor) divisor.style.display = 'none';
+            container.style.display = 'none';
+        } else {
+             if (divisor) divisor.style.display = 'block';
+             container.style.display = 'flex';
         }
     };
 
-    // --- 2. RENDERIZA MÉDIA DE AVALIAÇÃO (Versão Cálculo Automático) ---
+    // --- 2. RENDERIZA MÉDIA DE AVALIAÇÃO ---
     const renderRatingSummary = (profile) => {
         const container = document.getElementById('psi-rating-summary');
         if (!container) return;
 
-        let avg = 0;
-        let count = 0;
+        const avg = profile.average_rating ? parseFloat(profile.average_rating) : 0;
+        const count = profile.review_count ? parseInt(profile.review_count) : (profile.reviews ? profile.reviews.length : 0);
 
-        // 1. Tenta pegar dados prontos do backend
-        if (profile.average_rating) {
-            avg = parseFloat(profile.average_rating);
-            count = parseInt(profile.review_count);
-        } 
-        // 2. Se não vier pronto, CALCULA AGORA usando a lista de reviews
-        else if (profile.reviews && profile.reviews.length > 0) {
-            count = profile.reviews.length;
-            // Soma todas as notas e divide pela quantidade
-            const total = profile.reviews.reduce((sum, r) => sum + parseInt(r.rating || 0), 0);
-            avg = total / count;
-        }
-
-        // 3. Se não tiver nenhuma avaliação, mostra "Novo"
         if (count === 0) {
-            container.innerHTML = `
-                <span style="color:#ddd; font-size: 1.2rem;">★</span>
-                <span style="color:#999; font-size:0.9rem; margin-left: 5px; font-style: italic;">Novo na plataforma</span>
-            `;
-            container.style.display = 'flex'; 
+            container.style.display = 'none';
             return;
         }
 
-        // 4. Renderiza as Estrelas
+        container.style.display = 'flex';
         let starsHtml = '';
         for (let i = 1; i <= 5; i++) {
-            // Pinta a estrela se o índice for menor ou igual à média arredondada
             if (i <= Math.round(avg)) {
                 starsHtml += '<span style="color:#f39c12;">★</span>';
             } else {
                 starsHtml += '<span style="color:#ddd;">★</span>';
             }
         }
+
         container.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 5px; cursor: pointer;" onclick="document.querySelector('[data-tab=\'avaliacoes\']').click()">
-                <span style="font-size: 1.2rem; letter-spacing: 1px;">${starsHtml}</span>
-                <span style="font-weight: bold; color:#333; margin-left: 4px;">${avg.toFixed(1)}</span>
-                <span style="color:#777; font-size: 0.9rem; text-decoration: underline;">(${count} avaliações)</span>
-            </div>
+            <span style="font-size: 1.2rem; margin-right:5px;">${starsHtml}</span>
+            <span class="rating-hero-score">${avg.toFixed(1)}</span>
+            <span style="margin: 0 5px; color: #ccc;">•</span>
+            <span class="rating-hero-count" onclick="document.getElementById('tab-btn-avaliacoes').click()">${count} avaliações</span>
         `;
-        container.style.display = 'flex';
     };
 
-    // --- 3. PREENCHE O PERFIL (ATUALIZADO COM LOCALIZAÇÃO E MÉDIA) ---
+    // --- 3. VERIFICAÇÃO DE LOGIN PARA AVALIAR (RESTAURADA) ---
+    function checkPatientLoginStatus(psychologistId) {
+        const token = localStorage.getItem('girassol_token');
+        // Verifica se tem token (não estamos validando role rigorosamente no front para simplificar, 
+        // mas o backend vai bloquear se não for paciente)
+        
+        if (token) {
+            // USUÁRIO LOGADO -> MOSTRA FORMULÁRIO
+            const formWrapper = document.getElementById('review-form-wrapper');
+            const loginCta = document.getElementById('login-to-review-cta');
+            
+            if (formWrapper) formWrapper.style.display = 'block';
+            if (loginCta) loginCta.style.display = 'none';
+
+            // Configura o submit do formulário
+            const reviewForm = document.getElementById('review-form');
+            if (reviewForm) {
+                // Remove listeners antigos para não duplicar
+                const newForm = reviewForm.cloneNode(true);
+                reviewForm.parentNode.replaceChild(newForm, reviewForm);
+
+                newForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const ratingEl = document.querySelector('input[name="rating"]:checked');
+                    const commentEl = document.getElementById('review-comment');
+                    
+                    if (!ratingEl) {
+                        alert('Por favor, selecione uma nota.');
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch('/api/reviews', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({
+                                psychologistId: psychologistId,
+                                rating: parseInt(ratingEl.value),
+                                comment: commentEl.value
+                            })
+                        });
+
+                        if (response.ok) {
+                            alert('Avaliação enviada com sucesso!');
+                            window.location.reload();
+                        } else {
+                            const err = await response.json();
+                            alert('Erro ao enviar: ' + (err.error || 'Tente novamente.'));
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        alert('Erro de conexão.');
+                    }
+                });
+            }
+
+        } else {
+            // USUÁRIO DESLOGADO -> MOSTRA BOTÃO DE LOGIN
+            const formWrapper = document.getElementById('review-form-wrapper');
+            const loginCta = document.getElementById('login-to-review-cta');
+            
+            if (formWrapper) formWrapper.style.display = 'none';
+            if (loginCta) {
+                loginCta.style.display = 'block';
+                // Atualiza o link de login para voltar pra cá depois
+                const btn = document.getElementById('login-wall-btn');
+                if (btn) {
+                    const returnUrl = encodeURIComponent(window.location.href);
+                    btn.href = `login.html?return_url=${returnUrl}`;
+                }
+            }
+        }
+    }
+
+    // --- 4. PREENCHE O PERFIL ---
     const populateProfile = (profile) => {
         const setText = (id, text) => {
             const el = document.getElementById(id);
@@ -126,10 +184,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         document.getElementById('psi-nome').textContent = profile.nome || 'Nome não disponível';
         
-        // Adiciona Selo de Verificado se ativo
         if (profile.status === 'active') {
             const h1 = document.getElementById('psi-nome');
-            // Evita duplicar o badge se já existir
             if (!h1.querySelector('.verification-badge')) {
                 const badge = document.createElement('span');
                 badge.className = 'verification-badge';
@@ -155,11 +211,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const modalidadeEl = document.getElementById('psi-modalidade');
         if (modalidadeEl) modalidadeEl.textContent = profile.modalidade || 'Online e Presencial';
 
-        // --- NOVO: LOCALIZAÇÃO ---
+        // Localização (Novo)
         const locEl = document.getElementById('psi-localizacao');
         if (locEl) {
             locEl.innerHTML = '';
-            // Se for presencial e tiver CEP (ou cidade se você adicionar no futuro)
             if (profile.modalidade && profile.modalidade.includes('Presencial')) {
                 locEl.innerHTML = `
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
@@ -167,12 +222,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </svg>
                     <span>Consultório Presencial (São Paulo/SP)</span> 
                 `;
-                // OBS: Coloquei "São Paulo/SP" fixo por enquanto pois não temos cidade no banco. 
-                // Idealmente, adicionar campo 'cidade' no cadastro.
             }
         }
 
-        // Botão WhatsApp
         const contactButton = document.getElementById('btn-agendar-whatsapp');
         if (contactButton) {
             if (profile.telefone) {
@@ -187,13 +239,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        // Tags (Abordagens, etc)
         const fillTags = (id, items) => {
             const container = document.getElementById(id);
             if (!container) return;
             container.innerHTML = '';
-            
-            // Garante que items seja array (se vier string do banco)
             let tags = [];
             if (Array.isArray(items)) tags = items;
             else if (typeof items === 'string') tags = items.split(',');
@@ -205,17 +254,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                     span.textContent = item.trim();
                     container.appendChild(span);
                 });
+            } else {
+                container.innerHTML = '<span style="color:#999; font-size:0.9rem;">Não informado</span>';
             }
         };
 
         fillTags('psi-tags-especialidades', profile.temas_atuacao);
-        fillTags('psi-tags-abordagens', profile.abordagens_tecnicas); // Agora vai renderizar tags limpas pelo CSS novo
+        fillTags('psi-tags-abordagens', profile.abordagens_tecnicas);
         fillTags('psi-tags-praticas', profile.praticas_vivencias);
 
         renderSocialLinks(profile);
-        renderRatingSummary(profile); // Garante que a média aparece
+        renderRatingSummary(profile);
 
-        // Avaliações (Lista na aba)
+        // Avaliações (Lista)
         const reviewsContainer = document.getElementById('reviews-list-container');
         const tabBtnAvaliacoes = document.getElementById('tab-btn-avaliacoes');
         
@@ -223,7 +274,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             reviewsContainer.innerHTML = '';
             if (profile.reviews && profile.reviews.length > 0) {
                 if(tabBtnAvaliacoes) tabBtnAvaliacoes.textContent = `Avaliações (${profile.reviews.length})`;
-                
                 profile.reviews.forEach((r) => {
                     const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
                     const div = document.createElement('div');
@@ -243,32 +293,30 @@ document.addEventListener('DOMContentLoaded', async () => {
                 reviewsContainer.innerHTML = '<p style="color:#777;">Este profissional ainda não recebeu avaliações.</p>';
             }
         }
+
+        // --- CHAMA A VERIFICAÇÃO DE LOGIN ---
+        checkPatientLoginStatus(profile.id);
     };
 
-    // --- SETUP BOTÃO COMPARTILHAR ---
     const setupShareButton = () => {
         const btn = document.getElementById('share-profile-btn');
         if(!btn) return;
-
         btn.addEventListener('click', async () => {
             const shareData = {
                 title: document.title,
                 text: 'Confira este psicólogo na Plataforma Girassol!',
                 url: window.location.href
             };
-
             if (navigator.share) {
                 try { await navigator.share(shareData); }
-                catch(e) { console.log('Share cancelado'); }
+                catch(e) {}
             } else {
-                // Fallback: Copiar para área de transferência
                 navigator.clipboard.writeText(window.location.href);
-                alert('Link copiado para a área de transferência!');
+                alert('Link copiado!');
             }
         });
     };
 
-    // --- ROTEAMENTO E INICIALIZAÇÃO ---
     const extractSlug = () => {
         const parts = window.location.pathname.split('/').filter(Boolean);
         const slug = parts[parts.length - 1];
@@ -281,22 +329,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         const slug = extractSlug();
         
         if (!slug) {
-            // Logica para testes locais ou erro
+            // Lógica local/erro
         }
 
         try {
             const res = await fetch(`${API_BASE_URL}/api/psychologists/slug/${encodeURIComponent(slug)}`);
-
             if (res.status === 404) {
                 showError('Perfil não encontrado.');
                 return;
             }
-
             if (!res.ok) throw new Error('Erro na busca');
-
             const data = await res.json();
             populateProfile(data);
-            
             showProfile();
         } catch (err) {
             console.error(err);
@@ -304,10 +348,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    // Tabs
     const tabButtons = document.querySelectorAll('.tabs-nav .tab-link');
     const tabContents = document.querySelectorAll('.tab-content');
-
     tabButtons.forEach((btn) => {
         btn.addEventListener('click', () => {
             const tabName = btn.getAttribute('data-tab');
