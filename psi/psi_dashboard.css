@@ -618,3 +618,39 @@ button[disabled] { background: #e9ecef !important; color: #adb5bd; cursor: not-a
 .btn-perigo-final:hover {
     background-color: #c9303c;
 }
+/* INPUT COM PREFIXO (Redes Sociais) */
+.input-prefix-group {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #f8f9fa;
+}
+
+.input-prefix-group .prefix {
+    background-color: #e9ecef;
+    color: #555;
+    padding: 11px 15px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-right: 1px solid #ced4da;
+    white-space: nowrap;
+}
+
+.input-prefix-group input {
+    border: none !important; /* Remove a borda do input interno */
+    border-radius: 0 !important;
+    background-color: transparent !important;
+    flex-grow: 1;
+}
+
+.input-prefix-group input:focus {
+    outline: none;
+}
+
+/* Foco no grupo inteiro quando o input é focado */
+.input-prefix-group:focus-within {
+    border-color: var(--verde-escuro);
+    box-shadow: 0 0 0 2px rgba(27, 67, 50, 0.1);
+}
