@@ -1,118 +1,135 @@
+/* ==========================================================================
+   1. VARIÁVEIS E FONTES GLOBAIS
+   ========================================================================== */
 :root {
     --verde-escuro: #1B4332;
     --cor-girassol: #FFEE8C;
     --branco-puro: #FFFFFF;
     --cinza-fundo: #f8f9fa;
     --cinza-borda: #e9ecef;
-    --cinza-texto-claro: #6c757d;
+    --cinza-texto: #555;
+    --cinza-texto-claro: #adb5bd;
+    --coral-quente: #E63946;
 }
 
 @font-face {
     font-family: 'New Kansas';
-    src: url('assets/fonts/NewKansas-Bold.woff2') format('woff2'),
-         url('assets/fonts/NewKansas-Bold.woff') format('woff');
+    src: url('../assets/fonts/NewKansas-Bold.woff2') format('woff2'),
+         url('../assets/fonts/NewKansas-Bold.woff') format('woff');
     font-weight: 700;
     font-style: normal;
     font-display: swap;
 }
 
+/* ==========================================================================
+   2. ESTRUTURA DO LAYOUT (DASHBOARD)
+   ========================================================================== */
 body.pagina-dashboard {
     font-family: 'Inter', sans-serif;
-    color: #333;
+    background-color: var(--cinza-fundo);
+    color: var(--cinza-texto);
     margin: 0;
     padding-top: 0;
+    height: 100vh; /* Garante altura total */
+    overflow: hidden; /* Evita rolagem dupla na página inteira */
 }
 
-.pagina-dashboard h1, .pagina-dashboard h2, .pagina-dashboard h3, .pagina-dashboard h4 {
-    font-family: 'New Kansas', serif;
+.dashboard-container { 
+    display: flex; 
+    height: 100vh; 
 }
 
-.dashboard-container { display: flex; min-height: 100vh; }
+/* Área Principal de Conteúdo */
+.dashboard-main {
+    flex-grow: 1;
+    padding: 40px;
+    overflow-y: auto; /* A rolagem acontece AQUI, não no body */
+    height: 100vh;
+    box-sizing: border-box;
+}
+
+/* Títulos Gerais */
+h1, h2, h3, h4 { font-family: 'New Kansas', serif; color: var(--verde-escuro); }
+
 /* ==========================================================================
-   SIDEBAR (RESTAURADO - LAYOUT LIMPO)
+   3. SIDEBAR (CORRIGIDA - ESTILO ADMIN + BOTÃO AMARELO)
    ========================================================================== */
-
 .dashboard-sidebar {
     background-color: var(--verde-escuro);
     color: var(--branco-puro);
     display: flex;
     flex-direction: column;
-    padding: 25px 20px; /* Padding ajustado */
-    min-height: 100vh;  /* Usa min-height para não criar barra de rolagem forçada */
+    width: 280px; /* Largura fixa igual ao Admin */
+    min-width: 280px;
+    padding: 25px 20px;
+    height: 100vh; 
     box-sizing: border-box;
+    position: relative;
+    z-index: 10;
+    box-shadow: 5px 0 15px rgba(0,0,0,0.05);
 }
 
-/* Cabeçalho da Sidebar */
-.sidebar-header {
-    text-align: center;
-    margin-bottom: 10px;
+/* Efeito Ruído (Fundo) */
+.dashboard-sidebar::before {
+    content: "";
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 600 600' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.06;
+    z-index: 0;
 }
 
-.sidebar-logo { 
-    height: 35px; 
-    margin-bottom: 15px;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-}
+/* Elementos acima do ruído */
+.sidebar-header, .sidebar-nav, .sidebar-footer { position: relative; z-index: 1; }
 
-/* Bloco do Usuário */
-.sidebar-user-block {
-    text-align: center;
-    margin-bottom: 15px;
-}
+/* Cabeçalho */
+.sidebar-header { text-align: center; margin-bottom: 10px; }
+.sidebar-logo { height: 35px; margin: 0 auto 20px auto; display: block; }
 
+/* Usuário (Foto e Nome) */
+.sidebar-user-block { text-align: center; margin-bottom: 15px; }
 #psi-sidebar-photo {
-    width: 70px;
-    height: 70px;
+    width: 70px; height: 70px;
     border-radius: 50%;
     border: 2px solid rgba(255,255,255,0.2);
     object-fit: cover;
     margin-bottom: 10px;
 }
-
-.user-info p {
-    font-size: 1rem;
-    font-weight: 600;
-    margin: 0;
-    color: var(--branco-puro);
-}
-
+.user-info p { margin: 0; font-weight: 600; color: var(--branco-puro); font-size: 1rem; }
 .user-info .sidebar-logout {
-    font-size: 0.85rem;
-    color: var(--cor-girassol);
-    text-decoration: none;
-    opacity: 0.8;
-    transition: opacity 0.2s;
+    font-size: 0.85rem; color: var(--cor-girassol);
+    text-decoration: none; opacity: 0.8; transition: opacity 0.2s; font-weight: bold;
 }
 .user-info .sidebar-logout:hover { opacity: 1; }
 
-/* --- Navegação (VOLTANDO AO PADRÃO) --- */
-.sidebar-nav {
-    flex-grow: 1;
-    margin-top: 15px;
+/* --- BOTÃO "VER COMO PACIENTE" (AMARELO) --- */
+#btn-view-public-profile {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; padding: 10px; margin-top: 15px;
+    background-color: var(--cor-girassol);
+    border: none; border-radius: 25px;
+    color: var(--verde-escuro);
+    text-decoration: none; font-size: 0.9rem; font-weight: 700;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+    box-sizing: border-box;
 }
+#btn-view-public-profile:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
 
-.sidebar-nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 2px; /* Espaço confortável entre os itens */
-}
+/* Navegação */
+.sidebar-nav { margin-top: 20px; flex-grow: 1; overflow-y: auto; }
+.sidebar-nav ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 5px; }
 
+/* Item do Menu */
 .sidebar-nav li a {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    color: #e0e0e0;
-    text-decoration: none;
+    display: flex; align-items: center; justify-content: space-between; /* Espaço entre texto e badge */
+    gap: 12px;
     padding: 12px 15px;
     border-radius: 10px;
+    color: var(--cinza-texto-claro);
+    text-decoration: none;
+    font-weight: 500; font-size: 0.95rem;
     transition: all 0.2s ease;
-    font-weight: 500;
-    font-size: 0.95rem;
 }
 
 /* Estado Ativo e Hover */
@@ -120,38 +137,25 @@ body.pagina-dashboard {
 .sidebar-nav li a:hover {
     background-color: rgba(255, 255, 255, 0.1);
     color: var(--branco-puro);
-    font-weight: 600;
 }
 
-.sidebar-nav li a svg {
-    width: 22px;
-    height: 22px;
+.sidebar-nav li a svg { width: 20px; height: 20px; opacity: 0.8; }
+.sidebar-nav li.active a svg { opacity: 1; }
+
+/* Badges (Notificação) */
+.notification-badge, .badge-em-breve {
+    background-color: var(--cor-girassol); color: var(--verde-escuro);
+    font-size: 0.7rem; font-weight: bold;
+    padding: 2px 6px; border-radius: 10px;
+    margin-left: auto; flex-shrink: 0;
 }
 
-/* Badge de Notificação */
-.notification-badge {
-    background-color: var(--cor-girassol);
-    color: var(--verde-escuro);
-    font-size: 0.75rem;
-    font-weight: bold;
-    padding: 2px 8px;
-    border-radius: 12px;
-    margin-left: auto;
-}
+/* Rodapé Sidebar */
+.sidebar-footer { margin-top: auto; padding-top: 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); }
 
-/* Rodapé da Sidebar */
-.sidebar-footer {
-    margin-top: auto;
-    padding-top: 20px;
-    text-align: center;
-}
-
-/* --- ESTILOS PARA A PÁGINA DE PERFIL DO PROFISSIONAL --- */
-
-.perfil-container {
-    /* Esta classe pode ser usada para espaçamento geral se necessário */
-}
-
+/* ==========================================================================
+   4. FORMULÁRIOS E PERFIL (RESTAUROU SEU CÓDIGO AQUI)
+   ========================================================================== */
 .form-secao {
     background-color: var(--branco-puro);
     padding: 30px;
@@ -162,1752 +166,126 @@ body.pagina-dashboard {
 
 .form-secao h2 {
     font-family: 'Montserrat', sans-serif;
-    color: var(--verde-escuro);
     margin-bottom: 25px;
     border-bottom: 1px solid var(--cinza-borda);
     padding-bottom: 15px;
 }
 
-/* --- GRIDS PARA ORGANIZAÇÃO DOS CAMPOS --- */
-.form-grid-2col {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 25px;
-}
-
-.form-grid-credenciais {
-    display: flex;
-    flex-wrap: wrap; /* Permite que os itens quebrem para a linha de baixo em telas pequenas */
-    gap: 25px;
-    align-items: flex-end; /* Alinha os campos pela base */
-}
-
-/* --- GRUPOS DE FORMULÁRIO E CAMPOS --- */
-.form-group {
-    margin-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-}
-
-.form-group label, .form-group-upload label {
-    font-weight: 500;
-    margin-bottom: 8px;
-    font-size: 14px;
-    color: var(--cinza-texto);
-}
-
-.form-group input[type="text"],
-.form-group input[type="email"],
-.form-group input[type="tel"],
-.form-group input[type="number"],
-.form-group textarea,
-.filtro-select {
-    width: 100%;
-    padding: 11px; /* Padding reduzido */
-    border: 1px solid #ced4da;
-    border-radius: 8px;
-    font-size: 16px;
-    font-family: 'Inter', sans-serif;
-    background-color: #f8f9fa; /* Um fundo sutil para os campos */
-}
-
-/* Adicionado: Justifica o texto do campo de biografia */
-.form-group textarea#bio {
-    width: 100%;
-    box-sizing: border-box; /* Impede o vazamento */
-    min-height: 120px;
-    text-align: justify;
-}
-
-/* --- ESTILOS PARA VALIDAÇÃO DE FORMULÁRIO --- */
-
-/* Adiciona uma borda vermelha ao campo com erro */
-.form-group input.input-error,
-.form-group textarea.input-error {
-    border-color: #E63946; /* Coral-Vibrante */
-}
-
-/* Estilo da mensagem de erro que aparece abaixo do campo */
-.form-error-message {
-    color: #E63946; /* Coral-Vibrante */
-    font-size: 13px;
-    font-weight: 500;
-    margin-top: 5px;
-}
-
-.multiselect-options .option {
-    padding: 8px 12px; /* Padding reduzido */
-    cursor: pointer;
-}
-.multiselect-options .option:hover {
-    background-color: #D0E3E0; /* Azul Gelo (sugestão) */
-}
-.multiselect-options .option.selected {
-    background-color: #e9ecef;
-    font-weight: bold;
-    pointer-events: none; /* Impede de clicar em item já selecionado */
-}
-
-/* --- COMPONENTES ESPECÍFICOS --- */
-
-/* Upload de Arquivo */
-.form-group-upload {
-    display: flex;
-    flex-direction: column;
-}
-.upload-area {
-    display: flex;
-    border: 1px solid #ced4da;
-    border-radius: 8px;
-    padding: 5px;
-    align-items: center;
-    justify-content: space-between;
-    background-color: #f8f9fa;
-}
-.upload-area input[type="file"] {
-    display: none; /* Esconde o input de arquivo padrão */
-}
-.upload-area span {
-    padding-left: 10px;
-    color: var(--cinza-texto);
-}
-/* Reutilizando a classe .btn-rapido para o botão de anexo, mas com ajustes */
-.upload-area + .btn-rapido, 
-.upload-area label { /* Caso use label */
-    background-color: var(--cinza-fundo);
-    color: var(--cinza-texto);
-    font-weight: 500;
-    cursor: pointer;
-    padding: 8px 15px;
-    border-radius: 6px;
-}
-
-/* Status de Validação */
-.status-validacao {
-    font-size: 12px;
-    margin-top: 8px;
-    font-weight: bold;
-}
-.status-validacao.pendente {
-    color: #856404; /* Cor para texto "Pendente" */
-}
-
-/* --- BOTÕES MODERNOS (RADIO & CHECKBOX) --- */
-.radio-group-moderno, .checkbox-group-moderno {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-.radio-group-moderno label, .checkbox-group-moderno label {
-    display: inline-block; /* Importante para o layout funcionar */
-}
-.radio-group-moderno input, .checkbox-group-moderno input {
-    display: none; /* Esconde o input real */
-}
-.radio-group-moderno span, .checkbox-group-moderno span {
-    display: block;
-    padding: 10px 20px;
-    border: 1px solid #ced4da;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-weight: 500;
-}
-
-/* Estilo ATIVO para os botões */
-.radio-group-moderno input:checked + span, 
-.checkbox-group-moderno input:checked + span {
-    background-color: var(--verde-escuro);
-    color: var(--branco-puro);
-    border-color: var(--verde-escuro);
-}
-
-/* --- BOTÃO FINAL DE AÇÕES --- */
-.form-acoes {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 20px;
-}
-
-/* Usando a classe .btn-rapido que você definiu no HTML */
-.btn-rapido {
-    background-color: var(--verde-escuro);
-    color: var(--branco-puro);
-    border: none;
-    padding: 12px 30px;
-    border-radius: 25px;
-    font-weight: 700;
-    font-size: 16px;
-    font-family: 'Inter', sans-serif;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-}
-.btn-rapido:hover {
-    transform: scale(1.05);
-}
-
-/* --- ESTILO PARA O LINK DE EXCLUSÃO DE CONTA --- */
-.link-perigo {
-    background-color: transparent;
-    border: none;
-    color: #E63946; /* Coral-Vibrante */
-    text-decoration: underline;
-    cursor: pointer;
-    font-weight: bold;
-    padding: 0; /* Remove padding de botão */
-    font-size: 14px;
-}
-
-/* --- ESTILOS PARA GERENCIAMENTO DE ESTADO DO FORMULÁRIO --- */
-
-/* Estilo para dar um feedback visual de que os campos estão bloqueados */
-fieldset:disabled .form-group input,
-fieldset:disabled .form-group select,
-fieldset:disabled .form-group textarea {
-    background-color: #e9ecef; /* Um cinza mais claro */
-    cursor: not-allowed;
-}
-fieldset:disabled .toggle-btn {
-    opacity: 0.7;
-    pointer-events: none;
-}
-/* Adicionado: Garante que o componente customizado também fique desabilitado visualmente e funcionalmente */
-fieldset:disabled .multiselect-display {
-    background-color: #e9ecef;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
-/* Botão secundário para a ação de "Alterar" e "salvar"*/
-.btn-secundario {
-    background-color: transparent;
-    border: 2px solid var(--verde-escuro);
-    color: var(--verde-escuro);
-    padding: 10px 25px; /* Padding reduzido */
-    border-radius: 25px;
-    font-weight: 700;
-    font-size: 15px; /* Fonte reduzida */
-    font-family: 'Inter', sans-serif;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-/* Classe utilitária para esconder/mostrar elementos */
-.hidden {
-    display: none !important;
-}
-/* --- ESTILOS PARA A PÁGINA DE ASSINATURA E PAGAMENTOS --- */
-
-/* Card do Plano Atual */
-    background-color: var(--branco-puro);
-    padding: 30px;
-    border-radius: 1px 20px rgba(0,0,0,0.05);
-    margin-bottom: 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-left: 5px solid var(--cor-girassol);
-}
-.plano-atual-card h3 {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--cinza-texto);
-}
-.plano-atual-card .plano-nome {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 24px;
-    color: var(--verde-escuro);
-    margin: 5px 0;
-}
-.plano-atual-card .plano-data {
-    font-size: 14px;
-}
-.plano-acoes {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 10px;
-}
-.plano-acoes a {
-    color: var(--verde-escuro);
-    font-weight: 500;
-    text-decoration: none;
-}
-
-/* Grid dos Planos */
-.planos-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
-}
-.plano-card {
-    background-color: var(--branco-puro);
-    border: 2px solid var(--cinza-borda);
-    padding: 30px;
-    border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    transition: all 0.3s ease;
-}
-.plano-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-}
-
-/* Destaque do Plano Ativo */
-.plano-card--ativo {
-    border-color: var(--verde-escuro);
-    position: relative;
-    transform: scale(1.03); /* Levemente maior para destaque */
-}
-.selo-plano-atual {
-    position: absolute;
-    top: -15px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: var(--verde-escuro);
-    color: var(--branco-puro);
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-/* Conteúdo dos Cards de Plano */
-.plano-card h2 {
-    font-family: 'Montserrat', sans-serif;
-    text-align: center;
-    color: var(--verde-escuro);
-}
-.plano-card .preco {
-    font-size: 38px;
-    font-weight: 700;
-    text-align: center;
-    margin: 20px 0;
-    color: var(--cinza-texto);
-}
-.plano-card .preco span {
-    font-size: 16px;
-    font-weight: 400;
-}
-.beneficios-lista {
-    list-style: none;
-    padding-left: 0;
-    flex-grow: 1; /* Faz a lista crescer para alinhar os botões */
-}
-.beneficios-lista li {
-    padding: 8px 0;
-    border-bottom: 1px solid var(--cinza-borda);
-    padding-left: 25px;
-    position: relative;
-}
-.beneficios-lista li::before {
-    content: '✓';
-    color: var(--verde-escuro);
-    position: absolute;
-    left: 0;
-    font-weight: bold;
-}
-
-/* Botões de Ação dos Cards */
-.plano-cta {
-    margin-top: 20px;
-}
-.plano-cta button {
-    width: 100%;
-    padding: 15px;
-    border-radius: 25px;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    border: none;
-}
-.plano-cta button:disabled {
-    background-color: var(--cinza-fundo);
-    color: var(--cinza-texto);
-    cursor: not-allowed;
-}
-.btn-mudar-plano {
-    background-color: transparent;
-    border: 2px solid var(--verde-escuro);
-    color: var(--verde-escuro);
-}
-.btn-mudar-plano.btn-upgrade {
-    background-color: var(--verde-escuro);
-    color: var(--branco-puro);
-}
-/* --- ESTILO PARA O SELO DE NOTIFICAÇÃO --- */
-.sidebar-nav a {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.notification-badge {
-    background-color: #dc3545; /* Vermelho para alerta */
-    color: var(--branco-puro);
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    font-size: 12px;
-    font-weight: bold;
-    /* Adicionado para centralizar o número */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0; /* Impede que o selo encolha */
-}
-/* --- ESTILOS PARA A CAIXA DE ENTRADA --- */
-
-.inbox-container {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 30px;
-    height: calc(100vh - 200px); /* Ajuste a altura conforme necessário */
-}
-
-/* Coluna da Lista de Mensagens */
-.inbox-sidebar {
-    background-color: var(--branco-puro);
-    border-radius: 16px;
-    padding: 15px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-    overflow-y: auto;
-}
-.message-list {
-    list-style: none;
-}
-.message-item {
-    padding: 15px;
-    border-radius: 8px;
-    cursor: pointer;
-    border-bottom: 1px solid var(--cinza-borda);
-}
-.message-item:hover {
-    background-color: var(--cinza-fundo);
-}
-.message-item.active {
-    background-color: var(--cor-girassol);
-}
-.message-item.unread .message-subject {
-    font-weight: bold;
-    color: var(--verde-escuro);
-}
-.message-item .message-sender {
-    font-size: 14px;
-    font-weight: 500;
-}
-.message-item .message-subject {
-    font-size: 14px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.message-item .message-date {
-    font-size: 12px;
-    color: var(--cinza-texto);
-    text-align: right;
-}
-
-/* Coluna do Conteúdo da Mensagem */
-.inbox-content {
-    background-color: var(--branco-puro);
-    border-radius: 16px;
-    padding: 30px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-    overflow-y: auto;
-}
-.message-header {
-    border-bottom: 1px solid var(--cinza-borda);
-    padding-bottom: 15px;
-    margin-bottom: 20px;
-}
-.message-header h2 {
-    font-family: 'Montserrat', sans-serif;
-}
-.message-body p {
-    line-height: 1.6;
-    margin-bottom: 15px;
-}
-
-
-/* --- ESTILOS PARA A JANELA (MODAL) DE FEEDBACK --- */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-.modal-content {
-    background-color: var(--branco-puro);
-    padding: 40px;
-    border-radius: 16px;
-    width: 90%;
-    max-width: 600px;
-    position: relative;
-}
-.modal-close-btn {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    background: none;
-    border: none;
-    font-size: 28px;
-    cursor: pointer;
-}
-.modal-content h2 {
-    font-family: 'Montserrat', sans-serif;
-    margin-bottom: 10px;
-}
-.modal-content textarea {
-    width: 100%;
-    padding: 10px;
-    margin: 20px 0;
-    border: 1px solid var(--cinza-borda);
-    border-radius: 8px;
-    font-family: 'Inter', sans-serif;
-}
-/* --- ESTILOS PARA PÁGINA "EM BREVE" (COMUNIDADE) --- */
-
-.coming-soon-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 40px;
-    min-height: calc(100vh - 200px); /* Garante que ocupe a altura da tela */
-    background-color: var(--branco-puro);
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-}
-
-.coming-soon-icon {
-    color: var(--cor-girassol);
-    margin-bottom: 20px;
-}
-
-.coming-soon-subtitle {
-    font-family: 'Inter', sans-serif;
-    font-weight: 500;
-    color: var(--cinza-texto);
-    margin-bottom: 10px;
-}
-
-.coming-soon-title {
-    font-family: 'Montserrat', sans-serif;
-    color: var(--verde-escuro);
-    font-size: 2.5rem; /* Título grande e de impacto */
-    max-width: 600px;
-    margin-bottom: 20px;
-}
-
-.coming-soon-text {
-    max-width: 650px;
-    line-height: 1.7;
-    font-size: 1.1rem;
-    margin-bottom: 30px;
-}
-
-/* --- ESTILO PARA O SELO "EM BREVE" NA SIDEBAR --- */
-
-.sidebar-nav a {
-    display: flex; /* Alinha o texto e o selo */
-    justify-content: space-between;
-    align-items: center;
-}
-
-.badge-em-breve {
-    background-color: var(--cor-girassol);
-    color: var(--verde-escuro);
-    font-size: 10px;
-    font-weight: bold;
-    padding: 3px 8px;
-    border-radius: 10px;
-    text-transform: uppercase;
-}
-/* ================================================= */
-/* ESTILOS BASE DO DASHBOARD (DESKTOP-FIRST)         */
-/* ================================================= */
-:root {
-    --verde-escuro: #1B4332;
-    --branco-puro: #FFFFFF;
-    --cinza-claro: #f8f9fa;
-    --texto-claro: #adb5bd;
-}
-
-.pagina-dashboard {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--cinza-claro);
-    color: #555;
-    margin: 0;
-}
-
-.dashboard-container {
-    display: flex;
-    min-height: 100vh;
-}
-
-.dashboard-sidebar {
-    width: 280px; /* Um pouco mais de espaço */
-    background-color: var(--verde-escuro);
-    color: var(--branco-puro);
-    display: flex;
-    flex-direction: column;
-    padding: 25px;
-    box-shadow: 5px 0 15px rgba(0,0,0,0.1);
-    z-index: 10; /* Garante que a sidebar fique acima do conteúdo principal */
-    transition: transform 0.3s ease-in-out; /* Adiciona transição suave */
-}
-
-.sidebar-nav ul {
-    list-style: none;
-    padding: 0;
-    margin-top: 30px;
-}
-
-.sidebar-nav li a {
-    display: flex; /* Para alinhar o texto e os badges */
-    justify-content: space-between;
-    align-items: center;
-    color: var(--texto-claro);
-    text-decoration: none;
-    padding: 15px;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    font-weight: 500;
-}
-
-.sidebar-nav li.active a, .sidebar-nav li a:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: var(--branco-puro);
-    transform: translateX(5px);
-}
-
-.sidebar-footer {
-    margin-top: auto;
-    text-align: center;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding-top: 20px;
-}
-
-.sidebar-footer p { margin: 0 0 10px 0; font-weight: 500; }
-.sidebar-footer a { color: #FFEE8C; font-weight: bold; text-decoration: none; }
-
-.dashboard-main {
-    flex-grow: 1;
-    padding: 40px;
-    overflow-y: auto;
-}
-
-/* O botão de menu fica escondido no desktop por padrão */
-.menu-toggle {
-    display: none;
-}
-
-
-/* ================================================= */
-/* REGRAS PARA MOBILE (TELAS ATÉ 992px)              */
-/* ================================================= */
-@media (max-width: 992px) {
-    /* Mostra o botão de menu */
-    .menu-toggle {
-        display: block;
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        z-index: 1001; /* Fica acima de tudo */
-        background: var(--branco-puro);
-        border: none;
-        padding: 10px;
-        border-radius: 8px;
-        cursor: pointer;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-
-    /* Esconde a sidebar fora da tela por padrão */
-    .dashboard-sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100%;
-        transform: translateX(-100%);
-    }
-
-    /* Classe que o JS vai adicionar para mostrar a sidebar */
-    .dashboard-sidebar.is-open {
-        transform: translateX(0);
-    }
-
-    /* Faz o conteúdo principal ocupar toda a largura e adiciona padding no topo */
-    .dashboard-main {
-        width: 100%;
-        padding: 80px 20px 20px 20px;
-    }
-}
-/* ================================================= */
-/* ESTILOS E RESPONSIVIDADE - CAIXA DE ENTRADA       */
-/* ================================================= */
-
-/* --- Base (Desktop) --- */
-.inbox-container {
-    display: flex;
-    gap: 20px;
-    height: calc(100vh - 150px); /* Ocupa a altura disponível */
-    background-color: var(--branco-puro);
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-    overflow: hidden;
-}
-
-.inbox-sidebar {
-    width: 35%;
-    max-width: 350px;
-    border-right: 1px solid #e9ecef;
-    overflow-y: auto;
-}
-
-.message-list { list-style: none; margin: 0; padding: 0; }
-.message-item { padding: 15px; border-bottom: 1px solid #e9ecef; cursor: pointer; }
-.message-item:hover { background-color: var(--cinza-claro); }
-.message-item.active { background-color: #e9f5ff; }
-.message-item.unread .message-sender,
-.message-item.unread .message-subject { font-weight: bold; color: #333; }
-.message-sender { font-size: 1rem; margin-bottom: 5px; }
-.message-subject { font-size: 0.9rem; color: #555; }
-.message-date { font-size: 0.8rem; color: #777; text-align: right; }
-
-.inbox-content {
-    flex-grow: 1;
-    padding: 25px;
-    overflow-y: auto;
-}
-
-.btn-voltar-inbox { display: none; } /* Escondido no desktop */
-
-
-/* --- Regras para Mobile (telas até 768px) --- */
-@media (max-width: 768px) {
-    /* Ajusta o header principal para não quebrar */
-    .main-header {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 15px;
-    }
-
-    /* Oculta o conteúdo do e-mail por padrão */
-    .inbox-content {
-        display: none;
-        width: 100%;
-        padding: 15px;
-    }
-
-    /* Mostra a lista de e-mails ocupando toda a largura */
-    .inbox-sidebar {
-        width: 100%;
-        max-width: none;
-        border-right: none;
-    }
-
-    /* Mostra o botão "Voltar" */
-    .btn-voltar-inbox {
-        display: block;
-        background: none;
-        border: 1px solid #ccc;
-        padding: 8px 15px;
-        border-radius: 20px;
-        cursor: pointer;
-        font-weight: 500;
-        margin-bottom: 20px;
-    }
-
-    /* Classe de controle que o JS vai adicionar */
-    .inbox-container.mostrando-conteudo .inbox-sidebar {
-        display: none; /* Esconde a lista */
-    }
-    .inbox-container.mostrando-conteudo .inbox-content {
-        display: block; /* Mostra o conteúdo */
-    }
-}
-/* ================================================= */
-/* CORREÇÃO: COR DOS TÍTULOS EM FUNDOS ESCUROS       */
-/* ================================================= */
-
-/* Força a cor de qualquer título (h1, h2, h3...) para branco quando ele
-   estiver dentro de um elemento com a classe .main-header (o bloco verde).
-*/
-.main-header h1,
-.main-header h2,
-.main-header h3,
-.main-header h4 {
-    color: var(--branco-puro) !important;
-}
-.logo-comunidade {
-    max-width: 150px;
-    height: auto;
-    margin-bottom: 30px;
-}
-
-/* ================================================== */
-/* CORREÇÕES (MENU E ASSINATURA) */
-/* ================================================== */
-
-/* --- 3. Padronização do Menu Lateral --- */
-/* Isso força todos os botões do menu a terem o mesmo tamanho e espaçamento */
-.sidebar-nav ul {
-    padding: 0 16px; /* Adiciona um respiro lateral para o menu */
-    margin: 0;
-    list-style: none;
-}
-
-.sidebar-nav li a {
-    display: flex;
-    align-items: center;
-    height: 48px; /* Altura fixa para todos os botões */
-    padding: 0 16px; /* Espaçamento interno consistente */
-    text-decoration: none;
-    color: #ffffff; /* Cor do texto (assumindo branco do logo) */
-    font-weight: 500;
-    border-radius: 8px;
-    margin: 4px 0; /* Espaçamento vertical entre botões */
-    transition: background-color 0.2s, color 0.2s;
-}
-
-.sidebar-nav li a:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-.sidebar-nav li.active a {
-    background-color: #ffffff; /* Fundo branco para item ativo */
-    color: #1B4332; /* Cor do texto verde */
-}
-
-.sidebar-nav li a span {
-    flex-grow: 1; /* Faz o texto ocupar o espaço */
-}
-
-/* Garante que os badges (notificação, em breve) fiquem alinhados */
-.sidebar-nav li a .notification-badge,
-.sidebar-nav li a .badge-em-breve {
-    margin-left: auto; /* Empurra para a direita */
-}
-
-/* Alinha os botões à direita dentro dos formulários */
-/* --- 2. Redução dos Cards de Assinatura --- */
-.plano-card {
-    max-width: 380px; 
-    margin: 16px auto; /* Centraliza o card na página */
-}
-
-/* ================================================== */
-/* CORREÇÃO: Botões do formulário "Meu Perfil" */
-/* ================================================== */
-
-/* Alinha os botões à esquerda dentro dos formulários */
-#perfil-form .form-actions,
-#password-form .form-actions {
-    text-align: right;
-    text-align: left;
-    margin-top: 20px; /* Adiciona um respiro */
-}
-
-/* * Define um tamanho automático para os botões "Alterar", "Salvar" e "Alterar Senha",
-* sobrescrevendo o 'width: 100%' do style.css.
-*/
-#perfil-form .btn,
-#password-form .btn {
-    width: auto; /* Esta é a correção principal */
-    padding: 10px 24px; /* Garante que ambos tenham o mesmo padding */
-    font-size: 14px;
-    font-weight: 700;
-}
-/* ================================================== */
-/* PADRONIZAÇÃO DO MENU LATERAL (Igual ao Admin)      */
-/* ================================================== */
-
-.sidebar-nav ul {
-    padding: 0 16px; /* Adiciona um respiro lateral para o menu */
-    margin: 0;
-    list-style: none;
-}
-
-.sidebar-nav li a {
-    display: flex;
-    align-items: center;
-    height: 48px; /* Altura fixa para todos os botões */
-    padding: 0 16px; /* Espaçamento interno consistente */
-    text-decoration: none;
-    color: #ffffff; /* Cor do texto (assumindo branco do logo) */
-    font-weight: 500;
-    border-radius: 8px;
-    margin: 4px 0; /* Espaçamento vertical entre botões */
-    transition: background-color 0.2s, color 0.2s;
-}
-
-.sidebar-nav li.active a {
-    background-color: #ffffff; /* Fundo branco para item ativo */
-    color: #1B4332; /* Cor do texto verde */
-}
-
-/* Garante que os badges (notificação, em breve) fiquem alinhados */
-.sidebar-nav li a .notification-badge,
-.sidebar-nav li a .badge-em-breve {
-    margin-left: auto; /* Empurra para a direita */
-    flex-shrink: 0; /* Impede que o badge encolha */
-}
-
-/* ================================================== */
-/* AJUSTES FINAIS DO DASHBOARD PSI */
-/* ================================================== */
-
-/* --- 5. Menu lateral 20% mais estreito --- */
-.dashboard-sidebar {
-    width: 240px; /* O padrão parecia ser ~300px, 240px é ~20% menor */
-    /* Se o seu menu mobile quebrar, talvez precise ajustar o @media query */
-}
-
-/* --- 3. Cards de plano lado a lado --- */
-/* Assumindo que os cards estão dentro de um container com a classe .planos-container */
-.planos-container {
-    display: flex;
-    flex-wrap: wrap; /* Permite quebrar em telas menores */
-    justify-content: center;
-    gap: 24px; /* Espaçamento entre os cards */
-}
-
-/* Ajusta os cards de plano para o layout flex */
-.plano-card {
-    flex: 1 1 300px; /* Flex-grow, flex-shrink, flex-basis */
-    max-width: 320px; /* Limita a largura máxima de cada card */
-    margin: 0; /* Remove margens automáticas para o flex controlar */
-}
-
-/* --- 4. Botão "Me avise" (Comunidade) --- */
-.btn-avise {
-    display: inline-block;
-    padding: 12px 24px;
-    font-size: 15px;
-    font-weight: 700;
-    text-align: center;
-    text-decoration: none;
-    cursor: pointer;
-    border: none;
-    border-radius: 8px;
-    background-color: #1B4332; /* Verde principal */
-    color: #ffffff; /* Texto branco */
-    transition: background-color 0.2s;
-}
-.btn-avise:hover {
-    background-color: #295e4a; /* Verde mais escuro no hover */
-}
-}
-/* =============================================================
-   CORREÇÃO: FUNCIONALIDADE DO MULTISELECT CUSTOMIZADO
-   ============================================================= */
-
-/* 1. Esconde as opções por padrão */
-.multiselect-tag .multiselect-options {
-    display: none;
-    position: absolute;
-    background-color: var(--branco-puro);
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    width: 100%;
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 10;
-    margin-top: 5px;
-}
-
-/* 2. Mostra as opções quando o container tiver a classe '.open' */
-.multiselect-tag.open .multiselect-options {
-    display: block;
-}
-
-/* 3. Estiliza a área de display para parecer clicável */
-.multiselect-tag .multiselect-display {
-    border: 1px solid #ced4da;
-    border-radius: 8px;
-    padding: 8px;
-    min-height: 45px;
-    cursor: pointer;
-    background-color: #fff;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-}
-
-/* 4. Estilo de Foco/Aberto */
-.multiselect-tag.open .multiselect-display {
-    border-color: var(--verde-escuro);
-    box-shadow: 0 0 0 2px rgba(27, 67, 50, 0.2);
-}
-
-/* 5. Desabilita visualmente quando o fieldset está disabled */
-fieldset:disabled .multiselect-tag .multiselect-display {
-    background-color: #f1f3f5;
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-
-/* 6. Estilo da tag (que você já tem, mas garantindo) */
-.multiselect-display .tag {
-    background-color: var(--cor-girassol);
-    color: var(--verde-escuro);
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-.multiselect-display .tag .remove-tag {
-    background: none;
-    border: none;
-    color: var(--verde-escuro);
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    opacity: 0.7;
-}
-.multiselect-display .tag .remove-tag:hover {
-    opacity: 1;
-}
-/* =============================================================
-   CORREÇÃO: FUNCIONALIDADE DO MULTISELECT CUSTOMIZADO
-   ============================================================= */
-
-/* 0. Posição relativa para o dropdown funcionar */
-.form-group {
-    position: relative;
-}
-
-/* 1. Esconde as opções por padrão */
-.multiselect-tag .multiselect-options {
-    display: none;
-    position: absolute;
-    background-color: var(--branco-puro);
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    width: 100%;
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 10;
-    margin-top: 5px;
-}
-
-/* 2. Mostra as opções quando o container tiver a classe '.open' */
-.multiselect-tag.open .multiselect-options {
-    display: block;
-}
-
-/* 3. Estiliza a área de display para parecer clicável */
-.multiselect-tag .multiselect-display {
-    border: 1px solid #ced4da;
-    border-radius: 8px;
-    padding: 8px;
-    min-height: 45px;
-    cursor: pointer;
-    background-color: #fff;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-}
-
-/* 4. Estilo de Foco/Aberto */
-.multiselect-tag.open .multiselect-display {
-    border-color: var(--verde-escuro);
-    box-shadow: 0 0 0 2px rgba(27, 67, 50, 0.2);
-}
-
-/* 5. Desabilita visualmente quando o fieldset está disabled */
-fieldset:disabled .multiselect-tag .multiselect-display {
-    background-color: #f1f3f5;
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-
-/* 6. Estilo da tag (que você já tem, mas garantindo) */
-.multiselect-display .tag {
-    background-color: var(--cor-girassol);
-    color: var(--verde-escuro);
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-.multiselect-display .tag .remove-tag {
-    background: none;
-    border: none;
-    color: var(--verde-escuro);
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    opacity: 0.7;
-}
-.multiselect-display .tag .remove-tag:hover {
-    opacity: 1;
-}
-
-/* 7. Estilo da opção no dropdown */
-.multiselect-options .option {
-    padding: 10px 15px;
-    cursor: pointer;
-}
-.multiselect-options .option:hover {
-    background-color: #f8f9fa;
-}
-.multiselect-options .option.selected {
-    background-color: var(--cor-girassol);
-    color: var(--verde-escuro);
-    font-weight: 500;
-}
-/* ================================================== */
-/* CSS (KPIs Visão Geral + Cards de Plano) */
-/* ================================================== */
-
-/* --- Estilos dos KPIs (Visão Geral) --- */
-.kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 24px;
-    padding: 24px 0;
-}
-
-.kpi-card {
-    background-color: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-}
-
-.kpi-card h3 {
-    font-size: 16px;
-    font-weight: 700;
-    color: #4b5563;
-    margin: 0 0 8px 0;
-}
-
-.kpi-card .kpi-value {
-    font-size: 36px;
-    font-weight: 700;
-    color: #1B4332;
-    margin: 0 0 16px 0;
-}
-
-.kpi-card .kpi-value.status-active {
-    color: #065f46; /* Verde mais escuro para status */
-}
-
-.kpi-card .kpi-link {
-    font-size: 14px;
-    font-weight: 500;
-    color: #1B4332;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-/* --- 4. Cards de plano lado a lado --- */
-.plan-container {
-    display: flex;
-    flex-wrap: wrap; /* Permite quebrar em telas menores */
-    justify-content: center;
-    gap: 24px; /* Espaçamento entre os cards */
-    padding: 24px 0;
-}
-}
-/* ================================================== */
-/* AJUSTES FINAIS DO DASHBOARD PSI (Consolidado) */
-/* ================================================== */
-
-/* --- 3. Cards de plano lado a lado --- */
-/* Adicione a classe .plan-container ao <div> que envolve os 3 planos no seu HTML */
-.plan-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 24px;
-    padding: 24px 0;
-}
-.plan-card {
-    flex: 1 1 300px;
-    max-width: 320px;
-    margin: 0;
-    /* (O resto do estilo do .plan-card já deve existir) */
-}
-
-/* --- 2. Estilos dos KPIs (Visão Geral) --- */
-.kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 24px;
-    padding-top: 24px;
-}
-.kpi-card {
-    background-color: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-}
-.kpi-card h3 {
-    font-size: 16px;
-    font-weight: 700;
-    color: #4b5563;
-    margin: 0 0 12px 0;
-    line-height: 1.4;
-}
-.kpi-card .kpi-value {
-    font-size: 36px;
-    font-weight: 700;
-    color: #1B4332;
-    margin: 0 0 12px 0;
-}
-.kpi-card .kpi-link {
-    font-size: 13px;
-    color: #6b7280;
-    line-height: 1.5;
-}
-/* Barra de progresso para o KPI de cliques */
-.progress-bar-kpi {
-    width: 100%;
-    height: 8px;
-    background-color: #e5e7eb;
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 12px;
-}
-.progress-bar-kpi-fill {
-    height: 100%;
-    background-color: #1B4332;
-    border-radius: 4px;
-}
-
-/* ================================================== */
-/* ESTILOS DO WIDGET DE VERIFICAÇÃO (MEU PERFIL)      */
-/* ================================================== */
-
-/* Base do widget de verificação */
-#verification-widget {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 20px;
-    border-left-width: 5px;
-    border-left-style: solid;
-    margin-bottom: 30px; /* Espaçamento abaixo do widget */
-}
-
-#verification-widget h3 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-#verification-widget p {
-    margin: 0;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-/* Estilo para status PENDENTE */
-#verification-widget.status-pending {
-    background-color: #fffbeb; /* Amarelo bem claro */
-    border-left-color: #f59e0b; /* Amarelo/Laranja */
-    color: #b45309; /* Texto Laranja escuro */
-}
-
-/* Estilo para status VERIFICADO */
-#verification-widget.status-verified {
-    background-color: #f0fdf4; /* Verde bem claro */
-    border-left-color: #16a34a; /* Verde sucesso */
-    color: #14532d; /* Texto Verde escuro */
-}
-
-/* ================================================== */
-/* ESTILOS DO MODAL DE UPLOAD DE CRP                  */
-/* ================================================== */
-
-.form-group-upload {
-    margin-top: 20px;
-}
-
+/* Grids */
+.form-grid-2col { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; }
+.form-grid-credenciais { display: flex; flex-wrap: wrap; gap: 25px; align-items: flex-end; }
+
+/* Inputs */
+.form-group { margin-bottom: 20px; position: relative; }
+.form-group label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px; }
+.form-group input, .form-group textarea, .form-group select, .filtro-select {
+    width: 100%; padding: 11px;
+    border: 1px solid #ced4da; border-radius: 8px;
+    font-family: 'Inter', sans-serif; font-size: 16px;
+    background-color: #f8f9fa; box-sizing: border-box;
+}
+.form-group textarea#bio { min-height: 120px; text-align: justify; }
+
+/* Validação */
+.form-group input.input-error { border-color: var(--coral-quente); }
+.form-error-message { color: var(--coral-quente); font-size: 13px; margin-top: 5px; }
+
+/* Botões de Formulário */
+.btn { padding: 10px 24px; border-radius: 25px; font-weight: 700; border: none; cursor: pointer; transition: transform 0.2s; display: inline-block; }
+.btn-principal, .btn-rapido, .btn-primario { background-color: var(--verde-escuro); color: var(--branco-puro); }
+.btn-secundario { background-color: transparent; border: 2px solid var(--verde-escuro); color: var(--verde-escuro); }
+.btn:hover { transform: scale(1.03); }
+.form-acoes { display: flex; justify-content: flex-end; margin-top: 20px; }
+
+/* ==========================================================================
+   5. COMPONENTES ESPECÍFICOS (UPLOAD, MULTISELECT, WIDGETS)
+   ========================================================================== */
+
+/* Upload */
 .form-group-upload .upload-label {
-    display: block;
-    padding: 40px 20px;
-    border: 2px dashed var(--cinza-borda);
-    border-radius: 8px;
-    text-align: center;
-    cursor: pointer;
-    transition: background-color 0.2s, border-color 0.2s;
+    display: block; padding: 40px 20px;
+    border: 2px dashed var(--cinza-borda); border-radius: 8px;
+    text-align: center; cursor: pointer; transition: all 0.2s;
 }
+.form-group-upload .upload-label:hover { background-color: var(--cinza-fundo); border-color: var(--verde-escuro); }
+.form-group-upload input[type="file"] { display: none; }
 
-.form-group-upload .upload-label:hover {
-    background-color: var(--cinza-fundo);
-    border-color: var(--verde-escuro);
+/* Widget Verificação */
+#verification-widget {
+    display: flex; flex-direction: column; gap: 8px; padding: 20px;
+    border-left-width: 5px; border-left-style: solid; margin-bottom: 30px;
 }
+#verification-widget.status-pending { background-color: #fffbeb; border-left-color: #f59e0b; color: #b45309; }
+#verification-widget.status-verified { background-color: #f0fdf4; border-left-color: #16a34a; color: #14532d; }
 
-.form-group-upload input[type="file"] {
-    display: none;
+/* Multiselect Customizado */
+.multiselect-tag .multiselect-display {
+    border: 1px solid #ced4da; border-radius: 8px; padding: 8px; min-height: 45px;
+    cursor: pointer; background-color: #fff; display: flex; flex-wrap: wrap; gap: 5px;
 }
-/* --- ESTILOS PARA PAINEL DE INSIGHTS (PLANO LUZ) --- */
-.insights-secao {
-    margin-top: 40px;
-    background-color: var(--branco-puro);
-    padding: 30px;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+.multiselect-tag .multiselect-options {
+    display: none; position: absolute; background-color: #fff; border: 1px solid #ddd;
+    width: 100%; max-height: 200px; overflow-y: auto; z-index: 10; margin-top: 5px;
 }
+.multiselect-tag.open .multiselect-options { display: block; }
+.multiselect-display .tag {
+    background-color: var(--cor-girassol); color: var(--verde-escuro);
+    padding: 4px 8px; border-radius: 4px; font-size: 0.9rem; font-weight: 500;
+    display: flex; align-items: center; gap: 5px;
+}
+.multiselect-options .option { padding: 10px 15px; cursor: pointer; }
+.multiselect-options .option:hover { background-color: #f8f9fa; }
+.multiselect-options .option.selected { background-color: var(--cor-girassol); font-weight: bold; }
 
-.secao-header {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--cinza-borda);
-    padding-bottom: 15px;
-    margin-bottom: 25px;
-    gap: 10px;
+/* ==========================================================================
+   6. CAIXA DE ENTRADA E PLANOS
+   ========================================================================== */
+/* Inbox */
+.inbox-container {
+    display: flex; height: calc(100vh - 150px);
+    background: var(--branco-puro); border-radius: 16px;
+    overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.05);
 }
+.inbox-sidebar { width: 35%; max-width: 350px; border-right: 1px solid #e9ecef; overflow-y: auto; }
+.inbox-content { flex-grow: 1; padding: 25px; overflow-y: auto; }
+.message-item { padding: 15px; border-bottom: 1px solid #e9ecef; cursor: pointer; }
+.message-item.active { background-color: #e9f5ff; }
+.message-item.unread .message-subject { font-weight: bold; }
 
-.secao-header h2 {
-    margin: 0;
-    color: var(--verde-escuro);
-}
+/* KPIs e Planos */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; padding: 24px 0; }
+.kpi-card { background: #fff; padding: 24px; border-radius: 12px; border: 1px solid #e5e7eb; }
+.kpi-card .kpi-value { font-size: 36px; font-weight: 700; color: var(--verde-escuro); }
 
-.badge-plano-luz {
-    background-color: var(--cor-girassol);
-    color: var(--verde-escuro);
-    font-size: 12px;
-    font-weight: bold;
-    padding: 5px 10px;
-    border-radius: 15px;
-}
+.plan-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; padding: 24px 0; }
+.plano-card { flex: 1 1 300px; max-width: 320px; background: #fff; border: 2px solid var(--cinza-borda); padding: 30px; border-radius: 16px; display: flex; flex-direction: column; }
+.plano-card--ativo { border-color: var(--verde-escuro); transform: scale(1.03); }
 
-.insights-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 25px;
-}
+/* ==========================================================================
+   7. Q&A COMUNIDADE
+   ========================================================================== */
+.qna-card-psi { background: #fff; padding: 25px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+.qna-question-title { font-size: 1.2rem; margin-bottom: 10px; }
+.qna-card-body { background: #f8f9fa; padding: 15px; border-radius: 8px; }
 
-.insight-card {
-    padding: 20px;
-    border: 1px solid var(--cinza-borda);
-    border-radius: 12px;
-    background-color: var(--cinza-fundo);
-}
+/* Modal Q&A */
+#qna-answer-modal textarea { width: 100%; min-height: 150px; border: 1px solid #ced4da; padding: 10px; }
+#qna-answer-modal .modal-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+#qna-answer-modal .btn { width: 100%; justify-content: center; }
 
-.insight-card h4 {
-    font-family: 'Inter', sans-serif;
-    font-size: 16px;
-    font-weight: 500;
-    margin-top: 0;
-    margin-bottom: 15px;
+/* ==========================================================================
+   8. RESPONSIVIDADE MOBILE
+   ========================================================================== */
+@media (max-width: 992px) {
+    .dashboard-sidebar { position: fixed; top: 0; left: 0; height: 100%; transform: translateX(-100%); transition: transform 0.3s; }
+    .dashboard-sidebar.is-open { transform: translateX(0); }
+    .menu-toggle { display: block; position: fixed; top: 20px; left: 20px; z-index: 1001; background: #fff; border: none; padding: 10px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; }
+    .dashboard-main { width: 100%; padding: 80px 20px 20px 20px; }
+    .inbox-container { flex-direction: column; }
+    .inbox-sidebar { width: 100%; max-width: none; height: auto; }
+    .inbox-content { display: none; }
+    .inbox-container.mostrando-conteudo .inbox-sidebar { display: none; }
+    .inbox-container.mostrando-conteudo .inbox-content { display: block; }
+    .btn-voltar-inbox { display: block; margin-bottom: 15px; }
 }
-
-/* Simulação Gráfico de Barras */
-.grafico-barras-simples .barra-item {
-    margin-bottom: 12px;
-    font-size: 14px;
-}
-.grafico-barras-simples .label {
-    display: block;
-    margin-bottom: 4px;
-    color: var(--cinza-texto);
-    font-size: 13px;
-}
-.grafico-barras-simples .barra {
-    background-color: var(--cinza-borda);
-    border-radius: 4px;
-    height: 22px;
-    position: relative;
-    background-color: #e0f2fa; /* Cor base */
-}
-.grafico-barras-simples .barra small {
-    position: absolute;
-    left: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--verde-escuro);
-    font-size: 12px;
-    font-weight: bold;
-}
-/* Cores do gráfico (usando o verde da sua paleta) */
-.grafico-barras-simples .barra-item:nth-child(1) .barra { background-color: #1B4332; }
-.grafico-barras-simples .barra-item:nth-child(1) .barra small { color: var(--branco-puro); }
-.grafico-barras-simples .barra-item:nth-child(2) .barra { background-color: #2D6A4F; }
-.grafico-barras-simples .barra-item:nth-child(2) .barra small { color: var(--branco-puro); }
-.grafico-barras-simples .barra-item:nth-child(3) .barra { background-color: #40916C; }
-.grafico-barras-simples .barra-item:nth-child(3) .barra small { color: var(--branco-puro); }
-.grafico-barras-simples .barra-item:nth-child(4) .barra { background-color: #52B788; }
-.grafico-barras-simples .barra-item:nth-child(5) .barra { background-color: #74C69D; }
-
-
-/* Listas simples */
-.lista-simples-insights, .lista-top-insights {
-    padding-left: 20px;
-    font-size: 15px;
-    line-height: 1.6;
-}
-.lista-top-insights li {
-    margin-bottom: 10px;
-    font-weight: 500;
-}
-.lista-simples-insights strong {
-    color: var(--verde-escuro);
-    font-size: 16px;
-}
-
-/* --- ESTILOS PARA WIDGET DE UPSELL (BLOQUEADO) --- */
-.widget-bloqueado {
-    margin-top: 40px;
-    border-radius: 16px;
-    background-color: var(--cinza-fundo);
-    border: 2px dashed #ced4da; /* Borda tracejada para indicar "bloqueio" */
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    padding: 30px;
-    gap: 30px;
-}
-
-.widget-bloqueado-conteudo {
-    flex: 1;
-    min-width: 300px;
-}
-
-.widget-bloqueado-conteudo .icone-lock {
-    font-size: 24px;
-    display: block;
-    margin-bottom: 10px;
-    color: var(--verde-escuro);
-}
-
-.widget-bloqueado-conteudo h2 {
-    margin: 0 0 10px 0;
-    color: var(--verde-escuro);
-}
-
-.widget-bloqueado-conteudo p {
-    margin: 0;
-    line-height: 1.6;
-    color: var(--cinza-texto-claro);
-}
-.widget-bloqueado-conteudo p strong {
-    color: var(--verde-escuro);
-}
-
-.widget-bloqueado-acao {
-    flex-shrink: 0;
-}
-
-/* Reutilizando classes do psi_assinatura.css */
-.widget-bloqueado-acao .btn-mudar-plano {
-    width: auto;
-    padding: 15px 30px;
-}
-.widget-bloqueado-acao .btn-mudar-plano.btn-upgrade {
-    background-color: var(--verde-escuro);
-    color: var(--branco-puro);
-    transition: all 0.2s ease;
-}
-.widget-bloqueado-acao .btn-mudar-plano.btn-upgrade:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 15px rgba(27, 67, 50, 0.2);
-}
-/* =============================================================
-   ESTILOS DO PAINEL DE COMUNIDADE Q&A (PSI)
-   ============================================================= */
-
-.qna-container-admin {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-}
-
-.qna-card-psi {
-    background-color: var(--branco-puro);
-    padding: 25px;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-}
-
-.qna-card-header .qna-question-title {
-    font-family: 'New Kansas', serif;
-    font-size: 1.5rem;
-    color: var(--verde-escuro);
-    margin: 0 0 5px 0;
-}
-
-.qna-card-header .qna-question-author {
-    font-size: 0.9rem;
-    color: var(--cinza-texto-claro);
-    font-style: italic;
-}
-
-.qna-card-body {
-    margin: 20px 0;
-    padding: 15px;
-    background-color: #f8f9fa; /* Fundo cinza claro para a pergunta */
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
-}
-
-.qna-card-body .qna-question-content {
-    margin: 0;
-    line-height: 1.6;
-    color: #333;
-}
-
-/* Lista de respostas de OUTROS 'psis' */
-.existing-answers-list {
-    margin-top: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    border-top: 1px solid var(--cinza-borda);
-    padding-top: 20px;
-}
-
-.answer-item {
-    display: flex;
-    gap: 12px;
-    font-size: 0.95rem;
-}
-.answer-item img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-.answer-item .answer-content p {
-    margin: 5px 0 0 0;
-    line-height: 1.5;
-}
-
-.qna-card-actions {
-    margin-top: 20px;
-    border-top: 1px solid var(--cinza-borda);
-    padding-top: 20px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-/* Botão de Responder (usa classes existentes .btn .btn-principal) */
-.btn-responder {
-    padding: 10px 25px;
-    font-size: 0.9rem;
-}
-
-/* Selo "Respondido por você" */
-.badge-respondido {
-    font-weight: 500;
-    color: var(--verde-escuro);
-    font-size: 0.9rem;
-}
-.badge-respondido.hidden {
-    display: none;
-}
-.btn-responder.hidden {
-    display: none;
-}
-
-/* --- Estilos do Modal de Resposta --- */
-#qna-answer-modal textarea {
-    width: 100%;
-    min-height: 150px;
-    border: 1px solid #ced4da;
-    border-radius: 8px;
-    padding: 10px;
-    font-family: 'Inter', sans-serif;
-    font-size: 1rem;
-    resize: vertical;
-}
-
-#qna-answer-modal .char-counter-modal {
-    font-size: 0.85rem;
-    color: var(--cinza-texto-claro);
-    text-align: right;
-    margin-top: 5px;
-}
-
-#qna-answer-modal button:disabled {
-    background-color: #ccc;
-    border-color: #ccc;
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-/* --- CORREÇÃO (Q&A): Alinhamento dos botões do Modal --- */
-/* Sobrescreve o .modal-footer do style.css global 
-  APENAS para o modal de resposta do Q&A.
-*/
-#qna-answer-modal .modal-footer {
-    display: grid; /* Usa grid para criar colunas iguais */
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    justify-content: stretch; /* Garante que o grid ocupe o espaço */
-}
-
-#qna-answer-modal .modal-footer .btn {
-    width: 100%; /* Faz o botão preencher a célula do grid */
-    padding: 12px 20px;
-    font-size: 15px;
-    /* Garante que o texto dentro do botão esteja centralizado */
-    justify-content: center; 
-}
-/* =============================================================
-   ESTILOS DO PAINEL DE COMUNIDADE Q&A (PSI)
-   ============================================================= */
-
-.qna-container-admin {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-}
-
-.qna-card-psi {
-    background-color: var(--branco-puro);
-    padding: 25px;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-}
-
-.qna-card-header .qna-question-title {
-    font-family: 'New Kansas', serif;
-    font-size: 1.5rem;
-    color: var(--verde-escuro);
-    margin: 0 0 5px 0;
-}
-
-.qna-card-header .qna-question-author {
-    font-size: 0.9rem;
-    color: var(--cinza-texto-claro);
-    font-style: italic;
-}
-
-.qna-card-body {
-    margin: 20px 0;
-    padding: 15px;
-    background-color: #f8f9fa; /* Fundo cinza claro para a pergunta */
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
-}
-
-.qna-card-body .qna-question-content {
-    margin: 0;
-    line-height: 1.6;
-    color: #333;
-}
-
-/* Lista de respostas de OUTROS 'psis' */
-.existing-answers-list {
-    margin-top: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    border-top: 1px solid var(--cinza-borda);
-    padding-top: 20px;
-}
-
-.answer-item {
-    display: flex;
-    gap: 12px;
-    font-size: 0.95rem;
-}
-.answer-item img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-.answer-item .answer-content p {
-    margin: 5px 0 0 0;
-    line-height: 1.5;
-}
-
-.qna-card-actions {
-    margin-top: 20px;
-    border-top: 1px solid var(--cinza-borda);
-    padding-top: 20px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-/* Botão de Responder (usa classes existentes .btn .btn-principal) */
-.btn-responder {
-    padding: 10px 25px;
-    font-size: 0.9rem;
-}
-
-/* Selo "Respondido por você" */
-.badge-respondido {
-    font-weight: 500;
-    color: var(--verde-escuro);
-    font-size: 0.9rem;
-}
-.badge-respondido.hidden {
-    display: none;
-}
-.btn-responder.hidden {
-    display: none;
-}
-
-/* --- Estilos do Modal de Resposta --- */
-#qna-answer-modal textarea {
-    width: 100%;
-    min-height: 150px;
-    border: 1px solid #ced4da;
-    border-radius: 8px;
-    padding: 10px;
-    font-family: 'Inter', sans-serif;
-    font-size: 1rem;
-    resize: vertical;
-}
-
-#qna-answer-modal .char-counter-modal {
-    font-size: 0.85rem;
-    color: var(--cinza-texto-claro);
-    text-align: right;
-    margin-top: 5px;
-}
-
-#qna-answer-modal button:disabled {
-    background-color: #ccc;
-    border-color: #ccc;
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-
-/* *** CORREÇÃO: Alinhamento dos botões do Modal *** */
-#qna-answer-modal .modal-footer {
-    display: grid; 
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    justify-content: stretch; 
-}
-
-#qna-answer-modal .modal-footer .btn {
-    width: 100%; 
-    padding: 12px 20px;
-    font-size: 15px;
-    justify-content: center; 
-}
+@media (min-width: 993px) { .menu-toggle { display: none; } .btn-voltar-inbox { display: none; } }
