@@ -114,8 +114,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const fieldId = dropdown.id; 
             const dataKey = fieldId.replace('_multiselect', '');
             
+            // Armazena no elemento para persistência
             dropdown._selectedValues = [];
 
+            // 1. Carregar dados iniciais
             if (dataInicial && dataInicial[dataKey]) {
                 const savedData = Array.isArray(dataInicial[dataKey]) 
                     ? dataInicial[dataKey] 
@@ -144,6 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
 
+            // Eventos
             if (display) {
                 display.addEventListener('click', (e) => {
                     if (e.target.classList.contains('remove-tag')) {
@@ -181,6 +184,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!dropdown.contains(e.target)) dropdown.classList.remove('open');
             });
             
+            // Método para extrair dados no final
             dropdown.getValues = () => dropdown._selectedValues || [];
         });
     }
