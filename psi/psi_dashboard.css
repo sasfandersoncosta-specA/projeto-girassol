@@ -99,7 +99,7 @@ body.pagina-dashboard {
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 10px; /* Espaço confortável entre os itens */
+    gap: 2px; /* Espaço confortável entre os itens */
 }
 
 .sidebar-nav li a {
