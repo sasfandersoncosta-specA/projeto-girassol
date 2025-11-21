@@ -495,3 +495,56 @@ button[disabled] { background: #e9ecef !important; color: #adb5bd; cursor: not-a
     .btn-header-action { width: 100%; }
     .inbox-container { height: auto; min-height: auto; }
 }
+/* ==========================================================================
+   AJUSTES FINAIS: PÁGINA MEU PERFIL
+   ========================================================================== */
+
+/* 1. Botões de Ação (Alterar/Salvar) */
+.form-actions {
+    margin-top: 30px;
+    display: flex;
+    justify-content: flex-start; /* Alinha à esquerda */
+    gap: 15px;
+}
+
+/* Força o botão a ter tamanho normal, não 100% */
+#perfil-form .btn, 
+#password-form .btn {
+    width: auto; 
+    min-width: 180px; /* Tamanho mínimo elegante */
+    padding: 12px 30px;
+    font-size: 1rem;
+}
+
+/* 2. Botão de Excluir Conta */
+#btn-excluir-conta {
+    background: none;
+    border: 2px solid #d32f2f; /* Vermelho borda */
+    color: #d32f2f;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s;
+    margin-top: 10px;
+}
+#btn-excluir-conta:hover {
+    background-color: #d32f2f;
+    color: white;
+}
+
+/* 3. Ajuste de Espaçamento entre Widgets */
+.widget {
+    background-color: var(--branco-puro);
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    margin-bottom: 40px;
+}
+.widget h3 {
+    margin-top: 0;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+    font-size: 1.5rem;
+    color: var(--verde-escuro);
+}
