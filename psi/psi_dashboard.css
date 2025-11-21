@@ -218,24 +218,146 @@ h1, h2, h3, h4 { font-family: 'New Kansas', serif; color: var(--verde-escuro); }
 #verification-widget.status-pending { background-color: #fffbeb; border-left-color: #f59e0b; color: #b45309; }
 #verification-widget.status-verified { background-color: #f0fdf4; border-left-color: #16a34a; color: #14532d; }
 
-/* Multiselect Customizado */
+/* ==========================================================================
+   MULTISELECT CUSTOMIZADO (MODERNO & ESTILO GIRASSOL)
+   ========================================================================== */
+
+/* 1. O Campo de Input (Display) */
 .multiselect-tag .multiselect-display {
-    border: 1px solid #ced4da; border-radius: 8px; padding: 8px; min-height: 45px;
-    cursor: pointer; background-color: #fff; display: flex; flex-wrap: wrap; gap: 5px;
+    border: 1px solid #d1d5db; /* Cinza suave */
+    border-radius: 12px; /* Bordas mais arredondadas */
+    padding: 10px 12px; /* Mais espaço interno */
+    min-height: 50px;
+    cursor: pointer;
+    background-color: #ffffff;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px; /* Espaço entre as tags */
+    transition: all 0.2s ease;
+    position: relative;
 }
-.multiselect-tag .multiselect-options {
-    display: none; position: absolute; background-color: #fff; border: 1px solid #ddd;
-    width: 100%; max-height: 200px; overflow-y: auto; z-index: 10; margin-top: 5px;
+
+/* Efeito de Foco (Quando aberto ou hover) */
+.multiselect-tag:hover .multiselect-display,
+.multiselect-tag.open .multiselect-display {
+    border-color: var(--verde-escuro);
+    box-shadow: 0 0 0 3px rgba(27, 67, 50, 0.1); /* Glow suave verde */
 }
-.multiselect-tag.open .multiselect-options { display: block; }
+
+/* Seta indicativa (Opcional, para mostrar que é clicável) */
+.multiselect-tag .multiselect-display::after {
+    content: '▼';
+    font-size: 0.7rem;
+    color: #9ca3af;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+/* 2. As Etiquetas (Tags) - Estilo Pílula */
 .multiselect-display .tag {
-    background-color: var(--cor-girassol); color: var(--verde-escuro);
-    padding: 4px 8px; border-radius: 4px; font-size: 0.9rem; font-weight: 500;
-    display: flex; align-items: center; gap: 5px;
+    background-color: var(--cor-girassol); /* Amarelo da marca */
+    color: var(--verde-escuro); /* Texto verde para contraste */
+    padding: 6px 14px;
+    border-radius: 20px; /* Formato Pílula */
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: transform 0.1s ease;
+    z-index: 2; /* Fica acima da seta */
 }
-.multiselect-options .option { padding: 10px 15px; cursor: pointer; }
-.multiselect-options .option:hover { background-color: #f8f9fa; }
-.multiselect-options .option.selected { background-color: var(--cor-girassol); font-weight: bold; }
+
+.multiselect-display .tag:hover {
+    transform: scale(1.02);
+}
+
+/* Botão de Remover (x) dentro da tag */
+.multiselect-display .tag .remove-tag {
+    background: rgba(0,0,0,0.1); /* Fundo sutil */
+    border: none;
+    color: var(--verde-escuro);
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.2s;
+}
+
+.multiselect-display .tag .remove-tag:hover {
+    background: rgba(0,0,0,0.2); /* Escurece ao passar o mouse */
+    color: #000;
+}
+
+/* 3. O Menu Dropdown (Lista de Opções) */
+.multiselect-tag .multiselect-options {
+    display: none;
+    position: absolute;
+    top: 105%; /* Um pouco abaixo do input */
+    left: 0;
+    background-color: #ffffff;
+    border: 1px solid #f3f4f6;
+    width: 100%;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 20;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1); /* Sombra flutuante elegante */
+    padding: 5px; /* Espaço interno para as opções não colarem na borda */
+    animation: fadeIn 0.2s ease-out;
+}
+
+.multiselect-tag.open .multiselect-options {
+    display: block;
+}
+
+/* Item da Lista */
+.multiselect-options .option {
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 8px; /* Itens arredondados */
+    color: #4b5563;
+    font-weight: 500;
+    transition: background 0.1s;
+    margin-bottom: 2px;
+}
+
+/* Hover no Item */
+.multiselect-options .option:hover {
+    background-color: #f0fdf4; /* Verde menta bem clarinho */
+    color: var(--verde-escuro);
+}
+
+/* Item Selecionado */
+.multiselect-options .option.selected {
+    background-color: var(--verde-escuro);
+    color: #ffffff;
+}
+
+/* Barra de rolagem do dropdown (Estilo Mac/Moderno) */
+.multiselect-options::-webkit-scrollbar {
+    width: 6px;
+}
+.multiselect-options::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 4px;
+}
+
+/* Animação suave de entrada */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
 /* ==========================================================================
    6. CAIXA DE ENTRADA E PLANOS
