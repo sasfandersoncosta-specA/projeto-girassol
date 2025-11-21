@@ -3879,3 +3879,91 @@ header.header-rolagem .botoes-acao .btn-outline:hover {
     font-size: 0.8rem;
     color: var(--cor-girassol);
 }
+/* Estrelas de Média no Topo */
+.rating-summary-stars {
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
+
+/* Ícones de Rede Social */
+#psi-social-links .icon-btn {
+    display: inline-flex;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #f1f3f5;
+    color: #555;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+#psi-social-links .icon-btn:hover {
+    background-color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+/* --- NOVO LAYOUT DE PERFIL PÚBLICO --- */
+
+/* Centraliza e alinha a média de estrelas */
+.rating-display-hero {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    height: 24px;
+}
+
+/* Container da linha de ícones (Redes + Share) */
+.social-share-row {
+    display: inline-flex; /* Faz o fundo branco abraçar os ícones */
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    background-color: #ffffff;
+    padding: 8px 20px;
+    border-radius: 50px; /* Formato pílula */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+    margin-bottom: 30px;
+}
+
+/* Agrupamento dos ícones sociais */
+.social-links-group {
+    display: flex;
+    gap: 10px;
+}
+
+/* Estilo Moderno dos Botões Redondos */
+.icon-btn-modern, 
+#psi-social-links .icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid #f0f0f0;
+    background-color: #fff;
+    color: #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    text-decoration: none; /* Remove sublinhado de links */
+}
+
+.icon-btn-modern:hover,
+#psi-social-links .icon-btn:hover {
+    background-color: var(--verde-escuro);
+    color: white;
+    border-color: var(--verde-escuro);
+    transform: translateY(-2px);
+}
+
+/* Pequeno traço separador */
+.vertical-divider {
+    width: 1px;
+    height: 20px;
+    background-color: #ddd;
+}

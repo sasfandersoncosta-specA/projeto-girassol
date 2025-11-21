@@ -1,5 +1,4 @@
-// perfil_psicologo.js — versão final e corrigida
-// Compatível com URLs públicas no formato: dominio.com/nome-do-psicologo
+// perfil_psicologo.js — Versão Final (Social + Ratings + Share)
 
 document.addEventListener('DOMContentLoaded', async () => {
     const loginUrl = 'login.html';
@@ -7,69 +6,150 @@ document.addEventListener('DOMContentLoaded', async () => {
     const loadingElement = document.getElementById('loading-state');
     const errorElement = document.getElementById('error-state');
 
+    // --- FUNÇÕES DE ESTADO DA TELA ---
     const showLoading = () => {
         loadingElement.classList.remove('hidden');
         profileContainer.classList.add('hidden');
-        errorElement.classList.add('hidden');
-        errorElement.classList.remove('visivel'); // <-- NOVO, remove a classe que força mostrar
+        if(errorElement) errorElement.classList.add('hidden');
     };
 
     const showError = (message) => {
         loadingElement.classList.add('hidden');
         profileContainer.classList.add('hidden');
-        const p = errorElement.querySelector('p');
-        if (p) p.textContent = message;
-        errorElement.classList.remove('hidden');
+        if(errorElement) {
+            const p = errorElement.querySelector('p');
+            if (p) p.textContent = message;
+            errorElement.classList.remove('hidden');
+        }
     };
 
     const showProfile = () => {
         loadingElement.classList.add('hidden');
-        errorElement.classList.add('hidden');
-        errorElement.classList.remove('visivel'); // <-- NOVO, remove a classe que força mostrar
+        if(errorElement) errorElement.classList.add('hidden');
         profileContainer.classList.remove('hidden');
     };
 
+    // --- 1. RENDERIZA REDES SOCIAIS ---
+    const renderSocialLinks = (profile) => {
+        const container = document.getElementById('psi-social-links');
+        if (!container) return;
+        container.innerHTML = '';
+
+        // Mapa de ícones e cores
+        const networks = [
+            { key: 'instagram_url', color: '#E1306C', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.917 3.917 0 0 0-1.417.923A3.927 3.927 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.916 3.916 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.926 3.926 0 0 0-.923-1.417A3.911 3.911 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0h.003zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.92.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.486-.276a2.478 2.478 0 0 1-.919-.598 2.48 2.48 0 0 1-.599-.92c-.11-.281-.24-.704-.276-1.485-.038-.843-.047-1.096-.047-3.232 0-2.136.009-2.388.047-3.231.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045v.002zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92zm-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217zm0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334z"/></svg>' },
+            { key: 'linkedin_url', color: '#0077b5', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854V1.146zm4.943 12.248V6.169H2.542v7.225h2.401zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248-.822 0-1.359.54-1.359 1.248 0 .694.521 1.248 1.327 1.248h.015zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016a5.54 5.54 0 0 1 .016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225h2.4z"/></svg>' },
+            { key: 'tiktok_url', color: '#000000', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M9 0h1.98c.144.715.54 1.617 1.235 2.512C12.895 3.389 13.797 4 15 4v2c-1.753 0-3.07-.814-4-1.829V11a5 5 0 1 1-5-5v2a3 3 0 1 0 3 3V0Z"/></svg>' },
+            { key: 'x_url', color: '#000000', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865l8.875 11.633Z"/></svg>' },
+            { key: 'facebook_url', color: '#1877F2', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z"/></svg>' },
+            { key: 'agenda_online_url', color: '#1B4332', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/></svg>' }
+        ];
+
+        let hasLinks = false;
+        networks.forEach(net => {
+            if (profile[net.key] && profile[net.key].trim() !== '') {
+                const a = document.createElement('a');
+                a.href = profile[net.key];
+                a.target = '_blank';
+                a.className = 'icon-btn-modern'; // Usa a classe nova do CSS
+                a.innerHTML = net.icon;
+                // Hover colorido via JS
+                a.onmouseover = () => { a.style.color = net.color; a.style.borderColor = net.color; };
+                a.onmouseout = () => { a.style.color = ''; a.style.borderColor = ''; };
+                container.appendChild(a);
+                hasLinks = true;
+            }
+        });
+        
+        // Se não tiver nenhum link, esconde o container todo (incluindo divisor)
+        const divisor = document.querySelector('.social-share-row .vertical-divider');
+        if (!hasLinks) {
+            if (divisor) divisor.style.display = 'none';
+            container.style.display = 'none';
+        } else {
+             if (divisor) divisor.style.display = 'block';
+             container.style.display = 'flex';
+        }
+    };
+
+    // --- 2. RENDERIZA MÉDIA DE AVALIAÇÃO ---
+    const renderRatingSummary = (profile) => {
+        const container = document.getElementById('psi-rating-summary');
+        if (!container) return;
+
+        const avg = profile.average_rating ? parseFloat(profile.average_rating) : 0;
+        const count = profile.review_count ? parseInt(profile.review_count) : (profile.reviews ? profile.reviews.length : 0);
+
+        if (count === 0) {
+            container.style.display = 'none'; // Esconde se não tiver avaliação
+            return;
+        }
+
+        // Mostra o container
+        container.style.display = 'flex';
+
+        // Gera estrelas
+        let starsHtml = '';
+        for (let i = 1; i <= 5; i++) {
+            if (i <= Math.round(avg)) {
+                starsHtml += '<span style="color:#f39c12;">★</span>';
+            } else {
+                starsHtml += '<span style="color:#ddd;">★</span>';
+            }
+        }
+
+        container.innerHTML = `
+            <span style="font-size: 1.2rem; margin-right:5px;">${starsHtml}</span>
+            <span class="rating-hero-score">${avg.toFixed(1)}</span>
+            <span style="margin: 0 5px; color: #ccc;">•</span>
+            <span class="rating-hero-count" onclick="document.getElementById('tab-btn-avaliacoes').click()">${count} avaliações</span>
+        `;
+    };
+
+    // --- 3. PREENCHE O PERFIL (PRINCIPAL) ---
     const populateProfile = (profile) => {
         const setText = (id, text) => {
             const el = document.getElementById(id);
             if (el) el.textContent = text;
         };
 
-        // 2. Preenche o Cabeçalho do Perfil (Info)
-        const nomeElement = document.getElementById('psi-nome');
-        nomeElement.textContent = profile.nome || 'Nome não disponível'; // Define o nome
-
-        // REQ 1: Adiciona o Selo de Verificado
+        document.getElementById('psi-nome').textContent = profile.nome || 'Nome não disponível';
+        
+        // Adiciona Selo de Verificado se ativo
         if (profile.status === 'active') {
-            const badge = document.createElement('span');
-            badge.className = 'verification-badge';
-            badge.title = 'Perfil Verificado';
-            badge.innerHTML = '✓';
-            nomeElement.appendChild(badge);
+            const h1 = document.getElementById('psi-nome');
+            // Evita duplicar o badge se já existir
+            if (!h1.querySelector('.verification-badge')) {
+                const badge = document.createElement('span');
+                badge.className = 'verification-badge';
+                badge.title = 'Perfil Verificado';
+                badge.innerHTML = '✓';
+                h1.appendChild(badge);
+            }
         }
+        
         setText('psi-crp', profile.crp ? `CRP: ${profile.crp}` : 'CRP não informado');
 
         const foto = document.getElementById('psi-foto');
         if (foto) {
             foto.src = profile.fotoUrl || 'assets/images/default-avatar.png';
-            foto.alt = profile.nome ? `Foto de ${profile.nome}` : 'Foto do profissional';
+            foto.alt = `Foto de ${profile.nome}`;
         }
 
         setText('psi-bio', profile.bio || 'Biografia não disponível.');
         setText('psi-valor', profile.valor_sessao_numero
-            ? `R$ ${profile.valor_sessao_numero.toFixed(2).replace('.', ',')}`
+            ? `R$ ${parseFloat(profile.valor_sessao_numero).toFixed(2).replace('.', ',')}`
             : 'Valor a combinar');
 
         const modalidadeEl = document.getElementById('psi-modalidade');
-        if (modalidadeEl)
-            modalidadeEl.textContent = profile.modalidade || 'Online e Presencial';
+        if (modalidadeEl) modalidadeEl.textContent = profile.modalidade || 'Online e Presencial';
 
+        // Botão WhatsApp
         const contactButton = document.getElementById('btn-agendar-whatsapp');
         if (contactButton) {
             if (profile.telefone) {
                 const clean = profile.telefone.replace(/\D/g, '');
-                const link = `https://wa.me/55${clean}?text=Olá,%20${(profile.nome || '').split(' ')[0]}!%20Encontrei%20seu%20perfil%20na%20Girassol.`;
-                contactButton.href = link;
+                contactButton.href = `https://wa.me/55${clean}?text=Olá,%20encontrei%20seu%20perfil%20na%20Girassol.`;
                 contactButton.textContent = 'Agendar uma conversa';
                 contactButton.classList.remove('disabled');
             } else {
@@ -79,21 +159,26 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        const makeTag = (text) => {
-            const span = document.createElement('span');
-            span.className = 'tag-item';
-            span.textContent = text;
-            return span;
-        };
-
+        // Tags
         const fillTags = (id, items) => {
             const container = document.getElementById(id);
             if (!container) return;
             container.innerHTML = '';
-            if (items && items.length) {
-                items.forEach((item) => container.appendChild(makeTag(item)));
+            
+            // Garante que items seja array (se vier string do banco)
+            let tags = [];
+            if (Array.isArray(items)) tags = items;
+            else if (typeof items === 'string') tags = items.split(',');
+            
+            if (tags.length) {
+                tags.forEach(item => {
+                    const span = document.createElement('span');
+                    span.className = 'tag'; // Usa classe .tag do seu CSS
+                    span.textContent = item.trim();
+                    container.appendChild(span);
+                });
             } else {
-                container.appendChild(makeTag('Não informado'));
+                container.innerHTML = '<span style="color:#999; font-size:0.9rem;">Não informado</span>';
             }
         };
 
@@ -101,35 +186,64 @@ document.addEventListener('DOMContentLoaded', async () => {
         fillTags('psi-tags-abordagens', profile.abordagens_tecnicas);
         fillTags('psi-tags-praticas', profile.praticas_vivencias);
 
+        // --- CHAMA AS NOVAS FUNÇÕES VISUAIS ---
+        renderSocialLinks(profile);
+        renderRatingSummary(profile);
+
+        // Avaliações (Lista na aba)
         const reviewsContainer = document.getElementById('reviews-list-container');
         const tabBtnAvaliacoes = document.getElementById('tab-btn-avaliacoes');
+        
         if (reviewsContainer) {
             reviewsContainer.innerHTML = '';
             if (profile.reviews && profile.reviews.length > 0) {
-                if (tabBtnAvaliacoes)
-                    tabBtnAvaliacoes.textContent = `Avaliações (${profile.reviews.length})`;
+                if(tabBtnAvaliacoes) tabBtnAvaliacoes.textContent = `Avaliações (${profile.reviews.length})`;
+                
                 profile.reviews.forEach((r) => {
+                    const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
                     const div = document.createElement('div');
                     div.className = 'review-card';
                     div.innerHTML = `
-                        <div class="review-card-header">
-                            <strong>${r.patient ? r.patient.nome : 'Paciente anônimo'}</strong>
-                            <span class="review-rating">★ ${r.rating}</span>
+                        <div class="review-header">
+                            <h4>${r.patientName || 'Paciente'}</h4>
+                            <div class="rating-stars" style="color:#f39c12;">${stars}</div>
                         </div>
-                        <p>${r.comment || ''}</p>
-                        <small>${r.createdAt ? new Date(r.createdAt).toLocaleDateString('pt-BR') : ''}</small>
+                        <p class="review-comment">"${r.comment}"</p>
+                        <small style="color:#999;">${new Date(r.createdAt).toLocaleDateString('pt-BR')}</small>
                     `;
                     reviewsContainer.appendChild(div);
                 });
             } else {
-                if (tabBtnAvaliacoes)
-                    tabBtnAvaliacoes.textContent = 'Avaliações';
-                reviewsContainer.innerHTML = '<p>Este profissional ainda não recebeu avaliações.</p>';
+                if(tabBtnAvaliacoes) tabBtnAvaliacoes.textContent = 'Avaliações';
+                reviewsContainer.innerHTML = '<p style="color:#777;">Este profissional ainda não recebeu avaliações.</p>';
             }
         }
     };
 
-    // --- Extração de slug para URLs públicas tipo dominio.com/nome-do-psicologo ---
+    // --- SETUP BOTÃO COMPARTILHAR ---
+    const setupShareButton = () => {
+        const btn = document.getElementById('share-profile-btn');
+        if(!btn) return;
+
+        btn.addEventListener('click', async () => {
+            const shareData = {
+                title: document.title,
+                text: 'Confira este psicólogo na Plataforma Girassol!',
+                url: window.location.href
+            };
+
+            if (navigator.share) {
+                try { await navigator.share(shareData); }
+                catch(e) { console.log('Share cancelado'); }
+            } else {
+                // Fallback: Copiar para área de transferência
+                navigator.clipboard.writeText(window.location.href);
+                alert('Link copiado para a área de transferência!');
+            }
+        });
+    };
+
+    // --- ROTEAMENTO E INICIALIZAÇÃO ---
     const extractSlug = () => {
         const parts = window.location.pathname.split('/').filter(Boolean);
         const slug = parts[parts.length - 1];
@@ -139,116 +253,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const fetchProfile = async () => {
         showLoading();
-
         const slug = extractSlug();
+        
         if (!slug) {
-            showError('Perfil não especificado. Acesse o link direto do profissional.');
-            return;
+            // Logica para testes locais ou erro
         }
 
         try {
             const res = await fetch(`${API_BASE_URL}/api/psychologists/slug/${encodeURIComponent(slug)}`);
 
             if (res.status === 404) {
-                showError('Perfil não encontrado. Este profissional pode não estar mais na plataforma.');
+                showError('Perfil não encontrado.');
                 return;
             }
 
-            if (res.status === 401) {
-                console.warn('401 (não autenticado) ao carregar perfil público — ignorado.');
-                populateProfile({ nome: 'Informação restrita', bio: 'Perfil público protegido.' });
-                showProfile();
-                return;
-            }
-
-            if (!res.ok) {
-                console.warn('Falha ao buscar perfil:', res.status, res.statusText);
-                showError('Não foi possível carregar o perfil no momento. Tente novamente mais tarde.');
-                return;
-            }
+            if (!res.ok) throw new Error('Erro na busca');
 
             const data = await res.json();
             populateProfile(data);
-            checkPatientLoginStatus(data.id); // Chama a verificação de login
+            
             showProfile();
         } catch (err) {
-            console.error('Erro ao carregar perfil:', err);
-            showError('Ocorreu um problema ao carregar o perfil. Tente novamente mais tarde.');
+            console.error(err);
+            showError('Erro ao carregar perfil.');
         }
     };
 
-    // --- Alternância de abas ("Sobre" / "Avaliações") ---
-/**
- * Verifica se é um paciente logado e mostra o formulário de avaliação
- * OU mostra o CTA de login.
- */
-function checkPatientLoginStatus(psychologistId) {
-    
-    // --- INÍCIO DA CORREÇÃO ---
-    // 1. Procura pelo token E pelo role corretos
-    const token = localStorage.getItem('girassol_token');
-    const role = localStorage.getItem('girassol_role');
-    // --- FIM DA CORREÇÃO ---
-
-    // 2. Verifica se o token existe E se o usuário é um PACIENTE
-    if (token && role === 'patient') {
-        // --- USUÁRIO LOGADO COMO PACIENTE ---
-        document.getElementById('review-form-wrapper').style.display = 'block';
-        
-        // Adiciona o listener para o submit do formulário
-        const reviewForm = document.getElementById('review-form');
-        reviewForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const rating = new FormData(reviewForm).get('rating');
-            const comment = new FormData(reviewForm).get('comment');
-            
-            if (!rating) {
-                alert('Por favor, selecione uma nota (de 1 a 5 estrelas).');
-                return;
-            }
-
-            try {
-                // ROTA NOVA (você precisará criar no backend)
-                const response = await fetch('/api/reviews', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}` // Usa o token correto
-                    },
-                    body: JSON.stringify({
-                        psychologistId: psychologistId,
-                        rating: parseInt(rating),
-                        comment: comment
-                    })
-                });
-
-                if (response.ok) {
-                    alert('Avaliação enviada com sucesso!');
-                    window.location.reload(); 
-                } else {
-                    const errorData = await response.json();
-                    alert(`Erro ao enviar avaliação: ${errorData.error}`);
-                }
-            } catch (error) {
-                console.error('Erro no submit da avaliação:', error);
-                alert('Erro de conexão ao enviar avaliação.');
-            }
-        });
-    } else {
-        // --- USUÁRIO DESLOGADO (ou é um psicólogo) ---
-        const loginWall = document.getElementById('login-to-review-cta');
-        if (loginWall) {
-            loginWall.style.display = 'block';
-
-            const loginButton = document.getElementById('login-wall-btn');
-            if (loginButton) {
-                const redirectUrl = encodeURIComponent(window.location.href);
-                loginButton.href = `login.html?return_url=${redirectUrl}`;
-            }
-        }
-    }
-}
+    // Tabs
     const tabButtons = document.querySelectorAll('.tabs-nav .tab-link');
     const tabContents = document.querySelectorAll('.tab-content');
 
@@ -263,8 +294,6 @@ function checkPatientLoginStatus(psychologistId) {
         });
     });
 
-    // Inicia o carregamento
     fetchProfile();
-    // 4. (LINHA NOVA) Configura o botão de compartilhar
-    setupShareButton(); 
+    setupShareButton();
 });
