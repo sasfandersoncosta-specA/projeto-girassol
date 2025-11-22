@@ -1,4 +1,4 @@
-// perfil_psicologo.js — Versão Final (Toast + Média Corrigida)
+// perfil_psicologo.js — Versão Final (Null Safety + Layout Novo)
 
 document.addEventListener('DOMContentLoaded', async () => {
     const profileContainer = document.getElementById('profile-container');
@@ -6,22 +6,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     const errorElement = document.getElementById('error-state');
     const toastContainer = document.getElementById('toast-container');
 
-    // --- FUNÇÃO DE NOTIFICAÇÃO (TOAST) ---
+    // --- TOAST ---
     const showToast = (message, type = 'success') => {
         if (!toastContainer) return;
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
         toast.innerHTML = `<span>${message}</span>`;
         toastContainer.appendChild(toast);
-
-        // Remove após 4 segundos
         setTimeout(() => {
             toast.style.animation = 'fadeOut 0.5s forwards';
             setTimeout(() => toast.remove(), 500);
         }, 4000);
     };
 
-    // --- ESTADOS DA TELA ---
+    // --- ESTADOS ---
     const showLoading = () => {
         loadingElement.classList.remove('hidden');
         profileContainer.classList.add('hidden');
@@ -32,8 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadingElement.classList.add('hidden');
         profileContainer.classList.add('hidden');
         if(errorElement) {
-            const p = errorElement.querySelector('p');
-            if (p) p.textContent = message;
+            errorElement.querySelector('p').textContent = message;
             errorElement.classList.remove('hidden');
         }
     };
@@ -44,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         profileContainer.classList.remove('hidden');
     };
 
-    // --- 1. RENDERIZA REDES SOCIAIS ---
+    // --- RENDERIZADORES ---
     const renderSocialLinks = (profile) => {
         const container = document.getElementById('psi-social-links');
         if (!container) return;
@@ -65,60 +62,37 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const a = document.createElement('a');
                 a.href = profile[net.key];
                 a.target = '_blank';
-                a.className = 'icon-btn'; 
+                a.className = 'icon-btn';
                 a.innerHTML = net.icon;
                 container.appendChild(a);
                 hasLinks = true;
             }
         });
         
-        const divisor = document.querySelector('.social-share-row .vertical-divider');
-        if (!hasLinks) {
-            if (divisor) divisor.style.display = 'none';
-            container.style.display = 'none';
-        } else {
-             if (divisor) divisor.style.display = 'block';
-             container.style.display = 'flex';
-        }
+        // Se não tiver links, esconde (mas o botão share fica)
     };
 
-    // --- 2. RENDERIZA MÉDIA DE AVALIAÇÃO (CORRIGIDA PARA CALCULAR SEMPRE) ---
     const renderRatingSummary = (profile) => {
         const container = document.getElementById('psi-rating-summary');
         if (!container) return;
 
-        let avg = 0;
-        let count = 0;
-
-        // Tenta usar dados do backend ou calcula manualmente via lista de reviews
-        if (profile.reviews && profile.reviews.length > 0) {
-            count = profile.reviews.length;
+        // Lógica de média (usa dados do backend ou calcula)
+        let avg = profile.average_rating ? parseFloat(profile.average_rating) : 0;
+        let count = profile.review_count ? parseInt(profile.review_count) : (profile.reviews ? profile.reviews.length : 0);
+        
+        if (!avg && profile.reviews && profile.reviews.length > 0) {
             const total = profile.reviews.reduce((sum, r) => sum + parseFloat(r.rating || 0), 0);
             avg = total / count;
-        } 
-        else if (profile.average_rating) {
-            avg = parseFloat(profile.average_rating);
-            count = parseInt(profile.review_count);
         }
 
-        // Se ainda assim for 0, mostra "Novo"
         if (count === 0) {
-            container.innerHTML = `
-                <span style="color:#ddd; font-size: 1.2rem;">★</span>
-                <span style="color:#999; font-size:0.9rem; margin-left: 5px; font-style: italic;">Novo na plataforma</span>
-            `;
-            container.style.display = 'flex';
+            container.innerHTML = `<span style="color:#999; font-size:0.9rem;">Novo na plataforma</span>`;
             return;
         }
 
-        // Renderiza as estrelas douradas
         let starsHtml = '';
         for (let i = 1; i <= 5; i++) {
-            if (i <= Math.round(avg)) {
-                starsHtml += '<span style="color:#f39c12;">★</span>';
-            } else {
-                starsHtml += '<span style="color:#ddd;">★</span>';
-            }
+            starsHtml += (i <= Math.round(avg)) ? '<span style="color:#f39c12;">★</span>' : '<span style="color:#ddd;">★</span>';
         }
 
         container.innerHTML = `
@@ -128,15 +102,162 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <span style="color:#777; font-size: 0.9rem; text-decoration: underline;">(${count} avaliações)</span>
             </div>
         `;
-        container.style.display = 'flex';
     };
 
-    // --- 3. VERIFICAÇÃO DE LOGIN PARA AVALIAR ---
+    // --- 4. PREENCHE O PERFIL ---
+    const populateProfile = (profile) => {
+        const setText = (id, text) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        };
+
+        document.getElementById('psi-nome').textContent = profile.nome || 'Psicólogo';
+        
+        // Selo de Verificação
+        if (profile.status === 'active') {
+            const h1 = document.getElementById('psi-nome');
+            if (!h1.querySelector('.verification-badge')) {
+                const badge = document.createElement('span');
+                badge.className = 'verification-badge';
+                badge.title = 'Perfil Verificado';
+                badge.innerHTML = '✓';
+                h1.appendChild(badge);
+            }
+        }
+        
+        setText('psi-crp', profile.crp ? `CRP: ${profile.crp}` : 'CRP: --/------');
+
+        const foto = document.getElementById('psi-foto');
+        if (foto) {
+            // Fallback para foto vazia ou nula
+            foto.src = profile.fotoUrl || 'assets/images/default-avatar.png';
+            foto.alt = `Foto de ${profile.nome}`;
+        }
+
+        // --- BIO (AGORA COM PLACEHOLDER AMIGÁVEL) ---
+        const bioElement = document.getElementById('psi-bio-text');
+        if (bioElement) {
+            bioElement.innerHTML = profile.bio 
+                ? profile.bio.replace(/\n/g, '<br>') 
+                : '<span style="color:#999; font-style:italic;">Este profissional ainda não adicionou uma biografia, mas está pronto para atender você.</span>';
+        }
+
+        setText('psi-valor', profile.valor_sessao_numero
+            ? `R$ ${parseFloat(profile.valor_sessao_numero).toFixed(2).replace('.', ',')}`
+            : 'Sob Consulta');
+
+        const modalidadeEl = document.getElementById('psi-modalidade');
+        if (modalidadeEl) modalidadeEl.textContent = profile.modalidade || 'Online e Presencial';
+
+        // Localização
+        const locEl = document.getElementById('psi-localizacao');
+        if (locEl) {
+            locEl.innerHTML = '';
+            if (profile.modalidade && profile.modalidade.includes('Presencial')) {
+                locEl.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+                    </svg>
+                    <span>Consultório Presencial</span> 
+                `;
+            }
+        }
+
+        const contactButton = document.getElementById('btn-agendar-whatsapp');
+        if (contactButton) {
+            if (profile.telefone) {
+                const clean = profile.telefone.replace(/\D/g, '');
+                contactButton.href = `https://wa.me/55${clean}?text=Olá,%20encontrei%20seu%20perfil%20na%20Girassol.`;
+                contactButton.textContent = 'Agendar uma conversa';
+                contactButton.classList.remove('disabled');
+            } else {
+                contactButton.href = '#';
+                contactButton.textContent = 'Contato indisponível';
+                contactButton.classList.add('disabled');
+            }
+        }
+
+        // Popula a aba de Detalhes
+        const tabSobre = document.getElementById('tab-sobre');
+        if (tabSobre) {
+            const generateTagsHtml = (itemsStringOrArray, cssClass = 'practice-tag') => {
+                if (!itemsStringOrArray || itemsStringOrArray.length === 0) {
+                    return '<span style="color:#999; font-style:italic;">Não informado.</span>';
+                }
+                const list = Array.isArray(itemsStringOrArray) 
+                    ? itemsStringOrArray 
+                    : itemsStringOrArray.split(',');
+                
+                return list.map(item => `<span class="${cssClass}">${item.trim()}</span>`).join('');
+            };
+
+            const abordagensHtml = generateTagsHtml(profile.abordagens_tecnicas);
+            const especialidadesHtml = generateTagsHtml(profile.temas_atuacao);
+            const praticasHtml = generateTagsHtml(profile.praticas_vivencias);
+
+            tabSobre.innerHTML = `
+                <div class="about-section-modern">
+                    <h3 class="practices-title">Abordagem</h3>
+                    <div class="practices-container" style="margin-bottom: 30px;">
+                        ${abordagensHtml}
+                    </div>
+
+                    <h3 class="practices-title">Especialidades e Temas</h3>
+                    <div class="practices-container" style="margin-bottom: 30px;">
+                        ${especialidadesHtml}
+                    </div>
+
+                    <h3 class="practices-title">Práticas e Vivências Afirmativas</h3>
+                    <div class="practices-container">
+                        ${praticasHtml}
+                    </div>
+                </div>
+            `;
+            
+            // Também preenche o card lateral com as abordagens (se quiser manter lá)
+            const sideTags = document.getElementById('psi-tags-abordagens');
+            if(sideTags) sideTags.innerHTML = generateTagsHtml(profile.abordagens_tecnicas, 'small-tag');
+        }
+
+        renderSocialLinks(profile);
+        renderRatingSummary(profile);
+        populateReviews(profile);
+        checkPatientLoginStatus(profile.id);
+    };
+
+    const populateReviews = (profile) => {
+        const reviewsContainer = document.getElementById('reviews-list-container');
+        const tabBtnAvaliacoes = document.getElementById('tab-btn-avaliacoes');
+        
+        if (reviewsContainer) {
+            reviewsContainer.innerHTML = '';
+            if (profile.reviews && profile.reviews.length > 0) {
+                if(tabBtnAvaliacoes) tabBtnAvaliacoes.textContent = `Avaliações (${profile.reviews.length})`;
+                profile.reviews.forEach((r) => {
+                    const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+                    const div = document.createElement('div');
+                    div.className = 'review-card';
+                    div.innerHTML = `
+                        <div class="review-header">
+                            <h4>${r.patientName || 'Paciente'}</h4>
+                            <div class="rating-stars" style="color:#f39c12;">${stars}</div>
+                        </div>
+                        <p class="review-comment">"${r.comment}"</p>
+                        <small style="color:#999;">${new Date(r.createdAt).toLocaleDateString('pt-BR')}</small>
+                    `;
+                    reviewsContainer.appendChild(div);
+                });
+            } else {
+                if(tabBtnAvaliacoes) tabBtnAvaliacoes.textContent = 'Avaliações';
+                reviewsContainer.innerHTML = '<p style="color:#777;">Este profissional ainda não recebeu avaliações.</p>';
+            }
+        }
+    };
+
+    // --- LOGIN CHECK & SUBMIT ---
     function checkPatientLoginStatus(psychologistId) {
         const token = localStorage.getItem('girassol_token');
-        
         if (token) {
-            // LOGADO
             const formWrapper = document.getElementById('review-form-wrapper');
             const loginCta = document.getElementById('login-to-review-cta');
             if (formWrapper) formWrapper.style.display = 'block';
@@ -144,6 +265,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const reviewForm = document.getElementById('review-form');
             if (reviewForm) {
+                // Clona para remover listeners antigos
                 const newForm = reviewForm.cloneNode(true);
                 reviewForm.parentNode.replaceChild(newForm, reviewForm);
 
@@ -184,7 +306,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
             }
         } else {
-            // DESLOGADO
             const formWrapper = document.getElementById('review-form-wrapper');
             const loginCta = document.getElementById('login-to-review-cta');
             if (formWrapper) formWrapper.style.display = 'none';
@@ -199,171 +320,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // --- 4. PREENCHE O PERFIL ---
-    const populateProfile = (profile) => {
-        const setText = (id, text) => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = text;
-        };
-
-        document.getElementById('psi-nome').textContent = profile.nome || 'Nome não disponível';
-        
-        if (profile.status === 'active') {
-            const h1 = document.getElementById('psi-nome');
-            if (!h1.querySelector('.verification-badge')) {
-                const badge = document.createElement('span');
-                badge.className = 'verification-badge';
-                badge.title = 'Perfil Verificado';
-                badge.innerHTML = '✓';
-                h1.appendChild(badge);
-            }
-        }
-        
-        setText('psi-crp', profile.crp ? `CRP: ${profile.crp}` : 'CRP não informado');
-
-        const foto = document.getElementById('psi-foto');
-        if (foto) {
-            foto.src = profile.fotoUrl || 'assets/images/default-avatar.png';
-            foto.alt = `Foto de ${profile.nome}`;
-        }
-
-        setText('psi-valor', profile.valor_sessao_numero ? `R$ ${parseFloat(profile.valor_sessao_numero).toFixed(2).replace('.', ',')}` : 'Valor a combinar');
-
-        const modalidadeEl = document.getElementById('psi-modalidade');
-        if (modalidadeEl) modalidadeEl.textContent = profile.modalidade || 'Online e Presencial';
-
-        const locEl = document.getElementById('psi-localizacao');
-        if (locEl) {
-            locEl.innerHTML = '';
-            if (profile.modalidade && profile.modalidade.includes('Presencial')) {
-                locEl.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
-                    </svg>
-                    <span>Consultório Presencial (São Paulo/SP)</span> 
-                `;
-            }
-        }
-
-        const contactButton = document.getElementById('btn-agendar-whatsapp');
-        if (contactButton) {
-            if (profile.telefone) {
-                const clean = profile.telefone.replace(/\D/g, '');
-                contactButton.href = `https://wa.me/55${clean}?text=Olá,%20encontrei%20seu%20perfil%20na%20Girassol.`;
-                contactButton.textContent = 'Agendar uma conversa';
-                contactButton.classList.remove('disabled');
-            } else {
-                contactButton.href = '#';
-                contactButton.textContent = 'Contato indisponível';
-                contactButton.classList.add('disabled');
-            }
-        }
-
-        const fillTags = (id, items) => {
-            const container = document.getElementById(id);
-            if (!container) return;
-            container.innerHTML = '';
-            
-            let tags = [];
-            if (Array.isArray(items)) tags = items;
-            else if (typeof items === 'string') tags = items.split(',');
-            
-            if (tags.length) {
-                tags.forEach(item => {
-                    const span = document.createElement('span');
-                    span.className = 'tag'; 
-                    span.textContent = item.trim();
-                    container.appendChild(span);
-                });
-            }
-        };
-
-        renderSocialLinks(profile);
-        renderRatingSummary(profile);
-
-        // 1. Preenche o Texto da Bio no Topo (Novo Local)
-        const bioElement = document.getElementById('psi-bio-text');
-        if (bioElement) {
-            bioElement.innerHTML = profile.bio 
-                ? profile.bio.replace(/\n/g, '<br>') 
-                : 'Este profissional ainda não adicionou uma biografia.';
-        }
-
-        // 2. Popula a Aba "Detalhes" (Antiga Aba Sobre) com Especialidades e Práticas
-        const tabSobre = document.getElementById('tab-sobre');
-        if (tabSobre) {
-            
-            // Helper para gerar HTML de tags
-            const generateTagsHtml = (itemsStringOrArray, cssClass = 'tag') => {
-                if (!itemsStringOrArray || itemsStringOrArray.length === 0) {
-                    return '<span style="color:#999; font-style:italic;">Nenhuma informação.</span>';
-                }
-                const list = Array.isArray(itemsStringOrArray) 
-                    ? itemsStringOrArray 
-                    : itemsStringOrArray.split(',');
-                
-                return list.map(item => `<span class="${cssClass}">${item.trim()}</span>`).join('');
-            };
-
-            // --- AQUI ESTÁ A MUDANÇA ---
-            // Agora TODOS usam 'practice-tag' para ter o mesmo visual moderno
-            const especialidadesHtml = generateTagsHtml(profile.temas_atuacao, 'practice-tag');
-            const abordagensHtml = generateTagsHtml(profile.abordagens_tecnicas, 'practice-tag');
-            const praticasHtml = generateTagsHtml(profile.praticas_vivencias, 'practice-tag'); 
-            // ---------------------------
-            // Injeta o HTML na aba de baixo (ORDEM E TÍTULOS CORRIGIDOS)
-            tabSobre.innerHTML = `
-                <div class="about-section-modern">
-                    
-                    <h3 class="practices-title">Abordagem</h3>
-                    <div class="practices-container" style="margin-bottom: 30px;">
-                        ${abordagensHtml}
-                    </div>
-
-                    <h3 class="practices-title">Especialidades e Temas</h3>
-                    <div class="practices-container" style="margin-bottom: 30px;">
-                        ${especialidadesHtml}
-                    </div>
-
-                    <h3 class="practices-title">Práticas e Vivências Afirmativas</h3>
-                    <div class="practices-container">
-                        ${praticasHtml}
-                    </div>
-                </div>
-            `;
-        }
-
-        const reviewsContainer = document.getElementById('reviews-list-container');
-        const tabBtnAvaliacoes = document.getElementById('tab-btn-avaliacoes');
-        
-        if (reviewsContainer) {
-            reviewsContainer.innerHTML = '';
-            if (profile.reviews && profile.reviews.length > 0) {
-                if(tabBtnAvaliacoes) tabBtnAvaliacoes.textContent = `Avaliações (${profile.reviews.length})`;
-                profile.reviews.forEach((r) => {
-                    const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
-                    const div = document.createElement('div');
-                    div.className = 'review-card';
-                    div.innerHTML = `
-                        <div class="review-header">
-                            <h4>${r.patientName || 'Paciente'}</h4>
-                            <div class="rating-stars" style="color:#f39c12;">${stars}</div>
-                        </div>
-                        <p class="review-comment">"${r.comment}"</p>
-                        <small style="color:#999;">${new Date(r.createdAt).toLocaleDateString('pt-BR')}</small>
-                    `;
-                    reviewsContainer.appendChild(div);
-                });
-            } else {
-                if(tabBtnAvaliacoes) tabBtnAvaliacoes.textContent = 'Avaliações';
-                reviewsContainer.innerHTML = '<p style="color:#777;">Este profissional ainda não recebeu avaliações.</p>';
-            }
-        }
-
-        checkPatientLoginStatus(profile.id);
-    };
-
-    // --- SETUP SHARE ---
     const setupShareButton = () => {
         const btn = document.getElementById('share-profile-btn');
         if(!btn) return;
@@ -392,7 +348,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const fetchProfile = async () => {
         showLoading();
         const slug = extractSlug();
-        if (!slug) {} // Lógica local
+        if (!slug) {
+            // Lógica local
+        }
 
         try {
             const res = await fetch(`${API_BASE_URL}/api/psychologists/slug/${encodeURIComponent(slug)}`);

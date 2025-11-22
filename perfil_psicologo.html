@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil do Psicólogo - Jano</title>
 
-    <link rel="stylesheet" href="style.css?v=2.0">
-    <link rel="icon" href="assets/images/favicon.png?v=2" type="image/png">
-    <link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png?v=2">
+    <link rel="stylesheet" href="style.css?v=2.3"> <link rel="icon" href="assets/images/favicon.png?v=2" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@400;700;900&display.swap" rel="stylesheet">
@@ -17,41 +15,41 @@
     <div id="header-placeholder"></div>
 
     <div id="loading-state" class="container" style="text-align: center; padding: 5rem 1rem;">
-    <h2>Carregando...</h2>
-    <p>Buscando as informações do profissional.</p>
-</div>
+        <h2>Carregando...</h2>
+        <p>Buscando as informações do profissional.</p>
+    </div>
 
     <div id="error-state" class="container hidden" style="text-align: center; padding: 5rem 1rem;">
-    <h2>Erro ao Carregar Perfil</h2>
-    <p>Não foi possível encontrar os dados. Tente novamente mais tarde.</p>
-</div>
+        <h2>Perfil Indisponível</h2>
+        <p>Não foi possível carregar os dados deste profissional no momento.</p>
+    </div>
 
-<main id="profile-container" class="profile-page-main hidden">
+    <main id="profile-container" class="profile-page-main hidden">
         <div class="container">
             <div class="profile-header-grid">
+                
                 <div class="profile-info">
                     <div class="profile-photo-wrapper">
                         <img id="psi-foto" src="assets/images/default-avatar.png" alt="Foto do Psicólogo">
                     </div>
                     
-                    <h1 id="psi-nome">Carregando...</h1>
+                    <h1 id="psi-nome">Nome do Psicólogo</h1>
                     
                     <p id="psi-crp" class="crp" style="margin-bottom: 10px;">CRP: --/------</p>
                     
                     <div id="psi-rating-summary" class="rating-display-hero"></div>
 
-                    <div class="profile-bio-hero" style="margin-top: 25px; text-align: left;">
+                    <div class="profile-bio-hero" style="margin-top: 30px; text-align: left;">
                         <h3 style="color: var(--verde-escuro); font-family: 'New Kansas'; border-bottom: 1px solid #eee; padding-bottom: 10px; text-align: center; font-size: 1.4rem;">Sobre Mim</h3>
                         <p id="psi-bio-text" style="line-height: 1.7; color: #555; margin-top: 15px; text-align: justify; font-size: 0.95rem;">
-                            Carregando biografia...
-                        </p>
+                            </p>
                     </div>
                 </div>
 
                 <div class="conversion-card-wrapper">
                     <div class="conversion-card">
                         <h3>Valor da sessão</h3>
-                        <p id="psi-valor" class="price">R$ --</p>
+                        <p id="psi-valor" class="price">Sob Consulta</p>
                         
                         <h3>Modalidade de Atendimento</h3>
                         <p id="psi-modalidade" style="margin-bottom: 5px;">Online e Presencial</p>
@@ -60,8 +58,7 @@
                         
                         <a href="#" id="btn-agendar-whatsapp" class="btn btn-principal" style="width: 100%; margin-top: 15px;">Agendar uma conversa</a>
 
-                        <div id="psi-tags-abordagens" class="profile-tags small-tags" style="margin-top: 15px; justify-content: center;">
-                        </div>
+                        <div id="psi-tags-abordagens" class="profile-tags small-tags" style="margin-top: 15px; justify-content: center;"></div>
 
                         <div class="social-share-row" style="margin-top: 25px; margin-bottom: 0; padding: 0;">
                             <div id="psi-social-links" class="social-links-group"></div>
@@ -72,28 +69,23 @@
                                 </svg>
                             </button>
                         </div>
+
                     </div>
-                </div>  
+                </div>
             </div>
 
             <div class="profile-body-tabs">
                 <nav class="tabs-nav">
-                    <button type="button" class="tab-link active" data-tab="sobre">Sobre Mim</button>
+                    <button type="button" class="tab-link active" data-tab="sobre">Detalhes Profissionais</button>
                     <button type="button" class="tab-link" data-tab="avaliacoes" id="tab-btn-avaliacoes">Avaliações</button>
                 </nav>
 
                 <div id="tab-sobre" class="tab-content active">
-                    <h2>Sobre Mim</h2>
-                    <p id="psi-bio">Carregando biografia...</p>
-                    
-                    <h2>Práticas e Vivências</h2>
-                    <div id="psi-tags-praticas" class="profile-tags">
-                        </div>
-                </div>
+                    </div>
 
                 <div id="tab-avaliacoes" class="tab-content">
                     <h2>Avaliações de Pacientes</h2>
-
+                    
                     <div id="login-to-review-cta" class="login-wall-box" style="display: none;">
                         <h4>Deixe sua avaliação</h4>
                         <p>Para avaliar este profissional, você precisa estar conectado à sua conta de paciente.</p>
@@ -106,13 +98,13 @@
                         <h3>Deixe sua avaliação</h3>
                         <form id="review-form" class="form-contato" style="padding: 20px;">
                             <div class="form-group">
-                                <label>Sua nota (de 1 a 5 estrelas):</label>
+                                <label>Sua nota:</label>
                                 <div class="star-rating-input">
-                                    <input type="radio" id="star5" name="rating" value="5"><label for="star5" title="5 estrelas">★</label>
-                                    <input type="radio" id="star4" name="rating" value="4"><label for="star4" title="4 estrelas">★</label>
-                                    <input type="radio" id="star3" name="rating" value="3"><label for="star3" title="3 estrelas">★</label>
-                                    <input type="radio" id="star2" name="rating" value="2"><label for="star2" title="2 estrelas">★</label>
-                                    <input type="radio" id="star1" name="rating" value="1"><label for="star1" title="1 estrela">★</label>
+                                    <input type="radio" id="star5" name="rating" value="5"><label for="star5">★</label>
+                                    <input type="radio" id="star4" name="rating" value="4"><label for="star4">★</label>
+                                    <input type="radio" id="star3" name="rating" value="3"><label for="star3">★</label>
+                                    <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
+                                    <input type="radio" id="star1" name="rating" value="1"><label for="star1">★</label>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -123,30 +115,27 @@
                         </form>
                     </div>
 
-                    <div id="reviews-list-container">
-                        </div>
+                    <div id="reviews-list-container"></div>
                 </div>
             </div>
         </div>
     </main>
-<div class="wave-divider-footer">
+
+    <div class="wave-divider-footer">
         <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" style="display: block;">
             <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" 
-                  class="shape-fill" style="fill:var(--verde-escuro);">
-            </path>
+                  class="shape-fill" style="fill:var(--verde-escuro);"></path>
         </svg>
     </div>
+    
     <div id="footer-placeholder"></div>
+    
+    <div id="toast-container"></div>
 
-    <script src="script.js?v=1.9"></script>
-
+    <script src="script.js?v=2.3"></script>
     <script>
       const API_BASE_URL = "https://projeto-girassol.onrender.com";
     </script>
-    
-    <script src="perfil_psicologo.js?v=2.1"></script>
-    <div id="toast-container"></div>
-
-    <script src="script.js?v=1.9"></script>
-    </body>
+    <script src="perfil_psicologo.js?v=2.3"></script>
+</body>
 </html>
