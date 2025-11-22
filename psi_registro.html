@@ -16,15 +16,16 @@
 
 <body class="pagina-registro">
     <script>
-        // Verifica se a "chave" existe
-        const passouPeloQuestionario = sessionStorage.getItem('questionarioCompleto');
-
-        if (passouPeloQuestionario !== 'true') {
-            // Se não tem a chave, não pode estar aqui. Expulsa ele.
+        // CÓDIGO NOVO (QUE TE DEIXA ENTRAR)
+        const urlParams = new URLSearchParams(window.location.search);
+        const isInvite = urlParams.get('token'); // Se tiver token de convite, libera
+        const isAdminMode = urlParams.get('mode') === 'admin'; // Se for admin, libera
+        
+        // Só bloqueia se NÃO for admin E NÃO tiver respostas E NÃO for convite
+        if (!isAdminMode && !isInvite && !localStorage.getItem('psi_questionario_respostas')) {
             alert("Você precisa preencher o questionário de perfil primeiro.");
-            window.location.href = 'psi_questionario.html'; 
+            window.location.href = "psi_questionario.html";
         }
-        // Se a chave existe, o resto da página carrega normalmente.
     </script>
     
     <div class="container-auth">

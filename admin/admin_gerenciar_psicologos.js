@@ -167,9 +167,8 @@ window.initializePage = function() {
     const btnAdd = document.getElementById('btn-add-psi');
     if (btnAdd) {
         btnAdd.addEventListener('click', () => {
-            // Abre a página de registro padrão em uma nova aba
-            // Ajuste o link se sua página de registro tiver outro nome
-            window.open('/psi_registro.html', '_blank');
+            // Adicionamos o ?mode=admin para avisar a página de destino que somos nós
+            window.open('/psi_registro.html?mode=admin', '_blank');
         });
     }
 
