@@ -4177,3 +4177,22 @@ header.header-rolagem .botoes-acao .btn-outline:hover {
     font-size: 1.2rem;
     line-height: 0;
 }
+/* =============================================================
+   CORREÇÃO FINAL: BIOGRAFIA (QUEBRA DE LINHA)
+   ============================================================= */
+
+#psi-bio-text {
+    /* Força a quebra de palavras muito longas ou URLs */
+    overflow-wrap: break-word;  
+    word-wrap: break-word;      
+    word-break: break-word;     
+
+    /* Garante que o texto respeite a largura da coluna */
+    max-width: 100%;            
+    display: block;
+}
+
+/* Garante que a coluna da esquerda não estoure o Grid */
+.profile-info {
+    min-width: 0; /* Truque de CSS Grid para impedir vazamento */
+}
