@@ -134,20 +134,35 @@ window.initializePage = function() {
         });
     }
 
+    // --- LÓGICA DE FILTROS CORRIGIDA ---
+    
+    // 1. Seleção Robusta por IDs
     const searchInput = document.querySelector('.campo-busca');
-    const statusSelect = document.querySelectorAll('.filtro-select')[0];
-    const planoSelect = document.querySelectorAll('.filtro-select')[1];
+    const statusSelect = document.getElementById('filtro-status'); // Pega pelo ID novo
+    const planoSelect = document.getElementById('filtro-plano');   // Pega pelo ID novo
     
     function applyFilters() {
-        currentFilters.search = searchInput.value;
-        currentFilters.status = statusSelect.value;
-        currentFilters.plano = planoSelect.value;
+        // Verifica se o elemento existe antes de pegar o valor (evita erros se o HTML demorar)
+        currentFilters.search = searchInput ? searchInput.value : '';
+        currentFilters.status = statusSelect ? statusSelect.value : '';
+        currentFilters.plano = planoSelect ? planoSelect.value : '';
+        
+        console.log("Filtros aplicados:", currentFilters); // Debug: Veja no console o que está sendo enviado
         fetchPsychologists(1, currentFilters);
     }
 
-    if(searchInput) searchInput.addEventListener('input', applyFilters);
+    // 2. Event Listeners (Gatilhos)
+    let debounceTimer;
+    if(searchInput) {
+        searchInput.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(applyFilters, 500); 
+        });
+    }
+
     if(statusSelect) statusSelect.addEventListener('change', applyFilters);
     if(planoSelect) planoSelect.addEventListener('change', applyFilters);
 
+    // Carregamento Inicial
     fetchPsychologists(1);
 };

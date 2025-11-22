@@ -1,17 +1,20 @@
 <section class="filtros-container">
     <input type="text" class="campo-busca" placeholder="Buscar por nome, e-mail ou CRP...">
-    <select class="filtro-select">
+    
+    <select id="filtro-status" class="filtro-select">
         <option value="">Filtrar por Status</option>
-        <option value="ativo">Ativo</option>
-        <option value="pendente">Pendente</option>
-        <option value="inativo">Inativo</option>
+        <option value="active">Ativo</option>
+        <option value="pending">Pendente</option>
+        <option value="inactive">Inativo</option>
     </select>
-    <select class="filtro-select">
+
+    <select id="filtro-plano" class="filtro-select">
         <option value="">Filtrar por Plano</option>
-        <option value="semente">Semente</option>
-        <option value="luz">Luz</option>
-        <option value="sol">Sol</option>
+        <option value="Semente">Semente</option>
+        <option value="Luz">Luz</option>
+        <option value="Sol">Sol</option>
     </select>
+
     <button class="btn-primario">Adicionar Psicólogo</button>
 </section>
 
