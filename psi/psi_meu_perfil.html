@@ -9,7 +9,7 @@
 <div class="widget" id="verification-widget" style="display: none;">
     <h3>Status da Conta: <span id="verification-status-text"></span></h3>
     <p id="verification-description"></p>
-    </div>
+</div>
 
 <div class="widget">
     <h3>Informações do Perfil</h3>
@@ -20,14 +20,6 @@
                 <input type="text" id="nome" name="nome" required>
             </div>
 
-            <div class="form-group">
-                <label for="slug">Link do Perfil Personalizado</label>
-                <div class="input-prefix-group">
-                    <span class="prefix">projeto-girassol.onrender.com/</span>
-                    <input type="text" id="slug" name="slug" placeholder="seu-nome" pattern="[a-z0-9-]+" title="Use apenas letras minúsculas, números e hífen">
-                </div>
-                <small style="color: #666; font-size: 0.85rem; margin-top: 5px; display: block;">Este será o endereço que você compartilhará com seus pacientes.</small>
-            </div>
             <div class="form-group">
                 <label for="cpf">CPF</label>
                 <input type="text" id="cpf" name="cpf">
@@ -44,11 +36,15 @@
                 <label for="telefone">Telefone (WhatsApp)</label>
                 <input type="tel" id="telefone" name="telefone" inputmode="numeric">
             </div>
-            <div class="form-group">
-                <label for="agenda_online_url">Agenda Online (Calendly, Doctoralia...)</label>
-                <input type="text" id="agenda_online_url" name="agenda_online_url" placeholder="https://calendly.com/seu-usuario">
-            </div>
 
+            <div class="form-group">
+                <label for="slug">Link do Perfil Personalizado</label>
+                <div class="input-prefix-group">
+                    <span class="prefix">projeto-girassol.onrender.com/</span>
+                    <input type="text" id="slug" name="slug" placeholder="seu-nome" pattern="[a-z0-9-]+" title="Use apenas letras minúsculas, números e hífen">
+                </div>
+                <small style="color: #666; font-size: 0.85rem; margin-top: 5px; display: block;">Este será o endereço que você compartilhará com seus pacientes.</small>
+            </div>
             <div class="form-group">
                 <label for="linkedin_url">LinkedIn</label>
                 <div class="input-prefix-group">
@@ -87,7 +83,7 @@
                     <span class="prefix">x.com/</span>
                     <input type="text" id="x_url" name="x_url" placeholder="seu-usuario">
                 </div>
-            </div>
+            </div> 
             <div class="form-group">
                 <label for="bio">Biografia</label>
                 <textarea id="bio" name="bio" rows="5"></textarea>

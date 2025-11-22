@@ -150,18 +150,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // =====================================================================
+    // LÓGICA DA PÁGINA: MEU PERFIL (ATUALIZADA)
+    // =====================================================================
     function inicializarLogicaDoPerfil() {
         const form = document.getElementById('perfil-form');
         const fieldset = document.getElementById('form-fieldset');
         const btnAlterar = document.getElementById('btn-alterar');
         const btnSalvar = document.getElementById('btn-salvar');
+
         if (!form) return;
 
         setupMasks();
 
+        // Preencher campos
         if (psychologistData) {
-            // Agora inclui o campo 'slug'
-            ['nome', 'cpf', 'email', 'crp', 'telefone', 'bio', 'valor_sessao_numero', 'agenda_online_url', 'slug'].forEach(id => {
+            // Removido 'agenda_online_url' da lista
+            const fields = ['nome', 'cpf', 'email', 'crp', 'telefone', 'bio', 'valor_sessao_numero', 'slug'];
+            
+            fields.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = psychologistData[id] || '';
             });
@@ -171,6 +178,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 val = val.replace('https://', '').replace('http://', '').replace('www.', '').replace(prefix, '');
                 if(document.getElementById(id)) document.getElementById(id).value = val;
             };
+            
+            // Removido setSocial para agenda_online
             setSocial('linkedin_url', 'linkedin.com/in/');
             setSocial('instagram_url', 'instagram.com/');
             setSocial('facebook_url', 'facebook.com/');
@@ -180,6 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setupMultiselects(psychologistData);
         }
 
+        // ... (Resto do código de botões e submit permanece igual)
         btnAlterar.addEventListener('click', (e) => {
             e.preventDefault();
             fieldset.disabled = false;
