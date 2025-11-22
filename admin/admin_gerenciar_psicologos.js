@@ -163,6 +163,16 @@ window.initializePage = function() {
     if(statusSelect) statusSelect.addEventListener('change', applyFilters);
     if(planoSelect) planoSelect.addEventListener('change', applyFilters);
 
+    // --- NOVO: Botão Adicionar Psicólogo ---
+    const btnAdd = document.getElementById('btn-add-psi');
+    if (btnAdd) {
+        btnAdd.addEventListener('click', () => {
+            // Abre a página de registro padrão em uma nova aba
+            // Ajuste o link se sua página de registro tiver outro nome
+            window.open('/psi_registro.html', '_blank');
+        });
+    }
+
     // Carregamento Inicial
     fetchPsychologists(1);
 };
