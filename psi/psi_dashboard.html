@@ -13,6 +13,41 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@700&display.swap" rel="stylesheet">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
+    <style>
+    /* Força todos os botões dos planos a serem iguais */
+    .plano-card button {
+        background-color: #1B4332 !important; /* Verde Girassol Escuro */
+        color: #FFFFFF !important;
+        border: none !important;
+        border-radius: 50px !important; /* Borda redonda */
+        padding: 12px 24px !important;
+        font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        width: 100%;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        text-transform: uppercase;
+        opacity: 1 !important;
+    }
+
+    /* Efeito Hover (Ao passar o mouse) */
+    .plano-card button:hover {
+        background-color: #2D6A4F !important; /* Um verde um pouco mais claro */
+        transform: translateY(-4px); /* Sobe um pouquinho */
+        box-shadow: 0 8px 15px rgba(0,0,0,0.2); /* Sombra aumenta */
+    }
+
+    /* Estilo para quando o botão estiver desabilitado (Processando...) */
+    .plano-card button:disabled {
+        background-color: #ccc !important;
+        color: #666 !important;
+        cursor: not-allowed !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+</style>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js" defer></script>
 </head>
 <body class="pagina-dashboard">

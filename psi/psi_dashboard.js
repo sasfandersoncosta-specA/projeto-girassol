@@ -557,27 +557,27 @@ function isValidCPF(cpf) {
     
             // Força TODOS os cards a ficarem iguais
             document.querySelectorAll('.plano-card').forEach(card => {
-                // 1. Remove classes de destaque do HTML original
+                // 1. Remove classes de destaque antigo
                 card.classList.remove('plano-card--ativo');
                 const selo = card.querySelector('.selo-plano-atual');
                 if(selo) selo.remove();
     
-                // 2. Descobre qual plano é esse card pelo Título (H2)
-                // Isso é necessário porque o botão do meio no HTML não tem data-attribute
+                // 2. Identifica o plano pelo título
                 const cardTitle = card.querySelector('h2').textContent.toLowerCase();
-                let cardPlanType = 'luz'; // fallback
+                let cardPlanType = 'luz'; // fallback padrão
                 if(cardTitle.includes('semente')) cardPlanType = 'semente';
                 else if(cardTitle.includes('sol')) cardPlanType = 'sol';
     
-                // 3. Arruma o botão (Tira o disabled do HTML original)
+                // 3. Reseta o botão completamente
                 const btn = card.querySelector('button');
                 if(btn) {
-                    btn.textContent = "Assinar Agora"; // Texto igual para todos
+                    btn.textContent = "Assinar Agora";
                     btn.disabled = false;
-                    btn.style.opacity = "1";
-                    btn.style.cursor = "pointer";
                     
-                    // Reconecta o clique manualmente
+                    // IMPORTANTE: Removemos estilos inline para o CSS do <head> mandar em tudo
+                    btn.removeAttribute('style'); 
+                    
+                    // Reconecta o clique
                     btn.onclick = (e) => {
                         e.preventDefault();
                         iniciarPagamento(cardPlanType, btn);
