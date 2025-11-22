@@ -98,24 +98,20 @@ app.get('/fix-add-subscription', async (req, res) => {
     }
 });
 
-// 5. BOMBA ATÔMICA: Dar pagamento VIP para TODO MUNDO
+// 5. BOMBA ATÔMICA (Versão SQL Puro - Ignora o Model)
 app.get('/api/fix-vip-all', async (req, res) => {
     try {
-        // Cria uma data para daqui a 1 ano
-        const anoQueVem = new Date();
-        anoQueVem.setFullYear(anoQueVem.getFullYear() + 1);
-
-        // Atualiza TODOS os psicólogos do banco de uma vez
-        await db.Psychologist.update(
-            { subscription_expires_at: anoQueVem }, // Define a data futura
-            { where: {} } // O where vazio significa "APLIQUE EM TODOS"
-        );
-        res.send('<h1 style="color: green;">SUCESSO! Todos os psicólogos agora têm pagamento validado por 1 ano.</h1>');
+        // SQL Direto: Funciona mesmo se o model estiver desatualizado
+        await db.sequelize.query(`
+            UPDATE "Psychologists" 
+            SET "subscription_expires_at" = NOW() + INTERVAL '1 year',
+                "status" = 'active'
+        `);
+        res.send('<h1 style="color: green;">SUCESSO REAL! SQL executado direto no banco.</h1>');
     } catch (error) {
         res.status(500).send('ERRO: ' + error.message);
     }
 });
-
 
 // =============================================================
 // ROTAS DA APLICAÇÃO
