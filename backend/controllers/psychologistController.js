@@ -209,9 +209,9 @@ exports.getAuthenticatedPsychologistProfile = async (req, res) => {
         const psychologistId = req.psychologist.id;
 
         const psychologist = await db.Psychologist.findByPk(psychologistId, {
-            // Exclui campos sensíveis que o frontend não precisa ver
+            // Agora permitimos o CPF, pois é o próprio usuário vendo seus dados
             attributes: { 
-                exclude: ['senha', 'resetPasswordToken', 'resetPasswordExpires', 'cpf'] 
+                exclude: ['senha', 'resetPasswordToken', 'resetPasswordExpires'] 
             }
         });
 
