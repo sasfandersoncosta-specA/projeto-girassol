@@ -494,63 +494,56 @@ async function iniciarPagamento(planType, btnElement) {
     // porque se redirecionar ou abrir modal, queremos que o botão continue travado.
 }
     
-    async function abrirModalPagamento(preferenceId, backupLink) {
-        // Mostra o Modal
-        const modal = document.getElementById('payment-modal');
-        const loading = document.getElementById('brick-loading');
-        const container = document.getElementById('payment-brick-container');
+async function abrirModalPagamento(preferenceId, backupLink) {
+    const modal = document.getElementById('payment-modal');
+    const loading = document.getElementById('brick-loading');
+    const container = document.getElementById('payment-brick-container');
+    
+    modal.style.display = 'flex';
+    loading.style.display = 'block';
+    container.innerHTML = ''; 
+
+    try {
+        bricksBuilder = mp.bricks();
         
-        modal.style.display = 'flex';
-        loading.style.display = 'block';
-        container.innerHTML = ''; // Limpa formulários anteriores
-    
-        try {
-            bricksBuilder = mp.bricks();
-    
-            // Renderiza o "Payment Brick"
-            await bricksBuilder.create("payment", "payment-brick-container", {
-                initialization: {
-                    amount: 100, // Valor placeholder (o MP atualiza pelo preferenceId)
-                    preferenceId: preferenceId, // O ID QUE O BACKEND MANDOU
-                },
-                customization: {
-                    paymentMethods: {
-                        ticket: "all",
-                        bankTransfer: "all",
-                        creditCard: "all",
-                        debitCard: "all",
-                        mercadoPago: "all",
-                    },
-                    visual: {
-                        style: {
-                            theme: "default", // 'default', 'dark' ou 'flat'
-                        }
-                    },
-                },
-                callbacks: {
-                    onReady: () => {
-                        loading.style.display = 'none'; // Esconde o "Carregando..."
-                    },
-                    onSubmit: ({ selectedPaymentMethod, formData }) => {
-                        // O Brick faz o processamento sozinho aqui
-                        return new Promise((resolve, reject) => {
-                            // Simula processamento visual
-                            resolve(); 
-                        });
-                    },
-                    onError: (error) => {
-                        console.error(error);
-                        showToast('Erro no componente de pagamento.', 'error');
-                    },
-                },
-            });
-    
-        } catch (e) {
-            console.error("Falha ao carregar Brick", e);
-            // Fallback: Se o Brick falhar, manda pro link externo
+        // --- SEGURANÇA NOVA: Se demorar mais de 8s, vai pro link externo ---
+        const timeout = setTimeout(() => {
+            console.warn("Modal demorou demais. Redirecionando...");
             window.location.href = backupLink;
-        }
+        }, 8000);
+        // ------------------------------------------------------------------
+
+        await bricksBuilder.create("payment", "payment-brick-container", {
+            initialization: {
+                amount: 100, 
+                preferenceId: preferenceId, 
+            },
+            customization: {
+                paymentMethods: {
+                    ticket: "all", bankTransfer: "all", creditCard: "all", debitCard: "all", mercadoPago: "all",
+                },
+                visual: { style: { theme: "default" } },
+            },
+            callbacks: {
+                onReady: () => {
+                    clearTimeout(timeout); // Cancela o timer se carregou
+                    loading.style.display = 'none'; 
+                },
+                onSubmit: ({ selectedPaymentMethod, formData }) => {
+                    return new Promise((resolve, reject) => { resolve(); });
+                },
+                onError: (error) => {
+                    console.error(error);
+                    window.location.href = backupLink; // Erro? Manda pro link
+                },
+            },
+        });
+
+    } catch (e) {
+        console.error("Falha ao carregar Brick", e);
+        window.location.href = backupLink;
     }
+}
 
 // psi_dashboard.js - Versão Final Premium
 
