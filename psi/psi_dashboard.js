@@ -190,14 +190,31 @@ function isValidCPF(cpf) {
 
         setupMasks();
 
-        // Preencher campos
+        // 1. Preencher campos
         if (psychologistData) {
-            // Removido 'agenda_online_url' da lista
+            
+            // DEBUG: Vamos ver no console o que diabo o banco está devolvendo
+            console.log("DADOS RECEBIDOS DO BANCO:", psychologistData); 
+
             const fields = ['nome', 'cpf', 'email', 'crp', 'telefone', 'bio', 'valor_sessao_numero', 'slug'];
             
             fields.forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.value = psychologistData[id] || '';
+                if (el) {
+                    let valor = psychologistData[id] || '';
+                    
+                    // TRUQUE: Se for o CPF e vier só números, vamos tentar formatar "na marra" 
+                    // para a máscara não se perder, ou pelo menos garantir que é string.
+                    if (id === 'cpf' && valor) {
+                        valor = String(valor); 
+                    }
+
+                    el.value = valor;
+                    
+                    // O PULO DO GATO: Dispara um evento para avisar a máscara que o valor mudou
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                    el.dispatchEvent(new Event('change', { bubbles: true }));
+                }
             });
 
             const setSocial = (id, prefix) => {
