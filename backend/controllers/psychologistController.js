@@ -15,13 +15,17 @@ const generateToken = (id) => {
     });
 };
 
-// Função Auxiliar: Gera um slug a partir de um nome
+// Função Auxiliar: Gera um slug único (Nome + Sufixo Aleatório)
 const generateSlug = (name) => {
-    return name
+    const baseSlug = name
         .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Remove acentos
         .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres não alfanuméricos
+        .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres especiais
         .replace(/\s+/g, '-');
+    
+    // Adiciona sufixo aleatório para evitar duplicidade (ex: ana-silva-4921)
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000); 
+    return `${baseSlug}-${randomSuffix}`;
 };
 
 // ----------------------------------------------------------------------
