@@ -8,6 +8,8 @@ window.initializePage = function() {
     chartJsScript.src = 'https://cdn.jsdelivr.net/npm/chart.js';
     document.head.appendChild(chartJsScript);
 
+    const API_BASE_URL = '';
+
     const token = localStorage.getItem('girassol_token');
     if (!token) {
         // Se não houver token, a lógica em admin.js já fará o logout.
@@ -47,7 +49,7 @@ window.initializePage = function() {
         });
 
         try {
-            const response = await fetch('http://localhost:3001/api/admin/stats', {
+            const response = await fetch(`${API_BASE_URL}/api/admin/stats`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -95,7 +97,7 @@ window.initializePage = function() {
      */
     async function renderNewUsersChart() {
         try {
-            const response = await fetch('http://localhost:3001/api/admin/charts/new-users', {
+            const response = await fetch(`${API_BASE_URL}/api/admin/charts/new-users`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!response.ok) throw new Error('Falha ao buscar dados do gráfico.');
