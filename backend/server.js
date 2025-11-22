@@ -113,6 +113,21 @@ app.get('/api/fix-vip-all', async (req, res) => {
     }
 });
 
+// 6. CRIAÇÃO DAS COLUNAS DE REDES SOCIAIS QUE FALTAM
+app.get('/api/fix-add-socials', async (req, res) => {
+    try {
+        await db.sequelize.query(`
+            ALTER TABLE "Psychologists" 
+            ADD COLUMN IF NOT EXISTS "facebook_url" VARCHAR(255),
+            ADD COLUMN IF NOT EXISTS "tiktok_url" VARCHAR(255),
+            ADD COLUMN IF NOT EXISTS "x_url" VARCHAR(255);
+        `);
+        res.send('<h1 style="color: green;">SUCESSO! Colunas Facebook, TikTok e X criadas.</h1>');
+    } catch (error) {
+        res.status(500).send('ERRO: ' + error.message);
+    }
+});
+
 // =============================================================
 // ROTAS DA APLICAÇÃO
 // =============================================================
