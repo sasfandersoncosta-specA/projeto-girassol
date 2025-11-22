@@ -343,21 +343,60 @@ function isValidCPF(cpf) {
         if(form) {
             form.onsubmit = async (e) => {
                 e.preventDefault();
-                if (!confirm("Tem certeza absoluta?")) return;
+                
+                // 1. Captura a senha
+                const senhaInput = document.getElementById('senha-exclusao');
+                const senha = senhaInput ? senhaInput.value : null;
+
+                if (!senha) {
+                    showToast('Por favor, digite sua senha para confirmar.', 'error');
+                    return;
+                }
+
+                if (!confirm("Tem certeza absoluta? Essa ação não pode ser desfeita.")) return;
+                
+                const btnSubmit = form.querySelector('button[type="submit"]');
+                const textoOriginal = btnSubmit.textContent;
+                btnSubmit.textContent = "Excluindo...";
+                btnSubmit.disabled = true;
+
                 const fd = new FormData(form);
                 const exitData = {
                     motivo: fd.get('motivo'),
                     sugestao: fd.get('sugestao'),
                     avaliacao: document.querySelector('input[name="avaliacao"]:checked')?.value
                 };
+
                 try {
+                    // Envia o feedback (opcional, não bloqueia se falhar)
                     await apiFetch(`${API_BASE_URL}/api/psychologists/me/exit-survey`, {
                         method: 'POST', body: JSON.stringify(exitData)
-                    }).catch(e => console.warn(e));
-                    await apiFetch(`${API_BASE_URL}/api/psychologists/me`, { method: 'DELETE' });
-                    localStorage.removeItem('girassol_token');
-                    window.location.href = '../index.html';
-                } catch (err) { showToast('Erro ao excluir.', 'error'); }
+                    }).catch(e => console.warn("Erro ao salvar feedback:", e));
+
+                    // 2. Envia o DELETE COM A SENHA no body
+                    const response = await apiFetch(`${API_BASE_URL}/api/psychologists/me`, { 
+                        method: 'DELETE',
+                        body: JSON.stringify({ senha: senha }) // <--- O SEGREDO ESTÁ AQUI
+                    });
+
+                    if (!response.ok) {
+                        const errData = await response.json();
+                        throw new Error(errData.error || 'Senha incorreta ou falha na exclusão.');
+                    }
+
+                    showToast('Conta excluída com sucesso. Adeus!', 'success');
+                    
+                    setTimeout(() => {
+                        localStorage.removeItem('girassol_token');
+                        window.location.href = '../index.html';
+                    }, 2000);
+
+                } catch (err) { 
+                    console.error(err);
+                    showToast(`Erro: ${err.message}`, 'error');
+                    btnSubmit.textContent = textoOriginal;
+                    btnSubmit.disabled = false;
+                }
             };
         }
     }
