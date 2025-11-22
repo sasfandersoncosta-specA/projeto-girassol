@@ -98,6 +98,24 @@ app.get('/fix-add-subscription', async (req, res) => {
     }
 });
 
+// 5. BOMBA ATÔMICA: Dar pagamento VIP para TODO MUNDO
+app.get('/api/fix-vip-all', async (req, res) => {
+    try {
+        // Cria uma data para daqui a 1 ano
+        const anoQueVem = new Date();
+        anoQueVem.setFullYear(anoQueVem.getFullYear() + 1);
+
+        // Atualiza TODOS os psicólogos do banco de uma vez
+        await db.Psychologist.update(
+            { subscription_expires_at: anoQueVem }, // Define a data futura
+            { where: {} } // O where vazio significa "APLIQUE EM TODOS"
+        );
+        res.send('<h1 style="color: green;">SUCESSO! Todos os psicólogos agora têm pagamento validado por 1 ano.</h1>');
+    } catch (error) {
+        res.status(500).send('ERRO: ' + error.message);
+    }
+});
+
 
 // =============================================================
 // ROTAS DA APLICAÇÃO
