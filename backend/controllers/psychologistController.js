@@ -332,6 +332,14 @@ exports.updatePsychologistProfile = async (req, res) => {
 
         const body = req.body;
 
+        // Verifica se o slug mudou e se já existe
+        if (body.slug && body.slug !== psychologistToUpdate.slug) {
+            const slugExists = await db.Psychologist.findOne({ where: { slug: body.slug } });
+            if (slugExists) {
+                return res.status(409).json({ error: 'Este link personalizado já está em uso.' });
+            }
+        }
+
         // --- ANÁLISE FORENSE DOS DADOS ---
         console.log("1. DADOS BRUTOS RECEBIDOS:", JSON.stringify(body, null, 2));
 
@@ -372,7 +380,7 @@ exports.updatePsychologistProfile = async (req, res) => {
         const updatedPsychologist = await psychologistToUpdate.update({
             ...body, // Pega campos normais (nome, email...)
             ...safeArrays, // Sobrescreve com os arrays corrigidos
-            slug: generateSlug(body.nome || psychologistToUpdate.nome)
+            slug: body.slug || psychologistToUpdate.slug // Garante que o slug seja salvo
         });
 
         console.log("--- [DEBUG] SUCESSO NA ATUALIZAÇÃO! ---\n");

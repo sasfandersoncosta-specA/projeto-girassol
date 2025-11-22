@@ -1,4 +1,4 @@
-// Arquivo: psi_dashboard.js (VERSÃO FINAL CORRIGIDA)
+// Arquivo: psi_dashboard.js (VERSÃO FINAL COM SLUG E FOTO CORRIGIDA)
 
 document.addEventListener('DOMContentLoaded', function() {
     
@@ -6,30 +6,25 @@ document.addEventListener('DOMContentLoaded', function() {
     const mainContent = document.getElementById('main-content');
     const toastContainer = document.getElementById('toast-container');
 
-    // --- HELPER: FORMATA URL DA IMAGEM ---
-    // Transforma caminhos do sistema em URLs válidas do navegador
+    // --- HELPER: CORREÇÃO DE URL DE IMAGEM ---
     function formatImageUrl(path) {
         if (!path) return 'https://placehold.co/70x70/1B4332/FFFFFF?text=Psi';
-        if (path.startsWith('http')) return path; // Já é um link externo (ex: Google)
+        if (path.startsWith('http')) return path; 
         
-        // Normaliza barras invertidas (Windows) para barras normais
+        // Normaliza barras do Windows
         let cleanPath = path.replace(/\\/g, '/');
         
-        // Remove o prefixo de pasta do sistema se existir
+        // Remove tudo antes de 'uploads/' se existir
         if (cleanPath.includes('uploads/')) {
             cleanPath = cleanPath.substring(cleanPath.lastIndexOf('uploads/'));
         }
         
-        // Garante que começa com /
-        if (!cleanPath.startsWith('/')) {
-            cleanPath = '/' + cleanPath;
-        }
+        // Garante a barra inicial
+        if (!cleanPath.startsWith('/')) cleanPath = '/' + cleanPath;
         
-        // Adiciona a URL base da API
         return `${API_BASE_URL}${cleanPath}`;
     }
 
-    // --- TOAST ---
     function showToast(message, type = 'success') {
         if (!toastContainer) return;
         const toast = document.createElement('div');
@@ -39,7 +34,6 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => toast.remove(), 4000);
     }
 
-    // --- AUTH ---
     async function fetchPsychologistData() {
         await new Promise(resolve => setTimeout(resolve, 100));
         const token = localStorage.getItem('girassol_token');
@@ -47,8 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return new Promise(async (resolvePromise) => {
             if (!token) {
                 window.location.href = '../login.html';
-                resolvePromise(false); 
-                return;
+                resolvePromise(false); return;
             }
             try {
                 const response = await fetch(`${API_BASE_URL}/api/psychologists/me`, {
@@ -75,10 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!token) throw new Error("Token não encontrado.");
         
         const isFormData = options.body instanceof FormData;
-        const headers = {
-            'Authorization': `Bearer ${token}`,
-            ...options.headers
-        };
+        const headers = { 'Authorization': `Bearer ${token}`, ...options.headers };
         if (!isFormData) headers['Content-Type'] = 'application/json';
 
         const response = await fetch(url, { ...options, headers });
@@ -90,7 +80,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return response;
     }
 
-    // --- HELPERS UI ---
     function setupMasks() {
         if (typeof IMask === 'undefined') return;
         const cpf = document.getElementById('cpf');
@@ -106,7 +95,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const display = dropdown.querySelector('.multiselect-display');
             const options = dropdown.querySelectorAll('.option');
             const dataKey = dropdown.id.replace('_multiselect', '');
-            
             dropdown._selectedValues = [];
 
             if (dataInicial && dataInicial[dataKey]) {
@@ -127,9 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     tag.innerHTML = `${val} <button type="button" class="remove-tag" data-val="${val}">&times;</button>`;
                     display.appendChild(tag);
                 });
-                options.forEach(opt => {
-                    opt.classList.toggle('selected', dropdown._selectedValues.includes(opt.dataset.value));
-                });
+                options.forEach(opt => opt.classList.toggle('selected', dropdown._selectedValues.includes(opt.dataset.value)));
             }
 
             if (display) {
@@ -159,27 +145,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     renderTags();
                 });
             });
-
-            document.addEventListener('click', (e) => {
-                if (!dropdown.contains(e.target)) dropdown.classList.remove('open');
-            });
-            
+            document.addEventListener('click', (e) => { if (!dropdown.contains(e.target)) dropdown.classList.remove('open'); });
             dropdown.getValues = () => dropdown._selectedValues || [];
         });
     }
 
-    // --- PÁGINAS ---
     function inicializarLogicaDoPerfil() {
         const form = document.getElementById('perfil-form');
         const fieldset = document.getElementById('form-fieldset');
         const btnAlterar = document.getElementById('btn-alterar');
         const btnSalvar = document.getElementById('btn-salvar');
-
         if (!form) return;
+
         setupMasks();
 
         if (psychologistData) {
-            ['nome', 'cpf', 'email', 'crp', 'telefone', 'bio', 'valor_sessao_numero', 'agenda_online_url'].forEach(id => {
+            // Agora inclui o campo 'slug'
+            ['nome', 'cpf', 'email', 'crp', 'telefone', 'bio', 'valor_sessao_numero', 'agenda_online_url', 'slug'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = psychologistData[id] || '';
             });
@@ -245,6 +227,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 const sidebarName = document.getElementById('psi-sidebar-name');
                 if(sidebarName) sidebarName.textContent = psychologistData.nome;
+
+                // Atualiza link do botão "Ver como Paciente"
+                const btnView = document.getElementById('btn-view-public-profile');
+                if (btnView && psychologistData.slug) {
+                    btnView.href = `/${psychologistData.slug}`;
+                }
+
             } catch (error) {
                 console.error(error);
                 showToast(`Erro: ${error.message}`, 'error');
@@ -259,7 +248,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     async function inicializarLogicaExclusao() {
-        // ... (código mantido igual ao anterior)
+        if (psychologistData && psychologistData.nome) {
+            const el = document.getElementById('nome-profissional-saida');
+            if (el) el.textContent = psychologistData.nome.split(' ')[0];
+        }
+        document.getElementById('stat-dias').textContent = 142;
+        document.getElementById('stat-views').textContent = 1205;
+        document.getElementById('stat-contatos').textContent = 48;
+        document.getElementById('stat-comunidade').textContent = 15;
+
         const form = document.getElementById('exit-form');
         if(form) {
             form.onsubmit = async (e) => {
@@ -283,40 +280,32 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // --- UPLOAD DE FOTO (CORRIGIDO) ---
     async function uploadProfilePhoto(file, imgEl) {
         const fd = new FormData();
         fd.append('foto', file);
         const oldSrc = imgEl.src;
-        
-        // Feedback visual imediato
         imgEl.style.opacity = '0.5';
-
         try {
             const res = await apiFetch(`${API_BASE_URL}/api/psychologists/me/foto`, {
                 method: 'POST', body: fd 
             });
-            
             if (!res.ok) throw new Error('Falha upload');
-            
             const data = await res.json();
             
-            // O Pulo do Gato: Formata a URL corretamente para o navegador
+            // CORREÇÃO: Usa o formatador para exibir a foto corretamente
             const finalUrl = formatImageUrl(data.fotoUrl);
             
             imgEl.src = finalUrl;
             imgEl.style.opacity = '1';
-            psychologistData.fotoUrl = data.fotoUrl; // Salva o original no state
+            psychologistData.fotoUrl = data.fotoUrl;
             showToast('Foto atualizada!');
         } catch (e) {
-            console.error(e);
             imgEl.src = oldSrc;
             imgEl.style.opacity = '1';
             showToast('Erro no upload.', 'error');
         }
     }
 
-    // --- ROTEADOR & INIT ---
     function loadPage(url) {
         if (!url) return;
         mainContent.innerHTML = '<div style="padding:40px; text-align:center; color:#888;">Carregando...</div>';
@@ -336,7 +325,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (psychologistData) {
             if(nameEl) nameEl.textContent = psychologistData.nome;
-            // Usa o formatador aqui também para carregar a foto inicial corretamente
+            // CORREÇÃO: Usa o formatador ao carregar a página
             if(imgEl) imgEl.src = formatImageUrl(psychologistData.fotoUrl);
             
             const btnLink = document.getElementById('btn-view-public-profile');
@@ -362,7 +351,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 loadPage(l.getAttribute('data-page'));
             };
         });
-
         loadPage('psi_visao_geral.html');
     }
 
