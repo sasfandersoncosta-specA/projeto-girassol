@@ -480,45 +480,44 @@ function isValidCPF(cpf) {
     function inicializarAssinatura() {
         console.log("Inicializando tela de assinatura...");
     
-        // 1. Conecta os botões
-        const botoes = document.querySelectorAll('.btn-mudar-plano');
-        botoes.forEach(btn => {
-            btn.onclick = (e) => {
-                e.preventDefault();
-                const plano = btn.getAttribute('data-plano').toLowerCase(); 
-                iniciarPagamento(plano, btn);
-            };
-        });
-    
-        // Elementos do topo (Resumo)
         const nomePlanoEl = document.querySelector('.plano-nome');
         const precoPlanoEl = document.querySelector('.plano-preco');
         const dataPlanoEl = document.querySelector('.plano-data');
     
-        // 2. Lógica Visual
+        // ============================================================
+        // CENÁRIO A: USUÁRIO COM PLANO ATIVO (Lógica de Destaque)
+        // ============================================================
         if (psychologistData && psychologistData.plano) {
-            // --- CENÁRIO A: TEM PLANO ATIVO ---
             const planoAtualDB = psychologistData.plano.toLowerCase(); 
-            
-            if (nomePlanoEl) nomePlanoEl.textContent = `Plano ${psychologistData.plano}`;
+
+            if (nomePlanoEl) {
+                nomePlanoEl.textContent = `Plano ${psychologistData.plano}`;
+                nomePlanoEl.style.color = ""; // Reseta cor
+            }
             if (precoPlanoEl) precoPlanoEl.style.display = 'block';
-            
-            // Formata a data de vencimento
             if (dataPlanoEl && psychologistData.subscription_expires_at) {
                 const dataVenc = new Date(psychologistData.subscription_expires_at);
-                dataPlanoEl.textContent = `Vencimento: ${dataVenc.toLocaleDateString('pt-BR')}`;
+                dataPlanoEl.textContent = `Próxima cobrança em: ${dataVenc.toLocaleDateString('pt-BR')}`;
             }
     
-            // Atualiza os Cards
             document.querySelectorAll('.plano-card').forEach(card => {
+                // Limpa estados anteriores
                 card.classList.remove('plano-card--ativo');
-                const btn = card.querySelector('.btn-mudar-plano');
                 const selo = card.querySelector('.selo-plano-atual');
                 if(selo) selo.remove();
     
-                if (card.querySelector('h2').textContent.toLowerCase().includes(planoAtualDB)) {
+                const btn = card.querySelector('button');
+                const cardTitle = card.querySelector('h2').textContent.toLowerCase();
+    
+                // Identifica qual plano é este card (Semente, Luz ou Sol)
+                let cardPlanType = '';
+                if(cardTitle.includes('semente')) cardPlanType = 'semente';
+                else if(cardTitle.includes('luz')) cardPlanType = 'luz';
+                else if(cardTitle.includes('sol')) cardPlanType = 'sol';
+    
+                // Se for o plano ativo do usuário
+                if (cardPlanType === planoAtualDB) {
                     card.classList.add('plano-card--ativo');
-                    
                     const novoSelo = document.createElement('div');
                     novoSelo.className = 'selo-plano-atual';
                     novoSelo.textContent = 'Seu Plano Atual';
@@ -527,38 +526,62 @@ function isValidCPF(cpf) {
                     if(btn) {
                         btn.textContent = "Plano Atual";
                         btn.disabled = true;
-                        btn.classList.remove('btn-upgrade'); // Remove estilo de destaque se tiver
+                        btn.style.opacity = "0.6";
+                        btn.style.cursor = "default";
                     }
                 } else {
-                    // Lógica para os outros planos (Upgrade ou Downgrade)
+                    // Outros planos
                     if(btn) {
                         btn.textContent = "Mudar para este plano";
                         btn.disabled = false;
+                        btn.style.opacity = "1";
+                        btn.style.cursor = "pointer";
+                        // Adiciona evento de clique
+                        btn.onclick = (e) => { e.preventDefault(); iniciarPagamento(cardPlanType, btn); };
                     }
                 }
             });
     
         } else {
-            // --- CENÁRIO B: NÃO TEM PLANO (NOVO USUÁRIO OU VENCIDO) ---
-            console.log("Usuário sem plano ativo.");
+            // ============================================================
+            // CENÁRIO B: NENHUM PLANO (RESET TOTAL / USUÁRIO NOVO)
+            // ============================================================
+            console.log("Usuário sem plano. Resetando visual dos cards.");
     
             if (nomePlanoEl) {
                 nomePlanoEl.textContent = "Nenhum plano ativo";
-                nomePlanoEl.style.color = "#e63946"; // Vermelho para alertar
+                nomePlanoEl.style.color = "#e63946"; 
             }
-            if (precoPlanoEl) precoPlanoEl.style.display = 'none'; // Esconde o preço no topo
-            if (dataPlanoEl) dataPlanoEl.textContent = "Escolha um plano abaixo para ativar seu perfil.";
+            if (precoPlanoEl) precoPlanoEl.style.display = 'none';
+            if (dataPlanoEl) dataPlanoEl.textContent = "Escolha um plano abaixo para começar.";
     
-            // Garante que todos os cards estejam "clicáveis" e sem destaque
+            // Força TODOS os cards a ficarem iguais
             document.querySelectorAll('.plano-card').forEach(card => {
+                // 1. Remove classes de destaque do HTML original
                 card.classList.remove('plano-card--ativo');
                 const selo = card.querySelector('.selo-plano-atual');
                 if(selo) selo.remove();
     
-                const btn = card.querySelector('.btn-mudar-plano');
+                // 2. Descobre qual plano é esse card pelo Título (H2)
+                // Isso é necessário porque o botão do meio no HTML não tem data-attribute
+                const cardTitle = card.querySelector('h2').textContent.toLowerCase();
+                let cardPlanType = 'luz'; // fallback
+                if(cardTitle.includes('semente')) cardPlanType = 'semente';
+                else if(cardTitle.includes('sol')) cardPlanType = 'sol';
+    
+                // 3. Arruma o botão (Tira o disabled do HTML original)
+                const btn = card.querySelector('button');
                 if(btn) {
-                    btn.textContent = "Assinar Agora";
+                    btn.textContent = "Assinar Agora"; // Texto igual para todos
                     btn.disabled = false;
+                    btn.style.opacity = "1";
+                    btn.style.cursor = "pointer";
+                    
+                    // Reconecta o clique manualmente
+                    btn.onclick = (e) => {
+                        e.preventDefault();
+                        iniciarPagamento(cardPlanType, btn);
+                    };
                 }
             });
         }
