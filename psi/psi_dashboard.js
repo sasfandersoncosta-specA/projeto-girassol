@@ -433,6 +433,100 @@ function isValidCPF(cpf) {
         // Por enquanto, eles ficam zerados como placeholder.
     }
 
+    // --- LÓGICA DE PAGAMENTO (MERCADO PAGO) ---
+    async function iniciarPagamento(planType, btnElement) {
+        const originalText = btnElement.textContent;
+        
+        // Trava o botão para evitar clique duplo
+        btnElement.textContent = "Gerando cobrança...";
+        btnElement.disabled = true;
+        btnElement.style.opacity = "0.7";
+        btnElement.style.cursor = "not-allowed";
+
+        try {
+            // Envia 'semente', 'luz' ou 'sol' para o backend
+            const res = await apiFetch(`${API_BASE_URL}/api/payments/create-preference`, {
+                method: 'POST',
+                body: JSON.stringify({ planType: planType })
+            });
+
+            if (!res.ok) throw new Error('Erro ao criar pagamento');
+
+            const data = await res.json();
+            
+            // Redireciona para o Mercado Pago se tiver link
+            if (data.init_point) {
+                window.location.href = data.init_point;
+            }
+
+        } catch (error) {
+            console.error(error);
+            showToast('Erro ao iniciar pagamento. Tente novamente.', 'error');
+            
+            // Restaura o botão em caso de erro
+            btnElement.textContent = originalText;
+            btnElement.disabled = false;
+            btnElement.style.opacity = "1";
+            btnElement.style.cursor = "pointer";
+        }
+    }
+
+    function inicializarAssinatura() {
+        console.log("Inicializando tela de assinatura...");
+    
+        // 1. Conecta os botões de mudança de plano
+        const botoes = document.querySelectorAll('.btn-mudar-plano');
+        
+        botoes.forEach(btn => {
+            btn.onclick = (e) => {
+                e.preventDefault();
+                // Pega o valor do HTML (Ex: "Sol") e converte para minúsculo ("sol")
+                const plano = btn.getAttribute('data-plano').toLowerCase(); 
+                iniciarPagamento(plano, btn);
+            };
+        });
+    
+        // 2. (Opcional) Atualiza visualmente qual é o plano atual baseado no Banco de Dados
+        if (psychologistData && psychologistData.plano) {
+            const planoAtualDB = psychologistData.plano.toLowerCase(); // ex: 'luz'
+            
+            // Atualiza o texto do topo
+            const nomePlanoEl = document.querySelector('.plano-nome');
+            if (nomePlanoEl) nomePlanoEl.textContent = `Plano ${psychologistData.plano}`;
+    
+            // Atualiza os cards (Remove o destaque do HTML estático e põe no real)
+            document.querySelectorAll('.plano-card').forEach(card => {
+                card.classList.remove('plano-card--ativo');
+                const btn = card.querySelector('.btn-mudar-plano');
+                const selo = card.querySelector('.selo-plano-atual');
+                if(selo) selo.remove();
+    
+                // Se for o plano ativo
+                if (card.querySelector('h2').textContent.toLowerCase().includes(planoAtualDB)) {
+                    card.classList.add('plano-card--ativo');
+                    
+                    // Adiciona selo visual
+                    const novoSelo = document.createElement('div');
+                    novoSelo.className = 'selo-plano-atual';
+                    novoSelo.textContent = 'Seu Plano Atual';
+                    card.insertBefore(novoSelo, card.firstChild);
+    
+                    // Desabilita o botão
+                    if(btn) {
+                        btn.textContent = "Plano Atual";
+                        btn.disabled = true;
+                    }
+                } else {
+                    // Reabilita botões dos outros planos
+                    if(btn) {
+                        btn.textContent = btn.classList.contains('btn-upgrade') ? "Fazer Upgrade" : "Mudar para este plano";
+                        btn.disabled = false;
+                    }
+                }
+            });
+        }
+    }
+
     async function uploadProfilePhoto(file, imgEl) {
         const fd = new FormData();
         fd.append('foto', file); // O backend espera 'foto' na rota POST
@@ -478,6 +572,7 @@ function isValidCPF(cpf) {
                 if (url.includes('meu_perfil')) inicializarLogicaDoPerfil();
                 else if (url.includes('excluir_conta')) inicializarLogicaExclusao();
                 else if (url.includes('visao_geral')) inicializarVisaoGeral();
+                else if (url.includes('assinatura')) inicializarAssinatura();
             })
             .catch(e => mainContent.innerHTML = '<p>Erro ao carregar.</p>');
     }
@@ -516,6 +611,15 @@ function isValidCPF(cpf) {
             };
         });
         loadPage('psi_visao_geral.html');
+    }
+
+    // ATENÇÃO: Adicione esta verificação no seu "loadPage" ou na inicialização
+    // Se a URL tiver ?status=approved, mostre festa!
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('status') === 'approved') {
+        showToast('Pagamento Aprovado! Seu perfil está ativo.', 'success');
+        // Limpa a URL para não ficar mostrando o toast toda hora
+        window.history.replaceState({}, document.title, window.location.pathname);
     }
 
     fetchPsychologistData().then(ok => { if (ok) initializeDashboard(); });

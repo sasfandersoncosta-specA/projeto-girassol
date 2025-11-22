@@ -19,6 +19,7 @@ const usuarioRoutes = require('./routes/usuarioRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const qnaRoutes = require('./routes/qnaRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 // Controllers
 const demandController = require('./controllers/demandController');
@@ -142,6 +143,7 @@ app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/qna', qnaRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Rotas Específicas do Admin
 app.get('/api/admin/feedbacks', demandController.getRatings);
