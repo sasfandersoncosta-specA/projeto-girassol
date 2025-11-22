@@ -1004,9 +1004,10 @@ exports.saveExitSurvey = async (req, res) => {
 // Simula um pagamento (Use apenas para testes ou ativação manual)
 exports.simulatePayment = async (req, res) => {
     try {
-        const email = req.body.email || req.query.email; // Aceita via formulário ou via Link
+        // Tenta pegar do link primeiro (req.query). Se não tiver, tenta do body com segurança.
+        const email = req.query.email || (req.body && req.body.email);
 
-        const psi = await db.Psychologist.findOne({ where: { email: email } });
+        const psi = await db.Psychologist.findOne({ where: { email } });
         if (!psi) return res.status(404).json({ error: 'Psicólogo não encontrado' });
 
         // Calcula data de hoje + 30 dias
