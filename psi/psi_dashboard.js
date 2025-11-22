@@ -446,11 +446,11 @@ function isValidCPF(cpf) {
         btnElement.disabled = true;
     
         try {
-            // 1. Pega o CUPOM se tiver
+            // 1. Pega o CUPOM
             const cupomInput = document.getElementById('cupom-input');
             const cupomCodigo = cupomInput ? cupomInput.value.trim() : '';
     
-            // 2. Chama o Backend para criar a intenção de venda
+            // 2. Chama Backend
             const res = await apiFetch(`${API_BASE_URL}/api/payments/create-preference`, {
                 method: 'POST',
                 body: JSON.stringify({ planType: planType, cupom: cupomCodigo })
@@ -459,16 +459,22 @@ function isValidCPF(cpf) {
             if (!res.ok) throw new Error('Erro ao criar pagamento');
             const data = await res.json();
     
-            // 3. SE FOR CUPOM VIP (GRÁTIS)
+            // --- CORREÇÃO AQUI: CUPOM SEM RELOAD ---
             if (data.couponSuccess) {
                 showToast(data.message, 'success');
-                setTimeout(() => window.location.reload(), 1500);
+                
+                // Atualiza os dados do usuário em memória
+                await fetchPsychologistData(); 
+                
+                // Recarrega apenas a aba de assinatura (Refresh Suave)
+                loadPage('psi_assinatura.html'); 
                 return;
             }
+            // ---------------------------------------
     
-            // 4. SE FOR PAGAMENTO REAL -> ABRE O MODAL
+            // 4. Se for pagamento real
             if (data.id) {
-                abrirModalPagamento(data.id, data.init_point); // Passa o ID da preferência
+                abrirModalPagamento(data.id, data.init_point);
             }
     
         } catch (error) {
@@ -538,133 +544,134 @@ function isValidCPF(cpf) {
         }
     }
 
+// psi_dashboard.js - Versão Final Premium
+
 function inicializarAssinatura() {
-    console.log("Inicializando tela de assinatura v2...");
+    console.log("Inicializando Assinatura Premium...");
 
     const cardResumo = document.getElementById('card-resumo-assinatura');
-    const nomePlanoEl = document.querySelector('.plano-nome');
-    const precoPlanoEl = document.querySelector('.plano-preco');
-    const dataPlanoEl = document.querySelector('.plano-data');
-    const btnCancelar = document.getElementById('btn-cancelar-assinatura');
+    const nomePlanoEl = document.querySelector('.nome-plano-destaque');
+    const precoPlanoEl = document.querySelector('.preco-destaque');
+    const dataPlanoEl = document.querySelector('.data-renovacao');
+    
+    // Elementos do Modal de Cancelamento
+    const btnAbrirCancel = document.getElementById('btn-cancelar-assinatura');
+    const modalCancel = document.getElementById('modal-cancelamento');
+    const btnFecharModal = document.getElementById('btn-fechar-modal-cancel');
+    const btnConfirmarCancel = document.getElementById('btn-confirmar-cancelamento');
 
-    // MAPA DE PREÇOS (Para corrigir o valor visualmente)
-    const precos = {
-        'semente': 'R$ 49,00',
-        'luz': 'R$ 99,00',
-        'sol': 'R$ 149,00'
-    };
+    // Elementos do Cupom
+    const btnCupom = document.getElementById('btn-aplicar-cupom');
 
-    // 1. Configura Botão de Cancelar
-    if (btnCancelar) {
-        btnCancelar.onclick = async () => {
-            if(!confirm("Tem certeza? Você continuará com acesso até o fim do período, mas a renovação será cancelada.")) return;
-            
-            btnCancelar.textContent = "Cancelando...";
+    // === 1. LÓGICA DO CUPOM (Botão Aplicar) ===
+    if(btnCupom) {
+        // Agora o botão "Aplicar" dispara o pagamento simulado do plano Sol
+        btnCupom.onclick = () => {
+            const codigo = document.getElementById('cupom-input').value;
+            if(!codigo) { showToast('Digite um código.', 'error'); return; }
+            // Simula clique no plano Sol, mas passando o cupom
+            iniciarPagamento('sol', btnCupom); 
+        };
+    }
+
+    // === 2. LÓGICA DE CANCELAMENTO COM MODAL NOVO ===
+    if (btnAbrirCancel && modalCancel) {
+        // Abrir Modal
+        btnAbrirCancel.onclick = () => { modalCancel.style.display = 'flex'; };
+        
+        // Fechar Modal (Manter Plano)
+        btnFecharModal.onclick = () => { modalCancel.style.display = 'none'; };
+
+        // Confirmar Cancelamento
+        btnConfirmarCancel.onclick = async () => {
+            btnConfirmarCancel.textContent = "Processando...";
             try {
-                const res = await apiFetch(`${API_BASE_URL}/api/psychologists/me/cancel-subscription`, { method: 'POST' });
-                if(res.ok) {
-                    showToast('Assinatura cancelada.', 'info');
-                    // Atualiza localmente para refletir na hora
-                    psychologistData.plano = null; 
-                    inicializarAssinatura(); // Recarrega a tela
-                }
+                await apiFetch(`${API_BASE_URL}/api/psychologists/me/cancel-subscription`, { method: 'POST' });
+                psychologistData.plano = null; 
+                modalCancel.style.display = 'none';
+                showToast('Assinatura cancelada com sucesso.', 'info');
+                inicializarAssinatura(); // Recarrega a tela
             } catch(e) {
                 console.error(e);
                 showToast('Erro ao cancelar.', 'error');
-                btnCancelar.textContent = "Cancelar renovação automática";
+                btnConfirmarCancel.textContent = "Sim, Cancelar";
             }
         };
     }
 
-    // 2. Configura Botões de Assinatura (Conecta todos de uma vez)
-    document.querySelectorAll('.btn-mudar-plano').forEach(btn => {
-        // Remove listeners antigos clonando o nó (hack rápido) ou apenas reatribuindo
-        btn.onclick = (e) => {
-            e.preventDefault();
-            const plano = btn.getAttribute('data-plano').toLowerCase();
-            iniciarPagamento(plano, btn);
-        };
-    });
+    // === 3. ESTADO VISUAL (COM OU SEM PLANO) ===
+    const temPlano = psychologistData && psychologistData.plano;
+    const planoAtualDB = temPlano ? psychologistData.plano.toLowerCase() : null;
+    const mapPreco = { 'semente': 'R$ 49,00 / mês', 'luz': 'R$ 99,00 / mês', 'sol': 'R$ 149,00 / mês' };
 
-    // 3. Lógica Visual de Estado
-    if (psychologistData && psychologistData.plano) {
-        // --- TEM PLANO ATIVO ---
-        const planoAtualDB = psychologistData.plano.toLowerCase();
+    if (temPlano) {
+        // MOSTRAR CARD PREMIUM
+        if(cardResumo) cardResumo.style.display = 'flex';
         
-        cardResumo.style.display = 'flex'; // Mostra o card do topo
+        if(nomePlanoEl) nomePlanoEl.textContent = `Plano ${psychologistData.plano}`;
+        if(precoPlanoEl) precoPlanoEl.textContent = mapPreco[planoAtualDB] || 'Valor sob consulta';
         
-        if (nomePlanoEl) nomePlanoEl.textContent = `Plano ${psychologistData.plano}`;
-        
-        // CORREÇÃO DO PREÇO VISUAL:
-        if (precoPlanoEl) precoPlanoEl.textContent = `${precos[planoAtualDB] || 'Valor sob consulta'} / mês`;
-
-        if (dataPlanoEl && psychologistData.subscription_expires_at) {
-            const dataVenc = new Date(psychologistData.subscription_expires_at);
-            dataPlanoEl.textContent = `Vencimento do período atual: ${dataVenc.toLocaleDateString('pt-BR')}`;
-            dataPlanoEl.style.color = "#1B4332";
-        }
-
-        // Atualiza os Cards de baixo
-        document.querySelectorAll('.plano-card').forEach(card => {
-            card.classList.remove('plano-card--ativo');
-            const selo = card.querySelector('.selo-plano-atual');
-            if(selo) selo.remove();
-
-            const btn = card.querySelector('button');
-            const cardTitle = card.querySelector('h2').textContent.toLowerCase();
-
-            // Lógica de Identificação
-            let thisPlan = '';
-            if(cardTitle.includes('semente')) thisPlan = 'semente';
-            else if(cardTitle.includes('luz')) thisPlan = 'luz';
-            else if(cardTitle.includes('sol')) thisPlan = 'sol';
-
-            if (thisPlan === planoAtualDB) {
-                // É O PLANO ATUAL
-                card.classList.add('plano-card--ativo');
-                const novoSelo = document.createElement('div');
-                novoSelo.className = 'selo-plano-atual';
-                novoSelo.textContent = 'Seu Plano Atual';
-                card.insertBefore(novoSelo, card.firstChild);
-
-                if(btn) {
-                    btn.textContent = "Plano Atual";
-                    btn.disabled = true;
-                    btn.style.opacity = "0.6";
-                }
+        if(dataPlanoEl) {
+            if(psychologistData.subscription_expires_at) {
+                const dataVenc = new Date(psychologistData.subscription_expires_at);
+                dataPlanoEl.textContent = `Renova em: ${dataVenc.toLocaleDateString('pt-BR')}`;
             } else {
-                // É OUTRO PLANO (PERMITE TROCA/UPGRADE)
-                if(btn) {
-                    // Decide o texto (Upgrade ou Mudar)
-                    // (Lógica simplificada: sempre permite mudar)
-                    btn.textContent = "Mudar para este plano";
-                    btn.disabled = false;
-                    btn.style.opacity = "1";
-                    btn.style.cursor = "pointer";
-                }
+                dataPlanoEl.textContent = "Vencimento: Indefinido";
             }
-        });
-
+        }
     } else {
-        // --- NÃO TEM PLANO ---
-        console.log("Sem plano ativo.");
-        cardResumo.style.display = 'none'; // Esconde o cabeçalho de resumo se não tem plano
-
-        // Reseta todos os cards para "Assinar Agora"
-        document.querySelectorAll('.plano-card').forEach(card => {
-            card.classList.remove('plano-card--ativo');
-            const selo = card.querySelector('.selo-plano-atual');
-            if(selo) selo.remove();
-
-            const btn = card.querySelector('button');
-            if(btn) {
-                btn.textContent = "Assinar Agora";
-                btn.disabled = false;
-                btn.style.opacity = "1";
-                btn.style.cursor = "pointer";
-            }
-        });
+        // ESCONDER CARD PREMIUM
+        if(cardResumo) cardResumo.style.display = 'none';
     }
+
+    // === 4. CONFIGURAR CARDS DOS PLANOS ===
+    document.querySelectorAll('.plano-card').forEach(card => {
+        const btn = card.querySelector('.btn-mudar-plano');
+        if (!btn) return;
+
+        // Identifica o plano
+        let planoDoCard = btn.getAttribute('data-plano');
+        if (!planoDoCard) { // Fallback pelo H2
+            const text = card.querySelector('h2').textContent.toLowerCase();
+            if (text.includes('semente')) planoDoCard = 'Semente';
+            else if (text.includes('luz')) planoDoCard = 'Luz';
+            else if (text.includes('sol')) planoDoCard = 'Sol';
+        }
+        const planoLower = planoDoCard ? planoDoCard.toLowerCase() : '';
+
+        // Limpa estados
+        card.classList.remove('plano-card--ativo');
+        const selo = card.querySelector('.selo-plano-atual');
+        if(selo) selo.remove();
+
+        // Se for o plano atual
+        if (temPlano && planoAtualDB === planoLower) {
+            card.classList.add('plano-card--ativo');
+            const novoSelo = document.createElement('div');
+            novoSelo.className = 'selo-plano-atual';
+            novoSelo.textContent = 'Seu Plano Atual';
+            card.insertBefore(novoSelo, card.firstChild);
+            
+            btn.textContent = "Plano Atual";
+            btn.disabled = true;
+            btn.style.opacity = "0.5";
+            btn.style.cursor = "default";
+        } else {
+            // Se for outro plano
+            btn.textContent = temPlano ? "Trocar para este" : "Assinar Agora";
+            btn.disabled = false;
+            btn.style.opacity = "1";
+            btn.style.cursor = "pointer";
+
+            // Reconecta clique
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+            newBtn.onclick = (e) => {
+                e.preventDefault();
+                iniciarPagamento(planoLower, newBtn);
+            };
+        }
+    });
 }
 
     async function uploadProfilePhoto(file, imgEl) {
@@ -699,16 +706,21 @@ function inicializarAssinatura() {
         }
     }
 
-    function loadPage(url) {
+function loadPage(url) {
         if (!url) return;
         mainContent.innerHTML = '<div style="padding:40px; text-align:center; color:#888;">Carregando...</div>';
         
-        // Use o './' para forçar o caminho relativo correto
+        // --- NOVO: Sincroniza a Sidebar com a página carregada ---
+        document.querySelectorAll('.sidebar-nav li').forEach(li => li.classList.remove('active'));
+        const activeLink = document.querySelector(`.sidebar-nav a[data-page="${url}"]`);
+        if (activeLink) activeLink.closest('li').classList.add('active');
+        // ---------------------------------------------------------
+
         fetch('./' + url).then(r => r.ok ? r.text() : Promise.reject(url))
             .then(html => {
                 mainContent.innerHTML = html;
                 
-                // --- ROTEADOR DE LÓGICA ---
+                // Roteador
                 if (url.includes('meu_perfil')) inicializarLogicaDoPerfil();
                 else if (url.includes('excluir_conta')) inicializarLogicaExclusao();
                 else if (url.includes('visao_geral')) inicializarVisaoGeral();
@@ -717,14 +729,15 @@ function inicializarAssinatura() {
             .catch(e => mainContent.innerHTML = '<p>Erro ao carregar.</p>');
     }
 
-    function initializeDashboard() {
+function initializeDashboard() {
         document.getElementById('dashboard-container').style.display = 'flex';
+        
+        // Configura foto e nome na sidebar
         const imgEl = document.getElementById('psi-sidebar-photo');
         const nameEl = document.getElementById('psi-sidebar-name');
         
         if (psychologistData) {
             if(nameEl) nameEl.textContent = psychologistData.nome;
-            // CORREÇÃO: Usa o formatador ao carregar a página
             if(imgEl) imgEl.src = formatImageUrl(psychologistData.fotoUrl);
             
             const btnLink = document.getElementById('btn-view-public-profile');
@@ -735,6 +748,7 @@ function inicializarAssinatura() {
             }
         }
 
+        // Upload de foto lateral
         const uploadInput = document.getElementById('profile-photo-upload');
         if (uploadInput && imgEl) {
             uploadInput.onchange = (e) => {
@@ -742,24 +756,32 @@ function inicializarAssinatura() {
             };
         }
 
+        // Configura cliques do menu
         document.querySelectorAll('.sidebar-nav a').forEach(l => {
             l.onclick = (e) => {
                 e.preventDefault();
-                document.querySelectorAll('.sidebar-nav li').forEach(li => li.classList.remove('active'));
-                l.closest('li').classList.add('active');
                 loadPage(l.getAttribute('data-page'));
             };
         });
-        loadPage('psi_visao_geral.html');
-    }
 
-    // ATENÇÃO: Adicione esta verificação no seu "loadPage" ou na inicialização
-    // Se a URL tiver ?status=approved, mostre festa!
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('status') === 'approved') {
-        showToast('Pagamento Aprovado! Seu perfil está ativo.', 'success');
-        // Limpa a URL para não ficar mostrando o toast toda hora
-        window.history.replaceState({}, document.title, window.location.pathname);
+        // --- CORREÇÃO AQUI: ROTEAMENTO INTELIGENTE ---
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        if (urlParams.has('status')) {
+            // Se voltou do Mercado Pago (aprovado, falha ou pendente), vai para assinatura
+            loadPage('psi_assinatura.html');
+            
+            // Se for aprovado, mostra o toast
+            if (urlParams.get('status') === 'approved') {
+                showToast('Pagamento Aprovado! Assinatura ativa.', 'success');
+                // Limpa a URL para ficar bonita
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        } else {
+            // Fluxo normal: vai para visão geral
+            loadPage('psi_visao_geral.html');
+        }
+        // ---------------------------------------------
     }
 
     fetchPsychologistData().then(ok => { if (ok) initializeDashboard(); });
