@@ -368,21 +368,23 @@ function isValidCPF(cpf) {
                 };
 
                 try {
-                    // Envia o feedback (opcional, não bloqueia se falhar)
+                    // Envia o feedback (opcional)
                     await apiFetch(`${API_BASE_URL}/api/psychologists/me/exit-survey`, {
                         method: 'POST', body: JSON.stringify(exitData)
                     }).catch(e => console.warn("Erro ao salvar feedback:", e));
 
-                    // 2. Envia o DELETE COM A SENHA no body
+                    // 2. Envia o DELETE
                     const response = await apiFetch(`${API_BASE_URL}/api/psychologists/me`, { 
                         method: 'DELETE',
-                        body: JSON.stringify({ senha: senha }) // <--- O SEGREDO ESTÁ AQUI
+                        body: JSON.stringify({ senha: senha }) 
                     });
 
+                    // --- CORREÇÃO AQUI: Verifica se o Backend recusou a senha ---
                     if (!response.ok) {
-                        const errData = await response.json();
-                        throw new Error(errData.error || 'Senha incorreta ou falha na exclusão.');
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || "Erro ao excluir conta.");
                     }
+                    // ------------------------------------------------------------
 
                     showToast('Conta excluída com sucesso. Adeus!', 'success');
                     
@@ -393,7 +395,9 @@ function isValidCPF(cpf) {
 
                 } catch (err) { 
                     console.error(err);
-                    showToast(`Erro: ${err.message}`, 'error');
+                    // Agora ele vai cair aqui se a senha estiver errada (403), sem deslogar
+                    showToast(err.message, 'error'); 
+                    
                     btnSubmit.textContent = textoOriginal;
                     btnSubmit.disabled = false;
                 }
