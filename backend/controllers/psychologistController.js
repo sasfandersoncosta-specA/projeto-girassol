@@ -562,7 +562,8 @@ exports.deletePsychologistAccount = async (req, res) => {
 
         const isMatch = await bcrypt.compare(senha, psychologistWithPassword.senha);
         if (!isMatch) {
-            return res.status(401).json({ error: 'Senha incorreta. A conta não foi excluída.' });
+            // Usamos 403 (Forbidden) para não acionar o logout automático do frontend
+            return res.status(403).json({ error: 'Senha incorreta. A conta não foi excluída.' });
         }
 
         await psychologistWithPassword.destroy();
