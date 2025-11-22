@@ -151,7 +151,8 @@ const startServer = async () => {
 startServer().catch(err => console.error('Falha ao iniciar o servidor:', err));
 
 // --- ROTA DE EMERGÊNCIA: ATIVAR TODOS OS PSICÓLOGOS ---
-app.get('/fix-activate-psis', async (req, res) => {
+// Mudamos para começar com /api para não confundir com perfil de usuário
+app.get('/api/fix-activate-psis', async (req, res) => {
     try {
         // Atualiza TODOS os psicólogos para status 'active'
         await db.sequelize.query(`UPDATE "Psychologists" SET status = 'active'`);
