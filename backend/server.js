@@ -129,6 +129,23 @@ app.get('/api/fix-add-socials', async (req, res) => {
     }
 });
 
+// 6. RESET TOTAL (Zera o pagamento de TODOS os usuários)
+app.get('/api/fix-reset-payment', async (req, res) => {
+    try {
+        // Sem a cláusula WHERE, ele aplica em todas as linhas da tabela
+        await db.sequelize.query(`
+            UPDATE "Psychologists" 
+            SET "plano" = NULL,
+                "subscription_expires_at" = NULL,
+                "status" = 'pending' -- Opcional: volta o status para pendente também
+        `);
+        
+        res.send('<h1 style="color: red;">RESET GLOBAL EXECUTADO! Ninguém tem plano agora.</h1>');
+    } catch (error) {
+        res.status(500).send('ERRO: ' + error.message);
+    }
+});
+
 // =============================================================
 // ROTAS DA APLICAÇÃO
 // =============================================================

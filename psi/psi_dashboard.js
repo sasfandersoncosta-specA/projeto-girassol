@@ -436,92 +436,129 @@ function isValidCPF(cpf) {
     // --- LÓGICA DE PAGAMENTO (MERCADO PAGO) ---
     async function iniciarPagamento(planType, btnElement) {
         const originalText = btnElement.textContent;
-        
-        // Trava o botão para evitar clique duplo
-        btnElement.textContent = "Gerando cobrança...";
+
+        // Captura o cupom (se existir)
+        const cupomInput = document.getElementById('cupom-input');
+        const cupomCodigo = cupomInput ? cupomInput.value.trim() : '';
+
+        btnElement.textContent = "Processando...";
         btnElement.disabled = true;
-        btnElement.style.opacity = "0.7";
-        btnElement.style.cursor = "not-allowed";
 
         try {
-            // Envia 'semente', 'luz' ou 'sol' para o backend
             const res = await apiFetch(`${API_BASE_URL}/api/payments/create-preference`, {
                 method: 'POST',
-                body: JSON.stringify({ planType: planType })
+                // Envia o plano E o cupom
+                body: JSON.stringify({ planType: planType, cupom: cupomCodigo })
             });
 
-            if (!res.ok) throw new Error('Erro ao criar pagamento');
+            if (!res.ok) throw new Error('Erro ao processar.');
 
             const data = await res.json();
             
-            // Redireciona para o Mercado Pago se tiver link
+            // CENÁRIO 1: CUPOM VIP ACEITO
+            if (data.couponSuccess) {
+                showToast(data.message, 'success');
+                setTimeout(() => window.location.reload(), 1500); // Recarrega para mostrar o plano ativo
+                return;
+            }
+
+            // CENÁRIO 2: PAGAMENTO NORMAL (Mercado Pago)
             if (data.init_point) {
                 window.location.href = data.init_point;
             }
 
         } catch (error) {
             console.error(error);
-            showToast('Erro ao iniciar pagamento. Tente novamente.', 'error');
-            
-            // Restaura o botão em caso de erro
+            showToast('Erro ao iniciar. Tente novamente.', 'error');
             btnElement.textContent = originalText;
             btnElement.disabled = false;
-            btnElement.style.opacity = "1";
-            btnElement.style.cursor = "pointer";
         }
     }
+
+    // psi_dashboard.js
 
     function inicializarAssinatura() {
         console.log("Inicializando tela de assinatura...");
     
-        // 1. Conecta os botões de mudança de plano
+        // 1. Conecta os botões
         const botoes = document.querySelectorAll('.btn-mudar-plano');
-        
         botoes.forEach(btn => {
             btn.onclick = (e) => {
                 e.preventDefault();
-                // Pega o valor do HTML (Ex: "Sol") e converte para minúsculo ("sol")
                 const plano = btn.getAttribute('data-plano').toLowerCase(); 
                 iniciarPagamento(plano, btn);
             };
         });
     
-        // 2. (Opcional) Atualiza visualmente qual é o plano atual baseado no Banco de Dados
-        if (psychologistData && psychologistData.plano) {
-            const planoAtualDB = psychologistData.plano.toLowerCase(); // ex: 'luz'
-            
-            // Atualiza o texto do topo
-            const nomePlanoEl = document.querySelector('.plano-nome');
-            if (nomePlanoEl) nomePlanoEl.textContent = `Plano ${psychologistData.plano}`;
+        // Elementos do topo (Resumo)
+        const nomePlanoEl = document.querySelector('.plano-nome');
+        const precoPlanoEl = document.querySelector('.plano-preco');
+        const dataPlanoEl = document.querySelector('.plano-data');
     
-            // Atualiza os cards (Remove o destaque do HTML estático e põe no real)
+        // 2. Lógica Visual
+        if (psychologistData && psychologistData.plano) {
+            // --- CENÁRIO A: TEM PLANO ATIVO ---
+            const planoAtualDB = psychologistData.plano.toLowerCase(); 
+            
+            if (nomePlanoEl) nomePlanoEl.textContent = `Plano ${psychologistData.plano}`;
+            if (precoPlanoEl) precoPlanoEl.style.display = 'block';
+            
+            // Formata a data de vencimento
+            if (dataPlanoEl && psychologistData.subscription_expires_at) {
+                const dataVenc = new Date(psychologistData.subscription_expires_at);
+                dataPlanoEl.textContent = `Vencimento: ${dataVenc.toLocaleDateString('pt-BR')}`;
+            }
+    
+            // Atualiza os Cards
             document.querySelectorAll('.plano-card').forEach(card => {
                 card.classList.remove('plano-card--ativo');
                 const btn = card.querySelector('.btn-mudar-plano');
                 const selo = card.querySelector('.selo-plano-atual');
                 if(selo) selo.remove();
     
-                // Se for o plano ativo
                 if (card.querySelector('h2').textContent.toLowerCase().includes(planoAtualDB)) {
                     card.classList.add('plano-card--ativo');
                     
-                    // Adiciona selo visual
                     const novoSelo = document.createElement('div');
                     novoSelo.className = 'selo-plano-atual';
                     novoSelo.textContent = 'Seu Plano Atual';
                     card.insertBefore(novoSelo, card.firstChild);
     
-                    // Desabilita o botão
                     if(btn) {
                         btn.textContent = "Plano Atual";
                         btn.disabled = true;
+                        btn.classList.remove('btn-upgrade'); // Remove estilo de destaque se tiver
                     }
                 } else {
-                    // Reabilita botões dos outros planos
+                    // Lógica para os outros planos (Upgrade ou Downgrade)
                     if(btn) {
-                        btn.textContent = btn.classList.contains('btn-upgrade') ? "Fazer Upgrade" : "Mudar para este plano";
+                        btn.textContent = "Mudar para este plano";
                         btn.disabled = false;
                     }
+                }
+            });
+    
+        } else {
+            // --- CENÁRIO B: NÃO TEM PLANO (NOVO USUÁRIO OU VENCIDO) ---
+            console.log("Usuário sem plano ativo.");
+    
+            if (nomePlanoEl) {
+                nomePlanoEl.textContent = "Nenhum plano ativo";
+                nomePlanoEl.style.color = "#e63946"; // Vermelho para alertar
+            }
+            if (precoPlanoEl) precoPlanoEl.style.display = 'none'; // Esconde o preço no topo
+            if (dataPlanoEl) dataPlanoEl.textContent = "Escolha um plano abaixo para ativar seu perfil.";
+    
+            // Garante que todos os cards estejam "clicáveis" e sem destaque
+            document.querySelectorAll('.plano-card').forEach(card => {
+                card.classList.remove('plano-card--ativo');
+                const selo = card.querySelector('.selo-plano-atual');
+                if(selo) selo.remove();
+    
+                const btn = card.querySelector('.btn-mudar-plano');
+                if(btn) {
+                    btn.textContent = "Assinar Agora";
+                    btn.disabled = false;
                 }
             });
         }

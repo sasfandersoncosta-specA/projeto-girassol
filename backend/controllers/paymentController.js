@@ -8,11 +8,31 @@ const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN 
 // 1. CRIA O LINK DE PAGAMENTO (O usuário clica no botão e chama isso)
 exports.createPreference = async (req, res) => {
     try {
-        const { planType } = req.body; // 'semente', 'luz', 'sol'
-        const psychologistId = req.psychologist.id; // Pega o ID do usuário logado
+        const { planType, cupom } = req.body; // <--- AGORA RECEBE O CUPOM
+        const psychologistId = req.psychologist.id;
 
+        // --- SISTEMA DE CUPOM MÁGICO (BYPASS) ---
+        if (cupom && cupom.toUpperCase() === 'SOLVIP') {
+            const psi = await db.Psychologist.findByPk(psychologistId);
+            
+            // Dá 30 dias grátis do plano SOL
+            const hoje = new Date();
+            const trintaDias = new Date(hoje.setDate(hoje.getDate() + 30));
+
+            await psi.update({
+                status: 'active',
+                subscription_expires_at: trintaDias,
+                plano: 'Sol' // Força o plano Sol
+            });
+
+            // Retorna um sinal especial para o frontend
+            return res.json({ couponSuccess: true, message: 'Cupom VIP aplicado! Plano Sol ativado.' });
+        }
+        // ----------------------------------------
+
+        // ... (O RESTO DO CÓDIGO DO MERCADO PAGO CONTINUA IGUAL ABAIXO) ...
         let title, price;
-
+        // ... switch(planType) ...
         // Configuração dos preços
         switch (planType) {
             case 'semente': title = 'Plano Semente (Mensal)'; price = 49.00; break;
@@ -21,8 +41,8 @@ exports.createPreference = async (req, res) => {
             default: return res.status(400).json({ error: 'Plano inválido' });
         }
 
+        // ... const preference = new Preference(client); ...
         const preference = new Preference(client);
-
         const result = await preference.create({
             body: {
                 items: [
@@ -50,6 +70,7 @@ exports.createPreference = async (req, res) => {
             }
         });
 
+        // ... res.json({ init_point: result.init_point });
         res.json({ init_point: result.init_point }); // Manda o link para o frontend
 
     } catch (error) {
