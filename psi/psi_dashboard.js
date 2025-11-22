@@ -24,6 +24,33 @@ document.addEventListener('DOMContentLoaded', function() {
         
         return `${API_BASE_URL}${cleanPath}`;
     }
+    // --- HELPER: VALIDAÇÃO DE CPF ---
+function isValidCPF(cpf) {
+    if (typeof cpf !== "string") return false;
+    cpf = cpf.replace(/[^\d]+/g, ''); // Remove tudo que não é dígito
+    
+    if (cpf.length !== 11 || !!cpf.match(/(\d)\1{10}/)) return false; // Elimina 111.111.111-11 etc
+
+    let soma = 0;
+    let resto;
+
+    for (let i = 1; i <= 9; i++) 
+        soma = soma + parseInt(cpf.substring(i-1, i)) * (11 - i);
+    resto = (soma * 10) % 11;
+
+    if ((resto === 10) || (resto === 11)) resto = 0;
+    if (resto !== parseInt(cpf.substring(9, 10))) return false;
+
+    soma = 0;
+    for (let i = 1; i <= 10; i++) 
+        soma = soma + parseInt(cpf.substring(i-1, i)) * (12 - i);
+    resto = (soma * 10) % 11;
+
+    if ((resto === 10) || (resto === 11)) resto = 0;
+    if (resto !== parseInt(cpf.substring(10, 11))) return false;
+
+    return true;
+}
 
     function showToast(message, type = 'success') {
         if (!toastContainer) return;
@@ -200,6 +227,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            // --- NOVO CÓDIGO: VALIDAÇÃO DE CPF ---
+            const cpfInput = document.getElementById('cpf');
+            const cpfValue = cpfInput.value;
+            
+            if (!isValidCPF(cpfValue)) {
+                showToast('CPF inválido! Verifique os números.', 'error');
+                cpfInput.style.borderColor = '#e63946'; // Borda vermelha
+                cpfInput.focus();
+                
+                // Se quiser mostrar a mensagem pequena embaixo do input:
+                const feedback = document.getElementById('cpf-feedback');
+                if(feedback) feedback.style.display = 'block';
+                
+                return; // <--- ISSO IMPEDE O SALVAMENTO
+            }
+            
+            // Reseta o estilo se estiver certo
+            cpfInput.style.borderColor = ''; 
+            const feedback = document.getElementById('cpf-feedback');
+            if(feedback) feedback.style.display = 'none';
+            // -------------------------------------
+
             btnSalvar.textContent = "Salvando...";
             btnSalvar.disabled = true;
 
