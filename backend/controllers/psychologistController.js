@@ -780,54 +780,82 @@ exports.getShowcasePsychologists = async (req, res) => {
 // ----------------------------------------------------------------------
 // Rota: GET /api/psychologists/slug/:slug (NOVA ROTA)
 // ----------------------------------------------------------------------
+// ----------------------------------------------------------------------
+// Rota: GET /api/psychologists/slug/:slug (VERSÃO DIAGNÓSTICA)
+// ----------------------------------------------------------------------
 exports.getProfileBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
-    console.log(`[GET_PROFILE_BY_SLUG] Buscando slug: "${slug}"`);
-    
-    // Busca case-insensitive (aceita maiúsculas e minúsculas)
+    console.log(`\n[DIAGNÓSTICO] Iniciando busca pelo perfil: "${slug}"`);
+
+    // 1. Busca SOMENTE pelo slug primeiro (sem travas de status/data)
+    // Isso nos diz se o link existe, independente de estar pago ou não.
     const psychologist = await db.Psychologist.findOne({
-      where: { 
-        slug: { [Op.iLike]: slug },
-        status: 'active',
-        // REGRA NOVA: A data de expiração deve ser maior que AGORA
-        subscription_expires_at: { [Op.gt]: new Date() } 
-      },
+      where: { slug: { [Op.iLike]: slug } }, // Case insensitive
       attributes: { exclude: ['senha', 'resetPasswordToken', 'resetPasswordExpires', 'cpf'] },
     });
 
-    if (psychologist) {
-      console.log(`[GET_PROFILE_BY_SLUG] Psicólogo encontrado: ${psychologist.nome}`);
-      
-      // Busca as reviews do psicólogo
-      const reviews = await db.Review.findAll({
-        where: { psychologistId: psychologist.id },
-        include: [{
-          model: db.Patient,
-          as: 'patient',
-          attributes: ['nome']
-        }],
-        order: [['createdAt', 'DESC']]
-      });
-
-      const responseData = {
-        ...psychologist.toJSON(),
-        reviews: reviews.map(r => ({
-          id: r.id,
-          rating: r.rating,
-          comment: r.comment,
-          patientName: r.patient?.nome || 'Anônimo',
-          createdAt: r.createdAt
-        }))
-      };
-
-      res.status(200).json(responseData);
-    } else {
-      console.log(`[GET_PROFILE_BY_SLUG] Nenhum psicólogo encontrado com slug "${slug}" e status "active"`);
-      res.status(404).json({ error: 'Perfil não encontrado.' });
+    // Cenario 1: Slug errado (Link inexistente)
+    if (!psychologist) {
+      console.log(`❌ [DIAGNÓSTICO] Perfil não encontrado no banco de dados. Verifique se o slug está correto.`);
+      return res.status(404).json({ error: 'Perfil não encontrado.' });
     }
+
+    // Coleta dados para análise
+    const hoje = new Date();
+    const validade = psychologist.subscription_expires_at ? new Date(psychologist.subscription_expires_at) : null;
+    const status = psychologist.status;
+    const nome = psychologist.nome;
+
+    console.log(`🔎 [DIAGNÓSTICO] Usuário encontrado: ${nome}`);
+    console.log(`   - Status no Banco: ${status}`);
+    console.log(`   - Validade do Pagamento: ${validade ? validade.toLocaleString() : 'NENHUMA (NULL)'}`);
+    console.log(`   - Data de Hoje (Servidor): ${hoje.toLocaleString()}`);
+
+    // Cenario 2: Falta de Pagamento (Data nula ou vencida)
+    // Nota: Se validade for null, consideramos vencido.
+    if (!validade || validade < hoje) {
+        console.log(`🚫 [BLOQUEIO] O pagamento está vencido ou inexistente.`);
+        return res.status(404).json({ error: 'Perfil indisponível (Assinatura inativa).' });
+    }
+
+    // Cenario 3: Status Pendente (Mesmo pago, está oculto?)
+    if (status !== 'active') {
+        console.log(`🚫 [BLOQUEIO] O status do usuário não é 'active'. Status atual: '${status}'.`);
+        // Opcional: Se você quiser que o pagamento ative automaticamente, descomente a linha abaixo:
+        // await psychologist.update({ status: 'active' }); 
+        return res.status(404).json({ error: 'Perfil em análise.' });
+    }
+
+    // Se chegou aqui, está TUDO CERTO (Pago e Ativo)
+    console.log(`✅ [SUCESSO] Perfil aprovado para exibição pública!`);
+
+    // Busca reviews
+    const reviews = await db.Review.findAll({
+      where: { psychologistId: psychologist.id },
+      include: [{
+        model: db.Patient,
+        as: 'patient',
+        attributes: ['nome']
+      }],
+      order: [['createdAt', 'DESC']]
+    });
+
+    const responseData = {
+      ...psychologist.toJSON(),
+      reviews: reviews.map(r => ({
+        id: r.id,
+        rating: r.rating,
+        comment: r.comment,
+        patientName: r.patient?.nome || 'Anônimo',
+        createdAt: r.createdAt
+      }))
+    };
+
+    res.status(200).json(responseData);
+
   } catch (error) {
-    console.error('[GET_PROFILE_BY_SLUG] Erro:', error);
+    console.error('[ERRO CRÍTICO] Falha ao buscar perfil:', error);
     res.status(500).json({ error: 'Erro interno no servidor.' });
   }
 };
