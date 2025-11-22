@@ -17,6 +17,7 @@ router.get('/showcase', psychologistController.getShowcasePsychologists);
 router.get('/slug/:slug', psychologistController.getProfileBySlug);
 router.post('/match', psychologistController.getAnonymousMatches); 
 router.get('/:id/reviews', psychologistController.getPsychologistReviews);
+router.post('/simulate-payment', psychologistController.simulatePayment);
 
 // ===============================================
 // ROTAS PROTEGIDAS (Exigem login)

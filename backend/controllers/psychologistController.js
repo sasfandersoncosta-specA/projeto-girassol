@@ -69,8 +69,8 @@ exports.registerPsychologist = async (req, res) => {
             nome, email, crp, cpf,
             senha: hashedPassword,
             slug: generateSlug(nome),
-            status: 'pending', // Status inicial para moderação do admin
-            // Dados do questionário
+            status: 'pending', // Nasce escondido
+            subscription_expires_at: null, // Sem data de validade ainda
             genero_identidade, valor_sessao_faixa, temas_atuacao: temas_atuacao || [],
             abordagens_tecnicas: abordagens_tecnicas ? [abordagens_tecnicas] : [],
             praticas_vivencias: praticas_vivencias || [], modalidade, cep,
@@ -789,7 +789,9 @@ exports.getProfileBySlug = async (req, res) => {
     const psychologist = await db.Psychologist.findOne({
       where: { 
         slug: { [Op.iLike]: slug },
-        status: 'active' 
+        status: 'active',
+        // REGRA NOVA: A data de expiração deve ser maior que AGORA
+        subscription_expires_at: { [Op.gt]: new Date() } 
       },
       attributes: { exclude: ['senha', 'resetPasswordToken', 'resetPasswordExpires', 'cpf'] },
     });
@@ -996,5 +998,30 @@ exports.saveExitSurvey = async (req, res) => {
         console.error("Erro ao salvar exit survey:", error);
         // Não retorna erro 500 para não travar a exclusão da conta
         res.json({ message: "Seguindo..." }); 
+    }
+};
+
+// Simula um pagamento (Use apenas para testes ou ativação manual)
+exports.simulatePayment = async (req, res) => {
+    try {
+        const { email } = req.body; // Vamos ativar pelo e-mail
+
+        const psi = await db.Psychologist.findOne({ where: { email } });
+        if (!psi) return res.status(404).json({ error: 'Psicólogo não encontrado' });
+
+        // Calcula data de hoje + 30 dias
+        const validade = new Date();
+        validade.setDate(validade.getDate() + 30);
+
+        await psi.update({
+            status: 'active', // Ativa o perfil
+            subscription_expires_at: validade // Dá 30 dias de acesso
+        });
+
+        res.json({ 
+            message: `Pagamento simulado! ${psi.nome} está ativo até ${validade.toLocaleDateString()}` 
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 };
