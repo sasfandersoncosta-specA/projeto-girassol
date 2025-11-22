@@ -85,6 +85,20 @@ app.get('/fix-db-exit', async (req, res) => {
     }
 });
 
+// 4. Adicionar validade da assinatura do psicólogo
+app.get('/fix-add-subscription', async (req, res) => {
+    try {
+        await db.sequelize.query(`
+            ALTER TABLE "Psychologists" 
+            ADD COLUMN IF NOT EXISTS "subscription_expires_at" TIMESTAMP WITH TIME ZONE;
+        `);
+        res.send('<h1 style="color: blue;">Pronto! Coluna de validade criada.</h1>');
+    } catch (error) {
+        res.status(500).send('Erro: ' + error.message);
+    }
+});
+
+
 // =============================================================
 // ROTAS DA APLICAÇÃO
 // =============================================================
