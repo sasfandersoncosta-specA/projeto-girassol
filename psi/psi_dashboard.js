@@ -255,6 +255,11 @@ function isValidCPF(cpf) {
 
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
+            
+            // --- LINHA NOVA: Limpa o CPF antes de enviar ---
+            if (data.cpf) data.cpf = data.cpf.replace(/\D/g, ''); 
+            // ------------------------------------------------
+
             data.valor_sessao_numero = data.valor_sessao_numero ? parseFloat(data.valor_sessao_numero) : null;
 
             if(data.linkedin_url) data.linkedin_url = `https://linkedin.com/in/${data.linkedin_url}`;
