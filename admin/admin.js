@@ -1,213 +1,138 @@
 document.addEventListener('DOMContentLoaded', function() {
-
-    // Declaração de mainContent no escopo superior para acesso global dentro do módulo.
     const mainContent = document.getElementById('main-content');
 
-    /**
-     * Função de Logout: Limpa o token e redireciona para a página de login.
-     */
     function logout() {
         localStorage.removeItem('girassol_token');
         window.location.replace('login.html');
     }
 
-    /**
-     * Função de Segurança: Verifica se o token é válido antes de carregar a página.
-     * Se o token for inválido, força o logout.
-     */
     async function initializeAndProtect() {
         const token = localStorage.getItem('girassol_token');
-
-
-        if (!token) {
-            logout();
-            return; // Interrompe a execução
-        }
+        if (!token) { logout(); return; }
 
         try {
-            // Faz uma chamada à API para validar o token e buscar os dados do admin
             const response = await fetch('/api/admin/me', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            if (!response.ok) {
-                // Se o token for inválido (expirado, etc.), a API retornará um erro (401, 403)
-                throw new Error('Token inválido ou expirado.');
-            }
+            if (!response.ok) throw new Error('Token inválido');
 
             const admin = await response.json();
+            window.adminId = admin.id;
             
-            // Se a validação passou, atualiza a UI e configura a página
-            window.adminId = admin.id; // Armazena o ID do admin globalmente
             const adminNameEl = document.querySelector('.nome-admin');
             if (adminNameEl) adminNameEl.textContent = admin.nome;
 
-            // Somente após a validação bem-sucedida, configuramos a navegação
             setupPageNavigation();
+            updateWelcomeMessage();
 
         } catch (error) {
-            console.error("Falha na validação do token:", error.message);
-            logout(); // Força o logout se o token for inválido
+            console.error("Auth Error:", error);
+            logout();
         }
     }
 
-    /**
-     * Atualiza o título da página de boas-vindas.
-     */
     function updateWelcomeMessage() {
         const pageTitle = document.querySelector('.titulo-pagina h1');
         const adminName = document.querySelector('.nome-admin')?.textContent.split(' ')[0] || 'Admin';
-        if (pageTitle && mainContent && mainContent.innerHTML.includes('kpi-grid')) { // Verifica se a visão geral está carregada
+        if (pageTitle && mainContent && mainContent.innerHTML.includes('kpi-grid')) {
             pageTitle.textContent = `Bem-vindo, ${adminName}!`;
         }
     }
-    /**
-     * Configura toda a navegação e eventos da página DEPOIS que a autenticação for validada.
-     */
+
     function setupPageNavigation() {
         const navLinks = document.querySelectorAll('.sidebar-nav li');
-        const sidebar = document.querySelector('.dashboard-sidebar');
-        const toggleButton = document.getElementById('toggleSidebar');
-
-        /**
-         * Função principal: busca o conteúdo de um arquivo HTML e o insere na página.
-         */
+        
         function loadPage(pageUrl) {
-            // Garante que a URL da página comece com /admin/
             const absolutePageUrl = `/admin/${pageUrl}`;
-    
-            // Mostra um feedback de carregamento
             mainContent.innerHTML = '<p style="text-align:center; padding: 40px;">Carregando...</p>';
     
             fetch(absolutePageUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Arquivo não encontrado: ${pageUrl}`);
-                    }
-                    return response.text();
-                })
+                .then(r => r.ok ? r.text() : Promise.reject(pageUrl))
                 .then(html => {
                     mainContent.innerHTML = html;
-    
-                    // --- LÓGICA DE CARREGAMENTO DE SCRIPT APRIMORADA ---
-                    // Remove qualquer script de página carregado anteriormente para evitar duplicação.
+                    
+                    // Remove script antigo e insere o novo
                     const oldScript = document.getElementById('dynamic-page-script');
-                    if (oldScript) {
-                        oldScript.remove();
-                    }
+                    if (oldScript) oldScript.remove();
 
-                    // Cria o caminho absoluto para o script
-                    const scriptName = absolutePageUrl.replace('.html', '.js');
                     const script = document.createElement('script');
-                    script.src = scriptName;
-                    script.id = 'dynamic-page-script'; // Adiciona um ID para fácil remoção no futuro
-                    document.body.appendChild(script);
-
-                    // Tenta chamar a função de inicialização da página recém-carregada
-                    // O nome da função deve ser padronizado, ex: initializeVisaoGeralPage()
+                    script.src = absolutePageUrl.replace('.html', '.js');
+                    script.id = 'dynamic-page-script';
+                    
                     script.onload = () => {
-                        if (typeof window.initializePage === 'function') {
-                            window.initializePage();
-                        }
+                        if (typeof window.initializePage === 'function') window.initializePage();
                     };
-
-                    // Atualiza a mensagem de boas-vindas se a página for a visão geral
+                    document.body.appendChild(script);
                     updateWelcomeMessage();
-    
                 })
-                .catch(error => {
-                    mainContent.innerHTML = `<div style="padding: 20px;"><h2>Página em Construção</h2><p>O conteúdo para esta seção estará disponível em breve.</p></div>`;
-                    console.error('Erro ao carregar a página:', error);
-                });
+                .catch(e => mainContent.innerHTML = '<p>Erro ao carregar conteúdo.</p>');
         }
             
-        // Carrega a página inicial ao entrar no dashboard
         const initialLink = document.querySelector('.sidebar-nav li.active');
-        if (initialLink) {
-            const initialPage = initialLink.getAttribute('data-page');
-            loadPage(initialPage); 
-        }
+        if (initialLink) loadPage(initialLink.getAttribute('data-page'));
 
-         // Adiciona o evento de clique para cada link da navegação
         navLinks.forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
-
-                navLinks.forEach(item => item.classList.remove('active'));
+                navLinks.forEach(i => i.classList.remove('active'));
                 this.classList.add('active');
-                
-                const pageToLoad = this.getAttribute('data-page');
-                loadPage(pageToLoad);
-
-                if (window.innerWidth <= 992 && sidebar && sidebar.classList.contains('ativo')) {
-                    sidebar.classList.remove('ativo');
-                }
+                loadPage(this.getAttribute('data-page'));
             });
         });
-
-         // Adiciona o evento para o botão de menu mobile
-        if (toggleButton && sidebar) {
-            toggleButton.addEventListener('click', () => sidebar.classList.toggle('ativo'));
-        }
-
-        // Ouve o evento de atualização de dados para atualizar a UI
-        window.addEventListener('adminDataUpdated', updateWelcomeMessage);
     }
 
-    /**
-     * Controla o modal de confirmação genérico.
-     */
+    // --- AQUI ESTÁ A CORREÇÃO DO MODAL ---
     function setupConfirmationModal() {
         const modal = document.getElementById('confirmation-modal');
-        if (!modal) return;
+        
+        // Se não achar o modal no HTML, avisa no console
+        if (!modal) {
+            console.warn("Modal HTML não encontrado em admin.html");
+            return;
+        }
 
         const confirmBtn = document.getElementById('modal-confirm-btn');
         const cancelBtn = document.getElementById('modal-cancel-btn');
-        const closeBtn = document.getElementById('modal-close-btn');
         let confirmCallback = null;
 
+        // Função para FECHAR (Esconde na marra)
         const closeModal = () => {
-            modal.setAttribute('aria-hidden', 'true');
-            confirmCallback = null; // Limpa o callback para evitar execuções acidentais
+            modal.style.display = 'none'; // <--- Força display none
+            confirmCallback = null;
         };
 
-        // Função global para abrir o modal
+        // Função Global para ABRIR (Mostra na marra)
         window.openConfirmationModal = (title, body, onConfirm) => {
-            document.getElementById('modal-title').textContent = title;
-            document.getElementById('modal-body').innerHTML = body;
+            const titleEl = document.getElementById('modal-title');
+            const bodyEl = document.getElementById('modal-body');
+            
+            if(titleEl) titleEl.textContent = title;
+            if(bodyEl) bodyEl.innerHTML = body;
+            
             confirmCallback = onConfirm;
-            modal.setAttribute('aria-hidden', 'false');
+            modal.style.display = 'flex'; // <--- Força display flex (visível)
         };
 
-        confirmBtn.addEventListener('click', () => {
-            if (typeof confirmCallback === 'function') {
-                confirmCallback();
-            }
+        if(confirmBtn) confirmBtn.onclick = () => {
+            if (typeof confirmCallback === 'function') confirmCallback();
             closeModal();
-        });
+        };
 
-        cancelBtn.addEventListener('click', closeModal);
-        closeBtn.addEventListener('click', closeModal);
-        modal.addEventListener('click', (e) => {
+        if(cancelBtn) cancelBtn.onclick = closeModal;
+        
+        // Fecha se clicar fora
+        modal.onclick = (e) => {
             if (e.target === modal) closeModal();
-        });
+        };
     }
 
-    /**
-     * Configura eventos globais da página que não dependem de autenticação, como o botão de sair.
-     */
     function setupGlobalEvents() {
         const logoutButton = document.querySelector('.btn-sair');
-        if (logoutButton) {
-            logoutButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                logout();
-            });
-        }
+        if (logoutButton) logoutButton.onclick = (e) => { e.preventDefault(); logout(); };
     }
 
-    // Ponto de entrada: Inicia a verificação de segurança.
     initializeAndProtect();
-    setupConfirmationModal(); // Inicializa o modal
-    setupGlobalEvents(); // Configura eventos globais como o de logout
+    setupConfirmationModal();
+    setupGlobalEvents();
 });

@@ -1,10 +1,9 @@
 window.initializePage = function() {
-    console.log("Iniciando Gerenciador de Psicólogos..."); // Debug
+    console.log("Iniciando Gerenciador de Psicólogos..."); 
     const tableBody = document.getElementById('psychologists-table-body');
     const rowTemplate = document.getElementById('psychologist-row-template');
     const token = localStorage.getItem('girassol_token');
     
-    // Deixe vazio para usar o domínio atual (Render)
     const API_PREFIX = ''; 
 
     if (!tableBody || !rowTemplate || !token) {
@@ -17,13 +16,16 @@ window.initializePage = function() {
     let currentPage = 1;
     let currentFilters = { search: '', status: '', plano: '' };
 
-    // --- FUNÇÃO DE CONFIRMAÇÃO ROBUSTA ---
-    // Tenta usar o modal bonito, se falhar, usa o feio (nativo) que funciona sempre.
+    // --- CORREÇÃO BLINDADA: Verifica se o Modal EXISTE VISUALMENTE ---
     function confirmarAcao(titulo, mensagem, callback) {
-        if (typeof window.openConfirmationModal === 'function') {
+        const modalElement = document.getElementById('confirmation-modal'); // Procura o HTML
+        
+        // Só tenta abrir o modal se a função existir E o HTML estiver na página
+        if (typeof window.openConfirmationModal === 'function' && modalElement) {
             window.openConfirmationModal(titulo, mensagem, callback);
         } else {
-            // Fallback para o confirm nativo (remove tags HTML da mensagem para não ficar feio)
+            // PLANO B: Se não achar o modal, usa o confirm nativo do navegador
+            // Remove tags HTML para o texto ficar limpo no alerta padrão
             const msgTexto = mensagem.replace(/<[^>]*>/g, ''); 
             if (confirm(`${titulo}\n\n${msgTexto}`)) {
                 callback();
@@ -67,19 +69,16 @@ window.initializePage = function() {
         psychologists.forEach(psy => {
             const row = rowTemplate.content.cloneNode(true).querySelector('tr');
 
-            // Preenche dados básicos
             row.querySelector('[data-label="Nome"]').textContent = psy.nome;
             row.querySelector('[data-label="E-mail"]').textContent = psy.email;
             row.querySelector('[data-label="CRP"]').textContent = psy.crp;
             row.querySelector('[data-label="Plano"]').textContent = psy.plano || '-';
             row.querySelector('[data-label="Cliques"]').textContent = '- / -';
 
-            // Status
             const statusCell = row.querySelector('[data-label="Status"] .status');
             statusCell.textContent = psy.status === 'active' ? 'Ativo' : (psy.status === 'inactive' ? 'Inativo' : psy.status);
             statusCell.className = `status status-${psy.status}`;
 
-            // Botões de Ação
             const actionsCell = row.querySelector('[data-label="Ações"]');
             const isSuspended = psy.status === 'inactive';
 
@@ -89,15 +88,13 @@ window.initializePage = function() {
                 <button class="btn-tabela btn-tabela-perigo btn-delete">Excluir</button>
             `;
 
-            // --- Lógica VER DETALHES ---
             actionsCell.querySelector('.btn-details').addEventListener('click', () => {
                 if (psy.slug) window.open(`/${psy.slug}`, '_blank');
                 else alert('Usuário sem link personalizado.');
             });
 
-            // --- Lógica SUSPENDER ---
             actionsCell.querySelector('.btn-suspend').addEventListener('click', () => {
-                console.log("Cliquei em Suspender:", psy.nome); // Debug
+                console.log("Cliquei em Suspender:", psy.nome);
                 const newStatus = isSuspended ? 'active' : 'inactive';
                 
                 confirmarAcao('Alterar Status', `Deseja mudar o status de <b>${psy.nome}</b>?`, async () => {
@@ -113,9 +110,8 @@ window.initializePage = function() {
                 });
             });
 
-            // --- Lógica EXCLUIR ---
             actionsCell.querySelector('.btn-delete').addEventListener('click', () => {
-                console.log("Cliquei em Excluir:", psy.nome); // Debug
+                console.log("Cliquei em Excluir:", psy.nome);
                 
                 confirmarAcao('Excluir Profissional', `Tem certeza que deseja apagar <b>${psy.nome}</b>? Essa ação não tem volta.`, async () => {
                     try {
@@ -125,7 +121,7 @@ window.initializePage = function() {
                         });
                         
                         if (res.ok) {
-                            row.remove(); // Remove visualmente na hora
+                            row.remove(); 
                         } else {
                             const err = await res.json();
                             alert("Erro: " + (err.error || "Falha ao excluir"));
@@ -138,7 +134,6 @@ window.initializePage = function() {
         });
     }
 
-    // Filtros
     const searchInput = document.querySelector('.campo-busca');
     const statusSelect = document.querySelectorAll('.filtro-select')[0];
     const planoSelect = document.querySelectorAll('.filtro-select')[1];
@@ -154,6 +149,5 @@ window.initializePage = function() {
     if(statusSelect) statusSelect.addEventListener('change', applyFilters);
     if(planoSelect) planoSelect.addEventListener('change', applyFilters);
 
-    // Inicializa
     fetchPsychologists(1);
 };
