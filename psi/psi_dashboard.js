@@ -435,24 +435,30 @@ function isValidCPF(cpf) {
 
     async function uploadProfilePhoto(file, imgEl) {
         const fd = new FormData();
-        fd.append('foto', file);
+        fd.append('foto', file); // O backend espera 'foto' na rota POST
         const oldSrc = imgEl.src;
         imgEl.style.opacity = '0.5';
         try {
-            const res = await apiFetch(`${API_BASE_URL}/api/psychologists/me/photo`, {
-                method: 'POST', body: fd 
+            // CORREÇÃO AQUI: Mudamos de .../me/photo para .../me/foto
+            // Isso alinha com router.post('/me/foto', ...) no seu backend
+            const res = await apiFetch(`${API_BASE_URL}/api/psychologists/me/foto`, {
+                method: 'POST', 
+                body: fd 
             });
             if (!res.ok) throw new Error('Falha upload');
             const data = await res.json();
             
-            // CORREÇÃO: Usa o formatador para exibir a foto corretamente
             const finalUrl = formatImageUrl(data.fotoUrl);
             
             imgEl.src = finalUrl;
             imgEl.style.opacity = '1';
-            psychologistData.fotoUrl = data.fotoUrl;
+            
+            // Atualiza o objeto local para refletir a mudança sem refresh
+            if(psychologistData) psychologistData.fotoUrl = data.fotoUrl;
+            
             showToast('Foto atualizada!');
         } catch (e) {
+            console.error(e); // Adicionado para debug
             imgEl.src = oldSrc;
             imgEl.style.opacity = '1';
             showToast('Erro no upload.', 'error');
