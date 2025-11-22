@@ -1,4 +1,4 @@
-// perfil_psicologo.js — Versão Final (Null Safety + Layout Novo)
+// perfil_psicologo.js — v3.0
 
 document.addEventListener('DOMContentLoaded', async () => {
     const profileContainer = document.getElementById('profile-container');
@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 4000);
     };
 
-    // --- ESTADOS ---
     const showLoading = () => {
         loadingElement.classList.remove('hidden');
         profileContainer.classList.add('hidden');
@@ -41,7 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         profileContainer.classList.remove('hidden');
     };
 
-    // --- RENDERIZADORES ---
+    // --- REDES SOCIAIS ---
     const renderSocialLinks = (profile) => {
         const container = document.getElementById('psi-social-links');
         if (!container) return;
@@ -62,24 +61,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const a = document.createElement('a');
                 a.href = profile[net.key];
                 a.target = '_blank';
-                a.className = 'icon-btn';
+                a.className = 'icon-btn'; 
                 a.innerHTML = net.icon;
                 container.appendChild(a);
                 hasLinks = true;
             }
         });
-        
-        // Se não tiver links, esconde (mas o botão share fica)
     };
 
+    // --- AVALIAÇÕES ---
     const renderRatingSummary = (profile) => {
         const container = document.getElementById('psi-rating-summary');
         if (!container) return;
 
-        // Lógica de média (usa dados do backend ou calcula)
         let avg = profile.average_rating ? parseFloat(profile.average_rating) : 0;
         let count = profile.review_count ? parseInt(profile.review_count) : (profile.reviews ? profile.reviews.length : 0);
-        
+
+        // Força recálculo se necessário
         if (!avg && profile.reviews && profile.reviews.length > 0) {
             const total = profile.reviews.reduce((sum, r) => sum + parseFloat(r.rating || 0), 0);
             avg = total / count;
@@ -104,7 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
     };
 
-    // --- 4. PREENCHE O PERFIL ---
+    // --- PREENCHIMENTO ---
     const populateProfile = (profile) => {
         const setText = (id, text) => {
             const el = document.getElementById(id);
@@ -113,33 +111,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         document.getElementById('psi-nome').textContent = profile.nome || 'Psicólogo';
         
-        // Selo de Verificação
         if (profile.status === 'active') {
             const h1 = document.getElementById('psi-nome');
             if (!h1.querySelector('.verification-badge')) {
                 const badge = document.createElement('span');
                 badge.className = 'verification-badge';
-                badge.title = 'Perfil Verificado';
                 badge.innerHTML = '✓';
                 h1.appendChild(badge);
             }
         }
         
-        setText('psi-crp', profile.crp ? `CRP: ${profile.crp}` : 'CRP: --/------');
+        setText('psi-crp', profile.crp ? `CRP: ${profile.crp}` : 'CRP não informado');
 
         const foto = document.getElementById('psi-foto');
         if (foto) {
-            // Fallback para foto vazia ou nula
             foto.src = profile.fotoUrl || 'assets/images/default-avatar.png';
             foto.alt = `Foto de ${profile.nome}`;
         }
 
-        // --- BIO (AGORA COM PLACEHOLDER AMIGÁVEL) ---
         const bioElement = document.getElementById('psi-bio-text');
         if (bioElement) {
             bioElement.innerHTML = profile.bio 
                 ? profile.bio.replace(/\n/g, '<br>') 
-                : '<span style="color:#999; font-style:italic;">Este profissional ainda não adicionou uma biografia, mas está pronto para atender você.</span>';
+                : '<span style="color:#999; font-style:italic;">Este profissional ainda não adicionou uma biografia.</span>';
         }
 
         setText('psi-valor', profile.valor_sessao_numero
@@ -149,7 +143,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const modalidadeEl = document.getElementById('psi-modalidade');
         if (modalidadeEl) modalidadeEl.textContent = profile.modalidade || 'Online e Presencial';
 
-        // Localização
         const locEl = document.getElementById('psi-localizacao');
         if (locEl) {
             locEl.innerHTML = '';
@@ -177,7 +170,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        // Popula a aba de Detalhes
+        // Detalhes (Aba Sobre)
         const tabSobre = document.getElementById('tab-sobre');
         if (tabSobre) {
             const generateTagsHtml = (itemsStringOrArray, cssClass = 'practice-tag') => {
@@ -213,10 +206,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                 </div>
             `;
-            
-            // Também preenche o card lateral com as abordagens (se quiser manter lá)
-            const sideTags = document.getElementById('psi-tags-abordagens');
-            if(sideTags) sideTags.innerHTML = generateTagsHtml(profile.abordagens_tecnicas, 'small-tag');
         }
 
         renderSocialLinks(profile);
@@ -254,7 +243,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    // --- LOGIN CHECK & SUBMIT ---
+    // --- LOGIN CHECK ---
     function checkPatientLoginStatus(psychologistId) {
         const token = localStorage.getItem('girassol_token');
         if (token) {
@@ -265,7 +254,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const reviewForm = document.getElementById('review-form');
             if (reviewForm) {
-                // Clona para remover listeners antigos
                 const newForm = reviewForm.cloneNode(true);
                 reviewForm.parentNode.replaceChild(newForm, reviewForm);
 
@@ -273,36 +261,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                     e.preventDefault();
                     const ratingEl = document.querySelector('input[name="rating"]:checked');
                     const commentEl = document.getElementById('review-comment');
+                    if (!ratingEl) { showToast('Selecione uma nota.', 'error'); return; }
                     
-                    if (!ratingEl) {
-                        showToast('Por favor, selecione uma nota.', 'error');
-                        return;
-                    }
-
                     try {
-                        const response = await fetch('/api/reviews', {
+                        const res = await fetch('/api/reviews', {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${token}`
-                            },
-                            body: JSON.stringify({
-                                psychologistId: psychologistId,
-                                rating: parseInt(ratingEl.value),
-                                comment: commentEl.value
-                            })
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({ psychologistId, rating: parseInt(ratingEl.value), comment: commentEl.value })
                         });
-
-                        if (response.ok) {
-                            showToast('Avaliação enviada com sucesso!', 'success');
+                        if (res.ok) {
+                            showToast('Avaliação enviada!', 'success');
                             setTimeout(() => window.location.reload(), 1500);
                         } else {
-                            const err = await response.json();
-                            showToast(err.error || 'Erro ao enviar.', 'error');
+                            const err = await res.json();
+                            showToast(err.error || 'Erro.', 'error');
                         }
-                    } catch (error) {
-                        showToast('Erro de conexão.', 'error');
-                    }
+                    } catch (e) { showToast('Erro de conexão.', 'error'); }
                 });
             }
         } else {
@@ -312,10 +286,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (loginCta) {
                 loginCta.style.display = 'block';
                 const btn = document.getElementById('login-wall-btn');
-                if (btn) {
-                    const returnUrl = encodeURIComponent(window.location.href);
-                    btn.href = `login.html?return_url=${returnUrl}`;
-                }
+                if (btn) btn.href = `login.html?return_url=${encodeURIComponent(window.location.href)}`;
             }
         }
     }
@@ -324,11 +295,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const btn = document.getElementById('share-profile-btn');
         if(!btn) return;
         btn.addEventListener('click', async () => {
-            const shareData = {
-                title: document.title,
-                text: 'Confira este psicólogo na Plataforma Girassol!',
-                url: window.location.href
-            };
+            const shareData = { title: document.title, text: 'Confira este psicólogo!', url: window.location.href };
             if (navigator.share) {
                 try { await navigator.share(shareData); } catch(e) {}
             } else {
@@ -348,16 +315,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const fetchProfile = async () => {
         showLoading();
         const slug = extractSlug();
-        if (!slug) {
-            // Lógica local
-        }
-
         try {
             const res = await fetch(`${API_BASE_URL}/api/psychologists/slug/${encodeURIComponent(slug)}`);
-            if (res.status === 404) {
-                showError('Perfil não encontrado.');
-                return;
-            }
+            if (res.status === 404) { showError('Perfil não encontrado.'); return; }
             if (!res.ok) throw new Error('Erro na busca');
             const data = await res.json();
             populateProfile(data);
