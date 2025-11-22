@@ -433,45 +433,108 @@ function isValidCPF(cpf) {
         // Por enquanto, eles ficam zerados como placeholder.
     }
 
-    // --- LÓGICA DE PAGAMENTO (MERCADO PAGO) ---
+    // --- CONFIGURAÇÃO DO CHECKOUT TRANSPARENTE ---
+    const mp = new MercadoPago('TEST-3b56705c-edb9-46e7-b197-810510bef456', { // 
+        locale: 'pt-BR'
+    });
+    
+    let bricksBuilder = null;
+    
     async function iniciarPagamento(planType, btnElement) {
         const originalText = btnElement.textContent;
-
-        // Captura o cupom (se existir)
-        const cupomInput = document.getElementById('cupom-input');
-        const cupomCodigo = cupomInput ? cupomInput.value.trim() : '';
-
-        btnElement.textContent = "Processando...";
+        btnElement.textContent = "Abrindo...";
         btnElement.disabled = true;
-
+    
         try {
+            // 1. Pega o CUPOM se tiver
+            const cupomInput = document.getElementById('cupom-input');
+            const cupomCodigo = cupomInput ? cupomInput.value.trim() : '';
+    
+            // 2. Chama o Backend para criar a intenção de venda
             const res = await apiFetch(`${API_BASE_URL}/api/payments/create-preference`, {
                 method: 'POST',
-                // Envia o plano E o cupom
                 body: JSON.stringify({ planType: planType, cupom: cupomCodigo })
             });
-
-            if (!res.ok) throw new Error('Erro ao processar.');
-
+    
+            if (!res.ok) throw new Error('Erro ao criar pagamento');
             const data = await res.json();
-            
-            // CENÁRIO 1: CUPOM VIP ACEITO
+    
+            // 3. SE FOR CUPOM VIP (GRÁTIS)
             if (data.couponSuccess) {
                 showToast(data.message, 'success');
-                setTimeout(() => window.location.reload(), 1500); // Recarrega para mostrar o plano ativo
+                setTimeout(() => window.location.reload(), 1500);
                 return;
             }
-
-            // CENÁRIO 2: PAGAMENTO NORMAL (Mercado Pago)
-            if (data.init_point) {
-                window.location.href = data.init_point;
+    
+            // 4. SE FOR PAGAMENTO REAL -> ABRE O MODAL
+            if (data.id) {
+                abrirModalPagamento(data.id, data.init_point); // Passa o ID da preferência
             }
-
+    
         } catch (error) {
             console.error(error);
             showToast('Erro ao iniciar. Tente novamente.', 'error');
+        } finally {
             btnElement.textContent = originalText;
             btnElement.disabled = false;
+        }
+    }
+    
+    async function abrirModalPagamento(preferenceId, backupLink) {
+        // Mostra o Modal
+        const modal = document.getElementById('payment-modal');
+        const loading = document.getElementById('brick-loading');
+        const container = document.getElementById('payment-brick-container');
+        
+        modal.style.display = 'flex';
+        loading.style.display = 'block';
+        container.innerHTML = ''; // Limpa formulários anteriores
+    
+        try {
+            bricksBuilder = mp.bricks();
+    
+            // Renderiza o "Payment Brick"
+            await bricksBuilder.create("payment", "payment-brick-container", {
+                initialization: {
+                    amount: 100, // Valor placeholder (o MP atualiza pelo preferenceId)
+                    preferenceId: preferenceId, // O ID QUE O BACKEND MANDOU
+                },
+                customization: {
+                    paymentMethods: {
+                        ticket: "all",
+                        bankTransfer: "all",
+                        creditCard: "all",
+                        debitCard: "all",
+                        mercadoPago: "all",
+                    },
+                    visual: {
+                        style: {
+                            theme: "default", // 'default', 'dark' ou 'flat'
+                        }
+                    },
+                },
+                callbacks: {
+                    onReady: () => {
+                        loading.style.display = 'none'; // Esconde o "Carregando..."
+                    },
+                    onSubmit: ({ selectedPaymentMethod, formData }) => {
+                        // O Brick faz o processamento sozinho aqui
+                        return new Promise((resolve, reject) => {
+                            // Simula processamento visual
+                            resolve(); 
+                        });
+                    },
+                    onError: (error) => {
+                        console.error(error);
+                        showToast('Erro no componente de pagamento.', 'error');
+                    },
+                },
+            });
+    
+        } catch (e) {
+            console.error("Falha ao carregar Brick", e);
+            // Fallback: Se o Brick falhar, manda pro link externo
+            window.location.href = backupLink;
         }
     }
 

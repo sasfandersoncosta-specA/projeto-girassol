@@ -70,8 +70,11 @@ exports.createPreference = async (req, res) => {
             }
         });
 
-        // ... res.json({ init_point: result.init_point });
-        res.json({ init_point: result.init_point }); // Manda o link para o frontend
+        // MUDAR APENAS ESTA PARTE FINAL:
+        res.json({ 
+            id: result.id, // <--- ADICIONAMOS ISSO (O ID DA VENDA)
+            init_point: result.init_point 
+        });
 
     } catch (error) {
         console.error('Erro MP:', error);
