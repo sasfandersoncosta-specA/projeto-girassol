@@ -405,13 +405,41 @@ function isValidCPF(cpf) {
         }
     }
 
+    // =====================================================================
+    // LÓGICA DA PÁGINA: VISÃO GERAL (NOVA)
+    // =====================================================================
+    function inicializarVisaoGeral() {
+        if (!psychologistData) return;
+
+        // 1. Atualiza o nome de boas-vindas
+        const welcomeEl = document.getElementById('psi-welcome-name');
+        if (welcomeEl) {
+            const primeiroNome = psychologistData.nome.split(' ')[0];
+            welcomeEl.textContent = `Bem-vindo(a), ${primeiroNome}!`;
+        }
+
+        // 2. Verifica se o perfil está completo (Telefone, Bio ou Status Pendente)
+        const alertEl = document.getElementById('alert-complete-profile');
+        if (alertEl) {
+            // Se faltar telefone, bio OU se o status ainda for 'pending' (recém criado)
+            if (!psychologistData.telefone || !psychologistData.bio || psychologistData.status === 'pending') {
+                alertEl.style.display = 'flex';
+            } else {
+                alertEl.style.display = 'none';
+            }
+        }
+        
+        // 3. (Opcional) Aqui você pode atualizar os números dos KPIs se tiver os dados
+        // Por enquanto, eles ficam zerados como placeholder.
+    }
+
     async function uploadProfilePhoto(file, imgEl) {
         const fd = new FormData();
         fd.append('foto', file);
         const oldSrc = imgEl.src;
         imgEl.style.opacity = '0.5';
         try {
-            const res = await apiFetch(`${API_BASE_URL}/api/psychologists/me/foto`, {
+            const res = await apiFetch(`${API_BASE_URL}/api/psychologists/me/photo`, {
                 method: 'POST', body: fd 
             });
             if (!res.ok) throw new Error('Falha upload');
@@ -434,11 +462,16 @@ function isValidCPF(cpf) {
     function loadPage(url) {
         if (!url) return;
         mainContent.innerHTML = '<div style="padding:40px; text-align:center; color:#888;">Carregando...</div>';
-        fetch(url).then(r => r.ok ? r.text() : Promise.reject(url))
+        
+        // Use o './' para forçar o caminho relativo correto
+        fetch('./' + url).then(r => r.ok ? r.text() : Promise.reject(url))
             .then(html => {
                 mainContent.innerHTML = html;
+                
+                // --- ROTEADOR DE LÓGICA ---
                 if (url.includes('meu_perfil')) inicializarLogicaDoPerfil();
                 else if (url.includes('excluir_conta')) inicializarLogicaExclusao();
+                else if (url.includes('visao_geral')) inicializarVisaoGeral();
             })
             .catch(e => mainContent.innerHTML = '<p>Erro ao carregar.</p>');
     }

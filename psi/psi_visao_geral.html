@@ -43,24 +43,3 @@
         <span class="kpi-link">De quem visitou seu perfil, a porcentagem que iniciou o contato.</span>
     </div>
 </div>
-
-<script>
-    (function() {
-        // 1. Pega os dados do psicólogo que já estão na memória (psi_dashboard.js)
-        if (typeof psychologistData !== 'undefined' && psychologistData) {
-            
-            // Atualiza o nome
-            const primeiroNome = psychologistData.nome.split(' ')[0];
-            document.getElementById('psi-welcome-name').textContent = `Bem-vindo(a), ${primeiroNome}!`;
-            
-            // 2. Verifica se o perfil está completo
-            // Consideramos incompleto se não tiver telefone OU bio OU CRP validado
-            if (!psychologistData.telefone || !psychologistData.bio || psychologistData.status === 'pending') {
-                document.getElementById('alert-complete-profile').style.display = 'flex';
-            }
-
-            // 3. (Opcional) Aqui você poderia buscar os KPIs reais do backend no futuro
-            // Por enquanto, deixamos os placeholders zerados ou estáticos.
-        }
-    })();
-</script>
