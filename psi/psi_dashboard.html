@@ -250,20 +250,21 @@
 
     <div id="toast-container"></div>
 
-    <div id="payment-modal" class="modal-overlay" style="display: none; z-index: 9999;">
-        <div class="modal-content" style="max-width: 500px; padding: 0;">
-            <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="margin:0; color: #1B4332;">Finalizar Assinatura</h3>
-                <button onclick="document.getElementById('payment-modal').style.display='none'" style="background:none; border:none; font-size: 1.5rem; cursor:pointer;">&times;</button>
-            </div>
-            
-            <div id="payment-brick-container"></div>
-            
-            <div id="brick-loading" style="padding: 30px; text-align: center; color: #666;">
-                Carregando pagamento seguro...
-            </div>
+<div id="payment-modal" class="modal-overlay" style="display: none; z-index: 9999;">
+    <div class="modal-content" style="max-width: 500px; padding: 0; overflow: hidden;">
+        <div style="padding: 15px; background: #f8f9fa; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin:0; color: #1B4332; font-size: 1.1rem;">Pagamento Seguro</h3>
+            <button onclick="document.getElementById('payment-modal').style.display='none'" style="background:none; border:none; font-size: 1.5rem; cursor:pointer; color: #666;">&times;</button>
         </div>
+        
+        <div id="brick-loading" style="padding: 40px; text-align: center; color: #666;">
+            <div style="margin-bottom: 10px;">🔒</div>
+            Carregando Mercado Pago...
+        </div>
+        
+        <div id="payment-brick-container"></div>
     </div>
+</div>
 
     <div id="confirmation-modal" class="modal-overlay">
         <div class="modal-content">

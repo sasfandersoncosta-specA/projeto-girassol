@@ -440,51 +440,59 @@ function isValidCPF(cpf) {
     
     let bricksBuilder = null;
     
-    async function iniciarPagamento(planType, btnElement) {
-        const originalText = btnElement.textContent;
-        btnElement.textContent = "Abrindo...";
-        btnElement.disabled = true;
-    
-        try {
-            // 1. Pega o CUPOM
-            const cupomInput = document.getElementById('cupom-input');
-            const cupomCodigo = cupomInput ? cupomInput.value.trim() : '';
-    
-            // 2. Chama Backend
-            const res = await apiFetch(`${API_BASE_URL}/api/payments/create-preference`, {
-                method: 'POST',
-                body: JSON.stringify({ planType: planType, cupom: cupomCodigo })
-            });
-    
-            if (!res.ok) throw new Error('Erro ao criar pagamento');
-            const data = await res.json();
-    
-            // --- CORREÇÃO AQUI: CUPOM SEM RELOAD ---
-            if (data.couponSuccess) {
-                showToast(data.message, 'success');
-                
-                // Atualiza os dados do usuário em memória
-                await fetchPsychologistData(); 
-                
-                // Recarrega apenas a aba de assinatura (Refresh Suave)
-                loadPage('psi_assinatura.html'); 
-                return;
-            }
-            // ---------------------------------------
-    
-            // 4. Se for pagamento real
-            if (data.id) {
-                abrirModalPagamento(data.id, data.init_point);
-            }
-    
-        } catch (error) {
-            console.error(error);
-            showToast('Erro ao iniciar. Tente novamente.', 'error');
-        } finally {
-            btnElement.textContent = originalText;
-            btnElement.disabled = false;
+// psi_dashboard.js
+
+async function iniciarPagamento(planType, btnElement) {
+    const originalText = btnElement.textContent;
+    btnElement.textContent = "Processando...";
+    btnElement.disabled = true;
+
+    try {
+        const cupomInput = document.getElementById('cupom-input');
+        const cupomCodigo = cupomInput ? cupomInput.value.trim() : '';
+
+        const res = await apiFetch(`${API_BASE_URL}/api/payments/create-preference`, {
+            method: 'POST',
+            body: JSON.stringify({ planType: planType, cupom: cupomCodigo })
+        });
+
+        if (!res.ok) throw new Error('Erro na comunicação com o servidor');
+        
+        const data = await res.json();
+
+        // 1. CUPOM GRÁTIS
+        if (data.couponSuccess) {
+            showToast(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1500);
+            return;
         }
+
+        // 2. CHECKOUT TRANSPARENTE (Tenta abrir o modal)
+        if (data.id) {
+            // Verifica se o container do modal existe antes de tentar abrir
+            if (document.getElementById('payment-brick-container')) {
+                abrirModalPagamento(data.id, data.init_point);
+            } else {
+                console.warn("Container do modal não encontrado. Usando redirecionamento.");
+                window.location.href = data.init_point; // Fallback
+            }
+        } 
+        // 3. PLANO B (Se não veio ID, usa o link direto)
+        else if (data.init_point) {
+            window.location.href = data.init_point;
+        } else {
+            throw new Error("Nenhum dado de pagamento retornado.");
+        }
+
+    } catch (error) {
+        console.error(error);
+        showToast('Erro ao iniciar pagamento.', 'error');
+        btnElement.textContent = originalText;
+        btnElement.disabled = false;
     }
+    // Nota: Não colocamos o 'finally' para restaurar o botão aqui 
+    // porque se redirecionar ou abrir modal, queremos que o botão continue travado.
+}
     
     async function abrirModalPagamento(preferenceId, backupLink) {
         // Mostra o Modal

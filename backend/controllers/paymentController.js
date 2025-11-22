@@ -70,9 +70,9 @@ exports.createPreference = async (req, res) => {
             }
         });
 
-        // MUDAR APENAS ESTA PARTE FINAL:
+        // ATUALIZE ESTE BLOCO FINAL:
         res.json({ 
-            id: result.id, // <--- ADICIONAMOS ISSO (O ID DA VENDA)
+            id: result.id, // <--- OBRIGATÓRIO PARA O CHECKOUT TRANSPARENTE
             init_point: result.init_point 
         });
 
