@@ -1054,3 +1054,27 @@ exports.simulatePayment = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+// ----------------------------------------------------------------------
+// Rota: POST /api/psychologists/me/cancel-subscription
+// Descrição: Cancela a renovação (remove o nome do plano) mas mantém o acesso pelo tempo pago.
+// ----------------------------------------------------------------------
+exports.cancelSubscription = async (req, res) => {
+    try {
+        const psychologist = await db.Psychologist.findByPk(req.psychologist.id);
+        
+        if (!psychologist) return res.status(404).json({ error: 'Psi não encontrado' });
+
+        // Remove o "rótulo" do plano, liberando o usuário para assinar outro.
+        // A data 'subscription_expires_at' é MANTIDA, então ele não perde o acesso imediato.
+        await psychologist.update({
+            plano: null 
+        });
+
+        res.json({ message: 'Assinatura cancelada. Você mantém o acesso até o fim do período.' });
+
+    } catch (error) {
+        console.error('Erro ao cancelar:', error);
+        res.status(500).json({ error: 'Erro interno.' });
+    }
+};

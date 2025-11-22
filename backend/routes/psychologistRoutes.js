@@ -40,6 +40,9 @@ router.get('/me/qna-unanswered-count', psychologistController.getUnansweredQuest
 router.put('/me/password', psychologistController.updatePsychologistPassword);
 router.delete('/me', psychologistController.deletePsychologistAccount);
 
+// Adicione junto com as rotas protegidas "me"
+router.post('/me/cancel-subscription', psychologistController.cancelSubscription);
+
 // CORREÇÃO AQUI: Removemos 'authMiddleware' pois 'protect' já está aplicado globalmente acima
 router.post('/me/exit-survey', psychologistController.saveExitSurvey);
 

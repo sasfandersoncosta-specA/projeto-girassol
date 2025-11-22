@@ -3,25 +3,31 @@
     <p class="subtitulo-header">Escolha o plano que melhor se alinha ao seu momento profissional.</p>
 </header>
 
-<section class="plano-atual-card">
+<section class="plano-atual-card" id="card-resumo-assinatura" style="display: none;">
     <div class="plano-info">
         <h3>Seu Plano Atual</h3>
-        <p class="plano-nome">Plano Luz</p>
-        <p class="plano-preco">R$ 99 / mês</p>
-        <p class="plano-data">Próxima cobrança em: 25 de Outubro de 2025</p>
+        <p class="plano-nome" style="font-size: 1.8rem; font-weight: bold; color: #1B4332;">Carregando...</p>
+        <p class="plano-preco" style="font-size: 1.1rem; color: #555;">-</p>
+        <p class="plano-data" style="margin-top: 5px; font-size: 0.9rem; color: #777;">-</p>
     </div>
     <div class="plano-acoes">
-        <a href="#">Ver histórico de faturas</a>
-        <a href="#">Alterar método de pagamento</a>
+        <button id="btn-cancelar-assinatura" class="btn-text-danger" style="background: none; border: none; color: #e63946; text-decoration: underline; cursor: pointer; font-size: 0.9rem;">
+            Cancelar renovação automática
+        </button>
     </div>
 </section>
 
-<div style="max-width: 1200px; margin: 20px auto; padding: 0 20px; text-align: right;">
-    <div style="display: inline-flex; gap: 10px; align-items: center; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#1B4332" viewBox="0 0 16 16"><path d="M2 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H2zm13 2v5H1V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1zm-1 9H2a1 1 0 0 1-1-1v-1h14v1a1 1 0 0 1-1 1z"/></svg>
-        <input type="text" id="cupom-input" placeholder="Possui um cupom?" style="border: 1px solid #ddd; padding: 8px; border-radius: 4px; outline: none;">
+<section style="max-width: 1200px; margin: 30px auto 10px auto; display: flex; justify-content: flex-end;">
+    <div class="coupon-wrapper" style="display: flex; gap: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 8px; overflow: hidden; border: 1px solid #eee; background: #fff;">
+        <div style="padding: 12px 15px; background: #f8f9fa; border-right: 1px solid #eee; display: flex; align-items: center; color: #555;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M2 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H2zm13 2v5H1V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1zm-1 9H2a1 1 0 0 1-1-1v-1h14v1a1 1 0 0 1-1 1z"/></svg>
+        </div>
+        <input type="text" id="cupom-input" placeholder="Cupom de desconto" style="border: none; padding: 10px 15px; width: 200px; outline: none; font-size: 0.95rem;">
+        <button id="btn-aplicar-cupom" style="background: #1B4332; color: #fff; border: none; padding: 0 20px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
+            Aplicar
+        </button>
     </div>
-</div>
+</section>
 
 <section class="planos-grid">
     <div class="plano-card">
@@ -33,12 +39,11 @@
             <li>Suporte por E-mail</li>
         </ul>
         <div class="plano-cta">
-            <button class="btn-mudar-plano" data-plano="Semente">Mudar para este plano</button>
+            <button class="btn-mudar-plano" data-plano="Semente">Assinar Agora</button>
         </div>
     </div>
 
-    <div class="plano-card plano-card--ativo">
-        <div class="selo-plano-atual">Seu Plano Atual</div>
+    <div class="plano-card">
         <h2>Plano Luz</h2>
         <div class="preco">R$ 99<span>/mês</span></div>
         <ul class="beneficios-lista">
@@ -48,7 +53,7 @@
             <li>Suporte Prioritário</li>
         </ul>
         <div class="plano-cta">
-            <button disabled>Plano Atual</button>
+            <button class="btn-mudar-plano" data-plano="Luz">Assinar Agora</button>
         </div>
     </div>
 
@@ -62,7 +67,7 @@
             <li>Consultoria de Marketing</li>
         </ul>
         <div class="plano-cta">
-            <button class="btn-mudar-plano btn-upgrade" data-plano="Sol">Fazer Upgrade</button>
+            <button class="btn-mudar-plano btn-upgrade" data-plano="Sol">Assinar Agora</button>
         </div>
     </div>
-</section>  
+</section>

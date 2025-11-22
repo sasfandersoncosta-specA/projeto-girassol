@@ -538,117 +538,134 @@ function isValidCPF(cpf) {
         }
     }
 
-    // psi_dashboard.js
+function inicializarAssinatura() {
+    console.log("Inicializando tela de assinatura v2...");
 
-    function inicializarAssinatura() {
-        console.log("Inicializando tela de assinatura...");
-    
-        const nomePlanoEl = document.querySelector('.plano-nome');
-        const precoPlanoEl = document.querySelector('.plano-preco');
-        const dataPlanoEl = document.querySelector('.plano-data');
-    
-        // ============================================================
-        // CENÁRIO A: USUÁRIO COM PLANO ATIVO (Lógica de Destaque)
-        // ============================================================
-        if (psychologistData && psychologistData.plano) {
-            const planoAtualDB = psychologistData.plano.toLowerCase(); 
+    const cardResumo = document.getElementById('card-resumo-assinatura');
+    const nomePlanoEl = document.querySelector('.plano-nome');
+    const precoPlanoEl = document.querySelector('.plano-preco');
+    const dataPlanoEl = document.querySelector('.plano-data');
+    const btnCancelar = document.getElementById('btn-cancelar-assinatura');
 
-            if (nomePlanoEl) {
-                nomePlanoEl.textContent = `Plano ${psychologistData.plano}`;
-                nomePlanoEl.style.color = ""; // Reseta cor
-            }
-            if (precoPlanoEl) precoPlanoEl.style.display = 'block';
-            if (dataPlanoEl && psychologistData.subscription_expires_at) {
-                const dataVenc = new Date(psychologistData.subscription_expires_at);
-                dataPlanoEl.textContent = `Próxima cobrança em: ${dataVenc.toLocaleDateString('pt-BR')}`;
-            }
-    
-            document.querySelectorAll('.plano-card').forEach(card => {
-                // Limpa estados anteriores
-                card.classList.remove('plano-card--ativo');
-                const selo = card.querySelector('.selo-plano-atual');
-                if(selo) selo.remove();
-    
-                const btn = card.querySelector('button');
-                const cardTitle = card.querySelector('h2').textContent.toLowerCase();
-    
-                // Identifica qual plano é este card (Semente, Luz ou Sol)
-                let cardPlanType = '';
-                if(cardTitle.includes('semente')) cardPlanType = 'semente';
-                else if(cardTitle.includes('luz')) cardPlanType = 'luz';
-                else if(cardTitle.includes('sol')) cardPlanType = 'sol';
-    
-                // Se for o plano ativo do usuário
-                if (cardPlanType === planoAtualDB) {
-                    card.classList.add('plano-card--ativo');
-                    const novoSelo = document.createElement('div');
-                    novoSelo.className = 'selo-plano-atual';
-                    novoSelo.textContent = 'Seu Plano Atual';
-                    card.insertBefore(novoSelo, card.firstChild);
-    
-                    if(btn) {
-                        btn.textContent = "Plano Atual";
-                        btn.disabled = true;
-                        btn.style.opacity = "0.6";
-                        btn.style.cursor = "default";
-                    }
-                } else {
-                    // Outros planos
-                    if(btn) {
-                        btn.textContent = "Mudar para este plano";
-                        btn.disabled = false;
-                        btn.style.opacity = "1";
-                        btn.style.cursor = "pointer";
-                        // Adiciona evento de clique
-                        btn.onclick = (e) => { e.preventDefault(); iniciarPagamento(cardPlanType, btn); };
-                    }
+    // MAPA DE PREÇOS (Para corrigir o valor visualmente)
+    const precos = {
+        'semente': 'R$ 49,00',
+        'luz': 'R$ 99,00',
+        'sol': 'R$ 149,00'
+    };
+
+    // 1. Configura Botão de Cancelar
+    if (btnCancelar) {
+        btnCancelar.onclick = async () => {
+            if(!confirm("Tem certeza? Você continuará com acesso até o fim do período, mas a renovação será cancelada.")) return;
+            
+            btnCancelar.textContent = "Cancelando...";
+            try {
+                const res = await apiFetch(`${API_BASE_URL}/api/psychologists/me/cancel-subscription`, { method: 'POST' });
+                if(res.ok) {
+                    showToast('Assinatura cancelada.', 'info');
+                    // Atualiza localmente para refletir na hora
+                    psychologistData.plano = null; 
+                    inicializarAssinatura(); // Recarrega a tela
                 }
-            });
-    
-        } else {
-            // ============================================================
-            // CENÁRIO B: NENHUM PLANO (RESET TOTAL / USUÁRIO NOVO)
-            // ============================================================
-            console.log("Usuário sem plano. Resetando visual dos cards.");
-    
-            if (nomePlanoEl) {
-                nomePlanoEl.textContent = "Nenhum plano ativo";
-                nomePlanoEl.style.color = "#e63946"; 
+            } catch(e) {
+                console.error(e);
+                showToast('Erro ao cancelar.', 'error');
+                btnCancelar.textContent = "Cancelar renovação automática";
             }
-            if (precoPlanoEl) precoPlanoEl.style.display = 'none';
-            if (dataPlanoEl) dataPlanoEl.textContent = "Escolha um plano abaixo para começar.";
-    
-            // Força TODOS os cards a ficarem iguais
-            document.querySelectorAll('.plano-card').forEach(card => {
-                // 1. Remove classes de destaque antigo
-                card.classList.remove('plano-card--ativo');
-                const selo = card.querySelector('.selo-plano-atual');
-                if(selo) selo.remove();
-    
-                // 2. Identifica o plano pelo título
-                const cardTitle = card.querySelector('h2').textContent.toLowerCase();
-                let cardPlanType = 'luz'; // fallback padrão
-                if(cardTitle.includes('semente')) cardPlanType = 'semente';
-                else if(cardTitle.includes('sol')) cardPlanType = 'sol';
-    
-                // 3. Reseta o botão completamente
-                const btn = card.querySelector('button');
-                if(btn) {
-                    btn.textContent = "Assinar Agora";
-                    btn.disabled = false;
-                    
-                    // IMPORTANTE: Removemos estilos inline para o CSS do <head> mandar em tudo
-                    btn.removeAttribute('style'); 
-                    
-                    // Reconecta o clique
-                    btn.onclick = (e) => {
-                        e.preventDefault();
-                        iniciarPagamento(cardPlanType, btn);
-                    };
-                }
-            });
-        }
+        };
     }
+
+    // 2. Configura Botões de Assinatura (Conecta todos de uma vez)
+    document.querySelectorAll('.btn-mudar-plano').forEach(btn => {
+        // Remove listeners antigos clonando o nó (hack rápido) ou apenas reatribuindo
+        btn.onclick = (e) => {
+            e.preventDefault();
+            const plano = btn.getAttribute('data-plano').toLowerCase();
+            iniciarPagamento(plano, btn);
+        };
+    });
+
+    // 3. Lógica Visual de Estado
+    if (psychologistData && psychologistData.plano) {
+        // --- TEM PLANO ATIVO ---
+        const planoAtualDB = psychologistData.plano.toLowerCase();
+        
+        cardResumo.style.display = 'flex'; // Mostra o card do topo
+        
+        if (nomePlanoEl) nomePlanoEl.textContent = `Plano ${psychologistData.plano}`;
+        
+        // CORREÇÃO DO PREÇO VISUAL:
+        if (precoPlanoEl) precoPlanoEl.textContent = `${precos[planoAtualDB] || 'Valor sob consulta'} / mês`;
+
+        if (dataPlanoEl && psychologistData.subscription_expires_at) {
+            const dataVenc = new Date(psychologistData.subscription_expires_at);
+            dataPlanoEl.textContent = `Vencimento do período atual: ${dataVenc.toLocaleDateString('pt-BR')}`;
+            dataPlanoEl.style.color = "#1B4332";
+        }
+
+        // Atualiza os Cards de baixo
+        document.querySelectorAll('.plano-card').forEach(card => {
+            card.classList.remove('plano-card--ativo');
+            const selo = card.querySelector('.selo-plano-atual');
+            if(selo) selo.remove();
+
+            const btn = card.querySelector('button');
+            const cardTitle = card.querySelector('h2').textContent.toLowerCase();
+
+            // Lógica de Identificação
+            let thisPlan = '';
+            if(cardTitle.includes('semente')) thisPlan = 'semente';
+            else if(cardTitle.includes('luz')) thisPlan = 'luz';
+            else if(cardTitle.includes('sol')) thisPlan = 'sol';
+
+            if (thisPlan === planoAtualDB) {
+                // É O PLANO ATUAL
+                card.classList.add('plano-card--ativo');
+                const novoSelo = document.createElement('div');
+                novoSelo.className = 'selo-plano-atual';
+                novoSelo.textContent = 'Seu Plano Atual';
+                card.insertBefore(novoSelo, card.firstChild);
+
+                if(btn) {
+                    btn.textContent = "Plano Atual";
+                    btn.disabled = true;
+                    btn.style.opacity = "0.6";
+                }
+            } else {
+                // É OUTRO PLANO (PERMITE TROCA/UPGRADE)
+                if(btn) {
+                    // Decide o texto (Upgrade ou Mudar)
+                    // (Lógica simplificada: sempre permite mudar)
+                    btn.textContent = "Mudar para este plano";
+                    btn.disabled = false;
+                    btn.style.opacity = "1";
+                    btn.style.cursor = "pointer";
+                }
+            }
+        });
+
+    } else {
+        // --- NÃO TEM PLANO ---
+        console.log("Sem plano ativo.");
+        cardResumo.style.display = 'none'; // Esconde o cabeçalho de resumo se não tem plano
+
+        // Reseta todos os cards para "Assinar Agora"
+        document.querySelectorAll('.plano-card').forEach(card => {
+            card.classList.remove('plano-card--ativo');
+            const selo = card.querySelector('.selo-plano-atual');
+            if(selo) selo.remove();
+
+            const btn = card.querySelector('button');
+            if(btn) {
+                btn.textContent = "Assinar Agora";
+                btn.disabled = false;
+                btn.style.opacity = "1";
+                btn.style.cursor = "pointer";
+            }
+        });
+    }
+}
 
     async function uploadProfilePhoto(file, imgEl) {
         const fd = new FormData();
