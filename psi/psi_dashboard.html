@@ -61,11 +61,12 @@
     
     /* Fonte "Kansas" simulada com Serif */
     .fonte-kansas {
-        font-family: 'KansasNew', 'Times New Roman', serif;
-        font-size: 2.2rem;
-        font-weight: 700;
-        margin: 5px 0;
-    }
+         font-family: 'KansasNew', 'Times New Roman', serif;
+         font-size: 2.5rem;
+         font-weight: 700;
+         margin-bottom: 5px;
+         line-height: 1.1;
+     }
 
     /* Badge atualizado */
     .status-badge {
@@ -112,6 +113,28 @@
     .btn-cancelar-discreto {
         background: none; border: none; color: #999;
         font-size: 0.9rem; cursor: pointer; text-decoration: underline;
+    }
+
+    /* --- TRECHO CSS CORRETO --- */
+    
+    /* 2. Regra de Ouro dos Botões */
+    /* Estado padrão: Verde Escuro */
+    .plano-card .btn-mudar-plano {
+        background-color: #1B4332 !important;
+        color: #ffffff !important;
+        opacity: 1 !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.2s, background-color 0.2s;
+    }
+
+    /* Estado Desabilitado (Plano Atual): Cinza */
+    /* O JS só precisa adicionar o atributo 'disabled', o CSS faz o resto */
+    .plano-card .btn-mudar-plano:disabled {
+        background-color: #cccccc !important;
+        color: #666666 !important;
+        cursor: default !important;
+        transform: none !important;
+        box-shadow: none !important;
     }
     </style>
     
@@ -163,9 +186,12 @@
             <section id="card-resumo-assinatura" class="plano-atual-moderno" style="display: none;">
                 <div class="info-lado-esquerdo">
                     <div class="fonte-kansas" id="banner-nome-plano">Carregando...</div>
+                    <div class="fonte-kansas" id="banner-nome-plano">--</div>
                     <div class="status-badge">
                         <span style="width: 8px; height: 8px; background: #4ade80; border-radius: 50%;"></span>
                         Plano Ativo </div>
+                        Ativo e Validado
+                    </div>
                 </div>
                 
                 <div class="info-lado-direito">
