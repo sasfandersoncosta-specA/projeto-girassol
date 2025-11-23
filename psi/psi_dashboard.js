@@ -169,36 +169,80 @@ document.addEventListener('DOMContentLoaded', function() {
     function abrirModalStripe(clientSecret) {
         const modal = document.getElementById('payment-modal');
         const container = document.getElementById("payment-element");
-        
-        if (!modal || !container) return alert("Erro interno: Modal não encontrado.");
+        const btnCloseX = document.getElementById('btn-close-modal-x');
 
+        if (!modal || !container) {
+            console.error("Modal não encontrado!");
+            return;
+        }
+
+        // 1. Mostra o modal
         modal.style.display = 'flex';
-        container.innerHTML = ''; // Limpa lixo anterior
+        
+        // 2. Limpa resquícios anteriores
+        container.innerHTML = '';
 
-        const appearance = { theme: 'stripe', variables: { colorPrimary: '#1B4332' } };
+        // 3. Configuração Visual (Estilo Tupperware/Clean)
+        const appearance = {
+            theme: 'stripe', // O tema padrão já é muito parecido com o que você quer
+            labels: 'floating', // Labels flutuantes (moderno)
+            variables: {
+                colorPrimary: '#1B4332', // Sua cor de marca
+                colorBackground: '#ffffff',
+                colorText: '#30313d',
+                colorDanger: '#df1b41',
+                fontFamily: 'Inter, system-ui, sans-serif',
+                borderRadius: '6px',
+            }
+        };
+
+        // 4. Cria os elementos
         elements = stripe.elements({ appearance, clientSecret });
-        const paymentElement = elements.create("payment");
+        
+        // O 'payment' element cria tudo (cartão, pix, boleto) sozinho
+        const paymentElement = elements.create("payment", {
+            layout: "tabs", // Abas para Cartão/Pix (organizado)
+        });
+        
         paymentElement.mount("#payment-element");
 
+        // 5. Conecta o botão de fechar (X)
+        if(btnCloseX) {
+            btnCloseX.onclick = (e) => {
+                e.preventDefault();
+                modal.style.display = 'none';
+            };
+        }
+
+        // 6. Conecta o Formulário
         const form = document.getElementById('payment-form');
+        // Clona para remover listeners velhos e evitar travamento
         const newForm = form.cloneNode(true);
         form.parentNode.replaceChild(newForm, form);
 
         newForm.onsubmit = async (e) => {
             e.preventDefault();
+            
             const btn = document.getElementById("btn-confirmar-stripe");
+            const msgDiv = document.getElementById("payment-message");
+            
             btn.disabled = true;
             btn.textContent = "Processando...";
+            msgDiv.textContent = "";
+            msgDiv.classList.add("hidden");
 
             const { error } = await stripe.confirmPayment({
                 elements,
-                confirmParams: { return_url: "https://projeto-girassol.onrender.com/psi/psi_dashboard.html?status=approved" },
+                confirmParams: {
+                    // Redireciona para o mesmo lugar com status=approved
+                    return_url: window.location.href.split('?')[0] + "?status=approved",
+                },
             });
 
+            // Se chegou aqui, deu erro (pois o sucesso redireciona)
             if (error) {
-                const msg = document.getElementById("payment-message");
-                msg.textContent = error.message;
-                msg.classList.remove("hidden");
+                msgDiv.textContent = error.message;
+                msgDiv.classList.remove("hidden");
                 btn.disabled = false;
                 btn.textContent = "Pagar Agora";
             }

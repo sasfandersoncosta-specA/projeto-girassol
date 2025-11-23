@@ -26,15 +26,18 @@
         backdrop-filter: blur(3px);
     }
     
+    /* Ajuste do Modal para parecer um Checkout moderno */
     .modal-content {
-        background: white;
-        padding: 0; /* Padding zero para o cabeçalho encostar */
-        border-radius: 12px;
-        width: 90%;
-        max-width: 480px;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-        overflow: hidden;
+        background: #ffffff;
+        padding: 0;
+        border-radius: 8px; /* Bordas mais suaves */
+        width: 100%;
+        max-width: 500px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        display: flex; 
+        flex-direction: column;
         animation: slideUp 0.3s ease;
+        border: 1px solid #e0e0e0;
     }
 
     /* Cabeçalho do Modal */
@@ -49,12 +52,12 @@
         padding: 20px;
     }
 
-    /* --- CORREÇÃO CRÍTICA: ESPAÇO DO FORMULÁRIO --- */
+    /* Área do Stripe (Removemos a borda vermelha e altura fixa excessiva) */
     #payment-element {
-        min-height: 300px; /* Força altura para o Stripe aparecer */
-        width: 100%;
-        display: block;
+        min-height: 50px; /* Altura inicial pequena, o Stripe expande sozinho */
         margin-bottom: 20px;
+        width: 100%;
+        /* Sem borda vermelha, sem fundo cinza */
     }
 
     /* Botão Pagar */
@@ -118,21 +121,6 @@
     </style>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js" defer></script>
 
-<style>
-    /* Força bruta para garantir que o modal apareça na frente de tudo */
-    #payment-modal {
-        z-index: 2147483647 !important; /* Valor máximo permitido */
-        display: none; /* O JS muda isso para flex */
-        visibility: visible !important;
-        opacity: 1 !important;
-    }
-    
-    #payment-element {
-        background-color: #f0f0f0; /* Fundo cinza para ver se a div existe */
-        min-height: 50px;
-        border: 2px dashed red; /* Borda vermelha temporária para debug */
-    }
-</style>
 </head>
 <body class="pagina-dashboard">
     <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu">
@@ -183,17 +171,20 @@
 
     <div id="payment-modal" class="modal-overlay">
         <div class="modal-content">
-            <div class="modal-header-custom">
-                <h3 style="margin:0; color: #1B4332;">Pagamento Seguro</h3>
-                <button onclick="fecharModalStripe()" style="background:none; border:none; font-size: 2rem; cursor:pointer; color: #666; line-height: 1;">&times;</button>
+            <div class="modal-header-custom" style="padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin:0; font-family: 'Inter', sans-serif; font-size: 1.1rem; color: #333;">Pagamento Seguro</h3>
+                <button id="btn-close-modal-x" type="button" style="background:none; border:none; font-size: 1.5rem; cursor:pointer; color: #999;">&times;</button>
             </div>
             
-            <div class="modal-body-custom">
+            <div class="modal-body-custom" style="padding: 25px;">
                 <form id="payment-form">
                     <div id="payment-element"></div>
                     
-                    <button id="btn-confirmar-stripe">Pagar Agora</button>
-                    <div id="payment-message" class="hidden" style="margin-top: 15px; color: #e63946; font-size: 0.9rem; text-align: center;"></div>
+                    <div id="payment-message" class="hidden" style="color: #df1b41; font-size: 0.9rem; margin-bottom: 10px; text-align: center;"></div>
+
+                    <button id="btn-confirmar-stripe" style="width: 100%; background: #0070BA; color: white; padding: 14px; border-radius: 5px; border: none; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s;">
+                        Pagar Agora
+                    </button>
                 </form>
             </div>
         </div>
