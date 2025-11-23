@@ -59,15 +59,13 @@
         position: relative; overflow: hidden;
     }
     
-    /* Fonte "Kansas" simulada com Serif */
-    .fonte-kansas {
-         font-family: 'KansasNew', 'Times New Roman', serif;
-         font-size: 2.5rem;
-         font-weight: 700;
-         margin-bottom: 5px;
-         line-height: 1.1;
-     }
-
+    /* CORREÇÃO 1: Fonte do Nome do Plano no Banner */
+    /* Forçamos a mesma família de fonte do título principal */
+    #banner-nome-plano, .nome-plano-banner, .fonte-kansas {
+        font-family: 'KansasNew', 'Times New Roman', serif !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.5px;
+    }
     /* Badge atualizado */
     .status-badge {
         display: inline-flex; align-items: center; gap: 8px;
@@ -136,6 +134,22 @@
         transform: none !important;
         box-shadow: none !important;
     }
+
+    /* Correção do Toast (Notificação Invisível) */
+    /* Estilo Base para todos os toasts */
+    #toast-container .toast {
+        color: #FFFFFF !important; /* Texto sempre Branco */
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        opacity: 1 !important;
+        font-weight: 500;
+    }
+
+    /* Cores específicas por tipo */
+    .toast-success { background-color: #1B4332 !important; border-left: 5px solid #4ade80; }
+    .toast-error   { background-color: #d32f2f !important; border-left: 5px solid #ff8a80; }
+    
+    /* AQUI ESTAVA O PROBLEMA: Definimos uma cor escura para o 'info' também */
+    .toast-info    { background-color: #2D6A4F !important; border-left: 5px solid #A8DADC; }
     </style>
     
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js" defer></script>
