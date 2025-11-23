@@ -6,7 +6,7 @@
 <section id="card-resumo-assinatura" class="plano-atual-moderno" style="display: none;">
     <div class="info-lado-esquerdo">
         <h3>Plano Ativo</h3>
-        <div class="nome-plano-destaque">Plano Luz</div>
+        <div class="nome-plano-destaque font-header-style" id="banner-nome-plano">Carregando...</div>
         <div class="status-badge">
             <span style="width: 8px; height: 8px; background: #4ade80; border-radius: 50%;"></span>
             Ativo e Validado
@@ -14,23 +14,18 @@
     </div>
     
     <div class="info-lado-direito">
-        <div class="preco-destaque">R$ 99,00 / mês</div>
-        <span class="data-renovacao">Renova em: 25/10/2025</span>
-        <button id="btn-cancelar-assinatura" class="btn-cancelar-moderno">
-            Cancelar Assinatura
-        </button>
-    </div>
+        <div class="preco-destaque" id="banner-preco">R$ -- / mês</div>
+        <span class="data-renovacao" id="banner-renovacao">Renova em: --/--/----</span>
+        </div>
 </section>
 
-<section style="max-width: 1200px; margin: 0 auto 30px auto; display: flex; justify-content: flex-end;">
-    <div class="coupon-wrapper" style="display: flex; gap: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 8px; overflow: hidden; border: 1px solid #eee; background: #fff;">
+<section class="coupon-area">
+    <div class="coupon-wrapper" style="display: flex; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 8px; overflow: hidden; border: 1px solid #eee; background: #fff;">
         <div style="padding: 12px 15px; background: #f8f9fa; border-right: 1px solid #eee; display: flex; align-items: center; color: #555;">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M2 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H2zm13 2v5H1V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1zm-1 9H2a1 1 0 0 1-1-1v-1h14v1a1 1 0 0 1-1 1z"/></svg>
         </div>
-        <input type="text" id="cupom-input" placeholder="Cupom de desconto" style="border: none; padding: 10px 15px; width: 200px; outline: none; font-size: 0.95rem;">
-        <button id="btn-aplicar-cupom" style="background: #1B4332; color: #fff; border: none; padding: 0 20px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
-            Aplicar
-        </button>
+        <input type="text" id="cupom-input" placeholder="Tem um cupom?" style="border: none; padding: 10px 15px; width: 200px; outline: none;">
+        <button id="btn-aplicar-cupom" style="background: #1B4332; color: #fff; border: none; padding: 0 20px; font-weight: 600; cursor: pointer;">Aplicar</button>
     </div>
 </section>
 
@@ -55,7 +50,6 @@
             <li>Perfil Completo</li>
             <li>Até 30 Cliques de Contato</li>
             <li>Acesso a Workshops</li>
-            <li>Suporte Prioritário</li>
         </ul>
         <div class="plano-cta">
             <button class="btn-mudar-plano" data-plano="Luz">Assinar Agora</button>
@@ -67,8 +61,7 @@
         <div class="preco">R$ 149<span>/mês</span></div>
         <ul class="beneficios-lista">
             <li>Perfil em Destaque</li>
-            <li>Cliques de Contato Ilimitados</li>
-            <li>Acesso a Workshops e Cursos</li>
+            <li>Cliques Ilimitados</li>
             <li>Consultoria de Marketing</li>
         </ul>
         <div class="plano-cta">
@@ -76,6 +69,13 @@
         </div>
     </div>
 </section>
+
+<div id="area-cancelamento" class="danger-zone" style="display: none;">
+    <p style="color: #666; font-size: 0.9rem; margin-bottom: 10px;">Deseja encerrar sua assinatura?</p>
+    <button id="btn-cancelar-assinatura" class="btn-cancelar-discreto">
+        Cancelar renovação automática
+    </button>
+</div>
 
 <div id="modal-cancelamento" class="custom-modal-overlay">
     <div class="custom-modal-box">
@@ -87,7 +87,7 @@
         </div>
         <h3 style="margin-bottom: 10px; color: #333;">Tem certeza?</h3>
         <p style="color: #666; margin-bottom: 25px; line-height: 1.5;">
-            Você continuará com acesso aos benefícios até o fim do período pago, mas sua assinatura não será renovada automaticamente.
+            Você continuará com acesso aos benefícios até o fim do período pago, mas sua assinatura não será renovada.
         </p>
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button id="btn-fechar-modal-cancel" style="padding: 10px 20px; border: 1px solid #ddd; background: #fff; border-radius: 6px; cursor: pointer; color: #555;">Manter Plano</button>
