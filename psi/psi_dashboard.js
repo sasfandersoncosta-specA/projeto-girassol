@@ -7,6 +7,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const mainContent = document.getElementById('main-content');
     const toastContainer = document.getElementById('toast-container');
 
+    // No topo de psi_dashboard.js, logo após as variáveis:
+    function setupMasks() {
+        if (typeof IMask === 'undefined') return;
+        const cpf = document.getElementById('cpf');
+        const tel = document.getElementById('telefone');
+        const crp = document.getElementById('crp');
+        if (cpf) IMask(cpf, { mask: '000.000.000-00' });
+        if (tel) IMask(tel, { mask: '(00) 00000-0000' });
+        if (crp) IMask(crp, { mask: '00/000000' }); 
+    }
+
     // --- 1. CONFIGURAÇÃO STRIPE ---
     let stripe;
     let elements;
@@ -84,10 +95,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Link do Perfil Público (CORRIGIDO)
         const btnLink = document.getElementById('btn-view-public-profile');
         if(btnLink && psychologistData.slug) {
-            // Monta a URL absoluta para não confundir o navegador
-            const fullUrl = `${window.location.origin}/${psychologistData.slug}`;
-            btnLink.href = fullUrl;
-            console.log("Link do perfil definido para:", fullUrl);
+            // Removemos o window.location.origin para evitar duplicação se o ambiente tiver subpasta
+            // Usamos apenas a barra para ir para a raiz do domínio
+            const finalLink = `/${psychologistData.slug}`;
+            btnLink.href = finalLink;
+            // O target="_blank" no HTML já garante nova aba, mas o link tem que ser diferente da página atual
         }
     }
 
@@ -95,15 +107,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!url) return;
         mainContent.innerHTML = '<div style="padding:40px; text-align:center; color:#888;">Carregando...</div>';
         
-        // --- CORREÇÃO SIDEBAR: LIMPA TUDO E MARCA O CERTO ---
+        // Dentro de loadPage(url)
         document.querySelectorAll('.sidebar-nav li').forEach(li => li.classList.remove('active'));
-        
-        // Busca exata pelo atributo data-page
+
+        // Procura o link que tem o data-page igual à URL que estamos carregando
+        // O seletor agora é mais específico para evitar conflitos
         const activeLink = document.querySelector(`.sidebar-nav a[data-page="${url}"]`);
+
         if (activeLink) {
             activeLink.closest('li').classList.add('active');
         }
-        // ----------------------------------------------------
 
         fetch(url).then(r => r.ok ? r.text() : Promise.reject(url))
             .then(html => {
