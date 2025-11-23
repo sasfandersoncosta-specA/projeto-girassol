@@ -167,11 +167,14 @@ document.addEventListener('DOMContentLoaded', function() {
     function abrirModalStripe(clientSecret) {
         const modal = document.getElementById('payment-modal');
         const container = document.getElementById('payment-element');
-        // REMOVIDO DAQUI: const btnCloseX = ... (Já está no topo do arquivo)
+        
+        // Elementos do formulário
+        const form = document.getElementById('payment-form');
+        const btnSubmit = document.getElementById('btn-confirmar-stripe');
 
         if (!modal || !container) return;
 
-        // Ao abrir, removemos o !important do display:none para ele aparecer
+        // Mostra o modal
         modal.style.display = 'flex';
         modal.style.opacity = 1;
         modal.style.visibility = 'visible';
@@ -180,12 +183,40 @@ document.addEventListener('DOMContentLoaded', function() {
         const appearance = { theme: 'stripe', labels: 'floating' };
         elements = stripe.elements({ appearance, clientSecret });
 
-        setTimeout(() => {
-            const paymentElement = elements.create('payment', { layout: 'tabs' });
-            paymentElement.mount('#payment-element');
-        }, 50);
+        const paymentElement = elements.create('payment', { layout: 'tabs' });
+        paymentElement.mount('#payment-element');
 
-        // REMOVIDO DAQUI: A lógica do onclick do botão X (agora está no topo)
+        // --- A CORREÇÃO VITAL ESTÁ AQUI ---
+        // Interceptamos o clique para impedir o recarregamento da página
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // <--- ISSO IMPEDE O RECARREGAMENTO "ANSIOSO"
+            
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = "Processando...";
+
+            const { error } = await stripe.confirmPayment({
+                elements,
+                confirmParams: {
+                    // Após o pagamento, a Stripe te manda de volta para cá
+                    // Adicionamos ?status=approved para o seu JS saber que deu certo
+                    return_url: window.location.href.split('?')[0] + '?status=approved',
+                },
+            });
+
+            // Se chegou aqui, é porque houve erro imediato (cartão recusado, etc)
+            if (error) {
+                const messageDiv = document.getElementById('payment-message');
+                messageDiv.classList.remove('hidden');
+                messageDiv.textContent = error.message;
+                messageDiv.style.color = "red";
+                messageDiv.style.marginTop = "10px";
+                
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = "Pagar Agora";
+            }
+            // Se der sucesso, a Stripe redireciona a página automaticamente,
+            // então não precisamos fazer mais nada aqui.
+        });
     }
     
     window.fecharModalStripe = function() {
