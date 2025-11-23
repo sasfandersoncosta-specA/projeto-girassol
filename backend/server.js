@@ -34,7 +34,13 @@ initSocket(server);
 
 // --- MIDDLEWARES ---
 app.use(cors());
-app.use(express.json());
+
+// Isso permite que a gente pegue o 'rawBody' apenas na rota do webhook
+app.use(express.json({
+  verify: (req, res, buf) => {
+    req.rawBody = buf.toString();
+  }
+}));
 app.use(express.text({ type: 'application/json' }));
 app.use(express.urlencoded({ extended: true }));
 

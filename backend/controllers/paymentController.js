@@ -1,14 +1,15 @@
 // backend/controllers/paymentController.js
 const db = require('../models');
+// Certifique-se que STRIPE_SECRET_KEY está no seu .env
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-// 1. CRIA A INTENÇÃO DE PAGAMENTO (PaymentIntent)
+// 1. CRIA A INTENÇÃO DE PAGAMENTO (PaymentIntent) - MANTIDO IGUAL
 exports.createPreference = async (req, res) => {
     try {
         const { planType, cupom } = req.body;
         const psychologistId = req.psychologist.id;
 
-        // --- LÓGICA DO CUPOM VIP (Mantida) ---
+        // Lógica do Cupom VIP
         if (cupom && cupom.toUpperCase() === 'SOLVIP') {
             const psi = await db.Psychologist.findByPk(psychologistId);
             const hoje = new Date();
@@ -22,30 +23,25 @@ exports.createPreference = async (req, res) => {
             return res.json({ couponSuccess: true, message: 'Cupom VIP aplicado!' });
         }
 
-        // --- DEFINIÇÃO DE VALORES (Em Centavos) ---
         let amount;
         switch (planType) {
-            case 'semente': amount = 4900; break; // R$ 49,00
-            case 'luz':     amount = 9900; break; // R$ 99,00
-            case 'sol':     amount = 14900; break; // R$ 149,00
+            case 'semente': amount = 4900; break; 
+            case 'luz':     amount = 9900; break; 
+            case 'sol':     amount = 14900; break; 
             default: return res.status(400).json({ error: 'Plano inválido' });
         }
 
-        // Cria a Intenção na Stripe
         const paymentIntent = await stripe.paymentIntents.create({
             amount: amount,
             currency: 'brl',
-            automatic_payment_methods: { enabled: true }, // Habilita Cartão, Boleto, Pix automaticamente
+            automatic_payment_methods: { enabled: true },
             metadata: {
                 psychologistId: String(psychologistId),
                 planType: planType
             }
         });
 
-        // Retorna o "Segredo" para o Frontend desenhar o formulário
-        res.json({ 
-            clientSecret: paymentIntent.client_secret 
-        });
+        res.json({ clientSecret: paymentIntent.client_secret });
 
     } catch (error) {
         console.error('Erro Stripe:', error);
@@ -53,22 +49,34 @@ exports.createPreference = async (req, res) => {
     }
 };
 
-// 2. WEBHOOK (Confirmação de Segurança)
+// 2. WEBHOOK COM SEGURANÇA (A CORREÇÃO)
 exports.handleWebhook = async (req, res) => {
-    const event = req.body;
+    const sig = req.headers['stripe-signature'];
+    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-    // Monitora se o pagamento deu certo
+    let event;
+
+    try {
+        // AQUI ESTÁ A MUDANÇA: Validamos se o evento veio mesmo da Stripe
+        // Nota: req.rawBody é necessário aqui (veja instrução abaixo sobre o server.js)
+        event = stripe.webhooks.constructEvent(req.rawBody, sig, endpointSecret);
+    } catch (err) {
+        console.error(`Webhook Error: ${err.message}`);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
     if (event.type === 'payment_intent.succeeded') {
         const paymentIntent = event.data.object;
         const { psychologistId, planType } = paymentIntent.metadata;
 
-        console.log(`[STRIPE] Pagamento Aprovado: Psi ${psychologistId} - Plano ${planType}`);
+        console.log(`[STRIPE] Pagamento Aprovado e Verificado: Psi ${psychologistId}`);
 
         try {
             const psi = await db.Psychologist.findByPk(psychologistId);
             if (psi) {
                 const hoje = new Date();
                 const novaValidade = new Date(hoje.setDate(hoje.getDate() + 30));
+                // Capitaliza a primeira letra (sol -> Sol)
                 const planoFormatado = planType.charAt(0).toUpperCase() + planType.slice(1);
 
                 await psi.update({
@@ -79,6 +87,8 @@ exports.handleWebhook = async (req, res) => {
             }
         } catch (err) {
             console.error('Erro ao atualizar banco:', err);
+            // Retornamos 200 mesmo com erro no banco para a Stripe não ficar tentando reenviar infinitamente
+            return res.json({received: true}); 
         }
     }
 
