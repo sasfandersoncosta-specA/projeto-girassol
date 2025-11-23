@@ -166,81 +166,54 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    function abrirModalStripe(clientSecret) {
+function abrirModalStripe(clientSecret) {
         const modal = document.getElementById('payment-modal');
-        const container = document.getElementById("payment-element");
+        const container = document.getElementById('payment-element');
         const btnCloseX = document.getElementById('btn-close-modal-x');
-    
-        if (!modal || !container) {
-            return;
-        }
-    
-        // Exibir modal ANTES do mount
+
+        if (!modal || !container) return;
+
         modal.style.display = 'flex';
         modal.style.opacity = 1;
         modal.style.visibility = 'visible';
-    
-        // Limpar e garantir altura do container Stripe
         container.innerHTML = '';
         container.style.minHeight = '64px';
-    
-        // Montar Stripe Elements (após modal visível)
-        const appearance = {
-            theme: 'stripe',
-            labels: 'floating',
-            variables: {
-                colorPrimary: '#1B4332',
-                colorBackground: '#ffffff',
-                colorText: '#30313d',
-                colorDanger: '#df1b41',
-                fontFamily: 'Inter, system-ui, sans-serif',
-                borderRadius: '6px',
-            }
-        };
+
+        const appearance = { theme: 'stripe', labels: 'floating' };
         elements = stripe.elements({ appearance, clientSecret });
-    
+
         setTimeout(() => {
-            elements.create('payment', { layout: 'tabs' }).mount('#payment-element');
+            const paymentElement = elements.create('payment', { layout: 'tabs' });
+            paymentElement.mount('#payment-element');
         }, 50);
-    
-        // Botão fechar
-        if(btnCloseX) {
+
+        if (btnCloseX) {
             btnCloseX.onclick = (e) => {
                 e.preventDefault();
                 modal.style.display = 'none';
             };
         }
-    
-        // Lógica de submissão do formulário (mantida da versão anterior para funcionalidade)
+
         const form = document.getElementById('payment-form');
-        const newForm = form.cloneNode(true);
-        form.parentNode.replaceChild(newForm, form);
-    
-        newForm.onsubmit = async (e) => {
-            e.preventDefault();
-            
-            const btn = document.getElementById("btn-confirmar-stripe");
-            const msgDiv = document.getElementById("payment-message");
-            
-            btn.disabled = true;
-            btn.textContent = "Processando...";
-            msgDiv.textContent = "";
-            msgDiv.classList.add("hidden");
-    
-            const { error } = await stripe.confirmPayment({
-                elements,
-                confirmParams: {
-                    return_url: window.location.href.split('?')[0] + "?status=approved",
-                },
-            });
-    
-            if (error) {
-                msgDiv.textContent = error.message;
-                msgDiv.classList.remove("hidden");
-                btn.disabled = false;
-                btn.textContent = "Pagar Agora";
-            }
-        };
+        if (form) {
+            form.onsubmit = async function(e) {
+                e.preventDefault();
+                const btn = document.getElementById('btn-confirmar-stripe');
+                btn.disabled = true;
+                btn.textContent = 'Processando...';
+                const { error } = await stripe.confirmPayment({
+                    elements,
+                    confirmParams: {
+                        return_url: window.location.href.split('?')[0] + '?status=approved',
+                    }
+                });
+                if (error) {
+                    btn.disabled = false;
+                    btn.textContent = 'Pagar Agora';
+                    document.getElementById('payment-message').textContent = error.message;
+                }
+            };
+        }
     }
     
     window.fecharModalStripe = function() {
