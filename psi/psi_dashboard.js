@@ -480,12 +480,18 @@ function isValidCPF(cpf) {
     function abrirModalStripe(clientSecret) {
         const modal = document.getElementById('payment-modal');
         modal.style.display = 'flex';
-
+    
+        // --- CORREÇÃO CRÍTICA AQUI ---
+        // Limpa o container antes de montar a Stripe para evitar o erro "child nodes"
+        const container = document.getElementById("payment-element");
+        if (container) container.innerHTML = ''; 
+        // -----------------------------
+    
         // Configurações visuais para combinar com seu site
         const appearance = {
             theme: 'stripe',
             variables: {
-                colorPrimary: '#1B4332',
+                colorPrimary: '#1B4332', // Corrigido para corresponder ao solicitado
             },
         };
 
@@ -493,7 +499,7 @@ function isValidCPF(cpf) {
         elements = stripe.elements({ appearance, clientSecret });
 
         const paymentElement = elements.create("payment");
-        paymentElement.mount("#payment-element");
+        paymentElement.mount("#payment-element"); // Agora vai funcionar porque está vazio
 
         // Lidar com o clique no botão "Pagar Agora"
         const form = document.getElementById('payment-form');
