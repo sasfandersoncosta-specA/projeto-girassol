@@ -1,7 +1,7 @@
-// Arquivo: psi_dashboard.js (VERSÃO FINAL - COMPLETA)
+// Arquivo: psi_dashboard.js (VERSÃO FINAL - CORRIGIDA)
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("--- SISTEMA GIRASSOL INICIADO ---");
+    console.log("--- SISTEMA GIRASSOL V2.0 INICIADO ---");
     
     let psychologistData = null; 
     const mainContent = document.getElementById('main-content');
@@ -11,13 +11,12 @@ document.addEventListener('DOMContentLoaded', function() {
     let stripe;
     let elements;
     try {
-        // SUA CHAVE PÚBLICA DE TESTE
         stripe = Stripe('pk_test_51SWdGOR73Pott0IUw2asi2NZg0DpjAOdziPGvVr8SAmys1VASh2i3EAEpErccZLYHMEWfI9hIq68xL3piRCjsvIa00MkUDANOA');
     } catch (e) {
-        console.error("Erro ao iniciar Stripe:", e);
+        console.error("Erro Stripe:", e);
     }
 
-    // --- 2. HELPERS (Toast, Imagem, Fetch, Máscaras) ---
+    // --- 2. HELPERS ---
     function showToast(message, type = 'success') {
         if (!toastContainer) return;
         const toast = document.createElement('div');
@@ -36,32 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return `${API_BASE_URL}${cleanPath}`;
     }
 
-    function isValidCPF(cpf) {
-        if (typeof cpf !== "string") return false;
-        cpf = cpf.replace(/[^\d]+/g, '');
-        if (cpf.length !== 11 || !!cpf.match(/(\d)\1{10}/)) return false;
-        let soma = 0, resto;
-        for (let i = 1; i <= 9; i++) soma = soma + parseInt(cpf.substring(i-1, i)) * (11 - i);
-        resto = (soma * 10) % 11;
-        if ((resto === 10) || (resto === 11)) resto = 0;
-        if (resto !== parseInt(cpf.substring(9, 10))) return false;
-        soma = 0;
-        for (let i = 1; i <= 10; i++) soma = soma + parseInt(cpf.substring(i-1, i)) * (12 - i);
-        resto = (soma * 10) % 11;
-        if ((resto === 10) || (resto === 11)) resto = 0;
-        if (resto !== parseInt(cpf.substring(10, 11))) return false;
-        return true;
-    }
-
-    function setupMasks() {
-        if (typeof IMask === 'undefined') return;
-        const cpf = document.getElementById('cpf');
-        const tel = document.getElementById('telefone');
-        const crp = document.getElementById('crp');
-        if (cpf) IMask(cpf, { mask: '000.000.000-00' });
-        if (tel) IMask(tel, { mask: '(00) 00000-0000' });
-        if (crp) IMask(crp, { mask: '00/000000' }); 
-    }
+    // --- 3. CORE FUNCTIONS (NAV E DATA) ---
 
     async function apiFetch(url, options = {}) {
         const token = localStorage.getItem('girassol_token');
@@ -77,7 +51,73 @@ document.addEventListener('DOMContentLoaded', function() {
         return response;
     }
 
-    // --- 3. LÓGICA DE PAGAMENTO ---
+    async function fetchPsychologistData() {
+        const token = localStorage.getItem('girassol_token');
+        if (!token) { window.location.href = '../login.html'; return false; }
+        
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/psychologists/me`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                psychologistData = await response.json();
+                atualizarInterfaceLateral(); // Atualiza sidebar assim que os dados chegam
+                return true;
+            }
+            throw new Error("Token inválido");
+        } catch (error) {
+            localStorage.removeItem('girassol_token');
+            window.location.href = '../login.html';
+            return false;
+        }
+    }
+
+    function atualizarInterfaceLateral() {
+        if (!psychologistData) return;
+        
+        // Nome e Foto
+        const nameEl = document.getElementById('psi-sidebar-name');
+        const imgEl = document.getElementById('psi-sidebar-photo');
+        if(nameEl) nameEl.textContent = psychologistData.nome;
+        if(imgEl) imgEl.src = formatImageUrl(psychologistData.fotoUrl);
+
+        // Link do Perfil Público (CORRIGIDO)
+        const btnLink = document.getElementById('btn-view-public-profile');
+        if(btnLink && psychologistData.slug) {
+            // Monta a URL absoluta para não confundir o navegador
+            const fullUrl = `${window.location.origin}/${psychologistData.slug}`;
+            btnLink.href = fullUrl;
+            console.log("Link do perfil definido para:", fullUrl);
+        }
+    }
+
+    function loadPage(url) {
+        if (!url) return;
+        mainContent.innerHTML = '<div style="padding:40px; text-align:center; color:#888;">Carregando...</div>';
+        
+        // --- CORREÇÃO SIDEBAR: LIMPA TUDO E MARCA O CERTO ---
+        document.querySelectorAll('.sidebar-nav li').forEach(li => li.classList.remove('active'));
+        
+        // Busca exata pelo atributo data-page
+        const activeLink = document.querySelector(`.sidebar-nav a[data-page="${url}"]`);
+        if (activeLink) {
+            activeLink.closest('li').classList.add('active');
+        }
+        // ----------------------------------------------------
+
+        fetch(url).then(r => r.ok ? r.text() : Promise.reject(url))
+            .then(html => {
+                mainContent.innerHTML = html;
+                if (url.includes('meu_perfil')) inicializarLogicaDoPerfil();
+                else if (url.includes('visao_geral')) inicializarVisaoGeral();
+                else if (url.includes('assinatura')) inicializarAssinatura();
+                // Outras páginas...
+            })
+            .catch(e => mainContent.innerHTML = `<p>Erro ao carregar: ${e}</p>`);
+    }
+
+    // --- 4. PAGAMENTOS (STRIPE E CUPOM) ---
+
     window.iniciarPagamento = async function(planType, btnElement) {
         const originalText = btnElement.textContent;
         btnElement.textContent = "Carregando...";
@@ -102,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.clientSecret) {
                 abrirModalStripe(data.clientSecret);
             } else {
-                throw new Error("Erro ao iniciar pagamento.");
+                throw new Error("Falha ao iniciar pagamento.");
             }
         } catch (error) {
             console.error(error);
@@ -117,14 +157,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const modal = document.getElementById('payment-modal');
         const container = document.getElementById("payment-element");
         
-        if (!modal || !container) return alert("Erro: Modal não encontrado no HTML.");
+        if (!modal || !container) return alert("Erro interno: Modal não encontrado.");
 
-        // FORÇA O MODAL A APARECER (Display Flex + Opacidade)
         modal.style.display = 'flex';
-        modal.style.opacity = '1';
-        modal.style.visibility = 'visible';
-        
-        container.innerHTML = ''; // Limpeza
+        container.innerHTML = ''; // Limpa lixo anterior
 
         const appearance = { theme: 'stripe', variables: { colorPrimary: '#1B4332' } };
         elements = stripe.elements({ appearance, clientSecret });
@@ -160,78 +196,92 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('payment-modal').style.display = 'none';
     };
 
-    // --- 4. LÓGICA DO PERFIL (RESTAURADA) ---
+    // --- 5. PÁGINAS ESPECÍFICAS ---
+
+    function inicializarVisaoGeral() {
+        if(document.getElementById('psi-welcome-name') && psychologistData) {
+            document.getElementById('psi-welcome-name').textContent = `Olá, ${psychologistData.nome.split(' ')[0]}`;
+        }
+    }
+
     function inicializarLogicaDoPerfil() {
         const form = document.getElementById('perfil-form');
         if (!form) return;
-        setupMasks();
-
+        
+        // Preenche dados
         if (psychologistData) {
             const fields = ['nome', 'cpf', 'email', 'crp', 'telefone', 'bio', 'valor_sessao_numero', 'slug'];
             fields.forEach(id => {
                 const el = document.getElementById(id);
-                if (el) {
-                    let val = psychologistData[id] || '';
-                    if (id === 'cpf' && val) val = String(val);
+                if (el) el.value = psychologistData[id] || '';
+            });
+            setupMasks();
+            
+            // Redes sociais
+            ['linkedin_url', 'instagram_url', 'facebook_url', 'tiktok_url', 'x_url'].forEach(key => {
+                const el = document.getElementById(key);
+                if(el && psychologistData[key]) {
+                    // Remove prefixos para exibir bonito
+                    let val = psychologistData[key];
+                    val = val.replace('https://', '').replace('http://', '').replace('www.', '')
+                             .replace('linkedin.com/in/', '').replace('instagram.com/', '')
+                             .replace('facebook.com/', '').replace('tiktok.com/@', '').replace('x.com/', '');
                     el.value = val;
-                    el.dispatchEvent(new Event('input')); // Atualiza máscara
                 }
             });
+            
+            // Botões
+            const btnAlterar = document.getElementById('btn-alterar');
+            const btnSalvar = document.getElementById('btn-salvar');
+            const fieldset = document.getElementById('form-fieldset');
 
-            // Redes Sociais
-            const setSocial = (id, prefix) => {
-                let val = psychologistData[id] || '';
-                val = val.replace('https://', '').replace('http://', '').replace('www.', '').replace(prefix, '');
-                if(document.getElementById(id)) document.getElementById(id).value = val;
+            btnAlterar.onclick = (e) => { e.preventDefault(); fieldset.disabled = false; btnAlterar.classList.add('hidden'); btnSalvar.classList.remove('hidden'); };
+            
+            form.onsubmit = async (e) => {
+                e.preventDefault();
+                const cpfInput = document.getElementById('cpf');
+                if (!isValidCPF(cpfInput.value)) { showToast('CPF inválido!', 'error'); return; }
+
+                btnSalvar.textContent = "Salvando...";
+                const fd = new FormData(form);
+                const data = Object.fromEntries(fd.entries());
+                if (data.cpf) data.cpf = data.cpf.replace(/\D/g, '');
+
+                try {
+                    await apiFetch(`${API_BASE_URL}/api/psychologists/me`, { method: 'PUT', body: JSON.stringify(data) });
+                    showToast('Perfil salvo!', 'success');
+                    psychologistData = { ...psychologistData, ...data }; // Atualiza local
+                    atualizarInterfaceLateral(); // Atualiza nome/link na lateral
+                    fieldset.disabled = true;
+                    btnSalvar.classList.add('hidden');
+                    btnAlterar.classList.remove('hidden');
+                } catch (err) { showToast(err.message, 'error'); }
+                finally { btnSalvar.textContent = "Salvar Alterações"; }
             };
-            setSocial('linkedin_url', 'linkedin.com/in/');
-            setSocial('instagram_url', 'instagram.com/');
-            setSocial('facebook_url', 'facebook.com/');
-            setSocial('tiktok_url', 'tiktok.com/@');
-            setSocial('x_url', 'x.com/');
-            
-            // Multiselects (Simplificado para brevidade - se tiver a função completa, use-a)
-            document.querySelectorAll('.multiselect-tag').forEach(el => el.classList.remove('disabled')); 
         }
-
-        // Botões
-        const btnAlterar = document.getElementById('btn-alterar');
-        const btnSalvar = document.getElementById('btn-salvar');
-        const fieldset = document.getElementById('form-fieldset');
-
-        btnAlterar.onclick = (e) => {
-            e.preventDefault();
-            fieldset.disabled = false;
-            btnAlterar.classList.add('hidden');
-            btnSalvar.classList.remove('hidden');
-        };
-
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            const cpfInput = document.getElementById('cpf');
-            if (!isValidCPF(cpfInput.value)) {
-                showToast('CPF inválido!', 'error');
-                return;
-            }
-
-            btnSalvar.textContent = "Salvando...";
-            const fd = new FormData(form);
-            const data = Object.fromEntries(fd.entries());
-            if (data.cpf) data.cpf = data.cpf.replace(/\D/g, '');
-            
-            try {
-                await apiFetch(`${API_BASE_URL}/api/psychologists/me`, { method: 'PUT', body: JSON.stringify(data) });
-                showToast('Perfil salvo!', 'success');
-                psychologistData = { ...psychologistData, ...data };
-                fieldset.disabled = true;
-                btnSalvar.classList.add('hidden');
-                btnAlterar.classList.remove('hidden');
-            } catch (err) { showToast(err.message, 'error'); }
-            finally { btnSalvar.textContent = "Salvar Alterações"; }
-        };
+        
+        // Upload Foto
+        const uploadInput = document.getElementById('profile-photo-upload');
+        const imgEl = document.getElementById('psi-sidebar-photo');
+        if (uploadInput && imgEl) {
+            uploadInput.onchange = async (e) => {
+                if(e.target.files[0]) {
+                    const fd = new FormData();
+                    fd.append('foto', e.target.files[0]);
+                    try {
+                        const res = await apiFetch(`${API_BASE_URL}/api/psychologists/me/foto`, { method: 'POST', body: fd });
+                        if(res.ok) {
+                            const d = await res.json();
+                            psychologistData.fotoUrl = d.fotoUrl;
+                            atualizarInterfaceLateral();
+                            showToast('Foto atualizada!');
+                        }
+                    } catch (err) { showToast('Erro na foto', 'error'); }
+                }
+            };
+        }
     }
 
-    // --- 5. LÓGICA DE ASSINATURA ---
     function inicializarAssinatura() {
         const cardResumo = document.getElementById('card-resumo-assinatura');
         const temPlano = psychologistData && psychologistData.plano;
@@ -241,10 +291,28 @@ document.addEventListener('DOMContentLoaded', function() {
             document.querySelector('.nome-plano-destaque').textContent = `Plano ${psychologistData.plano}`;
             
             const btnCancelar = document.getElementById('btn-cancelar-assinatura');
-            if(btnCancelar) {
+            const modalCancel = document.getElementById('modal-cancelamento');
+            
+            if(btnCancelar && modalCancel) {
                 const novoBtn = btnCancelar.cloneNode(true);
                 btnCancelar.parentNode.replaceChild(novoBtn, btnCancelar);
-                novoBtn.onclick = () => document.getElementById('modal-cancelamento').style.display = 'flex';
+                novoBtn.onclick = () => modalCancel.style.display = 'flex';
+
+                document.getElementById('btn-fechar-modal-cancel').onclick = () => modalCancel.style.display = 'none';
+                
+                document.getElementById('btn-confirmar-cancelamento').onclick = async function() {
+                    this.textContent = "Processando...";
+                    try {
+                        await apiFetch(`${API_BASE_URL}/api/psychologists/me/cancel-subscription`, { method: 'POST' });
+                        psychologistData.plano = null;
+                        modalCancel.style.display = 'none';
+                        showToast('Assinatura cancelada.', 'info');
+                        inicializarAssinatura(); 
+                    } catch(e) {
+                        showToast('Erro ao cancelar.', 'error');
+                        this.textContent = "Sim, Cancelar";
+                    }
+                };
             }
         } else if (cardResumo) {
             cardResumo.style.display = 'none';
@@ -255,18 +323,17 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!btn) return;
             
             let plano = btn.getAttribute('data-plano');
-            if(!plano) { // Fallback
-                if(card.textContent.toLowerCase().includes('semente')) plano = 'semente';
-                else if(card.textContent.toLowerCase().includes('luz')) plano = 'luz';
+            if(!plano) {
+                const text = card.textContent.toLowerCase();
+                if(text.includes('semente')) plano = 'semente';
+                else if(text.includes('luz')) plano = 'luz';
                 else plano = 'sol';
             }
             
-            // Limpa estado anterior
             card.classList.remove('plano-card--ativo');
             const selo = card.querySelector('.selo-plano-atual');
             if(selo) selo.remove();
 
-            // Se for o plano atual
             if(temPlano && psychologistData.plano.toLowerCase() === plano.toLowerCase()) {
                 card.classList.add('plano-card--ativo');
                 const novoSelo = document.createElement('div');
@@ -275,9 +342,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 card.insertBefore(novoSelo, card.firstChild);
                 btn.textContent = "Plano Atual";
                 btn.disabled = true;
+                btn.style.opacity = "0.5";
             } else {
                 btn.textContent = "Assinar Agora";
                 btn.disabled = false;
+                btn.style.opacity = "1";
                 btn.onclick = (e) => {
                     e.preventDefault();
                     window.iniciarPagamento(plano.toLowerCase(), btn);
@@ -289,50 +358,24 @@ document.addEventListener('DOMContentLoaded', function() {
         if(btnCupom) btnCupom.onclick = () => window.iniciarPagamento('sol', btnCupom);
     }
 
-    // --- 6. ROTEADOR ---
-    function loadPage(url) {
-        if (!url) return;
-        mainContent.innerHTML = '<div style="padding:40px; text-align:center;">Carregando...</div>';
-        
-        fetch(url).then(r => r.ok ? r.text() : Promise.reject(url))
-            .then(html => {
-                mainContent.innerHTML = html;
-                if (url.includes('meu_perfil')) inicializarLogicaDoPerfil();
-                else if (url.includes('visao_geral')) {
-                    if(document.getElementById('psi-welcome-name') && psychologistData)
-                        document.getElementById('psi-welcome-name').textContent = `Olá, ${psychologistData.nome.split(' ')[0]}`;
-                }
-                else if (url.includes('assinatura')) inicializarAssinatura();
-            })
-            .catch(e => mainContent.innerHTML = `<p>Erro ao carregar: ${e}</p>`);
-    }
-
-    // --- INICIALIZAÇÃO ---
-    async function fetchPsychologistData() {
-        const token = localStorage.getItem('girassol_token');
-        if (!token) { window.location.href = '../login.html'; return false; }
-        try {
-            const r = await fetch(`${API_BASE_URL}/api/psychologists/me`, { headers: { 'Authorization': `Bearer ${token}` } });
-            if (r.ok) { psychologistData = await r.json(); return true; }
-            throw new Error();
-        } catch { localStorage.removeItem('girassol_token'); window.location.href = '../login.html'; return false; }
-    }
-
+    // --- START ---
     fetchPsychologistData().then(ok => {
         if (ok) {
             document.getElementById('dashboard-container').style.display = 'flex';
-            // Sidebar setup
-            if(document.getElementById('psi-sidebar-name')) 
-                document.getElementById('psi-sidebar-name').textContent = psychologistData.nome;
             
+            // Sidebar clicks
             document.querySelectorAll('.sidebar-nav a').forEach(l => {
                 l.onclick = (e) => { e.preventDefault(); loadPage(l.getAttribute('data-page')); };
             });
 
+            // Stripe Return
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('status')) {
                 loadPage('psi_assinatura.html');
-                if (urlParams.get('status') === 'approved') showToast('Assinatura Ativa!', 'success');
+                if (urlParams.get('status') === 'approved') {
+                    showToast('Pagamento Aprovado! Assinatura ativa.', 'success');
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
             } else {
                 loadPage('psi_visao_geral.html');
             }

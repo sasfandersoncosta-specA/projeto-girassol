@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Dashboard - Projeto Girassol</title>
 
-    <link rel="stylesheet" href="../style.css?v=1.8">
-    <link rel="stylesheet" href="psi_dashboard.css?v=1.8">
+    <link rel="stylesheet" href="../style.css?v=2.0">
+    <link rel="stylesheet" href="psi_dashboard.css?v=2.0">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,48 +17,51 @@
     <script src="https://js.stripe.com/v3/"></script>
 
     <style>
-    /* --- ESTILOS GERAIS DO MODAL DE PAGAMENTO --- */
-    .custom-modal-overlay, .modal-overlay {
+    /* --- MODAL DE PAGAMENTO --- */
+    .modal-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.7); /* Fundo escuro para foco */
+        background: rgba(0,0,0,0.8); /* Fundo bem escuro */
         display: none; justify-content: center; align-items: center;
-        z-index: 99999 !important; /* Sempre no topo */
+        z-index: 99999 !important;
         backdrop-filter: blur(3px);
     }
     
     .modal-content {
         background: white;
-        padding: 25px;
+        padding: 0; /* Padding zero para o cabeçalho encostar */
         border-radius: 12px;
         width: 90%;
-        max-width: 500px;
-        box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        max-width: 480px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        overflow: hidden;
         animation: slideUp 0.3s ease;
-        position: relative;
     }
 
-    /* --- CORREÇÃO DO FORMULÁRIO FANTASMA --- */
+    /* Cabeçalho do Modal */
+    .modal-header-custom {
+        padding: 15px 20px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #eee;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+
+    .modal-body-custom {
+        padding: 20px;
+    }
+
+    /* --- CORREÇÃO CRÍTICA: ESPAÇO DO FORMULÁRIO --- */
     #payment-element {
-        min-height: 240px; /* Força altura para o formulário aparecer */
+        min-height: 300px; /* Força altura para o Stripe aparecer */
         width: 100%;
-        background-color: #fdfdfd; /* Fundo leve para destacar os inputs */
-        border-radius: 8px;
-        padding: 10px 0;
-        margin-bottom: 15px;
+        display: block;
+        margin-bottom: 20px;
     }
 
-    /* Botões do Modal */
+    /* Botão Pagar */
     #btn-confirmar-stripe {
-        width: 100%;
-        margin-top: 15px;
-        background: #1B4332;
-        color: white;
-        padding: 14px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: bold;
-        font-size: 1rem;
+        width: 100%; background: #1B4332; color: white;
+        padding: 14px; border: none; border-radius: 8px;
+        cursor: pointer; font-weight: bold; font-size: 1rem;
         transition: background 0.3s;
     }
     #btn-confirmar-stripe:hover { background: #2D6A4F; }
@@ -67,16 +70,10 @@
     /* --- CARD PREMIUM DE ASSINATURA --- */
     .plano-atual-moderno {
         background: linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%);
-        border-radius: 16px;
-        padding: 25px 30px;
-        color: white;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-        box-shadow: 0 10px 20px rgba(27, 67, 50, 0.15);
-        position: relative;
-        overflow: hidden;
+        border-radius: 16px; padding: 25px 30px; color: white;
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 30px; box-shadow: 0 10px 20px rgba(27, 67, 50, 0.15);
+        position: relative; overflow: hidden;
     }
     .plano-atual-moderno::before {
         content: ''; position: absolute; top: -50px; right: -50px;
@@ -92,7 +89,7 @@
     }
     .btn-cancelar-moderno:hover { background: rgba(230, 57, 70, 0.9); color: white; border-color: transparent; }
 
-    /* Botões dos Planos (Normalização) */
+    /* Botões dos Planos */
     .plano-card button {
         background-color: #1B4332 !important; color: #FFFFFF !important;
         border: none !important; border-radius: 50px !important;
@@ -104,7 +101,6 @@
     .plano-card button:hover { transform: translateY(-4px); box-shadow: 0 8px 15px rgba(0,0,0,0.2); }
     .plano-card button:disabled { background-color: #ccc !important; color: #666 !important; cursor: not-allowed !important; transform: none !important; box-shadow: none !important; }
 
-    /* Toast Moderno */
     #toast-container .toast { background-color: #1B4332 !important; color: white !important; border-left: 5px solid #F4A261; }
     #toast-container .toast.toast-error { background-color: #d32f2f !important; border-left: 5px solid #ff8a80; }
 
@@ -136,7 +132,7 @@
                     </div>
                 </div>
                 <div style="margin-top: 20px; width: 100%; padding: 0 20px; box-sizing: border-box;">
-                    <a id="btn-view-public-profile" href="#" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px; background-color: var(--cor-girassol); border: none; border-radius: 30px; color: var(--verde-escuro); text-decoration: none; font-size: 0.95rem; font-weight: 700; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s ease; box-sizing: border-box;">
+                    <a id="btn-view-public-profile" target="_blank" style="cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px; background-color: var(--cor-girassol); border: none; border-radius: 30px; color: var(--verde-escuro); text-decoration: none; font-size: 0.95rem; font-weight: 700; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s ease; box-sizing: border-box;">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg>
                         Ver como Paciente
                     </a>
@@ -161,22 +157,23 @@
 
     <div id="payment-modal" class="modal-overlay">
         <div class="modal-content">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center;">
+            <div class="modal-header-custom">
                 <h3 style="margin:0; color: #1B4332;">Pagamento Seguro</h3>
                 <button onclick="fecharModalStripe()" style="background:none; border:none; font-size: 2rem; cursor:pointer; color: #666; line-height: 1;">&times;</button>
             </div>
             
-            <form id="payment-form">
-                <div id="payment-element">
-                    </div>
-                
-                <button id="btn-confirmar-stripe">Pagar Agora</button>
-                <div id="payment-message" class="hidden" style="margin-top: 15px; color: #e63946; font-size: 0.9rem; text-align: center;"></div>
-            </form>
+            <div class="modal-body-custom">
+                <form id="payment-form">
+                    <div id="payment-element"></div>
+                    
+                    <button id="btn-confirmar-stripe">Pagar Agora</button>
+                    <div id="payment-message" class="hidden" style="margin-top: 15px; color: #e63946; font-size: 0.9rem; text-align: center;"></div>
+                </form>
+            </div>
         </div>
     </div>
 
-    <div id="modal-cancelamento" class="custom-modal-overlay">
+    <div id="modal-cancelamento" class="custom-modal-overlay" style="display: none;">
         <div class="custom-modal-box">
             <div style="margin-bottom: 20px; color: #e63946;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/></svg>
@@ -191,7 +188,7 @@
     </div>
 
     <script src="https://unpkg.com/imask"></script>
-    <script src="/config.js?v=1.8"></script>
-    <script src="psi_dashboard.js?v=1.8"></script>
+    <script src="/config.js?v=2.0"></script>
+    <script src="psi_dashboard.js?v=2.0"></script>
 </body>
 </html>
