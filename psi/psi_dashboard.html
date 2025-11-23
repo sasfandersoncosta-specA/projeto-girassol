@@ -59,12 +59,15 @@
         position: relative; overflow: hidden;
     }
     
-    /* CORREÇÃO 1: Fonte do Nome do Plano no Banner */
-    /* Forçamos a mesma família de fonte do título principal */
+    /* CORREÇÃO 1: Fonte igual ao Título H1 */
     #banner-nome-plano, .nome-plano-banner, .fonte-kansas {
-        font-family: 'KansasNew', 'Times New Roman', serif !important;
+        font-family: 'New Kansas', serif !important; /* NOME CORRIGIDO */
         font-weight: 700 !important;
+        font-size: 2.5rem !important;
+        color: #ffffff !important;
         letter-spacing: -0.5px;
+        margin-bottom: 5px;
+        line-height: 1.1;
     }
     /* Badge atualizado */
     .status-badge {
@@ -199,11 +202,10 @@
 
             <section id="card-resumo-assinatura" class="plano-atual-moderno" style="display: none;">
                 <div class="info-lado-esquerdo">
-                    <div class="fonte-kansas" id="banner-nome-plano">Carregando...</div>
                     <div class="fonte-kansas" id="banner-nome-plano">--</div>
+                    
                     <div class="status-badge">
                         <span style="width: 8px; height: 8px; background: #4ade80; border-radius: 50%;"></span>
-                        Plano Ativo </div>
                         Ativo e Validado
                     </div>
                 </div>
