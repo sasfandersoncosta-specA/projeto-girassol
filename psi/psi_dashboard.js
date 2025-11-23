@@ -1,48 +1,58 @@
-// Arquivo: psi_dashboard.js (VERSÃO FINAL - CORRIGIDA)
+// Arquivo: psi_dashboard.js (VERSÃO FINAL 2.1)
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("--- SISTEMA GIRASSOL V2.0 INICIADO ---");
+    console.log("--- SISTEMA GIRASSOL V2.1 INICIADO ---");
     
     let psychologistData = null; 
+    // Variável para guardar qual plano o usuário está tentando assinar no modal
+    let currentPlanAttempt = ''; 
+
     const mainContent = document.getElementById('main-content');
     const toastContainer = document.getElementById('toast-container');
 
-    // --- CORREÇÃO IMEDIATA: O Event Listener do "X" agora vive aqui fora ---
-    // Isso garante que o botão fechar funcione SEMPRE, independente de pagamentos
+    // BOTÃO X FECHAR MODAL (Lógica Global Segura)
     const btnCloseX = document.getElementById('btn-close-modal-x');
     const modalPagamento = document.getElementById('payment-modal');
 
     if (btnCloseX && modalPagamento) {
         btnCloseX.addEventListener('click', function(e) {
             e.preventDefault();
-            // Removemos o style inline para o CSS original (display:none) voltar a valer
-            // ou forçamos o none diretamente
             modalPagamento.style.setProperty('display', 'none', 'important');
         });
     }
-    // -----------------------------------------------------------------------
+    
+    // BOTÃO APLICAR CUPOM (Lógica dentro do Modal)
+    const btnAplicarModal = document.getElementById('btn-aplicar-cupom-modal');
+    if (btnAplicarModal) {
+        btnAplicarModal.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const cupomVal = document.getElementById('modal-cupom-input').value;
+            if(!cupomVal || !currentPlanAttempt) return;
 
-    // No topo de psi_dashboard.js, logo após as variáveis:
-    function setupMasks() {
-        if (typeof IMask === 'undefined') return;
-        const cpf = document.getElementById('cpf');
-        const tel = document.getElementById('telefone');
-        const crp = document.getElementById('crp');
-        if (cpf) IMask(cpf, { mask: '000.000.000-00' });
-        if (tel) IMask(tel, { mask: '(00) 00000-0000' });
-        if (crp) IMask(crp, { mask: '00/000000' }); 
+            // Feedback visual
+            btnAplicarModal.textContent = "...";
+            
+            // Reinicia o pagamento com o cupom aplicado
+            try {
+                // Fechamos o modal visualmente por 1s ou apenas recarregamos o elemento
+                await window.iniciarPagamento(currentPlanAttempt, { textContent: '' }, cupomVal);
+                // Nota: iniciarPagamento já cuida de remontar o Stripe Element
+            } catch (err) {
+                console.error(err);
+            } finally {
+                btnAplicarModal.textContent = "Aplicar";
+            }
+        });
     }
 
-    // --- 1. CONFIGURAÇÃO STRIPE ---
+    // --- CONFIGURAÇÃO STRIPE ---
     let stripe;
     let elements;
     try {
         stripe = Stripe('pk_test_51SWdGOR73Pott0IUw2asi2NZg0DpjAOdziPGvVr8SAmys1VASh2i3EAEpErccZLYHMEWfI9hIq68xL3piRCjsvIa00MkUDANOA');
-    } catch (e) {
-        console.error("Erro Stripe:", e);
-    }
+    } catch (e) { console.error("Erro Stripe:", e); }
 
-    // --- 2. HELPERS ---
+    // --- HELPERS E FETCH ---
     function showToast(message, type = 'success') {
         if (!toastContainer) return;
         const toast = document.createElement('div');
@@ -61,8 +71,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return `${API_BASE_URL}${cleanPath}`;
     }
 
-    // --- 3. CORE FUNCTIONS (NAV E DATA) ---
-    // (Mantenha as funções apiFetch, fetchPsychologistData, atualizarInterfaceLateral e loadPage IGUAIS)
     async function apiFetch(url, options = {}) {
         const token = localStorage.getItem('girassol_token');
         if (!token) throw new Error("Token não encontrado.");
@@ -104,10 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if(nameEl) nameEl.textContent = psychologistData.nome;
         if(imgEl) imgEl.src = formatImageUrl(psychologistData.fotoUrl);
         const btnLink = document.getElementById('btn-view-public-profile');
-        if(btnLink && psychologistData.slug) {
-            const finalLink = `/${psychologistData.slug}`;
-            btnLink.href = finalLink;
-        }
+        if(btnLink && psychologistData.slug) btnLink.href = `/${psychologistData.slug}`;
     }
 
     function loadPage(url) {
@@ -127,31 +132,43 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(e => mainContent.innerHTML = `<p>Erro ao carregar: ${e}</p>`);
     }
 
-    // --- 4. PAGAMENTOS (STRIPE E CUPOM) ---
+    // --- LÓGICA DE PAGAMENTO ---
 
-    window.iniciarPagamento = async function(planType, btnElement) {
-        const originalText = btnElement.textContent;
-        btnElement.textContent = "Carregando...";
-        btnElement.disabled = true;
+    window.iniciarPagamento = async function(planType, btnElement, cupomForce = null) {
+        // Guarda qual plano está sendo tentado para caso use o cupom
+        currentPlanAttempt = planType;
+        
+        // Se btnElement não for um elemento DOM real (chamada via código), simulamos um obj
+        const btn = btnElement.tagName ? btnElement : { textContent: '', disabled: false };
+        
+        const originalText = btn.textContent;
+        if(btn.tagName) {
+            btn.textContent = "Carregando...";
+            btn.disabled = true;
+        }
 
         try {
-            const cupomInput = document.getElementById('cupom-input');
-            const cupomCodigo = cupomInput ? cupomInput.value.trim() : '';
+            // Pega cupom ou do modal ou nulo
+            const cupomCodigo = cupomForce || '';
 
             const res = await apiFetch(`${API_BASE_URL}/api/payments/create-preference`, {
                 method: 'POST', body: JSON.stringify({ planType, cupom: cupomCodigo })
             });
             const data = await res.json();
 
+            // Se for cupom 100% que ativa direto (Backend decide)
             if (data.couponSuccess) {
                 showToast(data.message, 'success');
+                // Fecha modal se estiver aberto
+                document.getElementById('payment-modal').style.setProperty('display', 'none', 'important');
                 await fetchPsychologistData();
-                loadPage('psi_assinatura.html');
+                loadPage('psi_assinatura.html'); // Recarrega para mostrar plano ativo
                 return;
             }
 
             if (data.clientSecret) {
                 abrirModalStripe(data.clientSecret);
+                if(cupomForce) showToast('Cupom aplicado!', 'success');
             } else {
                 throw new Error("Falha ao iniciar pagamento.");
             }
@@ -159,22 +176,21 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error(error);
             showToast('Erro: ' + error.message, 'error');
         } finally {
-            btnElement.textContent = originalText;
-            btnElement.disabled = false;
+            if(btn.tagName) {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
         }
     };
 
     function abrirModalStripe(clientSecret) {
         const modal = document.getElementById('payment-modal');
         const container = document.getElementById('payment-element');
-        
-        // Elementos do formulário
         const form = document.getElementById('payment-form');
         const btnSubmit = document.getElementById('btn-confirmar-stripe');
 
         if (!modal || !container) return;
 
-        // Mostra o modal
         modal.style.display = 'flex';
         modal.style.opacity = 1;
         modal.style.visibility = 'visible';
@@ -186,248 +202,118 @@ document.addEventListener('DOMContentLoaded', function() {
         const paymentElement = elements.create('payment', { layout: 'tabs' });
         paymentElement.mount('#payment-element');
 
-        // --- A CORREÇÃO VITAL ESTÁ AQUI ---
-        // Interceptamos o clique para impedir o recarregamento da página
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault(); // <--- ISSO IMPEDE O RECARREGAMENTO "ANSIOSO"
-            
+        // Impede duplo submit
+        form.onsubmit = async (e) => {
+            e.preventDefault();
             btnSubmit.disabled = true;
             btnSubmit.textContent = "Processando...";
 
             const { error } = await stripe.confirmPayment({
                 elements,
                 confirmParams: {
-                    // Após o pagamento, a Stripe te manda de volta para cá
-                    // Adicionamos ?status=approved para o seu JS saber que deu certo
                     return_url: window.location.href.split('?')[0] + '?status=approved',
                 },
             });
 
-            // Se chegou aqui, é porque houve erro imediato (cartão recusado, etc)
             if (error) {
                 const messageDiv = document.getElementById('payment-message');
                 messageDiv.classList.remove('hidden');
                 messageDiv.textContent = error.message;
                 messageDiv.style.color = "red";
-                messageDiv.style.marginTop = "10px";
-                
                 btnSubmit.disabled = false;
                 btnSubmit.textContent = "Pagar Agora";
             }
-            // Se der sucesso, a Stripe redireciona a página automaticamente,
-            // então não precisamos fazer mais nada aqui.
-        });
-    }
-    
-    window.fecharModalStripe = function() {
-        // Forçamos o fechamento com important também
-        document.getElementById('payment-modal').style.setProperty('display', 'none', 'important');
-    };
-
-        // --- 5. PÁGINAS ESPECÍFICAS ---
-
-    function inicializarVisaoGeral() {
-        if(document.getElementById('psi-welcome-name') && psychologistData) {
-            document.getElementById('psi-welcome-name').textContent = `Olá, ${psychologistData.nome.split(' ')[0]}`;
-        }
+        };
     }
 
-    function inicializarLogicaDoPerfil() {
-        const form = document.getElementById('perfil-form');
-        if (!form) return;
-        
-        // Preenche dados
-        if (psychologistData) {
-            const fields = ['nome', 'cpf', 'email', 'crp', 'telefone', 'bio', 'valor_sessao_numero', 'slug'];
-            fields.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.value = psychologistData[id] || '';
-            });
-            setupMasks();
-            
-            // Redes sociais
-            ['linkedin_url', 'instagram_url', 'facebook_url', 'tiktok_url', 'x_url'].forEach(key => {
-                const el = document.getElementById(key);
-                if(el && psychologistData[key]) {
-                    // Remove prefixos para exibir bonito
-                    let val = psychologistData[key];
-                    val = val.replace('https://', '').replace('http://', '').replace('www.', '')
-                             .replace('linkedin.com/in/', '').replace('instagram.com/', '')
-                             .replace('facebook.com/', '').replace('tiktok.com/@', '').replace('x.com/', '');
-                    el.value = val;
-                }
-            });
-            
-            // Botões
-            const btnAlterar = document.getElementById('btn-alterar');
-            const btnSalvar = document.getElementById('btn-salvar');
-            const fieldset = document.getElementById('form-fieldset');
-
-            btnAlterar.onclick = (e) => { e.preventDefault(); fieldset.disabled = false; btnAlterar.classList.add('hidden'); btnSalvar.classList.remove('hidden'); };
-            
-            form.onsubmit = async (e) => {
-                e.preventDefault();
-                const cpfInput = document.getElementById('cpf');
-                if (!isValidCPF(cpfInput.value)) { showToast('CPF inválido!', 'error'); return; }
-
-                btnSalvar.textContent = "Salvando...";
-                const fd = new FormData(form);
-                const data = Object.fromEntries(fd.entries());
-                if (data.cpf) data.cpf = data.cpf.replace(/\D/g, '');
-
-                try {
-                    await apiFetch(`${API_BASE_URL}/api/psychologists/me`, { method: 'PUT', body: JSON.stringify(data) });
-                    showToast('Perfil salvo!', 'success');
-                    psychologistData = { ...psychologistData, ...data }; // Atualiza local
-                    atualizarInterfaceLateral(); // Atualiza nome/link na lateral
-                    fieldset.disabled = true;
-                    btnSalvar.classList.add('hidden');
-                    btnAlterar.classList.remove('hidden');
-                } catch (err) { showToast(err.message, 'error'); }
-                finally { btnSalvar.textContent = "Salvar Alterações"; }
-            };
-        }
-        
-        // Upload Foto
-        const uploadInput = document.getElementById('profile-photo-upload');
-        const imgEl = document.getElementById('psi-sidebar-photo');
-        if (uploadInput && imgEl) {
-            uploadInput.onchange = async (e) => {
-                if(e.target.files[0]) {
-                    const fd = new FormData();
-                    fd.append('foto', e.target.files[0]);
-                    try {
-                        const res = await apiFetch(`${API_BASE_URL}/api/psychologists/me/foto`, { method: 'POST', body: fd });
-                        if(res.ok) {
-                            const d = await res.json();
-                            psychologistData.fotoUrl = d.fotoUrl;
-                            atualizarInterfaceLateral();
-                            showToast('Foto atualizada!');
-                        }
-                    } catch (err) { showToast('Erro na foto', 'error'); }
-                }
-            };
-        }
-
-        // --- ADICIONE ISTO NO FINAL DA FUNÇÃO ---
-        
-        // Localiza o botão/link de excluir conta (ajuste o ID 'btn-excluir-conta' se o seu for diferente)
-        const btnExcluir = document.getElementById('btn-excluir-conta') || document.querySelector('a[href*="excluir_conta"]');
-        
-        if (btnExcluir) {
-            btnExcluir.onclick = (e) => {
-                // Se for um botão ou link com href="#", prevenimos o comportamento padrão
-                // Se for um link direto (href="..."), o preventDefault impediria o redirecionamento, então cuidado.
-                // Mas para garantir o redirecionamento forçado:
-                e.preventDefault();
-                window.location.href = 'psi_excluir_conta.html';
-            };
-        }
-    }
-
+    // --- PÁGINA ASSINATURA (CORREÇÕES VISUAIS) ---
     function inicializarAssinatura() {
         const cardResumo = document.getElementById('card-resumo-assinatura');
         const areaCancelamento = document.getElementById('area-cancelamento');
         const temPlano = psychologistData && psychologistData.plano;
         
-        // Mapeamento de Preços
-        const precos = {
-            'semente': 'R$ 49,00',
-            'luz': 'R$ 99,00',
-            'sol': 'R$ 149,00'
-        };
+        const precos = { 'semente': 'R$ 49,00', 'luz': 'R$ 99,00', 'sol': 'R$ 149,00' };
 
         if (temPlano && cardResumo) {
-            const planoKey = psychologistData.plano.toLowerCase();
-            const precoAtual = precos[planoKey] || 'R$ --';
-            
-            // Exibir Banner e Área de Cancelamento
             cardResumo.style.display = 'flex';
             if(areaCancelamento) areaCancelamento.style.display = 'block';
 
-            // 1. Atualizar textos do Banner
-            const elNome = document.getElementById('banner-nome-plano');
-            const elPreco = document.getElementById('banner-preco');
+            const planoKey = psychologistData.plano.toLowerCase();
+            
+            // 1. DATA DE RENOVAÇÃO (CORREÇÃO)
             const elData = document.getElementById('banner-renovacao');
-            
-            if(elNome) elNome.textContent = `Plano ${psychologistData.plano}`;
-            if(elPreco) elPreco.textContent = `${precoAtual} / mês`;
-            
-            // Formatar data (exemplo simples, o ideal é vir formatado do back)
-            if(elData && psychologistData.subscription_expires_at) {
-                const dataObj = new Date(psychologistData.subscription_expires_at);
-                elData.textContent = `Renova em: ${dataObj.toLocaleDateString('pt-BR')}`;
+            if(elData) {
+                let dataDisplay;
+                if (psychologistData.subscription_expires_at) {
+                    dataDisplay = new Date(psychologistData.subscription_expires_at);
+                } else {
+                    // Fallback: Se não tem data no banco (ex: pagou agora), mostra Hoje + 1 Mês
+                    const hoje = new Date();
+                    dataDisplay = new Date(hoje.setMonth(hoje.getMonth() + 1));
+                }
+                elData.textContent = `Renova em: ${dataDisplay.toLocaleDateString('pt-BR')}`;
             }
 
-            // 2. Lógica de Cancelamento (Nova posição)
+            // Banner Texts
+            const elNome = document.getElementById('banner-nome-plano');
+            const elPreco = document.getElementById('banner-preco');
+            if(elNome) elNome.textContent = `Plano ${psychologistData.plano}`;
+            if(elPreco) elPreco.textContent = `${precos[planoKey] || 'R$ --'} / mês`;
+
+            // Setup Cancelamento (Rodapé)
             const btnCancelar = document.getElementById('btn-cancelar-assinatura');
             const modalCancel = document.getElementById('modal-cancelamento');
-            const btnFecharModal = document.getElementById('btn-fechar-modal-cancel');
-            const btnConfirmarCancel = document.getElementById('btn-confirmar-cancelamento');
+            const btnFechar = document.getElementById('btn-fechar-modal-cancel');
+            const btnConfirmar = document.getElementById('btn-confirmar-cancelamento');
 
             if(btnCancelar && modalCancel) {
-                // Removemos listeners antigos clonando
                 const novoBtn = btnCancelar.cloneNode(true);
                 btnCancelar.parentNode.replaceChild(novoBtn, btnCancelar);
+                novoBtn.onclick = (e) => { e.preventDefault(); modalCancel.style.display = 'flex'; };
+
+                if(btnFechar) btnFechar.onclick = () => modalCancel.style.display = 'none';
                 
-                novoBtn.onclick = (e) => {
-                    e.preventDefault();
-                    modalCancel.style.display = 'flex'; // Abre o modal corrigido
-                };
-
-                // Fechar Modal
-                if(btnFecharModal) {
-                    btnFecharModal.onclick = () => modalCancel.style.display = 'none';
-                }
-
-                // Confirmar Cancelamento
-                if(btnConfirmarCancel) {
-                    btnConfirmarCancel.onclick = async function() {
+                if(btnConfirmar) {
+                    btnConfirmar.onclick = async function() {
                         this.textContent = "Processando...";
                         try {
                             await apiFetch(`${API_BASE_URL}/api/psychologists/me/cancel-subscription`, { method: 'POST' });
-                            psychologistData.plano = null; // Zera localmente
+                            psychologistData.plano = null;
                             modalCancel.style.display = 'none';
-                            showToast('Assinatura cancelada com sucesso.', 'info');
-                            // Recarrega a tela para atualizar o estado
+                            showToast('Assinatura cancelada.', 'info');
                             inicializarAssinatura(); 
                         } catch(e) {
-                            showToast('Erro ao cancelar: ' + e.message, 'error');
+                            showToast('Erro: ' + e.message, 'error');
                             this.textContent = "Sim, Cancelar";
                         }
                     };
                 }
             }
         } else {
-            // Sem plano: Esconde banner e área de cancelamento
             if(cardResumo) cardResumo.style.display = 'none';
             if(areaCancelamento) areaCancelamento.style.display = 'none';
         }
 
-        // 3. Lógica dos Botões nos Cards ("Plano Atual" vs "Trocar de Plano")
+        // CARDS E BOTÕES
         document.querySelectorAll('.plano-card').forEach(card => {
             const btn = card.querySelector('.btn-mudar-plano');
             if (!btn) return;
             
-            // Descobre qual plano é esse card
-            let planoCard = btn.getAttribute('data-plano');
+            let planoCard = btn.getAttribute('data-plano') || '';
             if(!planoCard) {
-                const text = card.textContent.toLowerCase();
-                if(text.includes('semente')) planoCard = 'semente';
-                else if(text.includes('luz')) planoCard = 'luz';
+                const txt = card.textContent.toLowerCase();
+                if(txt.includes('semente')) planoCard = 'semente';
+                else if(txt.includes('luz')) planoCard = 'luz';
                 else planoCard = 'sol';
             }
-            
-            // Reseta estilos
+
             card.classList.remove('plano-card--ativo');
             const selo = card.querySelector('.selo-plano-atual');
             if(selo) selo.remove();
 
-            // Verifica se é o plano do usuário
-            const isCurrentPlan = temPlano && psychologistData.plano.toLowerCase() === planoCard.toLowerCase();
+            const isCurrent = temPlano && psychologistData.plano.toLowerCase() === planoCard.toLowerCase();
 
-            if(isCurrentPlan) {
-                // ESTADO: PLANO ATUAL
+            if(isCurrent) {
                 card.classList.add('plano-card--ativo');
                 const novoSelo = document.createElement('div');
                 novoSelo.className = 'selo-plano-atual';
@@ -437,47 +323,113 @@ document.addEventListener('DOMContentLoaded', function() {
                 btn.textContent = "Plano Atual";
                 btn.disabled = true;
                 btn.style.opacity = "0.6";
-                btn.style.cursor = "default";
             } else {
-                // ESTADO: OUTRO PLANO (Trocar ou Assinar)
-                if (temPlano) {
-                    btn.textContent = "Trocar de Plano"; // Mudança solicitada
-                } else {
-                    btn.textContent = "Assinar Agora";
-                }
-                
+                btn.textContent = temPlano ? "Trocar de Plano" : "Assinar Agora";
                 btn.disabled = false;
                 btn.style.opacity = "1";
-                btn.style.cursor = "pointer";
-                
                 btn.onclick = (e) => {
                     e.preventDefault();
                     window.iniciarPagamento(planoCard.toLowerCase(), btn);
                 };
             }
         });
+    }
+    
+    // --- RESTANTE DAS FUNÇÕES (PERFIL, EXCLUIR CONTA, ETC) ---
+    function inicializarVisaoGeral() {
+        if(document.getElementById('psi-welcome-name') && psychologistData) {
+            document.getElementById('psi-welcome-name').textContent = `Olá, ${psychologistData.nome.split(' ')[0]}`;
+        }
+    }
+    
+    function inicializarLogicaDoPerfil() {
+        const form = document.getElementById('perfil-form');
+        if (!form) return;
+        
+        if (psychologistData) {
+            ['nome','cpf','email','crp','telefone','bio','valor_sessao_numero','slug'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = psychologistData[id] || '';
+            });
+            setupMasks();
+            
+            ['linkedin_url','instagram_url','facebook_url','tiktok_url','x_url'].forEach(key => {
+                const el = document.getElementById(key);
+                if(el && psychologistData[key]) {
+                    let val = psychologistData[key].replace(/https?:\/\/(www\.)?/,'').replace(/linkedin\.com\/in\//,'').replace(/instagram\.com\//,'');
+                    el.value = val;
+                }
+            });
 
-        // Botão de aplicar cupom (Dispara plano Sol por padrão no seu código original, mantido)
-        const btnCupom = document.getElementById('btn-aplicar-cupom');
-        if(btnCupom) btnCupom.onclick = () => window.iniciarPagamento('sol', btnCupom);
+            const btnAlterar = document.getElementById('btn-alterar');
+            const btnSalvar = document.getElementById('btn-salvar');
+            const fieldset = document.getElementById('form-fieldset');
+
+            btnAlterar.onclick = (e) => { e.preventDefault(); fieldset.disabled = false; btnAlterar.classList.add('hidden'); btnSalvar.classList.remove('hidden'); };
+            
+            form.onsubmit = async (e) => {
+                e.preventDefault();
+                btnSalvar.textContent = "Salvando...";
+                const fd = new FormData(form);
+                const data = Object.fromEntries(fd.entries());
+                if (data.cpf) data.cpf = data.cpf.replace(/\D/g, '');
+                try {
+                    await apiFetch(`${API_BASE_URL}/api/psychologists/me`, { method: 'PUT', body: JSON.stringify(data) });
+                    showToast('Perfil salvo!', 'success');
+                    psychologistData = { ...psychologistData, ...data };
+                    atualizarInterfaceLateral();
+                    fieldset.disabled = true; btnSalvar.classList.add('hidden'); btnAlterar.classList.remove('hidden');
+                } catch (err) { showToast(err.message, 'error'); }
+                finally { btnSalvar.textContent = "Salvar Alterações"; }
+            };
+        }
+
+        const uploadInput = document.getElementById('profile-photo-upload');
+        if (uploadInput) {
+            uploadInput.onchange = async (e) => {
+                if(e.target.files[0]) {
+                    const fd = new FormData(); fd.append('foto', e.target.files[0]);
+                    try {
+                        const res = await apiFetch(`${API_BASE_URL}/api/psychologists/me/foto`, { method: 'POST', body: fd });
+                        if(res.ok) {
+                            const d = await res.json();
+                            psychologistData.fotoUrl = d.fotoUrl;
+                            atualizarInterfaceLateral(); showToast('Foto atualizada!');
+                        }
+                    } catch (err) { showToast('Erro na foto', 'error'); }
+                }
+            };
+        }
+
+        // --- EXCLUIR CONTA ---
+        const btnExcluir = document.getElementById('btn-excluir-conta') || document.querySelector('a[href*="excluir_conta"]');
+        if (btnExcluir) {
+            btnExcluir.onclick = (e) => { e.preventDefault(); window.location.href = 'psi_excluir_conta.html'; };
+        }
+    }
+    
+    function setupMasks() {
+        if (typeof IMask === 'undefined') return;
+        const cpf = document.getElementById('cpf');
+        const tel = document.getElementById('telefone');
+        const crp = document.getElementById('crp');
+        if (cpf) IMask(cpf, { mask: '000.000.000-00' });
+        if (tel) IMask(tel, { mask: '(00) 00000-0000' });
+        if (crp) IMask(crp, { mask: '00/000000' }); 
     }
 
-    // --- START ---
+    // INIT
     fetchPsychologistData().then(ok => {
         if (ok) {
             document.getElementById('dashboard-container').style.display = 'flex';
-            
-            // Sidebar clicks
             document.querySelectorAll('.sidebar-nav a').forEach(l => {
                 l.onclick = (e) => { e.preventDefault(); loadPage(l.getAttribute('data-page')); };
             });
-
-            // Stripe Return
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('status')) {
                 loadPage('psi_assinatura.html');
                 if (urlParams.get('status') === 'approved') {
-                    showToast('Pagamento Aprovado! Assinatura ativa.', 'success');
+                    showToast('Pagamento Aprovado!', 'success');
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
             } else {

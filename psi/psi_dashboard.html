@@ -5,170 +5,121 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Dashboard - Projeto Girassol</title>
 
-    <link rel="stylesheet" href="../style.css?v=2.0">
-    <link rel="stylesheet" href="psi_dashboard.css?v=2.0">
+    <link rel="stylesheet" href="../style.css?v=2.1">
+    <link rel="stylesheet" href="psi_dashboard.css?v=2.1">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@700&display.swap" rel="stylesheet">
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
-    
     <script src="https://js.stripe.com/v3/"></script>
 
     <style>
-        /* --- MODAL DE PAGAMENTO --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); /* Fundo bem escuro */
-            display: none; justify-content: center; align-items: center;
-            z-index: 99999 !important;
-            backdrop-filter: blur(3px);
-        }
-        
-        /* Ajuste do Modal para parecer um Checkout moderno */
-        .modal-content {
-            background: #ffffff;
-            padding: 0;
-            border-radius: 8px; /* Bordas mais suaves */
-            width: 100%;
-            max-width: 500px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-            display: flex; 
-            flex-direction: column;
-            animation: slideUp 0.3s ease;
-            border: 1px solid #e0e0e0;
-        }
+    /* SEUS ESTILOS ANTERIORES MANTIDOS */
+    .modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: none !important; /* Importante para o modal zumbi não voltar */
+        justify-content: center; align-items: center;
+        z-index: 99999 !important;
+        backdrop-filter: blur(3px);
+    }
+    
+    .modal-content {
+        background: #ffffff; padding: 0; border-radius: 8px;
+        width: 100%; max-width: 500px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        display: flex; flex-direction: column;
+        animation: slideUp 0.3s ease; border: 1px solid #e0e0e0;
+    }
 
-        /* Cabeçalho do Modal */
-        .modal-header-custom {
-            padding: 15px 20px;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #eee;
-            display: flex; justify-content: space-between; align-items: center;
-        }
+    .modal-header-custom {
+        padding: 15px 20px; background-color: #f8f9fa;
+        border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-body-custom { padding: 20px; }
+    
+    #payment-element { min-height: 50px; margin-bottom: 20px; width: 100%; }
 
-        .modal-body-custom {
-            padding: 20px;
-        }
+    #btn-confirmar-stripe {
+        width: 100%; background: #1B4332; color: white;
+        padding: 14px; border: none; border-radius: 8px;
+        cursor: pointer; font-weight: bold; font-size: 1rem;
+        transition: background 0.3s;
+    }
+    #btn-confirmar-stripe:hover { background: #2D6A4F; }
+    #btn-confirmar-stripe:disabled { background: #ccc; cursor: not-allowed; }
 
-        /* Área do Stripe (Removemos a borda vermelha e altura fixa excessiva) */
-        #payment-element {
-            min-height: 50px; /* Altura inicial pequena, o Stripe expande sozinho */
-            margin-bottom: 20px;
-            width: 100%;
-            /* Sem borda vermelha, sem fundo cinza */
-        }
+    /* --- ESTILO DO BANNER CORRIGIDO --- */
+    .plano-atual-moderno {
+        background: linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%);
+        border-radius: 16px; padding: 25px 30px; color: white;
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 30px; box-shadow: 0 10px 20px rgba(27, 67, 50, 0.15);
+        position: relative; overflow: hidden;
+    }
+    
+    /* Fonte "Kansas" simulada com Serif */
+    .fonte-kansas {
+        font-family: 'KansasNew', 'Times New Roman', serif;
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin: 5px 0;
+    }
 
-        /* Botão Pagar */
-        #btn-confirmar-stripe {
-            width: 100%; background: #1B4332; color: white;
-            padding: 14px; border: none; border-radius: 8px;
-            cursor: pointer; font-weight: bold; font-size: 1rem;
-            transition: background 0.3s;
-        }
-        #btn-confirmar-stripe:hover { background: #2D6A4F; }
-        #btn-confirmar-stripe:disabled { background: #ccc; cursor: not-allowed; }
+    /* Badge atualizado */
+    .status-badge {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: rgba(255,255,255,0.2); padding: 5px 12px;
+        border-radius: 20px; font-size: 0.85rem; font-weight: 500;
+        margin-top: 5px;
+    }
 
-        /* --- CARD PREMIUM DE ASSINATURA --- */
-        .plano-atual-moderno {
-            background: linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%);
-            border-radius: 16px; padding: 25px 30px; color: white;
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 30px; box-shadow: 0 10px 20px rgba(27, 67, 50, 0.15);
-            position: relative; overflow: hidden;
-        }
-        .plano-atual-moderno::before {
-            content: ''; position: absolute; top: -50px; right: -50px;
-            width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%;
-        }
-        .nome-plano-destaque { font-size: 2.2rem; font-weight: 700; margin: 5px 0; font-family: 'Montserrat', serif; }
-        .preco-destaque { font-size: 1.5rem; font-weight: 600; text-align: right; }
-        
-        .btn-cancelar-moderno {
-            background: rgba(230, 57, 70, 0.15); color: #ffadad;
-            border: 1px solid rgba(230, 57, 70, 0.3); padding: 8px 16px;
-            border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: all 0.3s;
-        }
-        .btn-cancelar-moderno:hover { background: rgba(230, 57, 70, 0.9); color: white; border-color: transparent; }
+    /* --- CUPOM DENTRO DO MODAL --- */
+    .modal-coupon-wrapper {
+        display: flex; margin-bottom: 20px;
+        border: 1px solid #eee; border-radius: 6px; overflow: hidden;
+    }
+    .modal-coupon-wrapper input {
+        flex: 1; border: none; padding: 10px; outline: none; font-size: 0.9rem;
+    }
+    .modal-coupon-wrapper button {
+        background: #eee; border: none; padding: 0 15px;
+        font-weight: 600; color: #555; cursor: pointer;
+        transition: 0.2s;
+    }
+    .modal-coupon-wrapper button:hover { background: #ddd; color: #000; }
 
-        /* Botões dos Planos */
-        .plano-card button {
-            background-color: #1B4332 !important; color: #FFFFFF !important;
-            border: none !important; border-radius: 50px !important;
-            padding: 12px 24px !important; font-family: 'Inter', sans-serif;
-            font-weight: 700; font-size: 0.95rem; cursor: pointer !important;
-            width: 100%; text-transform: uppercase; transition: all 0.3s ease !important;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); opacity: 1 !important;
-        }
-        .plano-card button:hover { transform: translateY(-4px); box-shadow: 0 8px 15px rgba(0,0,0,0.2); }
-        .plano-card button:disabled { background-color: #ccc !important; color: #666 !important; cursor: not-allowed !important; transform: none !important; box-shadow: none !important; }
+    /* Modal de Cancelamento */
+    .custom-modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.6); display: none;
+        justify-content: center; align-items: center; z-index: 10000;
+        backdrop-filter: blur(2px);
+    }
+    .custom-modal-box {
+        background: #ffffff; padding: 30px; border-radius: 12px;
+        width: 90%; max-width: 400px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center;
+        position: relative; animation: slideUp 0.3s ease;
+    }
 
-        #toast-container .toast { background-color: #1B4332 !important; color: white !important; border-left: 5px solid #F4A261; }
-        #toast-container .toast.toast-error { background-color: #d32f2f !important; border-left: 5px solid #ff8a80; }
-
-        @keyframes slideUp { from {transform: translateY(20px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
-
-        /* --- CORREÇÃO DO MODAL DE CANCELAMENTO (PRINT 2) --- */
-        .custom-modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); /* Fundo escuro */
-            display: none; justify-content: center; align-items: center;
-            z-index: 10000;
-            backdrop-filter: blur(2px);
-        }
-
-        .custom-modal-box {
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
-            text-align: center;
-            position: relative;
-            animation: slideUp 0.3s ease;
-        }
-
-        /* --- ESTILOS NOVOS SOLICITADOS --- */
-        
-        /* Fonte igual ao título para o nome do plano */
-        .font-header-style {
-            font-family: 'Montserrat', serif; /* Mesma fonte do título */
-            letter-spacing: -0.5px;
-        }
-
-        /* Área de Cancelamento Discreta (Rodapé) */
-        .danger-zone {
-            margin-top: 50px;
-            padding-top: 30px;
-            border-top: 1px solid #eee;
-            text-align: center;
-        }
-        .btn-cancelar-discreto {
-            background: none; border: none;
-            color: #999; font-size: 0.9rem;
-            cursor: pointer; text-decoration: underline;
-            transition: color 0.2s;
-        }
-        .btn-cancelar-discreto:hover { color: #e63946; }
-
-        /* Cupom Estilizado */
-        .coupon-area {
-            max-width: 600px; margin: 0 auto 40px auto;
-            display: flex; gap: 10px; justify-content: center;
-        }
+    /* Danger Zone (Rodapé) */
+    .danger-zone {
+        margin-top: 50px; padding-top: 30px;
+        border-top: 1px solid #eee; text-align: center;
+    }
+    .btn-cancelar-discreto {
+        background: none; border: none; color: #999;
+        font-size: 0.9rem; cursor: pointer; text-decoration: underline;
+    }
     </style>
+    
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js" defer></script>
-
 </head>
 <body class="pagina-dashboard">
     <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu">
-        <svg viewBox="0 0 100 80" width="24" height="24" fill="#1B4332">
-            <rect width="100" height="15" rx="8"></rect>
-            <rect y="30" width="100" height="15" rx="8"></rect>
-            <rect y="60" width="100" height="15" rx="8"></rect>
-        </svg>
+        <svg viewBox="0 0 100 80" width="24" height="24" fill="#1B4332"><rect width="100" height="15" rx="8"></rect><rect y="30" width="100" height="15" rx="8"></rect><rect y="60" width="100" height="15" rx="8"></rect></svg>
     </button>
     
     <div class="dashboard-container" id="dashboard-container" style="display: none;">
@@ -192,7 +143,6 @@
                     </a>
                 </div>
             </div>
-            
             <nav class="sidebar-nav">
                 <ul>
                     <li class="active"><a href="#" data-page="psi_visao_geral.html"><span>Visão Geral</span></a></li>
@@ -204,19 +154,87 @@
             </nav>
         </aside>
 
-        <main class="dashboard-main" id="main-content"></main>
+        <main class="dashboard-main" id="main-content">
+            <header class="main-header">
+                <h1>Gerencie sua Assinatura</h1>
+                <p class="subtitulo-header">Escolha o plano que melhor se alinha ao seu momento profissional.</p>
+            </header>
+
+            <section id="card-resumo-assinatura" class="plano-atual-moderno" style="display: none;">
+                <div class="info-lado-esquerdo">
+                    <div class="fonte-kansas" id="banner-nome-plano">Carregando...</div>
+                    <div class="status-badge">
+                        <span style="width: 8px; height: 8px; background: #4ade80; border-radius: 50%;"></span>
+                        Plano Ativo </div>
+                </div>
+                
+                <div class="info-lado-direito">
+                    <div class="preco-destaque" id="banner-preco">R$ -- / mês</div>
+                    <span class="data-renovacao" id="banner-renovacao">Renova em: --/--/----</span>
+                </div>
+            </section>
+
+            <section class="planos-grid">
+                <div class="plano-card">
+                    <h2>Plano Semente</h2>
+                    <div class="preco">R$ 49<span>/mês</span></div>
+                    <ul class="beneficios-lista">
+                        <li>Perfil Básico Visível</li>
+                        <li>Até 10 Cliques de Contato</li>
+                        <li>Suporte por E-mail</li>
+                    </ul>
+                    <div class="plano-cta">
+                        <button class="btn-mudar-plano" data-plano="Semente">Assinar Agora</button>
+                    </div>
+                </div>
+                <div class="plano-card">
+                    <h2>Plano Luz</h2>
+                    <div class="preco">R$ 99<span>/mês</span></div>
+                    <ul class="beneficios-lista">
+                        <li>Perfil Completo</li>
+                        <li>Até 30 Cliques de Contato</li>
+                        <li>Acesso a Workshops</li>
+                    </ul>
+                    <div class="plano-cta">
+                        <button class="btn-mudar-plano" data-plano="Luz">Assinar Agora</button>
+                    </div>
+                </div>
+                <div class="plano-card">
+                    <h2>Plano Sol</h2>
+                    <div class="preco">R$ 149<span>/mês</span></div>
+                    <ul class="beneficios-lista">
+                        <li>Perfil em Destaque</li>
+                        <li>Cliques Ilimitados</li>
+                        <li>Consultoria de Marketing</li>
+                    </ul>
+                    <div class="plano-cta">
+                        <button class="btn-mudar-plano btn-upgrade" data-plano="Sol">Assinar Agora</button>
+                    </div>
+                </div>
+            </section>
+
+            <div id="area-cancelamento" class="danger-zone" style="display: none;">
+                <p style="color: #666; font-size: 0.9rem; margin-bottom: 10px;">Deseja encerrar sua assinatura?</p>
+                <button id="btn-cancelar-assinatura" class="btn-cancelar-discreto">Cancelar renovação automática</button>
+            </div>
+        </main>
     </div>
 
     <div id="toast-container"></div>
 
     <div id="payment-modal" class="modal-overlay" style="display: none !important;">
         <div class="modal-content">
-            <div class="modal-header-custom" style="padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="margin:0; font-family: 'Inter', sans-serif; font-size: 1.1rem; color: #333;">Pagamento Seguro</h3>
+            <div class="modal-header-custom">
+                <h3 style="margin:0; font-family: 'Inter', sans-serif; font-size: 1.1rem; color: #333;">Checkout Seguro</h3>
                 <button id="btn-close-modal-x" type="button" style="background:none; border:none; font-size: 1.5rem; cursor:pointer; color: #999;">&times;</button>
             </div>
             
-            <div class="modal-body-custom" style="padding: 25px;">
+            <div class="modal-body-custom">
+               <div class="modal-coupon-wrapper">
+                   <input type="text" id="modal-cupom-input" placeholder="Cupom de desconto">
+                   <button id="btn-aplicar-cupom-modal" type="button">Aplicar</button>
+               </div>
+               
                <form id="payment-form">
                   <div id="payment-element"></div>
                   <div id="payment-message" class="hidden"></div>
@@ -226,13 +244,13 @@
         </div>
     </div>
 
-    <div id="modal-cancelamento" class="custom-modal-overlay" style="display: none;">
+    <div id="modal-cancelamento" class="custom-modal-overlay">
         <div class="custom-modal-box">
             <div style="margin-bottom: 20px; color: #e63946;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/></svg>
             </div>
             <h3 style="margin-bottom: 10px; color: #333;">Tem certeza?</h3>
-            <p style="color: #666; margin-bottom: 25px; line-height: 1.5;">Você continuará com acesso até o fim do período pago, mas a renovação será cancelada.</p>
+            <p style="color: #666; margin-bottom: 25px; line-height: 1.5;">Você continuará com acesso até o fim do período pago, mas sua assinatura não será renovada.</p>
             <div style="display: flex; gap: 10px; justify-content: center;">
                 <button id="btn-fechar-modal-cancel" style="padding: 10px 20px; border: 1px solid #ddd; background: #fff; border-radius: 6px; cursor: pointer; color: #555;">Manter Plano</button>
                 <button id="btn-confirmar-cancelamento" style="padding: 10px 20px; border: none; background: #e63946; border-radius: 6px; cursor: pointer; color: #fff; font-weight: bold;">Sim, Cancelar</button>
@@ -241,7 +259,7 @@
     </div>
 
     <script src="https://unpkg.com/imask"></script>
-    <script src="/config.js?v=2.0"></script>
-    <script src="psi_dashboard.js?v=2.0"></script>
+    <script src="/config.js?v=2.1"></script>
+    <script src="psi_dashboard.js?v=2.1"></script>
 </body>
 </html>
