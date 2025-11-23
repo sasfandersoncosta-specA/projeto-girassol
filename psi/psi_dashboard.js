@@ -170,24 +170,26 @@ document.addEventListener('DOMContentLoaded', function() {
         const modal = document.getElementById('payment-modal');
         const container = document.getElementById("payment-element");
         const btnCloseX = document.getElementById('btn-close-modal-x');
-
+    
         if (!modal || !container) {
-            console.error("Modal não encontrado!");
             return;
         }
-
-        // 1. Mostra o modal
+    
+        // Exibir modal ANTES do mount
         modal.style.display = 'flex';
-        
-        // 2. Limpa resquícios anteriores
+        modal.style.opacity = 1;
+        modal.style.visibility = 'visible';
+    
+        // Limpar e garantir altura do container Stripe
         container.innerHTML = '';
-
-        // 3. Configuração Visual (Estilo Tupperware/Clean)
+        container.style.minHeight = '64px';
+    
+        // Montar Stripe Elements (após modal visível)
         const appearance = {
-            theme: 'stripe', // O tema padrão já é muito parecido com o que você quer
-            labels: 'floating', // Labels flutuantes (moderno)
+            theme: 'stripe',
+            labels: 'floating',
             variables: {
-                colorPrimary: '#1B4332', // Sua cor de marca
+                colorPrimary: '#1B4332',
                 colorBackground: '#ffffff',
                 colorText: '#30313d',
                 colorDanger: '#df1b41',
@@ -195,31 +197,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 borderRadius: '6px',
             }
         };
-
-        // 4. Cria os elementos
         elements = stripe.elements({ appearance, clientSecret });
-        
-        // O 'payment' element cria tudo (cartão, pix, boleto) sozinho
-        const paymentElement = elements.create("payment", {
-            layout: "tabs", // Abas para Cartão/Pix (organizado)
-        });
-        
-        paymentElement.mount("#payment-element");
-
-        // 5. Conecta o botão de fechar (X)
+    
+        setTimeout(() => {
+            elements.create('payment', { layout: 'tabs' }).mount('#payment-element');
+        }, 50);
+    
+        // Botão fechar
         if(btnCloseX) {
             btnCloseX.onclick = (e) => {
                 e.preventDefault();
                 modal.style.display = 'none';
             };
         }
-
-        // 6. Conecta o Formulário
+    
+        // Lógica de submissão do formulário (mantida da versão anterior para funcionalidade)
         const form = document.getElementById('payment-form');
-        // Clona para remover listeners velhos e evitar travamento
         const newForm = form.cloneNode(true);
         form.parentNode.replaceChild(newForm, form);
-
+    
         newForm.onsubmit = async (e) => {
             e.preventDefault();
             
@@ -230,16 +226,14 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.textContent = "Processando...";
             msgDiv.textContent = "";
             msgDiv.classList.add("hidden");
-
+    
             const { error } = await stripe.confirmPayment({
                 elements,
                 confirmParams: {
-                    // Redireciona para o mesmo lugar com status=approved
                     return_url: window.location.href.split('?')[0] + "?status=approved",
                 },
             });
-
-            // Se chegou aqui, deu erro (pois o sucesso redireciona)
+    
             if (error) {
                 msgDiv.textContent = error.message;
                 msgDiv.classList.remove("hidden");
@@ -248,7 +242,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         };
     }
-
+    
     window.fecharModalStripe = function() {
         document.getElementById('payment-modal').style.display = 'none';
     };
