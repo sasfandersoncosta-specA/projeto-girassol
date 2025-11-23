@@ -120,6 +120,13 @@
     @keyframes slideUp { from {transform: translateY(20px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
 
     /* --- 3. CORREÇÃO DO TOAST (Fundo Escuro, Letra Branca) --- */
+    /* Força o modal a ficar na frente de tudo */
+    #payment-modal {
+        z-index: 99999 !important; 
+        background: rgba(0, 0, 0, 0.7); /* Fundo mais escuro para destacar */
+    }
+
+
     #toast-container .toast {
         background-color: #1B4332 !important; /* Fundo Verde Escuro */
         color: #ffffff !important; /* Letra Branca */
