@@ -7,6 +7,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const mainContent = document.getElementById('main-content');
     const toastContainer = document.getElementById('toast-container');
 
+    // --- CORREÇÃO IMEDIATA: O Event Listener do "X" agora vive aqui fora ---
+    // Isso garante que o botão fechar funcione SEMPRE, independente de pagamentos
+    const btnCloseX = document.getElementById('btn-close-modal-x');
+    const modalPagamento = document.getElementById('payment-modal');
+
+    if (btnCloseX && modalPagamento) {
+        btnCloseX.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Removemos o style inline para o CSS original (display:none) voltar a valer
+            // ou forçamos o none diretamente
+            modalPagamento.style.setProperty('display', 'none', 'important');
+        });
+    }
+    // -----------------------------------------------------------------------
+
     // No topo de psi_dashboard.js, logo após as variáveis:
     function setupMasks() {
         if (typeof IMask === 'undefined') return;
@@ -47,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // --- 3. CORE FUNCTIONS (NAV E DATA) ---
-
+    // (Mantenha as funções apiFetch, fetchPsychologistData, atualizarInterfaceLateral e loadPage IGUAIS)
     async function apiFetch(url, options = {}) {
         const token = localStorage.getItem('girassol_token');
         if (!token) throw new Error("Token não encontrado.");
@@ -65,14 +80,13 @@ document.addEventListener('DOMContentLoaded', function() {
     async function fetchPsychologistData() {
         const token = localStorage.getItem('girassol_token');
         if (!token) { window.location.href = '../login.html'; return false; }
-        
         try {
             const response = await fetch(`${API_BASE_URL}/api/psychologists/me`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
                 psychologistData = await response.json();
-                atualizarInterfaceLateral(); // Atualiza sidebar assim que os dados chegam
+                atualizarInterfaceLateral(); 
                 return true;
             }
             throw new Error("Token inválido");
@@ -85,38 +99,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function atualizarInterfaceLateral() {
         if (!psychologistData) return;
-        
-        // Nome e Foto
         const nameEl = document.getElementById('psi-sidebar-name');
         const imgEl = document.getElementById('psi-sidebar-photo');
         if(nameEl) nameEl.textContent = psychologistData.nome;
         if(imgEl) imgEl.src = formatImageUrl(psychologistData.fotoUrl);
-
-        // Link do Perfil Público (CORRIGIDO)
         const btnLink = document.getElementById('btn-view-public-profile');
         if(btnLink && psychologistData.slug) {
-            // Removemos o window.location.origin para evitar duplicação se o ambiente tiver subpasta
-            // Usamos apenas a barra para ir para a raiz do domínio
             const finalLink = `/${psychologistData.slug}`;
             btnLink.href = finalLink;
-            // O target="_blank" no HTML já garante nova aba, mas o link tem que ser diferente da página atual
         }
     }
 
     function loadPage(url) {
         if (!url) return;
         mainContent.innerHTML = '<div style="padding:40px; text-align:center; color:#888;">Carregando...</div>';
-        
-        // Dentro de loadPage(url)
         document.querySelectorAll('.sidebar-nav li').forEach(li => li.classList.remove('active'));
-
-        // Procura o link que tem o data-page igual à URL que estamos carregando
-        // O seletor agora é mais específico para evitar conflitos
         const activeLink = document.querySelector(`.sidebar-nav a[data-page="${url}"]`);
-
-        if (activeLink) {
-            activeLink.closest('li').classList.add('active');
-        }
+        if (activeLink) activeLink.closest('li').classList.add('active');
 
         fetch(url).then(r => r.ok ? r.text() : Promise.reject(url))
             .then(html => {
@@ -124,7 +123,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (url.includes('meu_perfil')) inicializarLogicaDoPerfil();
                 else if (url.includes('visao_geral')) inicializarVisaoGeral();
                 else if (url.includes('assinatura')) inicializarAssinatura();
-                // Outras páginas...
             })
             .catch(e => mainContent.innerHTML = `<p>Erro ao carregar: ${e}</p>`);
     }
@@ -169,17 +167,16 @@ document.addEventListener('DOMContentLoaded', function() {
     function abrirModalStripe(clientSecret) {
         const modal = document.getElementById('payment-modal');
         const container = document.getElementById('payment-element');
-        const btnCloseX = document.getElementById('btn-close-modal-x');
+        // REMOVIDO DAQUI: const btnCloseX = ... (Já está no topo do arquivo)
 
         if (!modal || !container) return;
 
-        // Só mostra o modal aqui (não ao carregar o dashboard)
+        // Ao abrir, removemos o !important do display:none para ele aparecer
         modal.style.display = 'flex';
         modal.style.opacity = 1;
         modal.style.visibility = 'visible';
         container.innerHTML = '';
 
-        // Stripe Elements config
         const appearance = { theme: 'stripe', labels: 'floating' };
         elements = stripe.elements({ appearance, clientSecret });
 
@@ -188,20 +185,15 @@ document.addEventListener('DOMContentLoaded', function() {
             paymentElement.mount('#payment-element');
         }, 50);
 
-        // Botão para fechar normalmente
-        if (btnCloseX) {
-            btnCloseX.onclick = (e) => {
-                e.preventDefault();
-                modal.style.display = 'none';
-            };
-        }
+        // REMOVIDO DAQUI: A lógica do onclick do botão X (agora está no topo)
     }
     
     window.fecharModalStripe = function() {
-        document.getElementById('payment-modal').style.display = 'none';
+        // Forçamos o fechamento com important também
+        document.getElementById('payment-modal').style.setProperty('display', 'none', 'important');
     };
 
-    // --- 5. PÁGINAS ESPECÍFICAS ---
+        // --- 5. PÁGINAS ESPECÍFICAS ---
 
     function inicializarVisaoGeral() {
         if(document.getElementById('psi-welcome-name') && psychologistData) {
