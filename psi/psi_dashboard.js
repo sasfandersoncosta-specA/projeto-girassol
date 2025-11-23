@@ -244,7 +244,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Texto do Nome (Limpo, sem 'Plano Ativo' antes)
             const elNome = document.getElementById('banner-nome-plano');
-            if(elNome) elNome.textContent = `Plano ${psychologistData.plano}`; // Ex: "Plano Sol"
+            if(elNome) elNome.textContent = `Plano ${psychologistData.plano}`;
             
             // Preço
             const elPreco = document.getElementById('banner-preco');

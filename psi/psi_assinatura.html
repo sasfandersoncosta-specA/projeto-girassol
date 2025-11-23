@@ -1,23 +1,48 @@
+<style>
+    /* Estilo exato para o Nome do Plano no Banner */
+    .nome-plano-banner {
+        font-family: 'KansasNew', 'Times New Roman', serif; /* Fonte do H1 */
+        font-size: 2.5rem; /* Tamanho grande como H1 */
+        font-weight: 700;
+        color: #ffffff !important; /* BRANCO PURO OBRIGATÓRIO */
+        margin-bottom: 8px; /* Espaço entre o nome e o badge */
+        line-height: 1;
+    }
+
+    /* Ajuste fino para o badge (cápsula) */
+    .status-badge {
+        display: inline-flex; 
+        align-items: center; 
+        gap: 8px;
+        background: rgba(255,255,255,0.15); 
+        padding: 6px 14px;
+        border-radius: 20px; 
+        font-size: 0.9rem; 
+        font-weight: 500;
+        color: #fff;
+        width: fit-content; /* Garante que a cápsula não estique */
+    }
+</style>
 <header class="main-header">
     <h1>Gerencie sua Assinatura</h1>
     <p class="subtitulo-header">Escolha o plano que melhor se alinha ao seu momento profissional.</p>
 </header>
 
-<section id="card-resumo-assinatura" class="plano-atual-moderno" style="display: none;">
-    <div class="info-lado-esquerdo">
-        <h1>Plano Ativo</h1>
-        <div class="nome-plano-destaque font-header-style" id="banner-nome-plano">Carregando...</div>
-        <div class="status-badge">
-            <span style="width: 8px; height: 8px; background: #4ade80; border-radius: 50%;"></span>
-            Ativo e Validado
-        </div>
-    </div>
-    
-    <div class="info-lado-direito">
-        <div class="preco-destaque" id="banner-preco">R$ -- / mês</div>
-        <span class="data-renovacao" id="banner-renovacao">Renova em: --/--/----</span>
-        </div>
-</section>
+            <section id="card-resumo-assinatura" class="plano-atual-moderno" style="display: none;">
+                <div class="info-lado-esquerdo">
+                    <div class="nome-plano-banner" id="banner-nome-plano">--</div>
+                    
+                    <div class="status-badge">
+                        <span style="width: 8px; height: 8px; background: #4ade80; border-radius: 50%;"></span>
+                        Ativo e Validado
+                    </div>
+                </div>
+                
+                <div class="info-lado-direito">
+                    <div class="preco-destaque" id="banner-preco" style="font-size: 1.8rem; font-weight: 700;">R$ -- / mês</div>
+                    <span class="data-renovacao" id="banner-renovacao" style="display:block; text-align:right; opacity:0.8; margin-top:5px; font-size:0.9rem;">Renova em: --/--/----</span>
+                </div>
+            </section>
 
 <section class="planos-grid">
     <div class="plano-card">
