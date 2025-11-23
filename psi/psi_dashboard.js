@@ -433,117 +433,111 @@ function isValidCPF(cpf) {
         // Por enquanto, eles ficam zerados como placeholder.
     }
 
-    // --- CONFIGURAÇÃO DO CHECKOUT TRANSPARENTE ---
-    const mp = new MercadoPago('TEST-3b56705c-edb9-46e7-b197-810510bef456', { // 
-        locale: 'pt-BR'
-    });
-    
-    let bricksBuilder = null;
-    
-// psi_dashboard.js
+    // --- CONFIGURAÇÃO STRIPE ---
+    const stripe = Stripe('pk_test_51SWdGOR73Pott0IUw2asi2NZg0DpjAOdziPGvVr8SAmys1VASh2i3EAEpErccZLYHMEWfI9hIq68xL3piRCjsvIa00MkUDANOA');
 
-async function iniciarPagamento(planType, btnElement) {
-    const originalText = btnElement.textContent;
-    btnElement.textContent = "Processando...";
-    btnElement.disabled = true;
+    let elements;
 
-    try {
-        const cupomInput = document.getElementById('cupom-input');
-        const cupomCodigo = cupomInput ? cupomInput.value.trim() : '';
+    async function iniciarPagamento(planType, btnElement) {
+        const originalText = btnElement.textContent;
+        btnElement.textContent = "Carregando...";
+        btnElement.disabled = true;
 
-        const res = await apiFetch(`${API_BASE_URL}/api/payments/create-preference`, {
-            method: 'POST',
-            body: JSON.stringify({ planType: planType, cupom: cupomCodigo })
-        });
+        try {
+            const cupomInput = document.getElementById('cupom-input');
+            const cupomCodigo = cupomInput ? cupomInput.value.trim() : '';
 
-        if (!res.ok) throw new Error('Erro na comunicação com o servidor');
-        
-        const data = await res.json();
+            // 1. Pede ao Backend para criar a intenção de pagamento
+            const res = await apiFetch(`${API_BASE_URL}/api/payments/create-preference`, {
+                method: 'POST',
+                body: JSON.stringify({ planType, cupom: cupomCodigo })
+            });
 
-        // 1. CUPOM GRÁTIS
-        if (data.couponSuccess) {
-            showToast(data.message, 'success');
-            setTimeout(() => window.location.reload(), 1500);
-            return;
-        }
+            const data = await res.json();
 
-        // 2. CHECKOUT TRANSPARENTE (Tenta abrir o modal)
-        if (data.id) {
-            // Verifica se o container do modal existe antes de tentar abrir
-            if (document.getElementById('payment-brick-container')) {
-                abrirModalPagamento(data.id, data.init_point);
-            } else {
-                console.warn("Container do modal não encontrado. Usando redirecionamento.");
-                window.location.href = data.init_point; // Fallback
+            // 2. Se for Cupom VIP
+            if (data.couponSuccess) {
+                showToast(data.message, 'success');
+                await fetchPsychologistData();
+                loadPage('psi_assinatura.html');
+                return;
             }
-        } 
-        // 3. PLANO B (Se não veio ID, usa o link direto)
-        else if (data.init_point) {
-            window.location.href = data.init_point;
-        } else {
-            throw new Error("Nenhum dado de pagamento retornado.");
+
+            // 3. Se for Pagamento Stripe -> Abre o Modal
+            if (data.clientSecret) {
+                abrirModalStripe(data.clientSecret);
+            }
+
+        } catch (error) {
+            console.error(error);
+            showToast('Erro ao iniciar pagamento.', 'error');
+        } finally {
+            btnElement.textContent = originalText;
+            btnElement.disabled = false;
         }
-
-    } catch (error) {
-        console.error(error);
-        showToast('Erro ao iniciar pagamento.', 'error');
-        btnElement.textContent = originalText;
-        btnElement.disabled = false;
     }
-    // Nota: Não colocamos o 'finally' para restaurar o botão aqui 
-    // porque se redirecionar ou abrir modal, queremos que o botão continue travado.
-}
-    
-async function abrirModalPagamento(preferenceId, backupLink) {
-    const modal = document.getElementById('payment-modal');
-    const loading = document.getElementById('brick-loading');
-    const container = document.getElementById('payment-brick-container');
-    
-    modal.style.display = 'flex';
-    loading.style.display = 'block';
-    container.innerHTML = ''; 
 
-    try {
-        bricksBuilder = mp.bricks();
-        
-        // --- SEGURANÇA NOVA: Se demorar mais de 8s, vai pro link externo ---
-        const timeout = setTimeout(() => {
-            console.warn("Modal demorou demais. Redirecionando...");
-            window.location.href = backupLink;
-        }, 8000);
-        // ------------------------------------------------------------------
+    function abrirModalStripe(clientSecret) {
+        const modal = document.getElementById('payment-modal');
+        modal.style.display = 'flex';
 
-        await bricksBuilder.create("payment", "payment-brick-container", {
-            initialization: {
-                amount: 100, 
-                preferenceId: preferenceId, 
+        // Configurações visuais para combinar com seu site
+        const appearance = {
+            theme: 'stripe',
+            variables: {
+                colorPrimary: '#1B4332',
             },
-            customization: {
-                paymentMethods: {
-                    ticket: "all", bankTransfer: "all", creditCard: "all", debitCard: "all", mercadoPago: "all",
-                },
-                visual: { style: { theme: "default" } },
-            },
-            callbacks: {
-                onReady: () => {
-                    clearTimeout(timeout); // Cancela o timer se carregou
-                    loading.style.display = 'none'; 
-                },
-                onSubmit: ({ selectedPaymentMethod, formData }) => {
-                    return new Promise((resolve, reject) => { resolve(); });
-                },
-                onError: (error) => {
-                    console.error(error);
-                    window.location.href = backupLink; // Erro? Manda pro link
-                },
-            },
-        });
+        };
 
-    } catch (e) {
-        console.error("Falha ao carregar Brick", e);
-        window.location.href = backupLink;
+        // Inicializa os elementos
+        elements = stripe.elements({ appearance, clientSecret });
+
+        const paymentElement = elements.create("payment");
+        paymentElement.mount("#payment-element");
+
+        // Lidar com o clique no botão "Pagar Agora"
+        const form = document.getElementById('payment-form');
+
+        // Evita múltiplos listeners se abrir o modal várias vezes
+        const newForm = form.cloneNode(true);
+        form.parentNode.replaceChild(newForm, form);
+
+        newForm.onsubmit = async (e) => {
+            e.preventDefault();
+            setLoading(true);
+
+            const { error } = await stripe.confirmPayment({
+                elements,
+                confirmParams: {
+                    // Para onde voltar se o pagamento der certo
+                    return_url: "https://projeto-girassol.onrender.com/psi/psi_dashboard.html?status=approved",
+                },
+            });
+
+            // Se chegou aqui, deu erro (pois sucesso redireciona)
+            if (error) {
+                const msg = document.getElementById("payment-message");
+                msg.textContent = error.message;
+                msg.classList.remove("hidden");
+                setLoading(false);
+            }
+        };
     }
-}
+
+    function setLoading(isLoading) {
+        const btn = document.getElementById("btn-confirmar-stripe");
+        if (isLoading) {
+            btn.disabled = true;
+            btn.textContent = "Processando...";
+        } else {
+            btn.disabled = false;
+            btn.textContent = "Pagar Agora";
+        }
+    }
+
+    function fecharModalStripe() {
+        document.getElementById('payment-modal').style.display = 'none';
+    }
 
 // psi_dashboard.js - Versão Final Premium
 

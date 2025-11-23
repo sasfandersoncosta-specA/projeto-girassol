@@ -1,125 +1,86 @@
 // backend/controllers/paymentController.js
-const { MercadoPagoConfig, Preference, Payment } = require('mercadopago');
 const db = require('../models');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-// Configura o cliente com o seu token do .env
-const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
-
-// 1. CRIA O LINK DE PAGAMENTO (O usuário clica no botão e chama isso)
+// 1. CRIA A INTENÇÃO DE PAGAMENTO (PaymentIntent)
 exports.createPreference = async (req, res) => {
     try {
-        const { planType, cupom } = req.body; // <--- AGORA RECEBE O CUPOM
+        const { planType, cupom } = req.body;
         const psychologistId = req.psychologist.id;
 
-        // --- SISTEMA DE CUPOM MÁGICO (BYPASS) ---
+        // --- LÓGICA DO CUPOM VIP (Mantida) ---
         if (cupom && cupom.toUpperCase() === 'SOLVIP') {
             const psi = await db.Psychologist.findByPk(psychologistId);
-            
-            // Dá 30 dias grátis do plano SOL
             const hoje = new Date();
             const trintaDias = new Date(hoje.setDate(hoje.getDate() + 30));
 
             await psi.update({
                 status: 'active',
                 subscription_expires_at: trintaDias,
-                plano: 'Sol' // Força o plano Sol
+                plano: 'Sol'
             });
-
-            // Retorna um sinal especial para o frontend
-            return res.json({ couponSuccess: true, message: 'Cupom VIP aplicado! Plano Sol ativado.' });
+            return res.json({ couponSuccess: true, message: 'Cupom VIP aplicado!' });
         }
-        // ----------------------------------------
 
-        // ... (O RESTO DO CÓDIGO DO MERCADO PAGO CONTINUA IGUAL ABAIXO) ...
-        let title, price;
-        // ... switch(planType) ...
-        // Configuração dos preços
+        // --- DEFINIÇÃO DE VALORES (Em Centavos) ---
+        let amount;
         switch (planType) {
-            case 'semente': title = 'Plano Semente (Mensal)'; price = 49.00; break;
-            case 'luz':     title = 'Plano Luz (Mensal)';     price = 99.00; break;
-            case 'sol':     title = 'Plano Sol (Mensal)';     price = 149.00; break;
+            case 'semente': amount = 4900; break; // R$ 49,00
+            case 'luz':     amount = 9900; break; // R$ 99,00
+            case 'sol':     amount = 14900; break; // R$ 149,00
             default: return res.status(400).json({ error: 'Plano inválido' });
         }
 
-        // ... const preference = new Preference(client); ...
-        const preference = new Preference(client);
-        const result = await preference.create({
-            body: {
-                items: [
-                    {
-                        id: planType,
-                        title: title,
-                        quantity: 1,
-                        unit_price: price,
-                        currency_id: 'BRL'
-                    }
-                ],
-                // AQUI ESTÁ O TRUQUE: Enviamos o ID do psicólogo escondido na venda
-                external_reference: String(psychologistId), 
-                
-                // Para onde o usuário volta depois de pagar
-                back_urls: {
-                    success: "https://projeto-girassol.onrender.com/psi/psi_dashboard.html?status=approved",
-                    failure: "https://projeto-girassol.onrender.com/psi/psi_dashboard.html?status=failure",
-                    pending: "https://projeto-girassol.onrender.com/psi/psi_dashboard.html?status=pending"
-                },
-                auto_return: "approved",
-                
-                // O Mercado Pago avisa seu servidor aqui (tem que ser URL pública)
-                notification_url: "https://projeto-girassol.onrender.com/api/payments/webhook" 
+        // Cria a Intenção na Stripe
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: amount,
+            currency: 'brl',
+            automatic_payment_methods: { enabled: true }, // Habilita Cartão, Boleto, Pix automaticamente
+            metadata: {
+                psychologistId: String(psychologistId),
+                planType: planType
             }
         });
 
-        // ATUALIZE ESTE BLOCO FINAL:
+        // Retorna o "Segredo" para o Frontend desenhar o formulário
         res.json({ 
-            id: result.id, // <--- OBRIGATÓRIO PARA O CHECKOUT TRANSPARENTE
-            init_point: result.init_point 
+            clientSecret: paymentIntent.client_secret 
         });
 
     } catch (error) {
-        console.error('Erro MP:', error);
-        res.status(500).json({ error: 'Erro ao gerar pagamento' });
+        console.error('Erro Stripe:', error);
+        res.status(500).json({ error: 'Erro ao criar pagamento' });
     }
 };
 
-// 2. O WEBHOOK (Onde a mágica da liberação acontece)
+// 2. WEBHOOK (Confirmação de Segurança)
 exports.handleWebhook = async (req, res) => {
-    // O MP manda o ID do pagamento na query ou no body
-    const paymentId = req.query.id || req.query['data.id'];
-    const topic = req.query.topic || req.query.type;
+    const event = req.body;
 
-    try {
-        if (topic === 'payment' || req.body.type === 'payment') {
-            const payment = new Payment(client);
-            // Consulta o status real no Mercado Pago
-            const paymentData = await payment.get({ id: paymentId });
+    // Monitora se o pagamento deu certo
+    if (event.type === 'payment_intent.succeeded') {
+        const paymentIntent = event.data.object;
+        const { psychologistId, planType } = paymentIntent.metadata;
 
-            const status = paymentData.status; 
-            const psychologistId = paymentData.external_reference; // Recupera o ID que escondemos
+        console.log(`[STRIPE] Pagamento Aprovado: Psi ${psychologistId} - Plano ${planType}`);
 
-            if (status === 'approved') {
-                console.log(`[PAGAMENTO] Aprovado para Psi ID: ${psychologistId}`);
+        try {
+            const psi = await db.Psychologist.findByPk(psychologistId);
+            if (psi) {
+                const hoje = new Date();
+                const novaValidade = new Date(hoje.setDate(hoje.getDate() + 30));
+                const planoFormatado = planType.charAt(0).toUpperCase() + planType.slice(1);
 
-                const psi = await db.Psychologist.findByPk(psychologistId);
-                
-                if (psi) {
-                    // Adiciona 30 dias de validade
-                    const hoje = new Date();
-                    const novaValidade = new Date(hoje.setDate(hoje.getDate() + 30));
-
-                    await psi.update({
-                        status: 'active',
-                        subscription_expires_at: novaValidade,
-                        plano: paymentData.additional_info?.items?.[0]?.id || 'premium'
-                    });
-                    
-                    console.log(`[SUCESSO] ${psi.nome} ativado até ${novaValidade}`);
-                }
+                await psi.update({
+                    status: 'active',
+                    subscription_expires_at: novaValidade,
+                    plano: planoFormatado
+                });
             }
+        } catch (err) {
+            console.error('Erro ao atualizar banco:', err);
         }
-        res.status(200).send('OK');
-    } catch (error) {
-        console.error('Erro Webhook:', error);
-        res.status(500).send('Erro');
     }
+
+    res.json({received: true});
 };
