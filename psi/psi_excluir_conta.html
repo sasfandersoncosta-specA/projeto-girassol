@@ -22,7 +22,7 @@
             </div>
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="psi_dashboard.html" onclick="return confirm('Deseja cancelar a exclusão e voltar?');"><span>← Voltar ao Painel</span></a></li>
+                    <li><a href="psi_dashboard.html"><span>← Voltar ao Painel</span></a></li>
                 </ul>
             </nav>
         </aside>
@@ -31,7 +31,7 @@
             
             <div class="main-header" style="background-color: #E63946; margin-bottom: 30px;">
                 <div class="header-content">
-                    <h1 style="color: white; font-family: 'New Kansas', serif;">É uma pena ver você partir...</h1>
+                    <h1 style="color: white; font-family: 'New Kansas', serif;">É uma pena ver você partir, <span id="display-nome-psi">...</span></h1>
                     <p class="subtitulo-header" style="color: rgba(255,255,255,0.9);">Sentiremos sua falta na nossa comunidade. Antes de ir, confira o impacto que você gerou na plataforma.</p>
                 </div>
             </div>
@@ -119,42 +119,58 @@
 
     <script src="/config.js"></script>
     <script>
+        // Função Helper para Toast (Mesmo estilo do Dashboard)
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
-            // Simulação de carregamento de dados do usuário (Para não ficar vazio)
-            // O ideal seria buscar via API, mas para a experiência de saída, dados fictícios ou do localStorage funcionam
-            
-            // Tenta pegar dados do cache ou coloca placeholders
             const token = localStorage.getItem('girassol_token');
             if(!token) window.location.href = '../login.html';
 
+            // 1. Carregar Dados do Profissional (Nome e Stats)
             try {
-                // Fetch rápido para preencher estatísticas (Opcional - pode remover se quiser estático)
-                const res = await fetch(`${API_BASE_URL}/api/psychologists/me/stats`, {
+                // Busca Stats
+                const resStats = await fetch(`${API_BASE_URL}/api/psychologists/me/stats`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if(res.ok) {
-                    const data = await res.json();
-                    document.getElementById('stat-dias').textContent = data.daysActive || '32';
-                    document.getElementById('stat-views').textContent = data.profileViews || '145';
-                    document.getElementById('stat-contatos').textContent = data.contactsReceived || '12';
-                } else {
-                    throw new Error('Falha ao carregar stats');
+                
+                // Busca Perfil (Para pegar o nome)
+                const resProfile = await fetch(`${API_BASE_URL}/api/psychologists/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if(resStats.ok && resProfile.ok) {
+                    const stats = await resStats.json();
+                    const profile = await resProfile.json();
+
+                    // Injeta o nome no título
+                    const primeiroNome = profile.nome.split(' ')[0];
+                    document.getElementById('display-nome-psi').textContent = primeiroNome + '!';
+
+                    // Injeta Stats
+                    document.getElementById('stat-dias').textContent = stats.daysActive || '32';
+                    document.getElementById('stat-views').textContent = stats.profileViews || '145';
+                    document.getElementById('stat-contatos').textContent = stats.contactsReceived || '12';
                 }
             } catch(e) {
-                // Fallback visual se a API falhar
-                document.getElementById('stat-dias').textContent = '30+';
-                document.getElementById('stat-views').textContent = '100+';
-                document.getElementById('stat-contatos').textContent = '10+';
+                console.error("Erro ao carregar dados:", e);
+                document.getElementById('display-nome-psi').textContent = 'Profissional!';
             }
 
-            // Lógica do Formulário de Exclusão
+            // 2. Lógica do Formulário de Exclusão
             document.getElementById('exit-form').onsubmit = async (e) => {
                 e.preventDefault();
                 const btn = e.target.querySelector('button[type="submit"]');
                 const originalText = btn.textContent;
                 
                 btn.disabled = true;
-                btn.textContent = "Excluindo...";
+                btn.textContent = "Processando...";
                 btn.style.opacity = "0.7";
 
                 const senha = document.getElementById('senha-exclusao').value;
@@ -171,19 +187,25 @@
                     });
 
                     if (response.ok) {
+                        // Sucesso: Toast verde + Redirecionamento com delay
+                        showToast('Conta excluída com sucesso. Até logo!', 'success');
                         localStorage.removeItem('girassol_token');
-                        alert('Sua conta foi excluída com sucesso. Esperamos te ver de volta um dia.');
-                        window.location.href = '../index.html';
+                        
+                        setTimeout(() => {
+                            window.location.href = '../index.html';
+                        }, 2000); // Espera 2s para ler a mensagem
                     } else {
+                        // Erro: Toast vermelho
                         const err = await response.json();
-                        alert('Erro: ' + (err.error || 'Senha incorreta'));
+                        showToast('Erro: ' + (err.error || 'Senha incorreta'), 'error');
+                        
                         btn.disabled = false;
                         btn.textContent = originalText;
                         btn.style.opacity = "1";
                     }
                 } catch (error) {
                     console.error(error);
-                    alert('Erro de conexão. Tente novamente.');
+                    showToast('Erro de conexão. Tente novamente.', 'error');
                     btn.disabled = false;
                     btn.textContent = originalText;
                 }
