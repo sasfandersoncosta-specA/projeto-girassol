@@ -166,19 +166,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-function abrirModalStripe(clientSecret) {
+    function abrirModalStripe(clientSecret) {
         const modal = document.getElementById('payment-modal');
         const container = document.getElementById('payment-element');
         const btnCloseX = document.getElementById('btn-close-modal-x');
 
         if (!modal || !container) return;
 
+        // Só mostra o modal aqui (não ao carregar o dashboard)
         modal.style.display = 'flex';
         modal.style.opacity = 1;
         modal.style.visibility = 'visible';
         container.innerHTML = '';
-        container.style.minHeight = '64px';
 
+        // Stripe Elements config
         const appearance = { theme: 'stripe', labels: 'floating' };
         elements = stripe.elements({ appearance, clientSecret });
 
@@ -187,31 +188,11 @@ function abrirModalStripe(clientSecret) {
             paymentElement.mount('#payment-element');
         }, 50);
 
+        // Botão para fechar normalmente
         if (btnCloseX) {
             btnCloseX.onclick = (e) => {
                 e.preventDefault();
                 modal.style.display = 'none';
-            };
-        }
-
-        const form = document.getElementById('payment-form');
-        if (form) {
-            form.onsubmit = async function(e) {
-                e.preventDefault();
-                const btn = document.getElementById('btn-confirmar-stripe');
-                btn.disabled = true;
-                btn.textContent = 'Processando...';
-                const { error } = await stripe.confirmPayment({
-                    elements,
-                    confirmParams: {
-                        return_url: window.location.href.split('?')[0] + '?status=approved',
-                    }
-                });
-                if (error) {
-                    btn.disabled = false;
-                    btn.textContent = 'Pagar Agora';
-                    document.getElementById('payment-message').textContent = error.message;
-                }
             };
         }
     }
