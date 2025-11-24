@@ -15,13 +15,15 @@
             <p style="text-align: center; margin-bottom: 20px; color: var(--cinza-texto);">Sua nova senha deve ser diferente da anterior.</p>
             <form class="login-form" id="form-redefinir-senha">
                 <p id="mensagem-redefinir-senha" class="mensagem-oculta"></p>
-                <div class="form-group">
+                <div class="form-group password-container">
                     <label for="nova-senha">Nova Senha</label>
                     <input type="password" id="nova-senha" name="nova-senha" required minlength="6">
+                    <i class="password-toggle-icon" role="button" aria-label="Mostrar senha">👁️</i>
                 </div>
-                <div class="form-group">
+                <div class="form-group password-container">
                     <label for="confirmar-nova-senha">Confirmar Nova Senha</label>
                     <input type="password" id="confirmar-nova-senha" name="confirmar-nova-senha" required>
+                    <i class="password-toggle-icon" role="button" aria-label="Mostrar senha">👁️</i>
                 </div>
                 <button type="submit" class="btn-login">Redefinir Senha</button>
             </form>
@@ -31,9 +33,6 @@
         </div>
     </main>
     <script src="config.js"></script> 
-    
-    <script src="header.js"></script>
-    
     <script src="redefinir_senha.js"></script>
 </body>
 </html>
