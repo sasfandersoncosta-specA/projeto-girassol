@@ -18,6 +18,12 @@ router.get('/slug/:slug', psychologistController.getProfileBySlug);
 router.post('/match', psychologistController.getAnonymousMatches); 
 router.get('/:id/reviews', psychologistController.getPsychologistReviews);
 
+// Rota para SOLICITAR o envio do e-mail de redefinição (PÚBLICA)
+router.post('/forgot-password', psychologistController.requestPasswordReset);
+
+// Rota para o usuário ENVIAR a nova senha com o token (PÚBLICA)
+router.post('/reset-password/:token', psychologistController.resetPassword); 
+
 // ===============================================
 // ROTAS PROTEGIDAS (Exigem login)
 // ===============================================
