@@ -951,23 +951,37 @@ exports.uploadCrpDocument = async (req, res) => {
 
 // ----------------------------------------------------------------------
 // Rota: GET /api/psychologists/:id/reviews
+// Descrição: Retorna todas as reviews para um psicólogo.
 // ----------------------------------------------------------------------
 exports.getPsychologistReviews = async (req, res) => {
     try {
+        // 1. Pega o ID do psicólogo da URL
         const { id } = req.params;
+
+        // 2. Busca todas as Reviews
+        // - where: Filtra pelo ID do psicólogo.
+        // - include: Traz os dados do Paciente que escreveu a review (para mostrar o nome/foto).
+        // - order: Ordena da mais nova para a mais antiga.
         const reviews = await db.Review.findAll({
             where: { psychologistId: id },
-            include: [{
-                model: db.Patient,
-                as: 'patient',
-                attributes: ['nome']
-            }],
+            
+            // ⚠️ IMPORTANTE: Certifique-se de que a associação "as: 'patient'" está correta no seu modelo Review
+            include: [{ 
+                model: db.Patient, 
+                as: 'patient', 
+                attributes: ['nome', 'fotoUrl'] // Busca apenas os campos necessários do paciente
+            }], 
+            
             order: [['createdAt', 'DESC']]
         });
-        res.status(200).json(reviews);
+
+        // 3. Retorna a lista de reviews (pode ser vazia, mas não é um erro 500)
+        return res.json({ reviews }); 
+
     } catch (error) {
-        console.error('Erro ao buscar avaliações do psicólogo:', error);
-       res.status(500).json({ error: 'Erro interno no servidor.' });
+        // Se houver um erro de banco de dados (ex: tabela Review não existe), ele será pego aqui.
+        console.error('Erro ao buscar reviews para o psicólogo:', error);
+        res.status(500).json({ error: 'Erro interno no servidor ao buscar avaliações.' });
     }
 };
 // COLE ESTA FUNÇÃO NO FINAL DE backend/controllers/psychologistController.js
