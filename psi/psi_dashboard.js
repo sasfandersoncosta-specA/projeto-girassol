@@ -128,6 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (url.includes('meu_perfil')) inicializarLogicaDoPerfil();
                 else if (url.includes('visao_geral')) inicializarVisaoGeral();
                 else if (url.includes('assinatura')) inicializarAssinatura();
+                else if (url.includes('comunidade')) inicializarComunidade(); 
             })
             .catch(e => mainContent.innerHTML = `<p>Erro ao carregar: ${e}</p>`);
     }
@@ -425,6 +426,113 @@ document.addEventListener('DOMContentLoaded', function() {
         if (cpf) IMask(cpf, { mask: '000.000.000-00' });
         if (tel) IMask(tel, { mask: '(00) 00000-0000' });
         if (crp) IMask(crp, { mask: '00/000000' }); 
+    }
+
+    // --- LÓGICA DA COMUNIDADE (Q&A) ---
+    function inicializarComunidade() {
+        const container = document.getElementById('qna-list-container');
+        const modal = document.getElementById('qna-answer-modal');
+        const form = document.getElementById('qna-answer-form');
+        const textarea = document.getElementById('qna-answer-textarea');
+        const charCounter = document.getElementById('qna-char-counter');
+        const btnSubmit = document.getElementById('qna-submit-answer');
+        let currentQuestionId = null;
+
+        if (!container) return;
+
+        // 1. Buscar Perguntas
+        apiFetch(`${API_BASE_URL}/api/qna`) // Assume rota GET /api/qna retorna lista
+            .then(async (res) => {
+                if (!res.ok) throw new Error('Erro ao carregar');
+                const questions = await res.json();
+                renderQuestions(questions);
+            })
+            .catch(err => {
+                console.error(err);
+                container.innerHTML = `<div style="text-align:center; padding:40px;">Erro ao carregar perguntas. Tente recarregar.</div>`;
+            });
+
+        function renderQuestions(questions) {
+            container.innerHTML = ''; // Remove o spinner
+            
+            if (!questions || questions.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:40px; color:#666;">Nenhuma pergunta em aberto no momento.</div>`;
+                return;
+            }
+
+            const template = document.getElementById('qna-card-template-psi');
+            
+            questions.forEach(q => {
+                const clone = template.content.cloneNode(true);
+                
+                // Preenche dados
+                clone.querySelector('.qna-question-title').textContent = q.titulo || 'Dúvida da Comunidade';
+                clone.querySelector('.qna-question-content').textContent = q.conteudo;
+                clone.querySelector('.qna-question-author').textContent = `Perguntado por ${q.Patient ? q.Patient.nome.split(' ')[0] : 'Anônimo'}`;
+
+                // Botão Responder
+                const btnResponder = clone.querySelector('.btn-responder');
+                btnResponder.onclick = () => abrirModalResposta(q.id, q.titulo);
+
+                // Se já respondeu (lógica visual opcional)
+                if (q.respondedByMe) {
+                    clone.querySelector('.badge-respondido').classList.remove('hidden');
+                    btnResponder.textContent = "Responder Novamente";
+                }
+
+                container.appendChild(clone);
+            });
+        }
+
+        // 2. Lógica do Modal
+        function abrirModalResposta(id, titulo) {
+            currentQuestionId = id;
+            modal.querySelector('.modal-title').textContent = `Respondendo: ${titulo}`;
+            textarea.value = '';
+            charCounter.textContent = "0/50 caracteres";
+            btnSubmit.disabled = true;
+            // Força display flex com !important por causa do CSS global
+            modal.style.setProperty('display', 'flex', 'important');
+        }
+
+        // Fechar Modal
+        const fecharModal = () => modal.style.setProperty('display', 'none', 'important');
+        if(modal.querySelector('.modal-close')) modal.querySelector('.modal-close').onclick = fecharModal;
+        if(modal.querySelector('.modal-cancel')) modal.querySelector('.modal-cancel').onclick = fecharModal;
+
+        // Validação de Caracteres
+        textarea.oninput = () => {
+            const len = textarea.value.length;
+            charCounter.textContent = `${len}/50 caracteres`;
+            if (len >= 50) {
+                charCounter.style.color = "green";
+                btnSubmit.disabled = false;
+            } else {
+                charCounter.style.color = "red";
+                btnSubmit.disabled = true;
+            }
+        };
+
+        // 3. Enviar Resposta
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            btnSubmit.textContent = "Enviando...";
+            
+            try {
+                await apiFetch(`${API_BASE_URL}/api/qna/${currentQuestionId}/answer`, {
+                    method: 'POST',
+                    body: JSON.stringify({ conteudo: textarea.value })
+                });
+                
+                showToast('Resposta enviada com sucesso!', 'success');
+                fecharModal();
+                inicializarComunidade(); // Recarrega a lista
+            } catch (error) {
+                showToast('Erro ao enviar: ' + error.message, 'error');
+            } finally {
+                btnSubmit.textContent = "Enviar Resposta";
+            }
+        };
     }
 
     // INIT
