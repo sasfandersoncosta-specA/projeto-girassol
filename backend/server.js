@@ -111,8 +111,9 @@ const startServer = async () => {
         console.log('Banco de dados sincronizado (DEV).');
         await seedTestData();
     } else {
-        await db.sequelize.sync();
-        console.log('Banco de dados sincronizado (PROD).');
+        // ⚠️ MUDANÇA TEMPORÁRIA: ISSO ADICIONARÁ AS COLUNAS NO POSTGRES DO RENDER
+        await db.sequelize.sync({ alter: true }); // <-- Mude para ISSO!
+        console.log('Banco de dados sincronizado (ALTERADO).');
     }
     server.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}.`));
 };
