@@ -107,8 +107,11 @@ exports.requestPasswordReset = async (req, res) => {
         psychologist.resetPasswordExpires = Date.now() + 3600000; // 1 hora
 
         await psychologist.save();
-
-        const resetLink = `http://127.0.0.1:5500/redefinir_senha.html?token=${resetToken}&type=psychologist`;
+        
+        // ⚠️ CORREÇÃO TECH LEAD: Usa a variável de ambiente (SITE_BASE_URL)
+        const baseUrl = process.env.SITE_BASE_URL || 'http://localhost:3000'; 
+        
+        const resetLink = `${baseUrl}/redefinir_senha.html?token=${resetToken}&type=psychologist`;
         await sendPasswordResetEmail(psychologist, resetLink);
 
         res.status(200).json({ message: 'Se um usuário com este e-mail existir, um link de redefinição foi enviado.' });
@@ -1031,32 +1034,6 @@ exports.saveExitSurvey = async (req, res) => {
         console.error("Erro ao salvar exit survey:", error);
         // Não retorna erro 500 para não travar a exclusão da conta
         res.json({ message: "Seguindo..." }); 
-    }
-};
-
-// Simula um pagamento (Use apenas para testes ou ativação manual)
-exports.simulatePayment = async (req, res) => {
-    try {
-        // Tenta pegar do link primeiro (req.query). Se não tiver, tenta do body com segurança.
-        const email = req.query.email || (req.body && req.body.email);
-
-        const psi = await db.Psychologist.findOne({ where: { email } });
-        if (!psi) return res.status(404).json({ error: 'Psicólogo não encontrado' });
-
-        // Calcula data de hoje + 30 dias
-        const validade = new Date();
-        validade.setDate(validade.getDate() + 30);
-
-        await psi.update({
-            status: 'active', // Ativa o perfil
-            subscription_expires_at: validade // Dá 30 dias de acesso
-        });
-
-        res.json({ 
-            message: `Pagamento simulado! ${psi.nome} está ativo até ${validade.toLocaleDateString()}` 
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
     }
 };
 
