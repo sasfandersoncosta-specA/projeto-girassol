@@ -2,15 +2,12 @@
 const express = require('express');
 const router = express.Router();
 const qnaController = require('../controllers/qnaController');
-const authMiddleware = require('../middleware/authMiddleware'); // Middleware para proteger rotas
+const { protect } = require('../middleware/authMiddleware'); // Seu middleware de proteção Psi
 
-// Rota para um usuário anônimo criar uma nova pergunta
-router.post('/questions', qnaController.createQuestion);
+// Rota para listar perguntas (Protegida para Psis logados)
+router.get('/', protect, qnaController.getQuestions);
 
-// Rota para buscar todas as perguntas e respostas aprovadas
-router.get('/questions', qnaController.getApprovedQuestions);
-// Rota para um psicólogo logado responder a uma pergunta
-// A rota é protegida para garantir que apenas psicólogos autenticados possam responder.
-router.post('/questions/:questionId/answers', authMiddleware.protect, authMiddleware.isPsychologist, qnaController.createAnswer);
+// Rota para responder
+router.post('/:id/answer', protect, qnaController.answerQuestion);
 
 module.exports = router;
