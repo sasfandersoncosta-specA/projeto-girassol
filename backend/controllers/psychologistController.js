@@ -38,17 +38,13 @@ exports.registerPsychologist = async (req, res) => {
             genero_identidade, valor_sessao_faixa, temas_atuacao,
             abordagens_tecnicas, praticas_vivencias, modalidade, cep
         } = req.body;
-
-        // 1. Validação dos dados essenciais
+        // ... (validações iniciais continuam iguais) ...
         if (!nome || !email || !senha || !crp || !cpf) {
             return res.status(400).json({ error: 'Nome, email, senha, CRP e CPF são obrigatórios.' });
         }
-
-        // 2. Verifica duplicidade usando o modelo correto: db.Psychologist
         const existingPsychologist = await db.Psychologist.findOne({
             where: { [Op.or]: [{ email }, { crp }, { cpf }] }
         });
-
         if (existingPsychologist) {
             if (existingPsychologist.email === email) {
                 return res.status(409).json({ error: 'Este email já está cadastrado.' });
@@ -60,23 +56,32 @@ exports.registerPsychologist = async (req, res) => {
                 return res.status(409).json({ error: 'Este CPF já está cadastrado.' });
             }
         }
-
-        // 3. Criptografa a senha
+        // CORREÇÃO TECH LEAD: Converter a faixa de texto para um número médio
+        // Ex: "R$ 91 - R$ 150" vira 120. Isso permite o cálculo matemático do Match.
+        let valorNumerico = 0;
+        if (valor_sessao_faixa) {
+            const numeros = valor_sessao_faixa.match(/\d+/g); // Extrai [91, 150]
+            if (numeros && numeros.length >= 2) {
+                // Calcula a média: (91 + 150) / 2 = 120
+                valorNumerico = (parseInt(numeros[0]) + parseInt(numeros[1])) / 2;
+            } else if (numeros && numeros.length === 1) {
+                valorNumerico = parseInt(numeros[0]);
+            }
+        }
         const hashedPassword = await bcrypt.hash(senha, 10);
-
-        // 4. Cria o novo psicólogo usando o modelo db.Psychologist
         const newPsychologist = await db.Psychologist.create({
             nome, email, crp, cpf,
             senha: hashedPassword,
             slug: generateSlug(nome),
-            status: 'pending', // Nasce escondido
-            subscription_expires_at: null, // Sem data de validade ainda
-            genero_identidade, valor_sessao_faixa, temas_atuacao: temas_atuacao || [],
+            status: 'pending',
+            subscription_expires_at: null,
+            genero_identidade, 
+            valor_sessao_faixa, // Salva o texto (para exibir)
+            valor_sessao_numero: valorNumerico, // <--- SALVA O NÚMERO (PARA O CÁLCULO)
+            temas_atuacao: temas_atuacao || [],
             abordagens_tecnicas: abordagens_tecnicas ? [abordagens_tecnicas] : [],
             praticas_vivencias: praticas_vivencias || [], modalidade, cep,
         });
-
-        // 5. Retorna sucesso
         res.status(201).json({ message: 'Psicólogo cadastrado com sucesso!', userId: newPsychologist.id });
 
     } catch (error) {

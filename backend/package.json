@@ -20,7 +20,6 @@
     "express": "^5.1.0",
     "express-session": "^1.18.2",
     "jsonwebtoken": "^9.0.2",
-    "mercadopago": "^2.10.0",
     "moment-timezone": "^0.6.0",
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
@@ -29,7 +28,8 @@
     "pg": "^8.12.0",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.7",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "stripe": "^20.0.0"
   },
   "devDependencies": {
     "dotenv-cli": "^11.0.0",

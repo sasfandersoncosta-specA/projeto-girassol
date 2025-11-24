@@ -1,5 +1,13 @@
 // Arquivo: resultados.js
 document.addEventListener('DOMContentLoaded', () => {
+    // Verifica se o config.js foi carregado
+    if (typeof API_BASE_URL === 'undefined') {
+        console.error("ERRO CRÍTICO: config.js não foi carregado. A API falhará.");
+        // Usa a função de erro global, se existir, senão um alert simples.
+        window.showGlobalError ? window.showGlobalError("Erro de configuração do sistema.") : alert("Erro de configuração do sistema. Contate o suporte.");
+        return;
+    }
+
     const loadingState = document.getElementById('loading-state');
     const resultsContainer = document.getElementById('results-container');
     const loginUrl = 'login.html'; // URL para redirecionar se não houver login

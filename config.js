@@ -1,13 +1,12 @@
-// c:/Users/Anderson/Desktop/Girassol-web/config.js
+// IMPORTANTE: Este arquivo deve ser carregado no HTML ANTES de qualquer outro script.
 
-/**
- * Define a URL base da API com base no ambiente (desenvolvimento ou produção).
- * Isso centraliza a configuração e evita ter URLs fixas no código.
- */
-const API_BASE_URL = (() => {
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    return 'http://localhost:3001'; // URL para desenvolvimento local
-  }
-  // Em produção (Render, etc.), retorne a URL completa do seu backend.
-  return 'https://projeto-girassol.onrender.com';
-})();
+const API_BASE_URL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'
+    ? 'http://localhost:3001'  // Seu Backend Local
+    : 'https://projeto-girassol.onrender.com/'; 
+
+console.log(`[Jano Config] Ambiente detectado: ${window.location.hostname}. API definida para: ${API_BASE_URL}`);
+
+// Função auxiliar para toast de erro global
+window.showGlobalError = (msg) => {
+    alert("Erro no Sistema: " + msg); // Pode substituir por um toast bonito depois
+};

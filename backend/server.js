@@ -45,112 +45,19 @@ app.use(express.text({ type: 'application/json' }));
 app.use(express.urlencoded({ extended: true }));
 
 // =============================================================
-// 🚨 ROTAS DE EMERGÊNCIA (PRIORIDADE MÁXIMA) 🚨
-// (Estão aqui no topo para garantir que nada as bloqueie)
+// 🚨 ROTAS DE EMERGÊNCIA (DESATIVADAS PARA PRODUÇÃO) 🚨
 // =============================================================
 
-// 1. Ativar Psicólogos (A que você precisa agora)
-app.get('/api/fix-activate-psis', async (req, res) => {
-    try {
-        await db.sequelize.query(`UPDATE "Psychologists" SET status = 'active'`);
-        res.send('<h1 style="color: green;">SUCESSO! Todos os psicólogos estão ativos e visíveis.</h1>');
-    } catch (error) {
-        res.status(500).send('ERRO: ' + error.message);
-    }
-});
+/* // COMENTE TUDO ISTO AQUI PARA NINGUÉM ACESSAR:
 
-// 2. Criar Colunas de Busca
-app.get('/fix-db-columns', async (req, res) => {
-    try {
-        await db.sequelize.query(`
-            ALTER TABLE "DemandSearches" ADD COLUMN IF NOT EXISTS rating INTEGER;
-            ALTER TABLE "DemandSearches" ADD COLUMN IF NOT EXISTS feedback TEXT;
-        `);
-        res.send('<h1 style="color: green;">SUCESSO: Colunas criadas!</h1>');
-    } catch (error) {
-        res.status(500).send('ERRO: ' + error.message);
-    }
-});
+app.get('/api/fix-activate-psis', async (req, res) => { ... });
 
-// 3. Criar Tabela de Saída
-app.get('/fix-db-exit', async (req, res) => {
-    try {
-        await db.sequelize.query(`
-            CREATE TABLE IF NOT EXISTS "ExitSurveys" (
-                "id" SERIAL PRIMARY KEY,
-                "psychologistId" INTEGER,
-                "motivo" VARCHAR(255),
-                "avaliacao" INTEGER,
-                "sugestao" TEXT,
-                "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                "updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-            );
-        `);
-        res.send('<h1 style="color: green;">SUCESSO: Tabela ExitSurveys criada!</h1>');
-    } catch (error) {
-        res.status(500).send('ERRO: ' + error.message);
-    }
-});
+app.get('/fix-db-columns', async (req, res) => { ... });
 
-// 4. Adicionar validade da assinatura do psicólogo
-app.get('/fix-add-subscription', async (req, res) => {
-    try {
-        await db.sequelize.query(`
-            ALTER TABLE "Psychologists" 
-            ADD COLUMN IF NOT EXISTS "subscription_expires_at" TIMESTAMP WITH TIME ZONE;
-        `);
-        res.send('<h1 style="color: blue;">Pronto! Coluna de validade criada.</h1>');
-    } catch (error) {
-        res.status(500).send('Erro: ' + error.message);
-    }
-});
+app.get('/api/fix-vip-all', async (req, res) => { ... });
 
-// 5. BOMBA ATÔMICA (Versão SQL Puro - Ignora o Model)
-app.get('/api/fix-vip-all', async (req, res) => {
-    try {
-        // SQL Direto: Funciona mesmo se o model estiver desatualizado
-        await db.sequelize.query(`
-            UPDATE "Psychologists" 
-            SET "subscription_expires_at" = NOW() + INTERVAL '1 year',
-                "status" = 'active'
-        `);
-        res.send('<h1 style="color: green;">SUCESSO REAL! SQL executado direto no banco.</h1>');
-    } catch (error) {
-        res.status(500).send('ERRO: ' + error.message);
-    }
-});
-
-// 6. CRIAÇÃO DAS COLUNAS DE REDES SOCIAIS QUE FALTAM
-app.get('/api/fix-add-socials', async (req, res) => {
-    try {
-        await db.sequelize.query(`
-            ALTER TABLE "Psychologists" 
-            ADD COLUMN IF NOT EXISTS "facebook_url" VARCHAR(255),
-            ADD COLUMN IF NOT EXISTS "tiktok_url" VARCHAR(255),
-            ADD COLUMN IF NOT EXISTS "x_url" VARCHAR(255);
-        `);
-        res.send('<h1 style="color: green;">SUCESSO! Colunas Facebook, TikTok e X criadas.</h1>');
-    } catch (error) {
-        res.status(500).send('ERRO: ' + error.message);
-    }
-});
-
-// 6. RESET TOTAL (Zera o pagamento de TODOS os usuários)
-app.get('/api/fix-reset-payment', async (req, res) => {
-    try {
-        // Sem a cláusula WHERE, ele aplica em todas as linhas da tabela
-        await db.sequelize.query(`
-            UPDATE "Psychologists" 
-            SET "plano" = NULL,
-                "subscription_expires_at" = NULL,
-                "status" = 'pending' -- Opcional: volta o status para pendente também
-        `);
-        
-        res.send('<h1 style="color: red;">RESET GLOBAL EXECUTADO! Ninguém tem plano agora.</h1>');
-    } catch (error) {
-        res.status(500).send('ERRO: ' + error.message);
-    }
-});
+app.get('/api/fix-reset-payment', async (req, res) => { ... });
+*/
 
 // =============================================================
 // ROTAS DA APLICAÇÃO
