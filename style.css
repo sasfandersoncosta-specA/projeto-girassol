@@ -764,25 +764,27 @@ header.header-rolagem nav a:hover {
 }
 
 /* --- ESTILO PARA O OLHO DE VISIBILIDADE DA SENHA --- */
+/* 1. ESTILO DO ÍCONE DE SENHA (Minimalista) */
 .password-container {
-    position: relative;
+    position: relative; /* Garante que o ícone fique fixo no input */
 }
 
-.toggle-password-visibility {
-.password-toggle-icon, .toggle-password-visibility {
+.password-toggle-icon {
+    /* Posição no canto do input */
     position: absolute;
     right: 15px;
     top: 50%;
     transform: translateY(-50%);
-    cursor: pointer;
-    color: #888;
-    user-select: none; /* Impede que o ícone seja selecionado como texto */
-    font-size: 20px; /* Tamanho do ícone */
-    font-style: normal; /* Garante que não fique itálico */
-}
 
-.toggle-password-visibility:hover {
-    color: #333;
+    /* Configuração do ícone/SVG/Texto */
+    font-size: 20px; /* Tamanho do seu ícone de olho */
+    color: var(--cinza-texto);
+    cursor: pointer;
+    z-index: 10;
+
+    /* Se você está colando o código SVG direto, talvez precise de: */
+    width: 24px;
+    height: 24px;
 }
 
 
@@ -2533,16 +2535,16 @@ body.pagina-dashboard {
     display: none;
 }
 .mensagem-erro, .mensagem-sucesso {
-    width: 100%;
-    text-align: center;
-    padding: 12px;
+    /* Sua mensagem de erro na página ("Erro interno no servidor") */
+    background-color: #fef2f2; /* Vermelho muito claro, quase branco */
+    color: #cc0000; /* Texto vermelho escuro */
+    border: 1px solid #fecaca;
+    padding: 10px 20px;
     border-radius: 8px;
-    margin-top: 16px;
-    font-size: 14px;
-}
-.mensagem-erro {
-    background-color: #fef2f2;
-    color: #991b1b;
+    margin: 10px auto 20px auto; /* Centraliza no card */
+    max-width: 90%;
+    text-align: center;
+    font-weight: 500;
 }
 .mensagem-sucesso {
     background-color: #ecfdf5;
