@@ -769,6 +769,7 @@ header.header-rolagem nav a:hover {
 }
 
 .toggle-password-visibility {
+.password-toggle-icon, .toggle-password-visibility {
     position: absolute;
     right: 15px;
     top: 50%;
@@ -788,107 +789,6 @@ header.header-rolagem nav a:hover {
 /* Efeito Hover para o botão INATIVO */
 .role-btn:not(.active):hover {
   background-color: #F8F9FA; /* Nosso Branco-Nuvem, um cinza bem claro */
-}
-
-/* --- 2. REGRAS PARA TELAS MENORES (ATÉ 767px) --- */
-
-@media (max-width: 767px) {
-
-  /* Torna os blocos principais empilháveis e centralizados */
-  .rodape-bloco-superior,
-  .rodape-nav ul,
-  .rodape-base,
-  .rodape-links-legais {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .rodape-nav ul,
-  .rodape-links-legais {
-    gap: 15px;
-  }
-  
-  .rodape-base {
-    gap: 30px;
-  }
-
-  .rodape-bloco-rt,
-  .rodape-container {
-    text-align: center;
-  }
-
-  .rodape-bloco-rt span, 
-  .rodape-copyright span {
-    display: block;
-  }
-
-  .rodape-divisor {
-    display: none;
-  }
-  
-  .rodape-social img {
-    width: 38px; /* Tamanho para Mobile */
-  }
-
-  /* ORDENAÇÃO DOS BLOCOS */
-  .rodape-social         { order: 1; }
-  .rodape-bloco-superior { order: 2; }
-  .rodape-base           { order: 3; }
-  .rodape-bloco-rt       { order: 4; }
-  .rodape-copyright      { order: 5; }
-}
-/* ==========================================================================
-   REGRAS FINAIS PARA DESKTOP (A PARTIR DE 992px)
-   ========================================================================== */
-
-@media (min-width: 992px) {
-    
-    /* Regras de layout que você já tinha */
-    .planos-grid { grid-template-columns: repeat(3, 1fr); }
-    .post-grid { grid-template-columns: repeat(3, 1fr); }
-
-    /* --- CORREÇÃO DEFINITIVA DO MENU DESKTOP --- */
-
-    /* 1. Esconde o menu hambúrguer */
-    .menu-hamburguer {
-        display: none !important;
-    }
-
-    /* 2. Mostra e alinha o container de navegação */
-    .container-navegacao {
-        display: flex !important;
-        flex-direction: row !important; /* FORÇA o layout em linha */
-        align-items: center !important;
-        position: static;
-        height: auto;
-        width: auto;
-        background-color: transparent;
-        padding-top: 0;
-    }
-
-    /* 3. Garante que a lista de links fique em linha */
-    header nav ul {
-        flex-direction: row !important; /* FORÇA a lista a ficar em linha */
-        gap: 30px;
-    }
-
-    header nav a {
-        font-size: 15px; /* Fonte reduzida */
-    }
-
-    /* 4. Garante que os botões de ação fiquem em linha */
-    .botoes-acao {
-        flex-direction: row !important; /* FORÇA os botões a ficarem em linha */
-        gap: 10px;
-        margin-top: 0;
-        margin-left: 30px;
-        width: auto;
-    }
-
-    .btn {
-        padding: 8px 18px; /* Padding reduzido */
-        font-size: 15px; /* Fonte reduzida */
-    }
 }
 /* ==========================================================================
    CORREÇÃO DO COLLAGE DE IMAGENS DOS TERAPEUTAS
@@ -3061,52 +2961,6 @@ body.pagina-dashboard {
     to { opacity: 0; transform: translateX(100%); }
 }
 
-/* --- ESTILOS GLOBAIS PARA O ÍCONE DE VER SENHA (CORRIGIDO) --- */
-
-.form-group-password-wrapper { 
-    position: relative; 
-    margin-bottom: 20px; 
-}
-
-.form-group-password-wrapper input[type="password"], .form-group-password-wrapper input[type="text"] { 
-    box-sizing: border-box; 
-    padding-right: 50px !important; 
-}
-
-.password-toggle-icon { 
-    position: absolute; 
-    right: 15px; 
-    cursor: pointer; 
-    color: #888; 
-    transition: color 0.2s ease; 
-}
-
-/* Centraliza o ícone se NÃO houver <label> (Página de Login) */ 
-.form-group-password-wrapper:not(:has(label)) .password-toggle-icon { 
-    /* Remove as regras que estão falhando */
-    top: auto; 
-    transform: none;
-    /* Aplica a mesma lógica da página de registro, alinhando pela base */
-    bottom: 12px; 
-}
-
-/* =============================================================
-   CORREÇÃO DE ALINHAMENTO: ÍCONE DE SENHA NO REGISTRO
-   ============================================================= */
-
-/*
- * Alvo: O ícone de senha em um wrapper que CONTÉM um label (ex: registrar.html).
- * Lógica: Alinha o ícone pela base do input, garantindo consistência.
- */
-.form-group-password-wrapper:has(label) .password-toggle-icon {
-    top: auto; /* Remove o alinhamento pelo topo */
-    bottom: 12px; /* Alinha pela base, a 12px de distância */
-}
-
-.password-toggle-icon:hover { color: var(--verde-escuro); }
-
-.password-toggle-icon svg { width: 22px; height: 22px; display: block; }
-
 /* Estilo para o botão de avançar desabilitado no questionário */
 .cta-button:disabled {
     background-color: #ccc;
@@ -3145,41 +2999,6 @@ body.pagina-dashboard {
 @keyframes spin {
     to {
         transform: rotate(360deg);
-    }
-}
-
-/* === Corrigir alinhamento e ícone duplo === */
-.form-group-password-wrapper {
-  position: relative;
-}
-
-.form-group-password-wrapper input[type="password"],
-.form-group-password-wrapper input[type="text"] {
-  padding-right: 45px;
-  box-sizing: border-box;
-}
-
-.password-toggle-icon {
-  position: absolute;
-  right: 12px;
-  top: 53%; /* antes era 50% */
-  transform: translateY(10%);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-}
-
-/* Oculta o ícone alternativo por padrão */
-.password-toggle-icon svg {
-  display: none;
-}
-
-/* Exibe o olho fechado quando o campo é senha */
-.password-toggle-icon .eye-closed {
-  display: block;
 }
 
 /* Exibe o olho aberto quando ativo */
