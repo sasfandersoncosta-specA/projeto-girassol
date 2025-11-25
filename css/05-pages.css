@@ -1,0 +1,179 @@
+/* public/css/05-pages.css */
+
+/* --- SEÇÕES GERAIS --- */
+.container { max-width: 900px; margin: 0 auto; padding: 60px 20px; text-align: center; }
+.secao-conteudo-pro h2, .titulo-secao { font-family: 'New Kansas', serif; font-weight: 700; font-size: 2.5rem; color: #333; margin-bottom: 60px; text-align: center; }
+.subtitulo-secao { font-size: 1.2rem; line-height: 1.6; color: var(--cinza-texto); max-width: 700px; margin: 0 auto 50px auto; text-align: center; }
+
+/* --- HERO (Home) --- */
+.hero { padding: 80px 50px 100px 50px; text-align: center; background-color: #1B4332; position: relative; margin-top: -2px; }
+.hero-fundo-escuro { padding-top: 100px; }
+.hero-texto h1 { font-size: 48px; color: white; margin-bottom: 10px; }
+.hero-texto p { font-size: 19px; color: white; margin-bottom: 40px; }
+.wave-divider { position: absolute; bottom: -1px; left: 0; width: 100%; line-height: 0; border: none !important; }
+.wave-divider svg { display: block; width: 100%; height: 80px; }
+
+/* --- SEÇÃO TERAPEUTAS --- */
+.secao-terapeutas { padding: 70px 20px 100px 20px; position: relative; background-color: #fdfaf6; overflow: hidden; }
+.secao-conteudo { display: grid; grid-template-columns: 1fr; gap: 40px; max-width: 1100px; margin: 0 auto; align-items: center; }
+.texto-terapeutas h2 { font-size: 32px; color: #1B4332; margin-top: 0; line-height: 1.2; }
+.texto-terapeutas p { font-size: 16px; line-height: 1.6; color: #333; }
+
+/* Collage de Imagens */
+.imagens-terapeutas { position: relative; min-height: 400px; }
+.foto-terapeuta { position: absolute; border-radius: 12px; border: 4px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.1); height: auto; }
+.foto-1 { width: 45%; top: 0; left: 10%; }
+.foto-2 { width: 35%; top: 20%; right: 5%; }
+.foto-3 { width: 30%; top: 55%; left: 0; }
+.foto-4 { width: 50%; top: 60%; right: 15%; }
+
+/* --- SEÇÃO COMO FUNCIONA --- */
+.como-funciona { padding: 70px 20px; background-color: white; position: relative; }
+.passo { display: grid; grid-template-columns: 1fr; gap: 50px; align-items: center; max-width: 1100px; margin: 0 auto; }
+.passo-texto h3 { font-size: 28px; color: #1B4332; line-height: 1.3; margin-top: 0; }
+.passo-texto p { font-size: 16px; line-height: 1.6; color: #333; }
+
+.passo-imagens { position: relative; min-height: 450px; }
+.passo-foto { position: absolute; border-radius: 16px; border: 4px solid white; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+.foto-passo1-1 { width: 40%; top: 0; left: 15%; }
+.foto-passo1-2 { width: 35%; top: 40%; right: 10%; }
+.forma-circulo { width: 80px; height: 80px; background-color: #D4E2D4; border-radius: 50%; position: absolute; top: 65%; right: 5%; z-index: -1; }
+.forma-meia-lua { width: 100px; height: 50px; background-color: #E8D8C2; border-radius: 50px 50px 0 0; position: absolute; top: 10%; left: 5%; z-index: -1; }
+
+/* --- FAQ & AVISO --- */
+.faq-secao { padding: 70px 20px 100px 20px; background-color: #fdfaf6; position: relative; }
+.acordeao-container { max-width: 600px; margin: 0 auto; }
+.acordeao-item { border-bottom: 1px solid #ddd; }
+.acordeao-titulo { display: flex; justify-content: space-between; width: 100%; padding: 20px 0; background: none; border: none; cursor: pointer; text-align: center; font-size: 18px; font-weight: 500; color: #333; }
+.acordeao-conteudo { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
+.acordeao-conteudo p { padding: 0 10px 20px 10px; font-size: 14px; text-align: justify; color: #555; }
+
+.aviso-crise { padding: 40px 20px 120px 20px; background-color: #fdfaf6; border-top: 1px solid #e9ecef; position: relative; text-align: center; }
+.aviso-conteudo { max-width: 1100px; margin: 0 auto; }
+.aviso-texto a { color: #007bff; text-decoration: underline; }
+
+/* --- PÁGINAS DE LOGIN / REGISTRO --- */
+.login-main { display: flex; justify-content: center; align-items: center; padding: 80px 20px; background-color: var(--off-white); min-height: calc(100vh - 160px); }
+.login-container { background-color: var(--branco-puro); padding: 35px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); width: 100%; max-width: 420px; text-align: center; }
+.login-titulo { color: var(--verde-escuro); margin-bottom: 30px; }
+.login-links { margin-top: 25px; }
+.login-links a { display: block; color: var(--cinza-texto); margin-top: 15px; }
+
+.social-login { display: flex; flex-direction: column; gap: 15px; }
+.btn-social { display: flex; align-items: center; justify-content: center; padding: 10px; border-radius: 8px; border: 1px solid #ccc; text-decoration: none; font-size: 15px; font-weight: bold; gap: 10px; }
+.btn-social.google { background: white; color: #444; }
+.btn-social.apple { background: black; color: white; border-color: black; }
+.btn-social svg { width: 20px; height: 20px; }
+.divisor { display: flex; align-items: center; margin: 25px 0; color: #aaa; }
+.divisor::before, .divisor::after { content: ''; flex: 1; border-bottom: 1px solid #ddd; }
+.divisor span { padding: 0 15px; font-size: 14px; }
+
+/* Role Selector (Psicólogo vs Paciente) */
+.role-selector { display: flex; gap: 10px; margin-bottom: 20px; }
+.role-btn { flex: 1; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; border: 2px solid #1B4332; background-color: white; color: #1B4332; transition: all 0.3s; }
+.role-btn.active { background-color: #1B4332; color: white; }
+
+/* --- DASHBOARD --- */
+.dashboard-container { display: flex; min-height: 100vh; }
+.dashboard-sidebar { width: 250px; background-color: #1B4332; color: white; display: flex; flex-direction: column; padding: 25px; box-shadow: 5px 0px 15px rgba(0,0,0,0.1); z-index: 10; }
+.sidebar-nav ul { margin-top: 30px; }
+.sidebar-nav li a { display: block; color: #adb5bd; padding: 15px; border-radius: 8px; transition: all 0.2s; }
+.sidebar-nav li.active a, .sidebar-nav li a:hover { background-color: rgba(255,255,255,0.1); color: white; }
+.dashboard-main { flex-grow: 1; padding: 40px; overflow-y: auto; background-color: #f8f9fa; }
+.welcome-header { background-color: var(--verde-escuro); color: white; padding: 40px; border-radius: 16px; margin-bottom: 30px; }
+.welcome-header h1 { font-family: 'New Kansas', serif; color: white; margin: 0; }
+
+.matches-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+.pro-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; position: relative; }
+.pro-card-img { width: 100%; height: 200px; object-fit: cover; }
+.pro-card h3, .pro-card p { padding: 0 15px; }
+
+/* --- MEDIA QUERIES GERAIS --- */
+@media (min-width: 768px) {
+    .secao-conteudo, .passo { grid-template-columns: 1fr 1fr; }
+    .contato-container { grid-template-columns: 1fr 1.5fr; }
+    .post-destaque { grid-template-columns: 1fr 1fr; }
+    .post-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 992px) {
+    .dashboard-sidebar { position: fixed; top: 0; left: 0; height: 100%; transform: translateX(-100%); transition: transform 0.3s; }
+    .dashboard-sidebar.is-open { transform: translateX(0); }
+    .menu-toggle { display: block; position: fixed; top: 20px; left: 20px; z-index: 1001; }
+}
+/* --- PÁGINA FAQ (Correções de Layout) --- */
+/* --- PÁGINA FAQ (Correções Finais) --- */
+
+/* 1. Topo da Página (Hero Branco) */
+.faq-hero {
+    text-align: center;
+    padding: 80px 20px 40px 20px; /* Reduzi o padding inferior pois não tem mais onda */
+    background-color: var(--branco-puro); /* Fundo Branco */
+}
+
+/* Força o texto a ser VERDE no fundo branco */
+.faq-hero h1,
+.faq-hero .subtitulo-secao {
+    color: var(--verde-escuro) !important; 
+}
+
+/* 2. Barra de Busca */
+.faq-busca-container {
+    max-width: 600px;
+    margin: 30px auto 0 auto;
+}
+
+#faq-busca {
+    width: 100%;
+    padding: 15px 25px;
+    border-radius: 30px;
+    border: 1px solid #ddd; /* Adicionei borda para destacar no fundo branco */
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    outline: none;
+    background-color: #fdfaf6; /* Um fundo levemente off-white para a barra */
+}
+/* 3. Container Central (Conserta o alinhamento à esquerda) */
+.container-sobre {
+    max-width: 800px; /* Largura ideal para leitura */
+    margin: 0 auto;   /* Centraliza o bloco na tela */
+    padding: 0 20px;  /* Garante margem em celulares */
+}
+
+/* 4. Títulos das Categorias (Ex: Para Pacientes) */
+.titulo-secao-menor {
+    font-family: 'New Kansas', serif;
+    font-size: 28px;
+    color: var(--verde-escuro);
+    margin-top: 60px;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #ddd; /* Linha separadora */
+    padding-bottom: 10px;
+}
+
+/* 5. Box Final (Fale Conosco) */
+.faq-cta {
+    background-color: #e9ecef;
+    padding: 40px;
+    border-radius: 16px;
+    text-align: center;
+    margin-top: 80px;
+    margin-bottom: 40px;
+}
+.faq-cta h3 {
+    font-family: 'New Kansas', serif;
+    color: var(--verde-escuro);
+    margin-top: 0;
+    font-size: 24px;
+}
+
+/* 6. Onda de Transição para o Rodapé */
+.wave-divider-footer {
+    position: absolute;
+    bottom: -1px; /* Sobrepõe levemente o rodapé para não haver espaços */
+    left: 0;
+    width: 100%;
+    line-height: 0; /* Remove espaços extras do SVG */
+    z-index: 5; /* Garante que a onda fique acima do conteúdo do rodapé */
+}
