@@ -629,8 +629,8 @@ header.header-rolagem nav a:hover {
     box-sizing: border-box;
     font-family: 'Lato', sans-serif;
     font-size: 15px; /* Fonte reduzida */
-    /* Cria o espaço interno para o ícone */
-    padding-right: 40px;
+    /* GARANTE ESPAÇO PARA O ÍCONE DE 24PX + MARGEM */
+    padding-right: 40px; 
 }
 
 .btn-login {
@@ -1164,21 +1164,28 @@ header.header-rolagem nav a:hover {
         grid-template-columns: repeat(3, 1fr);
     }
 
-    /* ⚠️ CORREÇÃO CRÍTICA DO MENU SANDUÍCHE */
+    /*  CORREÇÃO CRÍTICA DO MENU (FORÇA HORIZONTAL) */
+
+    /* 1. Esconde o ícone sanduíche */
     .menu-hamburguer {
-        display: none !important; /* Esconde o ícone */
+        display: none !important;
     }
 
+    /* 2. Garante que o menu Container fique visível e em linha */
     .container-navegacao {
-        display: flex !important; /* Força o menu a aparecer em linha */
-        position: static !important; /* Remove posicionamento absoluto de mobile */
+        display: flex !important;
+        flex-direction: row !important; /* Essencial: Garante que os links fiquem em linha */
+        position: static !important; /* Tira o menu do modo de sobreposição vertical */
         height: auto !important;
+        width: auto !important;
         padding-top: 0 !important;
-        background-color: transparent !important; /* Remove o fundo verde no desktop */
-        flex-direction: row !important; /* Garante layout em linha */
-        align-items: center !important;
-        width: auto !important; /* Largura automática para o conteúdo */
-        gap: 20px; /* Espaçamento entre a navegação e os botões */
+        background-color: transparent !important;
+    }
+
+    /* 3. Garante que a lista de links internos fique em linha */
+    header nav ul {
+        flex-direction: row !important; 
+        gap: 30px; /* Seu espaçamento original */
     }
 
 }
