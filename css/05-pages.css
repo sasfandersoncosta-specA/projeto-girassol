@@ -646,3 +646,218 @@
         grid-template-columns: 1fr 1fr; /* 2 Colunas lado a lado */
     }
 }
+
+/* --- PÁGINA RECURSOS DE CRISE --- */
+
+/* Caixa de Alerta Principal (Vermelha) */
+.aviso-crise-box {
+    background-color: #fef2f2; /* Vermelho muito suave */
+    border: 2px solid #E63946;  /* Vermelho Alerta */
+    border-radius: 12px;
+    padding: 30px;
+    margin: 30px 0 50px 0;
+    text-align: center;
+}
+.aviso-crise-box h2 {
+    color: #b91c1c; /* Vermelho Escuro */
+    margin-top: 0;
+    font-size: 1.8rem;
+}
+.aviso-crise-box p {
+    color: #7f1d1d;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+/* --- PÁGINA RECURSOS DE CRISE (Design Melhorado) --- */
+
+.recursos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-bottom: 60px;
+}
+
+.recurso-card {
+    background-color: var(--branco-puro);
+    padding: 40px 30px;
+    border-radius: 16px;
+    border: 1px solid #eee;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05); /* Sombra mais suave e elegante */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative; /* Para o detalhe da borda */
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.recurso-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Detalhe vermelho no topo do card */
+.recurso-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 6px;
+    background-color: #E63946;
+}
+
+/* Ícone Circular no topo */
+.card-icon-wrapper {
+    width: 70px;
+    height: 70px;
+    background-color: #fef2f2; /* Vermelho bem claro */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px auto;
+    color: #E63946;
+}
+.card-icon-wrapper svg {
+    width: 32px;
+    height: 32px;
+    fill: currentColor;
+}
+
+.recurso-card h3 {
+    font-family: 'New Kansas', serif;
+    color: #333; /* Título escuro para contraste */
+    margin-top: 0;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+.recurso-card p {
+    color: #666;
+    font-size: 1rem;
+    line-height: 1.6;
+    flex-grow: 1;
+    margin-bottom: 30px;
+}
+
+/* Botão de Emergência Moderno */
+.btn-emergencia {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    background-color: #E63946;
+    color: white;
+    font-weight: bold;
+    font-size: 1.1rem;
+    padding: 14px;
+    border-radius: 50px; /* Botão pílula */
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3); /* Sombra vermelha */
+}
+.btn-emergencia:hover {
+    background-color: #c9303c;
+    transform: scale(1.02);
+    box-shadow: 0 6px 20px rgba(230, 57, 70, 0.4);
+}
+
+.btn-emergencia svg {
+    width: 20px;
+    height: 20px;
+    fill: white;
+}
+
+/* Força os 3 cards de crise a ficarem lado a lado no Desktop */
+@media (min-width: 992px) {
+    .recursos-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+}
+
+/* --- Cards de Apoio Secundário (Ligue 180, etc) --- */
+.apoio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+/* Força 3 colunas no desktop para alinhar com o grid de cima */
+@media (min-width: 992px) {
+    .apoio-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.apoio-card {
+    background-color: #f8f9fa; /* Fundo cinza bem claro */
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 25px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: transform 0.2s ease;
+}
+
+.apoio-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--verde-escuro);
+}
+
+.apoio-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.apoio-header h4 {
+    font-family: 'New Kansas', serif;
+    color: var(--verde-escuro);
+    font-size: 1.2rem;
+    margin: 0;
+    line-height: 1.3;
+}
+
+/* Estilo do ícone pequeno */
+.apoio-icon {
+    width: 40px;
+    height: 40px;
+    background-color: var(--verde-escuro);
+    color: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.apoio-icon svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+.apoio-card p {
+    font-size: 0.95rem;
+    color: #555;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Ajuste do card "O que é a Jano?" para ficar mais elegante */
+.card-sobre-jano {
+    background-color: #fff !important;
+    border: 1px dashed #ccc !important; /* Borda pontilhada discreta */
+    border-left: none !important; /* Remove a borda grossa lateral */
+    text-align: center !important;
+    max-width: 700px;
+    margin: 60px auto 0 auto !important; /* Mais espaço acima e centralizado */
+}
+.card-sobre-jano h3 {
+    color: #555 !important;
+    font-size: 1.3rem !important;
+}
