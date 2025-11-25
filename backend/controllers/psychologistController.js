@@ -129,10 +129,15 @@ exports.resetPassword = async (req, res) => {
     try {
         const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
 
+        // BUSCA O USUÁRIO E VALIDA SE O TOKEN NÃO EXPIROU
         const psychologist = await db.Psychologist.findOne({
             where: {
                 resetPasswordToken: hashedToken,
-                resetPasswordExpires: { [db.Sequelize.Op.gt]: Date.now() }
+                // ⚠️ CORREÇÃO CRÍTICA AQUI: Usamos db.Sequelize.literal('NOW()') 
+                // para que o Postgres compare TIMESTAMP com TIMESTAMP.
+                resetPasswordExpires: { 
+                    [db.Sequelize.Op.gt]: db.Sequelize.literal('NOW()') 
+                }
             }
         });
 
@@ -140,7 +145,8 @@ exports.resetPassword = async (req, res) => {
             return res.status(400).json({ error: 'Token de redefinição inválido ou expirado.' });
         }
 
-        psychologist.senha = await bcrypt.hash(req.body.senha, 10);
+        // Se o token for válido, atualiza a senha
+        psychologist.senha = await bcrypt.hash(req.body.nova_senha, 10);
         psychologist.resetPasswordToken = null;
         psychologist.resetPasswordExpires = null;
         await psychologist.save();

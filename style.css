@@ -629,6 +629,8 @@ header.header-rolagem nav a:hover {
     box-sizing: border-box;
     font-family: 'Lato', sans-serif;
     font-size: 15px; /* Fonte reduzida */
+    /* Cria o espaço interno para o ícone */
+    padding-right: 40px;
 }
 
 .btn-login {
@@ -765,26 +767,22 @@ header.header-rolagem nav a:hover {
 
 /* --- ESTILO PARA O OLHO DE VISIBILIDADE DA SENHA --- */
 /* 1. ESTILO DO ÍCONE DE SENHA (Minimalista) */
-.password-container {
-    position: relative; /* Garante que o ícone fique fixo no input */
-}
-
 .password-toggle-icon {
-    /* Posição no canto do input */
+    /* ⚠️ CORREÇÃO DE POSICIONAMENTO */
     position: absolute;
-    right: 15px;
+    right: 15px; /* Afasta da borda direita */
     top: 50%;
-    transform: translateY(-50%);
-
-    /* Configuração do ícone/SVG/Texto */
-    font-size: 20px; /* Tamanho do seu ícone de olho */
-    color: var(--cinza-texto);
+    transform: translateY(-50%); /* Centraliza perfeitamente */
     cursor: pointer;
-    z-index: 10;
-
-    /* Se você está colando o código SVG direto, talvez precise de: */
+    
+    /* Estilo Minimalista (seu ícone) */
+    font-size: 20px;
     width: 24px;
     height: 24px;
+    color: var(--cinza-texto);
+    display: flex; /* Se o ícone for SVG/Imagem */
+    align-items: center;
+    justify-content: center;
 }
 
 
@@ -1165,6 +1163,24 @@ header.header-rolagem nav a:hover {
     .post-grid {
         grid-template-columns: repeat(3, 1fr);
     }
+
+    /* ⚠️ CORREÇÃO CRÍTICA DO MENU SANDUÍCHE */
+    .menu-hamburguer {
+        display: none !important; /* Esconde o ícone */
+    }
+
+    .container-navegacao {
+        display: flex !important; /* Força o menu a aparecer em linha */
+        position: static !important; /* Remove posicionamento absoluto de mobile */
+        height: auto !important;
+        padding-top: 0 !important;
+        background-color: transparent !important; /* Remove o fundo verde no desktop */
+        flex-direction: row !important; /* Garante layout em linha */
+        align-items: center !important;
+        width: auto !important; /* Largura automática para o conteúdo */
+        gap: 20px; /* Espaçamento entre a navegação e os botões */
+    }
+
 }
 /* --- ESTILOS GERAIS PARA SEÇÕES DE CONTEÚDO --- */
 
