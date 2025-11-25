@@ -15,6 +15,25 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // EM: redefinir_senha.js (Adicione no bloco principal document.addEventListener)
+
+    // Lógica para o Ícone de Visualização de Senha
+    document.querySelectorAll('.password-toggle-icon').forEach(icon => {
+        icon.innerHTML = '👁️'; // Placeholder visual simples. Mude para seu SVG/código CSS se necessário.
+        
+        icon.addEventListener('click', () => {
+            const input = icon.previousElementSibling;
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.innerHTML = '👁️'; // Olho aberto
+            } else {
+                input.type = 'password';
+                icon.innerHTML = '🙈'; // Olho fechado (Use 👁️ ou o código CSS de olho riscado)
+            }
+            input.focus();
+        });
+    });
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 

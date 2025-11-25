@@ -106,14 +106,30 @@ app.get(/(.*)/, (req, res) => {
 // Inicialização
 const PORT = process.env.PORT || 3001;
 const startServer = async () => {
+    // ⚠️ PATCH DE COLUNAS AUSENTES (para garantir que a Redefinição de Senha funcione)
+    try {
+        console.log('Verificando colunas resetPasswordToken...');
+        await db.sequelize.query(`
+            DO $$ BEGIN
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='Psychologists' AND column_name='resetPasswordToken') THEN
+                    ALTER TABLE "Psychologists" ADD COLUMN "resetPasswordToken" VARCHAR(255);
+                    ALTER TABLE "Psychologists" ADD COLUMN "resetPasswordExpires" TIMESTAMP WITH TIME ZONE;
+                    RAISE NOTICE 'Colunas de Redefinição de Senha adicionadas com sucesso!';
+                END IF;
+            END $$;
+        `);
+    } catch (e) {
+        console.warn('Não foi possível verificar/adicionar colunas (Pode ser erro de permissão ou já existem). Prosseguindo...');
+    }
+    // FIM DO PATCH
+
     if (process.env.NODE_ENV !== 'production') {
         await db.sequelize.sync({ alter: true });
         console.log('Banco de dados sincronizado (DEV).');
         await seedTestData();
     } else {
-        // ⚠️ MUDANÇA TEMPORÁRIA: ISSO ADICIONARÁ AS COLUNAS NO POSTGRES DO RENDER
-        await db.sequelize.sync({ alter: true }); // <-- Mude para ISSO!
-        console.log('Banco de dados sincronizado (ALTERADO).');
+        await db.sequelize.sync();
+        console.log('Banco de dados sincronizado (PROD).');
     }
     server.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}.`));
 };
