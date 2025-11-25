@@ -129,9 +129,33 @@ header.header-rolagem .btn-solid {
     padding: 0;
 }
 
-.rodape-social { display: flex; gap: 25px; }
-.rodape-social img { width: 28px; height: auto; transition: transform 0.2s ease; }
-.rodape-social img:hover { transform: scale(1.1); }
+/* --- Ícones Sociais (Rodapé) --- */
+.rodape-social {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.rodape-social a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+/* Estilo dos Ícones SVG */
+.rodape-social svg {
+    width: 24px;
+    height: 24px;
+    fill: #adb5bd; /* Cor cinza padrão do texto */
+    transition: all 0.3s ease;
+}
+
+/* Efeito ao passar o mouse (Fica Amarelo Girassol) */
+.rodape-social a:hover svg {
+    fill: var(--cor-girassol);
+    transform: translateY(-3px); /* Sobe um pouquinho */
+}
 
 .rodape-bloco-rt { text-align: left; }
 .rodape-bloco-rt p, .rodape-copyright p { font-size: 14px; margin: 0; }
