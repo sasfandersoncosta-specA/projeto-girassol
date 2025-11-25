@@ -56,18 +56,6 @@ exports.registerPsychologist = async (req, res) => {
                 return res.status(409).json({ error: 'Este CPF já está cadastrado.' });
             }
         }
-        // CORREÇÃO TECH LEAD: Converter a faixa de texto para um número médio
-        // Ex: "R$ 91 - R$ 150" vira 120. Isso permite o cálculo matemático do Match.
-        let valorNumerico = 0;
-        if (valor_sessao_faixa) {
-            const numeros = valor_sessao_faixa.match(/\d+/g); // Extrai [91, 150]
-            if (numeros && numeros.length >= 2) {
-                // Calcula a média: (91 + 150) / 2 = 120
-                valorNumerico = (parseInt(numeros[0]) + parseInt(numeros[1])) / 2;
-            } else if (numeros && numeros.length === 1) {
-                valorNumerico = parseInt(numeros[0]);
-            }
-        }
         const hashedPassword = await bcrypt.hash(senha, 10);
         const newPsychologist = await db.Psychologist.create({
             nome, email, crp, cpf,
@@ -77,7 +65,6 @@ exports.registerPsychologist = async (req, res) => {
             subscription_expires_at: null,
             genero_identidade, 
             valor_sessao_faixa, // Salva o texto (para exibir)
-            valor_sessao_numero: valorNumerico, // <--- SALVA O NÚMERO (PARA O CÁLCULO)
             temas_atuacao: temas_atuacao || [],
             abordagens_tecnicas: abordagens_tecnicas ? [abordagens_tecnicas] : [],
             praticas_vivencias: praticas_vivencias || [], modalidade, cep,
@@ -108,10 +95,7 @@ exports.requestPasswordReset = async (req, res) => {
 
         await psychologist.save();
         
-        // ⚠️ CORREÇÃO TECH LEAD: Usa a variável de ambiente (SITE_BASE_URL)
-        const baseUrl = process.env.SITE_BASE_URL || 'http://localhost:3000'; 
-        
-        const resetLink = `${baseUrl}/redefinir_senha.html?token=${resetToken}&type=psychologist`;
+        const resetLink = `http://127.0.0.1:5500/redefinir_senha.html?token=${resetToken}&type=psychologist`;
         await sendPasswordResetEmail(psychologist, resetLink);
 
         res.status(200).json({ message: 'Se um usuário com este e-mail existir, um link de redefinição foi enviado.' });
@@ -133,11 +117,7 @@ exports.resetPassword = async (req, res) => {
         const psychologist = await db.Psychologist.findOne({
             where: {
                 resetPasswordToken: hashedToken,
-                // ⚠️ CORREÇÃO CRÍTICA AQUI: Usamos db.Sequelize.literal('NOW()') 
-                // para que o Postgres compare TIMESTAMP com TIMESTAMP.
-                resetPasswordExpires: { 
-                    [db.Sequelize.Op.gt]: db.Sequelize.literal('NOW()') 
-                }
+                resetPasswordExpires: { [db.Sequelize.Op.gt]: Date.now() }
             }
         });
 

@@ -1167,34 +1167,11 @@ header.header-rolagem nav a:hover {
         display: none !important;
     }
 
-    /* 2. Container de Navegação: Ocupa o espaço central e se torna o contêiner dos links */
-    .container-navegacao {
-        display: flex !important;
-        flex-direction: row !important; 
-        position: static !important; /* Essencial: Tira do modo de sobreposição de tela cheia */
-        height: auto !important;
-        padding-top: 0 !important;
-        background-color: transparent !important;
-        
-        /* Permite que este bloco ocupe todo o espaço entre a Logo e os Botões */
-        flex-grow: 1; 
-        justify-content: center; /* Centraliza os links dentro deste container */
-    }
-
     /* 3. Garante que os links internos fiquem em linha */
     header nav ul {
         flex-direction: row !important; 
         gap: 30px; /* Espaçamento entre os links (Início, Blog, etc.) */
         width: auto !important;
-    }
-
-    /* 4. Corrige o container de botões (Entrar/Registrar) para horizontal */
-    .botoes-acao {
-        flex-direction: row !important;
-        margin-top: 0;
-        width: auto;
-        /* Garante que os botões fiquem à direita, fora do centro */
-        flex-shrink: 0; 
     }
 }
 /* --- ESTILOS GERAIS PARA SEÇÕES DE CONTEÚDO --- */

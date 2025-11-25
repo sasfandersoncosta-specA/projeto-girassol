@@ -48,16 +48,16 @@ app.use(express.urlencoded({ extended: true }));
 // 🚨 ROTAS DE EMERGÊNCIA (DESATIVADAS PARA PRODUÇÃO) 🚨
 // =============================================================
 
-/* // COMENTE TUDO ISTO AQUI PARA NINGUÉM ACESSAR:
+ // COMENTE TUDO ISTO AQUI PARA NINGUÉM ACESSAR:
 
-app.get('/api/fix-activate-psis', async (req, res) => { ... });
+app.get('/api/fix-activate-psis', async (req, res) => { /* ... */ });
 
-app.get('/fix-db-columns', async (req, res) => { ... });
+app.get('/fix-db-columns', async (req, res) => { /* ... */ });
 
-app.get('/api/fix-vip-all', async (req, res) => { ... });
+app.get('/api/fix-vip-all', async (req, res) => { /* ... */ });
 
-app.get('/api/fix-reset-payment', async (req, res) => { ... });
-*/
+app.get('/api/fix-reset-payment', async (req, res) => { /* ... */ });
+
 
 // =============================================================
 // ROTAS DA APLICAÇÃO
@@ -106,25 +106,7 @@ app.get(/(.*)/, (req, res) => {
 // Inicialização
 const PORT = process.env.PORT || 3001;
 const startServer = async () => {
-    // ⚠️ PATCH DE COLUNAS AUSENTES (para garantir que a Redefinição de Senha funcione)
-    try {
-        console.log('Verificando colunas resetPasswordToken...');
-        await db.sequelize.query(`
-            DO $$ BEGIN
-                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='Psychologists' AND column_name='resetPasswordToken') THEN
-                    ALTER TABLE "Psychologists" ADD COLUMN "resetPasswordToken" VARCHAR(255);
-                    ALTER TABLE "Psychologists" ADD COLUMN "resetPasswordExpires" TIMESTAMP WITH TIME ZONE;
-                    RAISE NOTICE 'Colunas de Redefinição de Senha adicionadas com sucesso!';
-                END IF;
-            END $$;
-        `);
-    } catch (e) {
-        console.warn('Não foi possível verificar/adicionar colunas (Pode ser erro de permissão ou já existem). Prosseguindo...');
-    }
-    // FIM DO PATCH
-
     if (process.env.NODE_ENV !== 'production') {
-        await db.sequelize.sync({ alter: true });
         console.log('Banco de dados sincronizado (DEV).');
         await seedTestData();
     } else {
