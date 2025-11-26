@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 'genero_identidade', question: "Com qual gênero você se identifica?", type: 'choice', choices: ["Feminino", "Masculino", "Não-binário", "Outro"], required: true },
         { id: 'valor_sessao_faixa', question: "Em qual faixa de preço você pretende atender?", type: 'choice', choices: ["Até R$ 50", "R$ 51 - R$ 90", "R$ 91 - R$ 150", "Acima de R$ 150"], required: true },
         { id: 'temas_atuacao', question: "Quais são seus principais temas de atuação?", type: 'multiple-choice', scrollable: true, choices: ["Ansiedade", "Estresse", "Depressão", "Relacionamentos", "Carreira", "Autoestima", "Luto", "Traumas", "TDAH", "Sexualidade"], required: true },
-        { id: 'abordagem_teorica', question: "Qual a sua principal abordagem teórica?", type: 'choice', scrollable: true, choices: ["Psicanálise", "Terapia Cognitivo-Comportamental (TCC)", "Humanista / Centrada na Pessoa", "Gestalt-terapia", "Análise do Comportamento (ABA)", "Sistêmica", "Outra"], required: true },
+        { id: 'abordagem_teorica', question: "Qual a sua principal abordagem teórica?", type: 'choice', scrollable: true, choices: ["Psicanálise", "Terapia Cognitivo-Comportamental (TCC)", "Humanista / Centrada na Pessoa", "Gestalt-terapia", "Análise do Comportamento (ABA)", "Outra"], required: true },
         { id: 'praticas_afirmativas', question: "Sua prática é afirmativa para quais comunidades ou perspectivas?", type: 'multiple-choice', scrollable: true, choices: ["LGBTQIAPN+ friendly", "Antirracista", "Feminista", "Neurodiversidade", "Nenhuma específica"], required: true, buttonText: "Verificar Demanda" },
         // Telas de Resultado Dinâmico
         { id: 'loading', type: 'loading', question: "Analisando a demanda...", subtitle: "Estamos cruzando seus dados com as buscas de nossos pacientes. Só um instante." },
@@ -110,17 +110,31 @@ document.addEventListener('DOMContentLoaded', () => {
     function checkNextButtonState(slide) {
         const nextButton = slide.querySelector('[data-action="next"], [data-action="check"]');
         if (!nextButton) return;
-
+    
         const input = slide.querySelector('input[required]');
         if (input) {
+            const value = input.value.trim();
+            // Remove tudo que não é número para contar os dígitos reais
+            const cleanValue = value.replace(/\D/g, ''); 
+    
             const isEmail = input.type === 'email';
             const isCrp = input.id === 'input-crp';
-            let isValid = input.value.trim() !== '';
-
+            const isCep = input.id === 'input-cep'; 
+            const isNome = input.id === 'input-nome';
+            
+            let isValid = value !== '';
+    
             if (isValid && isEmail) {
-                isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value);
+                isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
             } else if (isValid && isCrp) {
-                isValid = /^\d{2}\/\d{6}$/.test(input.value);
+                // CORREÇÃO: Aceita se tiver PELO MENOS 6 números (confiamos na máscara para o teto)
+                isValid = cleanValue.length >= 6; 
+            } else if (isValid && isCep) {
+                // CORREÇÃO: Aceita se tiver PELO MENOS 8 números
+                isValid = cleanValue.length >= 8;
+            } else if (isValid && isNome) {
+                const partesNome = value.split(/\s+/);
+                isValid = partesNome.length >= 2;
             }
             nextButton.disabled = !isValid;
         }
@@ -129,31 +143,48 @@ document.addEventListener('DOMContentLoaded', () => {
     function goToSlide(index) {
         document.querySelector('.slide.active')?.classList.remove('active');
         currentStep = index;
-        document.querySelector(`[data-index="${currentStep}"]`)?.classList.add('active');
+        // Seleciona o novo slide
+        const nextSlideElement = document.querySelector(`[data-index="${currentStep}"]`);
+        nextSlideElement?.classList.add('active');
+        
         updateProgressBar();
-
+    
         const currentQuestion = questions[currentStep];
-        if (currentQuestion && currentQuestion.id === 'crp') {
-            const crpInput = document.getElementById(`input-${currentQuestion.id}`);
-            if (crpInput && window.IMask) {
-                IMask(crpInput, { mask: '00/000000' });
+        
+        // Configurações de Máscara (IMask)
+        if (currentQuestion) {
+            if (currentQuestion.id === 'crp') {
+                const crpInput = document.getElementById(`input-${currentQuestion.id}`);
+                if (crpInput && window.IMask) {
+                    // Máscara flexível (permite digitar até preencher)
+                    IMask(crpInput, { mask: '00/000000' });
+                }
+            }
+            if (currentQuestion.id === 'cep') {
+                const cepInput = document.getElementById(`input-${currentQuestion.id}`);
+                if (cepInput && window.IMask) {
+                    IMask(cepInput, { mask: '00000-000' }); // Corrigi a máscara de CEP que estava igual a de CRP no seu código original
+                }
+            }
+            if (currentQuestion.id === 'waitlisted') {
+                const waitlistEmailInput = document.getElementById('input-waitlist-email');
+                if (waitlistEmailInput && userAnswers.email) {
+                    waitlistEmailInput.value = userAnswers.email;
+                }
             }
         }
-        if (currentQuestion && currentQuestion.id === 'cep') {
-            const crpInput = document.getElementById(`input-${currentQuestion.id}`);
-            if (crpInput && window.IMask) {
-                IMask(crpInput, { mask: '00/000000' });
+    
+        // LÓGICA DE AUTO-FOCUS (Novo)
+        // Pequeno delay para garantir que a transição CSS (se houver) iniciou
+        setTimeout(() => {
+            if (nextSlideElement) {
+                const inputToFocus = nextSlideElement.querySelector('input, textarea');
+                if (inputToFocus) inputToFocus.focus();
             }
-        }
-        if (currentQuestion && currentQuestion.id === 'waitlisted') {
-            const waitlistEmailInput = document.getElementById('input-waitlist-email');
-            if (waitlistEmailInput && userAnswers.email) {
-                waitlistEmailInput.value = userAnswers.email;
-            }
-        }
-
-        // Chama a verificação do botão sempre que um novo slide é exibido
-        checkNextButtonState(document.querySelector(`[data-index="${currentStep}"]`));
+        }, 150);
+    
+        // Chama a verificação do botão
+        checkNextButtonState(nextSlideElement);
     }
 
     function collectAnswer() {
@@ -172,30 +203,43 @@ document.addEventListener('DOMContentLoaded', () => {
     function validateAndAdvance() {
         const currentQuestion = questions[currentStep];
         const currentSlideEl = document.querySelector('.slide.active');
+        
+        // Se não é obrigatória, passa direto
         if (!currentQuestion.required) {
             collectAnswer();
             goToSlide(currentStep + 1);
             return;
         }
-
+    
         let isValid = true;
         let elementToShake;
-
+    
+        // Funções auxiliares de validação
         const isEmailValid = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        const isCrpValid = (crp) => /^\d{2}\/\d{6}$/.test(crp);
-
+        // Regex CRP ajustado: 2 dígitos + barra + 4 a 6 dígitos
+        const isCrpValid = (crp) => /^\d{2}\/\d{4,6}$/.test(crp);
+        const isCepValid = (cep) => /^\d{5}-\d{3}$/.test(cep);
+    
         if (['text', 'email'].includes(currentQuestion.type)) {
             const input = document.getElementById(`input-${currentQuestion.id}`);
             elementToShake = input.parentElement; 
-
+    
             const value = input.value.trim();
+            
             if (!value) {
                 isValid = false;
             } else if (currentQuestion.type === 'email' && !isEmailValid(value)) {
                 isValid = false;
             } else if (currentQuestion.id === 'crp' && !isCrpValid(value)) {
                 isValid = false;
+            } else if (currentQuestion.id === 'cep' && !isCepValid(value)) {
+                isValid = false;
+            } else if (currentQuestion.id === 'nome') {
+                // Validação de Nome + Sobrenome
+                const partesNome = value.split(/\s+/);
+                if (partesNome.length < 2) isValid = false;
             }
+    
         } else if (['multiple-choice'].includes(currentQuestion.type)) {
             elementToShake = currentSlideEl.querySelector('.choices-container');
             if (currentSlideEl.querySelectorAll('.choice-button.selected').length === 0) isValid = false;
@@ -205,8 +249,15 @@ document.addEventListener('DOMContentLoaded', () => {
             collectAnswer();
             goToSlide(currentStep + 1);
         } else if (elementToShake) {
+            // Efeito visual de erro
             elementToShake.classList.add('shake-error');
             setTimeout(() => elementToShake.classList.remove('shake-error'), 500);
+            
+            // Se for erro de nome, podemos dar um feedback extra (opcional)
+            if (currentQuestion.id === 'nome') {
+                 // Opcional: alterar placeholder ou mostrar msg pequena
+                 // input.placeholder = "Digite Nome e Sobrenome";
+            }
         }
     }
 
@@ -265,6 +316,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initializeQuiz() {
         slidesContainer.innerHTML = questions.map((q, i) => createSlideHTML(q, i)).join('');
+
+        // Adiciona capitalização automática para o campo de nome
+        const nomeInput = document.getElementById('input-nome');
+        if (nomeInput) {
+            nomeInput.addEventListener('input', (e) => {
+                const start = e.target.selectionStart;
+                const end = e.target.selectionEnd;
+                // Capitaliza a primeira letra de cada palavra
+                e.target.value = e.target.value.replace(/\b\w/g, char => char.toUpperCase());
+                e.target.setSelectionRange(start, end);
+            });
+        }
         
         // 1. LÓGICA DO "ENTER PARA AVANÇAR" (Problema 1)
         slidesContainer.addEventListener('keydown', (e) => {
@@ -286,66 +349,64 @@ document.addEventListener('DOMContentLoaded', () => {
 
         slidesContainer.addEventListener('click', (e) => {
             const target = e.target;
-            if (target.matches('[data-action="next"]')) {
+            
+            // CORREÇÃO CRÍTICA: Usamos .closest para pegar o botão mesmo clicando no texto
+            const nextBtn = target.closest('[data-action="next"]');
+            const restartBtn = target.closest('[data-action="restart"]');
+            const submitValidationBtn = target.closest('[data-action="submit-validation"]');
+            const checkBtn = target.closest('[data-action="check"]');
+            const submitWaitlistBtn = target.closest('[data-action="submit-waitlist"]');
+            const backBtn = target.closest('.back-button');
+            const choiceBtn = target.closest('.choice-button'); // Aqui está a mágica
+
+            if (nextBtn) {
                 validateAndAdvance();
-            } else if (target.matches('[data-action="restart"]')) {
+            } else if (restartBtn) {
                 goToSlide(0); 
-            } else if (target.matches('[data-action="submit-validation"]')) {
+            } else if (submitValidationBtn) {
                 localStorage.setItem('psi_questionario_respostas', JSON.stringify(userAnswers));
-
-                // Salva uma "chave" que prova que ele passou por aqui
                 sessionStorage.setItem('questionarioCompleto', 'true');
-
                 const { nome, email, crp } = userAnswers;
-                const params = new URLSearchParams({
-                    nome: nome || '',
-                    email: email || '',
-                    crp: crp || ''
-                });
+                const params = new URLSearchParams({ nome: nome || '', email: email || '', crp: crp || '' });
                 window.location.href = `psi_registro.html?${params.toString()}`;
-
-
-            } else if (target.matches('[data-action="check"]')) {
+            } else if (checkBtn) {
                 const currentSlideEl = document.querySelector('.slide.active');
                 if (currentSlideEl.querySelectorAll('.choice-button.selected').length > 0) {
                     checkDemand();
                 } else {
                     validateAndAdvance(); 
                 }
-            } else if (target.matches('[data-action="submit-waitlist"]')) {
+            } else if (submitWaitlistBtn) {
                 submitToWaitlist();
-            } else if (target.matches('.back-button')) {
+            } else if (backBtn) {
                 let passoAnterior = currentStep - 1;
                 const cepStepIndex = questions.findIndex(q => q.id === 'cep');
-        
-                // Se estou no passo DEPOIS do CEP (ex: 'genero_identidade')
                 if (currentStep === cepStepIndex + 1) {
                     const modalidade = userAnswers['modalidade'];
                     if (modalidade === 'Apenas Online') {
-                        // PULA o CEP e volta direto para Modalidade
                         passoAnterior = cepStepIndex - 1;
                     }
                 }
                 goToSlide(passoAnterior);
-            } else if (target.matches('.choice-button')) {
+            } 
+            // Lógica de Seleção Corrigida
+            else if (choiceBtn) {
                 const currentQuestion = questions[currentStep];
-                let proximoPasso = currentStep + 1; // Define o próximo passo padrão
+                let proximoPasso = currentStep + 1;
 
-                if (target.classList.contains('multi-choice')) {
-                    target.classList.toggle('selected');
+                if (choiceBtn.classList.contains('multi-choice')) {
+                    choiceBtn.classList.toggle('selected'); // Agora vai ficar amarelo!
                 } else {
-                    target.closest('.choices-container').querySelectorAll('.choice-button').forEach(btn => btn.classList.remove('selected'));
-                    target.classList.add('selected');
+                    choiceBtn.closest('.choices-container').querySelectorAll('.choice-button').forEach(btn => btn.classList.remove('selected'));
+                    choiceBtn.classList.add('selected'); // Agora vai ficar amarelo!
+                    
                     collectAnswer();
-                    // *** INÍCIO DA LÓGICA CONDICIONAL ***
+                    
                     if (currentQuestion.id === 'modalidade') {
                         const modalidade = userAnswers['modalidade'];
                         if (modalidade === 'Apenas Online') {
-                            // PULA a etapa do CEP
                             const cepStepIndex = questions.findIndex(q => q.id === 'cep');
                             proximoPasso = cepStepIndex + 1; 
-                            
-                            // Limpa o CEP, caso o usuário esteja voltando e mudando a opção
                             userAnswers['cep'] = null; 
                         }
                     }

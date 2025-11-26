@@ -1755,9 +1755,31 @@ header.header-rolagem nav a:hover {
     background-color: var(--off-white); /* Cor de fundo do questionário claro */
 }
 
-.choice-button:hover, .choice-button.selected {background-color: var(--cor-girassol); border-color: var(--cor-girassol); color: var(--verde-escuro);}
-.shake-error {animation: shake 0.5s ease-in-out;}
-@keyframes shake {0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 50% { transform: translateX(8px); } 75% { transform: translateX(-8px); }}
+/* --- No final do arquivo style.css --- */
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+.shake-error {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* Quando o erro acontece no input de texto, pintamos a linha de baixo de vermelho */
+.form-group-questionario.shake-error .text-input {
+    border-bottom-color: #ff6b6b !important;
+    transition: border-color 0.2s;
+}
+
+/* Quando o erro acontece nos botões de escolha, pintamos a borda do container */
+.choices-container.shake-error {
+    border: 1px solid #ff6b6b;
+    border-radius: 12px;
+    padding: 10px; /* Um pouco de respiro para a borda não colar */
+}
 /* =====================================================================
 //* --- CORREÇÃO VISUAL: ESTRELAS E INPUT --- */
 
@@ -3009,6 +3031,7 @@ body.pagina-dashboard {
 @keyframes spin {
     to {
         transform: rotate(360deg);
+    }
 }
 
 /* Exibe o olho aberto quando ativo */
@@ -4095,4 +4118,43 @@ header.header-rolagem .botoes-acao .btn-outline:hover {
     display: block !important;
     opacity: 1 !important;
     visibility: visible !important;
+}
+
+/* --- ESTILO DE SELEÇÃO DOS BOTÕES (No final do style.css) --- */
+
+/* Estado Selecionado (Ativo) */
+.choice-button.selected {
+    background-color: #FFEE8C !important; /* Amarelo Girassol */
+    color: #1B4332 !important;           /* Verde Escuro */
+    border-color: #FFEE8C !important;
+    font-weight: 700;                     /* Negrito para destaque */
+    transform: scale(1.02);               /* Leve aumento para feedback tátil */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Garante que o hover no selecionado mantenha o estilo */
+.choice-button.selected:hover {
+    background-color: #ffe66d !important; /* Amarelo um pouco mais intenso */
+    border-color: #ffe66d !important;
+}
+
+/* --- CORREÇÃO VISUAL: ESTADO SELECIONADO (AMARELO) --- */
+/* Adicione isso no final absoluto do seu style.css */
+
+button.choice-button.selected,
+.choice-button.selected {
+    background-color: #FFEE8C !important; /* Amarelo Girassol */
+    color: #1B4332 !important;           /* Verde Escuro */
+    border-color: #FFEE8C !important;     /* Borda Amarela */
+    font-weight: 700 !important;          /* Negrito */
+    transform: scale(1.02);               /* Leve aumento */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+/* Garante que, ao passar o mouse num item JÁ selecionado, ele continue amarelo */
+button.choice-button.selected:hover,
+.choice-button.selected:hover {
+    background-color: #ffe66d !important; /* Um amarelo levemente mais forte */
+    border-color: #ffe66d !important;
+    opacity: 1 !important;
 }

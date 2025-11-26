@@ -670,35 +670,36 @@
     margin-bottom: 0;
 }
 
-/* --- PÁGINA RECURSOS DE CRISE (Design Melhorado) --- */
+/* --- PÁGINA RECURSOS DE CRISE (Ajuste Fino) --- */
 
 .recursos-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
-    margin-bottom: 60px;
+    /* Item 5: Cards menores. Mudamos minmax para 250px (era 300px) e limitamos a largura máxima */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px; /* Espaço menor entre eles */
+    max-width: 1000px; /* Trava a largura total do grid */
+    margin: 0 auto 60px auto; /* Centraliza o grid na tela */
 }
 
+/* 1. Configuração do Card para ocupar toda a altura */
 .recurso-card {
     background-color: var(--branco-puro);
     padding: 40px 30px;
     border-radius: 16px;
     border: 1px solid #eee;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05); /* Sombra mais suave e elegante */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
     text-align: center;
+    
+    /* FLEXBOX PARA ALINHAMENTO VERTICAL */
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    position: relative; /* Para o detalhe da borda */
+    height: 100%; /* Garante que todos os cards tenham a mesma altura no grid */
+    
+    position: relative;
     overflow: hidden;
     transition: transform 0.3s ease;
 }
 
-.recurso-card:hover {
-    transform: translateY(-5px);
-}
-
-/* Detalhe vermelho no topo do card */
 .recurso-card::before {
     content: '';
     position: absolute;
@@ -706,68 +707,107 @@
     background-color: #E63946;
 }
 
-/* Ícone Circular no topo */
+/* Ícone */
 .card-icon-wrapper {
-    width: 70px;
-    height: 70px;
-    background-color: #fef2f2; /* Vermelho bem claro */
+    width: 60px; /* Ícone levemente menor */
+    height: 60px;
+    background-color: #fef2f2;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 20px auto;
+    margin: 0 auto 15px auto;
     color: #E63946;
 }
-.card-icon-wrapper svg {
-    width: 32px;
-    height: 32px;
-    fill: currentColor;
-}
+.card-icon-wrapper svg { width: 28px; height: 28px; fill: currentColor; }
 
+/* Título do Card de Crise */
 .recurso-card h3 {
     font-family: 'New Kansas', serif;
-    color: #333; /* Título escuro para contraste */
+    color: #333;
     margin-top: 0;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     margin-bottom: 15px;
+    line-height: 1.2;
+    min-height: 3.6em; /* Reserva espaço para 3 linhas */
+    
+    /* NOVO: Garante que o título e o subtítulo fiquem um embaixo do outro e centralizados */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
 }
 
+/* Subtítulo (o texto entre parênteses) */
+.recurso-card h3 span {
+    display: block;
+    font-size: 0.75em; /* Um pouco menor para hierarquia */
+    font-weight: 400; /* Fonte normal, não negrito */
+    margin-top: 4px;
+    color: #555;
+}
+
+/* Descrição do Card (Área de Texto) */
 .recurso-card p {
     color: #666;
-    font-size: 1rem;
-    line-height: 1.6;
-    flex-grow: 1;
-    margin-bottom: 30px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    margin-bottom: 0; /* Removemos margem aqui para controlar no container */
+    
+    /* CORREÇÃO DE ALINHAMENTO NUMÉRICO: */
+    min-height: 90px; /* Força todos os textos a terem pelo menos essa altura */
+    /* AQUI ESTÁ O SEGREDO: Altura Mínima Fixa */
+    /* Isso força todos os textos a terem o mesmo tamanho da caixa do SAMU (o maior texto) */
+    min-height: 110px; 
+    
+    flex-grow: 1; /* Garante que o botão vá para o fundo se o texto for curto */
+    display: flex;
+    align-items: flex-start; /* Alinha texto no topo */
+    justify-content: center; /* Centraliza texto horizontalmente */
+    align-items: flex-start; /* Texto começa no topo */
+    justify-content: center;
+    /* flex-grow: 1;  <-- REMOVIDO: Não queremos mais que o texto estique até o fundo */
 }
 
-/* Botão de Emergência Moderno */
+/* 2. O Segredo do Alinhamento: Botão no Rodapé */
+/* Seleciona a div que contém o botão (a última div dentro do card) */
+/* Container do Botão */
+.recurso-card > div:last-child {
+    margin-top: auto; /* ISSO EMPURRA O BOTÃO PARA O FINAL ABSOLUTO */
+    /* margin-top: auto; <-- REMOVIDO: O botão não vai mais para o chão */
+    margin-top: 20px; /* Espaço fixo e elegante entre o texto e o botão */
+    width: 100%;
+    display: flex;
+    justify-content: center; /* Garante que o botão fique no meio horizontalmente */
+    padding-top: 20px; /* Um respiro mínimo caso o texto de cima seja muito longo */
+    justify-content: center;
+}
+
 .btn-emergencia {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    width: 100%;
+    gap: 8px;
     background-color: #E63946;
     color: white;
     font-weight: bold;
-    font-size: 1.1rem;
-    padding: 14px;
-    border-radius: 50px; /* Botão pílula */
+    font-size: 1rem;
+    padding: 12px 25px;
+    border-radius: 50px;
     text-decoration: none;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3); /* Sombra vermelha */
+    box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3);
+    width: fit-content; /* Botão do tamanho do texto */
+    margin: 0 auto; /* Centraliza o botão horizontalmente */
 }
 .btn-emergencia:hover {
     background-color: #c9303c;
     transform: scale(1.02);
-    box-shadow: 0 6px 20px rgba(230, 57, 70, 0.4);
 }
-
-.btn-emergencia svg {
-    width: 20px;
-    height: 20px;
-    fill: white;
-}
+.btn-emergencia svg { width: 18px; height: 18px; fill: white; }
 
 /* Força os 3 cards de crise a ficarem lado a lado no Desktop */
 @media (min-width: 992px) {
@@ -848,16 +888,390 @@
     line-height: 1.5;
 }
 
-/* Ajuste do card "O que é a Jano?" para ficar mais elegante */
+/* Card "O que é a Jano" (Verde Menta) */
 .card-sobre-jano {
-    background-color: #fff !important;
-    border: 1px dashed #ccc !important; /* Borda pontilhada discreta */
-    border-left: none !important; /* Remove a borda grossa lateral */
+    background-color: #E0F2F1 !important; /* Verde Menta Suave */
+    border: 1px solid #B2DFDB !important; /* Borda Verde um pouco mais escura */
+    border-left: 5px solid var(--verde-escuro) !important; /* Detalhe lateral */
     text-align: center !important;
-    max-width: 700px;
+    max-width: 800px;
     margin: 60px auto 0 auto !important; /* Mais espaço acima e centralizado */
+    padding: 40px !important;
+    border-radius: 12px !important;
 }
 .card-sobre-jano h3 {
-    color: #555 !important;
-    font-size: 1.3rem !important;
+    color: var(--verde-escuro) !important;
+    font-size: 1.5rem !important;
+    margin-top: 0;
+    font-family: 'New Kansas', serif;
+}
+.card-sobre-jano p {
+    color: #2c3e35 !important; /* Texto escuro legível sobre o menta */
+}
+/* --- SEÇÃO COMO FUNCIONA (Estilo Rico/Humanizado) --- */
+
+.como-funciona {
+    padding: 100px 20px; /* Mais respiro vertical */
+    background-color: #fdfaf6; /* Fundo Off-white quente */
+    overflow: hidden; /* Para conter decorações */
+}
+
+.steps-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 80px; /* Espaço generoso entre os passos */
+    max-width: 1100px;
+    margin: 60px auto 0 auto;
+}
+
+/* O Bloco do Passo (Zig-Zag) */
+.step-row {
+    display: flex;
+    align-items: center;
+    gap: 60px;
+}
+
+/* Inverte a ordem para o segundo passo (Imagem na esquerda, Texto na direita) */
+.step-row.reverse {
+    flex-direction: row-reverse;
+}
+
+/* Coluna de Texto */
+.step-content {
+    flex: 1;
+    text-align: left;
+}
+
+.step-tag {
+    display: inline-block;
+    background-color: #E0F2F1; /* Verde menta bem claro */
+    color: var(--verde-escuro);
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 6px 14px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.step-content h3 {
+    font-family: 'New Kansas', serif;
+    font-size: 2.2rem;
+    color: var(--verde-escuro);
+    margin-top: 0;
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+.step-content p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #555;
+}
+
+/* Coluna de Imagem (Com decorações) */
+.step-image-col {
+    flex: 1;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+/* A Imagem em si */
+.step-img-frame {
+    position: relative;
+    z-index: 2;
+    border-radius: 24px; /* Bordas bem arredondadas */
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(27, 67, 50, 0.15); /* Sombra rica */
+    width: 100%;
+    max-width: 450px;
+    height: 350px;
+}
+
+.step-img-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.step-row:hover .step-img-frame img {
+    transform: scale(1.05); /* Zoom suave ao passar o mouse */
+}
+
+/* Decoração "Blob" atrás da imagem */
+.step-blob {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 20px;
+    left: 20px;
+    background-color: var(--cor-girassol);
+    border-radius: 24px;
+    z-index: 1; /* Atrás da imagem */
+    opacity: 0.4;
+}
+
+.step-row.reverse .step-blob {
+    left: -20px; /* Inverte a sombra decorativa */
+}
+
+/* Responsividade para Mobile */
+@media (max-width: 900px) {
+    .step-row, .step-row.reverse {
+        flex-direction: column; /* Empilha tudo */
+        gap: 30px;
+        text-align: center;
+    }
+    
+    .step-content {
+        text-align: center;
+    }
+    
+    .step-blob {
+        top: 15px; left: 15px;
+    }
+    
+    .step-row.reverse .step-blob {
+        left: 15px;
+    }
+}
+
+/* --- TABELA COMPARATIVA (Profissionais) --- */
+
+.comparativo-secao {
+    padding: 80px 20px;
+    background-color: #fdfaf6; /* Fundo off-white para destacar do resto */
+}
+
+.tabela-comparativa {
+    display: grid;
+    grid-template-columns: 1fr; /* Mobile: empilhado */
+    gap: 30px;
+    max-width: 900px;
+    margin: 40px auto 0 auto;
+}
+
+/* Estilo base das colunas */
+.coluna-tabela {
+    background: #ffffff;
+    padding: 40px 30px;
+    border-radius: 16px;
+    border: 1px solid #e0e0e0;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.coluna-tabela h3 {
+    font-family: 'New Kansas', serif;
+    font-size: 1.5rem;
+    margin-bottom: 25px;
+    color: #555;
+}
+
+.coluna-tabela ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: left; /* Itens alinhados à esquerda para leitura fácil */
+}
+
+.coluna-tabela li {
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 1rem;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.coluna-tabela li:last-child {
+    border-bottom: none;
+}
+
+/* Destaques Visuais (Ícones) */
+.icone-x::before {
+    content: '✕';
+    color: #E63946; /* Vermelho */
+    font-weight: bold;
+    font-size: 1.2rem;
+    display: inline-block;
+    width: 25px;
+}
+
+.icone-check::before {
+    content: '✓';
+    color: var(--verde-escuro);
+    font-weight: bold;
+    font-size: 1.2rem;
+    display: inline-block;
+    width: 25px;
+}
+
+/* --- COLUNA DESTAQUE (JANO) --- */
+.coluna-tabela.destaque {
+    border: 2px solid var(--verde-escuro);
+    box-shadow: 0 10px 40px rgba(27, 67, 50, 0.15);
+    transform: scale(1.02); /* Levemente maior */
+    position: relative;
+    background-color: #fff;
+    z-index: 2;
+}
+
+/* Etiqueta "Recomendado" */
+.tag-destaque {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--verde-escuro);
+    color: var(--cor-girassol);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.coluna-tabela.destaque h3 {
+    color: var(--verde-escuro);
+    font-size: 1.8rem; /* Título maior */
+}
+
+.coluna-tabela.destaque li {
+    color: #333;
+    font-weight: 500;
+}
+
+/* Responsividade Desktop */
+@media (min-width: 768px) {
+    .tabela-comparativa {
+        grid-template-columns: 1fr 1fr; /* Lado a lado */
+        align-items: center; /* Centraliza verticalmente */
+    }
+    /* A coluna "Outros" fica um pouco menor visualmente */
+    .coluna-tabela:not(.destaque) {
+        transform: scale(0.95); 
+        background-color: #f9f9f9;
+    }
+}
+/* --- CORES DE FUNDO ALTERNADAS (Ritmo Visual) --- */
+
+/* Seção 2: Terapeutas -> BRANCO */
+.secao-terapeutas {
+    background-color: var(--branco-puro) !important;
+}
+
+/* Seção 3: Como Funciona -> OFF-WHITE (Creme) */
+.como-funciona {
+    background-color: var(--off-white) !important;
+}
+
+/* --- PÁGINA DE CONTATO --- */
+
+.contato-container {
+    display: grid;
+    grid-template-columns: 1fr; /* Mobile: 1 coluna */
+    gap: 50px;
+    max-width: 1100px;
+    margin: 0 auto;
+    align-items: start;
+}
+
+/* No Desktop, divide em 2 colunas (1/3 para info, 2/3 para formulário) */
+@media (min-width: 992px) {
+    .contato-container {
+        grid-template-columns: 1fr 1.5fr;
+    }
+}
+
+/* Lado Esquerdo: Informações */
+.info-contato h3 {
+    font-family: 'New Kansas', serif;
+    color: var(--verde-escuro);
+    font-size: 1.8rem;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.info-contato p {
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.info-contato ul {
+    list-style: none;
+    padding: 0;
+}
+
+.info-contato li {
+    margin-bottom: 25px;
+    font-size: 1.05rem;
+    color: #333;
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+}
+
+.info-contato li strong {
+    color: var(--verde-escuro);
+    display: block;
+    margin-bottom: 5px;
+}
+
+.info-contato a {
+    color: var(--verde-escuro);
+    text-decoration: underline;
+}
+
+/* Lado Direito: Formulário (Cartão) */
+.form-contato {
+    background-color: #f8f9fa; /* Fundo cinza suave */
+    padding: 40px;
+    border-radius: 16px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.form-contato .form-group {
+    margin-bottom: 20px;
+}
+
+.form-contato label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+}
+
+.form-contato input,
+.form-contato select,
+.form-contato textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    background-color: #fff;
+}
+
+.form-contato textarea {
+    resize: vertical; /* Permite redimensionar só na altura */
+}
+
+/* Seção 4: FAQ -> BRANCO */
+.faq-secao {
+    background-color: var(--branco-puro) !important;
+}
+
+/* Seção 5: Aviso de Crise -> OFF-WHITE */
+.aviso-crise {
+    background-color: var(--off-white) !important;
+    border-top: none; /* Remove borda se houver, para ficar limpo */
 }
