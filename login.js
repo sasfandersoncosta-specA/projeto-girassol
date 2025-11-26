@@ -8,19 +8,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnPaciente = document.getElementById('btnPaciente');
     const btnPsicologo = document.getElementById('btnPsicologo');
 
-    // --- LÓGICA DE PRÉ-PREENCHIMENTO (NOVO) ---
-    const prefillEmail = localStorage.getItem('login_prefetch_email');
-    const prefillRole = localStorage.getItem('login_prefetch_role');
+    // --- LÓGICA DE PRÉ-PREENCHIMENTO (via URL) ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const tipoUsuario = urlParams.get('tipo'); // Pega o valor de 'tipo' (ex: 'psi')
+    const emailParam = urlParams.get('email'); // Pega o email
 
-    if (prefillEmail) {
-        emailInput.value = prefillEmail;
-        localStorage.removeItem('login_prefetch_email'); // Limpa para não usar de novo
+    // Preenche o e-mail se ele veio na URL
+    if (emailParam) {
+        emailInput.value = emailParam;
     }
-    if (prefillRole === 'psychologist' && btnPsicologo) {
-        btnPsicologo.click(); // Simula o clique no botão "Sou Psicólogo(a)"
-        localStorage.removeItem('login_prefetch_role'); // Limpa
+
+    // Seleciona o botão "Sou Psicólogo(a)" se o tipo for 'psi'
+    if (tipoUsuario === 'psi' && btnPsicologo && btnPaciente) {
+        btnPaciente.classList.remove('active');
+        btnPsicologo.classList.add('active');
     }
-    // --- FIM DO BLOCO NOVO ---
+    // --- FIM DO BLOCO DE PRÉ-PREENCHIMENTO ---
+
 
 
     // --- LÓGICA PARA O NOVO SELETOR DE PERFIL ---
@@ -39,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         roleInput.value = selectedRole; // Define o valor inicial
 
         // Atualiza o valor padrão se o pré-preenchimento já o mudou
-        if (prefillRole === 'psychologist') {
+        if (tipoUsuario === 'psi') {
             roleInput.value = 'psychologist';
         }
 

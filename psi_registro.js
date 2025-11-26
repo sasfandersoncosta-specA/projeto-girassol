@@ -116,7 +116,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('login_prefetch_role', 'psychologist');
                     mensagemRegistro.textContent = result.message + " Redirecionando...";
                     mensagemRegistro.className = 'mensagem-sucesso';
-                    setTimeout(() => { window.location.href = 'login.html'; }, 2000);
+                    setTimeout(() => { 
+                        window.location.href = `login.html?email=${encodeURIComponent(registrationData.email)}&tipo=psi`; 
+                    }, 2000);
                 }
 
             } else {
