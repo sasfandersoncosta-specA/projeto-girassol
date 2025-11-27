@@ -1,4 +1,6 @@
 const db = require('../models');
+// ADICIONE ESTA LINHA ABAIXO:
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY); 
 const { Op } = require('sequelize');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -1058,5 +1060,42 @@ exports.cancelSubscription = async (req, res) => {
     } catch (error) {
         console.error('Erro ao cancelar:', error);
         res.status(500).json({ error: 'Erro interno.' });
+    }
+};
+
+// ----------------------------------------------------------------------
+// Rota: POST /api/psychologists/me/reactivate-subscription
+// Descrição: Remove o agendamento de cancelamento no Stripe e mantém o plano ativo.
+// ----------------------------------------------------------------------
+exports.reactivateSubscription = async (req, res) => {
+    try {
+        // 1. Identificação segura (usando seu padrão req.psychologist)
+        if (!req.psychologist || !req.psychologist.id) {
+            return res.status(401).json({ error: 'Não autorizado.' });
+        }
+
+        const psychologist = await db.Psychologist.findByPk(req.psychologist.id);
+
+        if (!psychologist || !psychologist.stripeSubscriptionId) {
+            return res.status(404).json({ error: 'Assinatura não encontrada para reativação.' });
+        }
+
+        // 2. Mágica do Stripe: "Não cancele mais no final do período"
+        await stripe.subscriptions.update(psychologist.stripeSubscriptionId, {
+            cancel_at_period_end: false,
+        });
+
+        // 3. Atualiza o banco local para o front saber que está tudo bem
+        // Nota: Ajustamos para garantir que o status fique ativo e flags de cancelamento sejam limpas
+        await psychologist.update({
+            cancelAtPeriodEnd: false, // Certifique-se que sua tabela tem essa coluna, ou ignore se não tiver
+            status: 'active'
+        });
+
+        res.status(200).json({ message: 'Assinatura reativada com sucesso! A renovação automática foi restaurada.' });
+
+    } catch (error) {
+        console.error('Erro ao reativar assinatura:', error);
+        res.status(500).json({ error: 'Erro ao processar reativação no Stripe.' });
     }
 };

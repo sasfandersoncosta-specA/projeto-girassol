@@ -48,6 +48,9 @@ router.delete('/me', psychologistController.deletePsychologistAccount);
 // Adicione junto com as rotas protegidas "me"
 router.post('/me/cancel-subscription', psychologistController.cancelSubscription);
 
+// Cole esta linha junto com as outras rotas (geralmente no final da lista)
+router.post('/me/reactivate-subscription', psychologistController.reactivateSubscription);
+
 // CORREÇÃO AQUI: Removemos 'authMiddleware' pois 'protect' já está aplicado globalmente acima
 router.post('/me/exit-survey', psychologistController.saveExitSurvey);
 
