@@ -233,208 +233,195 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- PÁGINA ASSINATURA (CORREÇÕES VISUAIS) ---
     // Substitua toda a função 'inicializarAssinatura' por esta versão:
+// --- SUBSTITUA A FUNÇÃO inicializarAssinatura ANTIGA POR ESTE BLOCO INTEIRO ---
 
- function inicializarAssinatura() {
-    const cardResumo = document.getElementById('card-resumo-assinatura');
-    const areaCancelamento = document.getElementById('area-cancelamento');
-    const temPlano = psychologistData && psychologistData.plano;
+    function inicializarAssinatura() {
+        const cardResumo = document.getElementById('card-resumo-assinatura');
+        const areaCancelamento = document.getElementById('area-cancelamento');
+        const temPlano = psychologistData && psychologistData.plano;
 
-    // Tabela de preços
-    const precos = { 'semente': 'R$ 99,00', 'luz': 'R$ 149,00', 'sol': 'R$ 199,00' };
+        // Tabela de preços atualizada
+        const precos = { 'semente': 'R$ 99,00', 'luz': 'R$ 149,00', 'sol': 'R$ 199,00' };
 
-    if (temPlano && cardResumo) {
-        cardResumo.style.display = 'flex';
-        
-        // Verifica status
-        const isCancelado = psychologistData.cancel_at_period_end || psychologistData.status === 'canceled' || psychologistData.cancelado_localmente;
-
-        // Se estiver cancelado, esconde a opção de cancelar novamente
-        if (areaCancelamento) {
-            areaCancelamento.style.display = isCancelado ? 'none' : 'block';
-        }
-
-        // --- BANNER SUPERIOR ---
-        const elNome = document.getElementById('banner-nome-plano');
-        if(elNome) elNome.textContent = `Plano ${psychologistData.plano}`;
-        
-        const planoKey = psychologistData.plano.toLowerCase();
-        const elPreco = document.getElementById('banner-preco');
-        if(elPreco) elPreco.textContent = `${precos[planoKey] || 'R$ --'} / mês`;
-
-        const elData = document.getElementById('banner-renovacao');
-        const elBadge = cardResumo.querySelector('.status-badge');
-
-        let dataDisplay;
-        if (psychologistData.subscription_expires_at) {
-            dataDisplay = new Date(psychologistData.subscription_expires_at);
-        } else {
-            const hoje = new Date();
-            dataDisplay = new Date(hoje.setMonth(hoje.getMonth() + 1));
-        }
-        const dataFormatada = dataDisplay.toLocaleDateString('pt-BR');
-
-        if (isCancelado) {
-            // BANNER: Amarelo
-            if (elData) elData.textContent = `Finaliza em: ${dataFormatada}`;
-            if (elBadge) elBadge.innerHTML = `<span style="width: 8px; height: 8px; background: #FFC107; border-radius: 50%;"></span> Cancelado`;
-        } else {
-            // BANNER: Verde
-            if (elData) elData.textContent = `Renova em: ${dataFormatada}`;
-            if (elBadge) elBadge.innerHTML = `<span style="width: 8px; height: 8px; background: #4ade80; border-radius: 50%;"></span> Ativo`;
-        }
-
-        // Lógica Modal Cancelamento
-        const btnCancelar = document.getElementById('btn-cancelar-assinatura');
-        const modalCancel = document.getElementById('modal-cancelamento');
-        
-        if(btnCancelar && modalCancel && !isCancelado) {
-            const novoBtn = btnCancelar.cloneNode(true);
-            btnCancelar.parentNode.replaceChild(novoBtn, btnCancelar);
+        if (temPlano && cardResumo) {
+            cardResumo.style.display = 'flex';
             
-            novoBtn.onclick = (e) => { e.preventDefault(); modalCancel.style.display = 'flex'; };
-            document.getElementById('btn-fechar-modal-cancel').onclick = () => modalCancel.style.display = 'none';
+            // Verifica se está cancelado (backend ou flag local)
+            const isCancelado = psychologistData.cancel_at_period_end || psychologistData.status === 'canceled' || psychologistData.cancelado_localmente;
+
+            if (areaCancelamento) {
+                // Se já cancelou, não mostra botão de cancelar de novo
+                areaCancelamento.style.display = isCancelado ? 'none' : 'block';
+            }
+
+            // --- BANNER SUPERIOR ---
+            const elNome = document.getElementById('banner-nome-plano');
+            if(elNome) elNome.textContent = `Plano ${psychologistData.plano}`;
             
-            const btnConfirmar = document.getElementById('btn-confirmar-cancelamento');
-            const novoConfirmar = btnConfirmar.cloneNode(true);
-            btnConfirmar.parentNode.replaceChild(novoConfirmar, btnConfirmar);
+            const planoKey = psychologistData.plano.toLowerCase();
+            const elPreco = document.getElementById('banner-preco');
+            if(elPreco) elPreco.textContent = `${precos[planoKey] || 'R$ --'} / mês`;
 
-            novoConfirmar.onclick = async function() {
-                this.textContent = "Processando...";
-                try {
-                    await apiFetch(`${API_BASE_URL}/api/psychologists/me/cancel-subscription`, { method: 'POST' });
-                    psychologistData.cancel_at_period_end = true; 
-                    psychologistData.cancelado_localmente = true; 
-                    modalCancel.style.display = 'none';
-                    showToast('Renovação cancelada.', 'info');
-                    inicializarAssinatura(); 
-                } catch(e) {
-                    showToast('Erro: ' + e.message, 'error');
-                } finally {
-                    this.textContent = "Sim, Cancelar";
-                }
-            };
-        }
-    } else {
-        if(cardResumo) cardResumo.style.display = 'none';
-        if(areaCancelamento) areaCancelamento.style.display = 'none';
-    }
+            const elData = document.getElementById('banner-renovacao');
+            const elBadge = cardResumo.querySelector('.status-badge');
 
-    // --- CARDS E BOTÕES ---
-    document.querySelectorAll('.plano-card').forEach(card => {
-        const btn = card.querySelector('.btn-mudar-plano');
-        if (!btn) return;
-        
-        let planoCard = btn.getAttribute('data-plano');
-        if(!planoCard) {
-            const text = card.textContent.toLowerCase();
-            if(text.includes('semente')) planoCard = 'semente';
-            else if(text.includes('luz')) planoCard = 'luz';
-            else planoCard = 'sol';
-        }
-
-        // Limpa classes antigas
-        card.classList.remove('plano-card--ativo');
-        btn.classList.remove('btn-reativar'); // Limpa a classe amarela caso exista
-        
-        const selo = card.querySelector('.selo-plano-atual');
-        if(selo) selo.remove();
-
-        const isCurrent = temPlano && psychologistData.plano.toLowerCase() === planoCard.toLowerCase();
-        const isCancelado = psychologistData.cancel_at_period_end || psychologistData.status === 'canceled' || psychologistData.cancelado_localmente;
-
-        if(isCurrent) {
-            const novoSelo = document.createElement('div');
-            novoSelo.className = 'selo-plano-atual';
-            novoSelo.textContent = 'Seu Plano Atual';
-            novoSelo.style.cssText = "background:#1B4332; color:#fff; padding:5px 10px; border-radius:4px; margin-bottom:10px; font-size:0.8rem; display:inline-block; font-weight:bold;";
-            card.insertBefore(novoSelo, card.firstChild);
+            let dataDisplay;
+            if (psychologistData.subscription_expires_at) {
+                dataDisplay = new Date(psychologistData.subscription_expires_at);
+            } else {
+                const hoje = new Date();
+                dataDisplay = new Date(hoje.setMonth(hoje.getMonth() + 1));
+            }
+            const dataFormatada = dataDisplay.toLocaleDateString('pt-BR');
 
             if (isCancelado) {
-                // ESTADO: REATIVAR (Amarelo)
-                btn.textContent = "Reativar Assinatura";
-                btn.disabled = false;
-                btn.classList.add('btn-reativar'); // Adiciona a classe CSS amarela
-                
-                // AÇÃO: Chama a função direta de reativação (SEM COBRANÇA IMEDIATA)
-                btn.onclick = (e) => {
-                    e.preventDefault();
-                    reativarAssinatura(btn);
-                };
+                // ESTADO: CANCELADO (Amarelo)
+                if (elData) elData.textContent = `Finaliza em: ${dataFormatada}`;
+                if (elBadge) elBadge.innerHTML = `<span style="width: 8px; height: 8px; background: #FFC107; border-radius: 50%;"></span> Cancelado`;
             } else {
-                // ESTADO: ATIVO (Disabled)
-                btn.textContent = "Plano Atual";
-                btn.disabled = true;
+                // ESTADO: ATIVO (Verde)
+                if (elData) elData.textContent = `Renova em: ${dataFormatada}`;
+                if (elBadge) elBadge.innerHTML = `<span style="width: 8px; height: 8px; background: #4ade80; border-radius: 50%;"></span> Ativo`;
+            }
+
+            // Lógica do Modal de Cancelamento
+            const btnCancelar = document.getElementById('btn-cancelar-assinatura');
+            const modalCancel = document.getElementById('modal-cancelamento');
+            
+            if(btnCancelar && modalCancel && !isCancelado) {
+                // Clona para limpar eventos antigos
+                const novoBtn = btnCancelar.cloneNode(true);
+                btnCancelar.parentNode.replaceChild(novoBtn, btnCancelar);
+                
+                novoBtn.onclick = (e) => { e.preventDefault(); modalCancel.style.display = 'flex'; };
+                document.getElementById('btn-fechar-modal-cancel').onclick = () => modalCancel.style.display = 'none';
+                
+                const btnConfirmar = document.getElementById('btn-confirmar-cancelamento');
+                const novoConfirmar = btnConfirmar.cloneNode(true);
+                btnConfirmar.parentNode.replaceChild(novoConfirmar, btnConfirmar);
+
+                novoConfirmar.onclick = async function() {
+                    this.textContent = "Processando...";
+                    try {
+                        await apiFetch(`${API_BASE_URL}/api/psychologists/me/cancel-subscription`, { method: 'POST' });
+                        psychologistData.cancel_at_period_end = true; 
+                        psychologistData.cancelado_localmente = true; 
+                        modalCancel.style.display = 'none';
+                        showToast('Renovação cancelada.', 'info');
+                        inicializarAssinatura(); // Recarrega visual
+                    } catch(e) {
+                        showToast('Erro: ' + e.message, 'error');
+                    } finally {
+                        this.textContent = "Sim, Cancelar";
+                    }
+                };
             }
         } else {
-            // ESTADO: TROCAR (Verde)
-            btn.textContent = temPlano ? "Trocar de Plano" : "Assinar Agora";
-            btn.disabled = false;
-            btn.onclick = (e) => {
-                e.preventDefault();
-                window.iniciarPagamento(planoCard.toLowerCase(), btn);
+            if(cardResumo) cardResumo.style.display = 'none';
+            if(areaCancelamento) areaCancelamento.style.display = 'none';
+        }
+
+        // --- CARDS E BOTÕES ---
+        document.querySelectorAll('.plano-card').forEach(card => {
+            const btn = card.querySelector('.btn-mudar-plano');
+            if (!btn) return;
+            
+            let planoCard = btn.getAttribute('data-plano');
+            if(!planoCard) {
+                const text = card.textContent.toLowerCase();
+                if(text.includes('semente')) planoCard = 'semente';
+                else if(text.includes('luz')) planoCard = 'luz';
+                else planoCard = 'sol';
+            }
+
+            card.classList.remove('plano-card--ativo');
+            btn.classList.remove('btn-reativar');
+            
+            const selo = card.querySelector('.selo-plano-atual');
+            if(selo) selo.remove();
+
+            const isCurrent = temPlano && psychologistData.plano.toLowerCase() === planoCard.toLowerCase();
+            const isCancelado = psychologistData.cancel_at_period_end || psychologistData.status === 'canceled' || psychologistData.cancelado_localmente;
+
+            if(isCurrent) {
+                const novoSelo = document.createElement('div');
+                novoSelo.className = 'selo-plano-atual';
+                novoSelo.textContent = 'Seu Plano Atual';
+                novoSelo.style.cssText = "background:#1B4332; color:#fff; padding:5px 10px; border-radius:4px; margin-bottom:10px; font-size:0.8rem; display:inline-block; font-weight:bold;";
+                card.insertBefore(novoSelo, card.firstChild);
+
+                if (isCancelado) {
+                    // BOTÃO AMARELO (REATIVAR)
+                    btn.textContent = "Reativar Assinatura";
+                    btn.disabled = false;
+                    btn.classList.add('btn-reativar');
+                    
+                    btn.onclick = (e) => {
+                        e.preventDefault();
+                        reativarAssinatura(btn); // Chama a função auxiliar abaixo
+                    };
+                } else {
+                    // BOTÃO CINZA (Ativo)
+                    btn.textContent = "Plano Atual";
+                    btn.disabled = true;
+                }
+            } else {
+                // BOTÃO VERDE (Trocar)
+                btn.textContent = temPlano ? "Trocar de Plano" : "Assinar Agora";
+                btn.disabled = false;
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    window.iniciarPagamento(planoCard.toLowerCase(), btn);
+                };
+            }
+        });
+    }
+
+    // Função Auxiliar para Reativar (Conectada ao Modal Visual)
+    function reativarAssinatura(btnElement) {
+        const modal = document.getElementById('modal-reativacao');
+        const btnFechar = document.getElementById('btn-fechar-modal-reativacao');
+        const btnConfirmar = document.getElementById('btn-confirmar-reativacao');
+        
+        btnReativacaoAtual = btnElement;
+
+        if (modal) {
+            modal.style.display = 'flex';
+            
+            btnFechar.onclick = () => {
+                modal.style.display = 'none';
+            };
+
+            btnConfirmar.onclick = async function() {
+                const textoOriginalModal = this.textContent;
+                this.textContent = "Processando...";
+                this.disabled = true;
+
+                try {
+                    const response = await apiFetch(`${API_BASE_URL}/api/psychologists/me/reactivate-subscription`, {
+                        method: 'POST'
+                    });
+
+                    if (response.ok) {
+                        showToast('Assinatura reativada com sucesso! 🌻', 'success');
+                        psychologistData.cancel_at_period_end = false;
+                        psychologistData.cancelado_localmente = false;
+                        modal.style.display = 'none';
+                        inicializarAssinatura();
+                    } else {
+                        throw new Error("Falha na comunicação com o servidor.");
+                    }
+                } catch (error) {
+                    console.error(error);
+                    modal.style.display = 'none'; 
+                    showToast('Erro: Ainda não foi possível conectar ao servidor de pagamentos.', 'error');
+                } finally {
+                    this.textContent = textoOriginalModal;
+                    this.disabled = false;
+                }
             };
         }
-    });
-}
-function reativarAssinatura(btnElement) {
-    // 1. Abre o Modal Personalizado
-    const modal = document.getElementById('modal-reativacao');
-    const btnFechar = document.getElementById('btn-fechar-modal-reativacao');
-    const btnConfirmar = document.getElementById('btn-confirmar-reativacao');
-    
-    // Guarda referência do botão para mudar texto depois
-    btnReativacaoAtual = btnElement;
-
-    if (modal) {
-        modal.style.display = 'flex'; // Mostra o modal
-        
-        // Configura o botão "Cancelar/Fechar"
-        btnFechar.onclick = () => {
-            modal.style.display = 'none';
-        };
-
-        // Configura o botão "Sim, Reativar"
-        // (Usamos onclick direto para evitar acúmulo de listeners se a função for chamada várias vezes)
-        btnConfirmar.onclick = async function() {
-            // Feedback visual no botão do modal
-            const textoOriginalModal = this.textContent;
-            this.textContent = "Processando...";
-            this.disabled = true;
-
-            try {
-                // Chama a API (Backend precisa existir!)
-                const response = await apiFetch(`${API_BASE_URL}/api/psychologists/me/reactivate-subscription`, {
-                    method: 'POST'
-                });
-
-                if (response.ok) {
-                    showToast('Assinatura reativada com sucesso! 🌻', 'success');
-                    
-                    // Atualiza dados locais
-                    psychologistData.cancel_at_period_end = false;
-                    psychologistData.cancelado_localmente = false;
-                    
-                    modal.style.display = 'none';
-                    
-                    // Recarrega a tela para voltar ao verde
-                    inicializarAssinatura();
-                } else {
-                    throw new Error("Falha na comunicação com o servidor.");
-                }
-            } catch (error) {
-                console.error(error);
-                // Fecha o modal para mostrar o erro na tela principal
-                modal.style.display = 'none'; 
-                showToast('Erro: Ainda não foi possível conectar ao servidor de pagamentos.', 'error');
-            } finally {
-                // Restaura botão do modal
-                this.textContent = textoOriginalModal;
-                this.disabled = false;
-            }
-        };
     }
-}           
-      
     // --- RESTANTE DAS FUNÇÕES (PERFIL, EXCLUIR CONTA, ETC) ---
     function inicializarVisaoGeral() {
         if(document.getElementById('psi-welcome-name') && psychologistData) {
