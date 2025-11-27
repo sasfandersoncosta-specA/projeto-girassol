@@ -4,8 +4,12 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log("--- SISTEMA GIRASSOL V2.1 INICIADO ---");
     
     let psychologistData = null; 
+    
     // Variável para guardar qual plano o usuário está tentando assinar no modal
-    let currentPlanAttempt = ''; 
+    let currentPlanAttempt = '';
+
+    // Variável global temporária para saber qual botão disparou a ação
+    let btnReativacaoAtual = null;
 
     const mainContent = document.getElementById('main-content');
     const toastContainer = document.getElementById('toast-container');
@@ -372,44 +376,65 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 }
+function reativarAssinatura(btnElement) {
+    // 1. Abre o Modal Personalizado
+    const modal = document.getElementById('modal-reativacao');
+    const btnFechar = document.getElementById('btn-fechar-modal-reativacao');
+    const btnConfirmar = document.getElementById('btn-confirmar-reativacao');
+    
+    // Guarda referência do botão para mudar texto depois
+    btnReativacaoAtual = btnElement;
 
- // Função específica para reativar sem cobrar nada agora
- async function reativarAssinatura(btnElement) {
-    if(!confirm("Deseja reativar sua assinatura? A renovação automática voltará a ocorrer na data de vencimento original.")) {
-        return;
+    if (modal) {
+        modal.style.display = 'flex'; // Mostra o modal
+        
+        // Configura o botão "Cancelar/Fechar"
+        btnFechar.onclick = () => {
+            modal.style.display = 'none';
+        };
+
+        // Configura o botão "Sim, Reativar"
+        // (Usamos onclick direto para evitar acúmulo de listeners se a função for chamada várias vezes)
+        btnConfirmar.onclick = async function() {
+            // Feedback visual no botão do modal
+            const textoOriginalModal = this.textContent;
+            this.textContent = "Processando...";
+            this.disabled = true;
+
+            try {
+                // Chama a API (Backend precisa existir!)
+                const response = await apiFetch(`${API_BASE_URL}/api/psychologists/me/reactivate-subscription`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    showToast('Assinatura reativada com sucesso! 🌻', 'success');
+                    
+                    // Atualiza dados locais
+                    psychologistData.cancel_at_period_end = false;
+                    psychologistData.cancelado_localmente = false;
+                    
+                    modal.style.display = 'none';
+                    
+                    // Recarrega a tela para voltar ao verde
+                    inicializarAssinatura();
+                } else {
+                    throw new Error("Falha na comunicação com o servidor.");
+                }
+            } catch (error) {
+                console.error(error);
+                // Fecha o modal para mostrar o erro na tela principal
+                modal.style.display = 'none'; 
+                showToast('Erro: Ainda não foi possível conectar ao servidor de pagamentos.', 'error');
+            } finally {
+                // Restaura botão do modal
+                this.textContent = textoOriginalModal;
+                this.disabled = false;
+            }
+        };
     }
-
-    const originalText = btnElement.textContent;
-    btnElement.textContent = "Reativando...";
-    btnElement.disabled = true;
-
-    try {
-        // Assume que o backend tem essa rota para "desfazer o cancelamento"
-        // O Backend deve apenas fazer: stripe.subscriptions.update(id, { cancel_at_period_end: false })
-        const response = await apiFetch(`${API_BASE_URL}/api/psychologists/me/reactivate-subscription`, {
-            method: 'POST'
-        });
-
-        if (response.ok) {
-            showToast('Sucesso! Seu plano foi reativado.', 'success');
-            
-            // Atualiza dados locais
-            psychologistData.cancel_at_period_end = false;
-            psychologistData.cancelado_localmente = false;
-            
-            // Recarrega a tela para voltar ao verde
-            inicializarAssinatura();
-        } else {
-            throw new Error("Não foi possível reativar.");
-        }
-    } catch (error) {
-        console.error(error);
-        showToast('Erro ao reativar: ' + error.message, 'error');
-        btnElement.textContent = originalText;
-        btnElement.disabled = false;
-    }
-}
-
+}           
+      
     // --- RESTANTE DAS FUNÇÕES (PERFIL, EXCLUIR CONTA, ETC) ---
     function inicializarVisaoGeral() {
         if(document.getElementById('psi-welcome-name') && psychologistData) {
