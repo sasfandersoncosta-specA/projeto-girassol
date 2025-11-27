@@ -132,7 +132,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (url.includes('meu_perfil')) inicializarLogicaDoPerfil();
                 else if (url.includes('visao_geral')) inicializarVisaoGeral();
                 else if (url.includes('assinatura')) inicializarAssinatura();
-                else if (url.includes('comunidade')) inicializarComunidade(); 
+                else if (url.includes('comunidade')) inicializarComunidade();
+                else if (url.includes('caixa_de_entrada')) inicializarCaixaEntrada();
             })
             .catch(e => mainContent.innerHTML = `<p>Erro ao carregar: ${e}</p>`);
     }
@@ -611,6 +612,195 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         };
     }
+
+    // --- LÓGICA DA CAIXA DE ENTRADA (Módulo Final Conectado) ---
+function inicializarCaixaEntrada() {
+    const listContainer = document.getElementById('inbox-message-list');
+    const contentContainer = document.getElementById('inbox-message-content');
+    
+    // ROTA CORRETA BASEADA NO SEU SERVER.JS
+    const API_MESSAGING_BASE = `${API_BASE_URL}/api/messaging`; 
+
+    if (!listContainer) return;
+
+    // 1. Renderiza a lista lateral (Conversas)
+    function renderInboxList(conversations) {
+        listContainer.innerHTML = '';
+        if (!conversations || conversations.length === 0) {
+            listContainer.innerHTML = '<li style="padding:20px; text-align:center; color:#999;">Nenhuma conversa iniciada.</li>';
+            return;
+        }
+
+        conversations.forEach(conv => {
+            // O backend retorna o objeto 'patient' populado
+            const paciente = conv.patient || { nome: 'Paciente', fotoUrl: null };
+            
+            const li = document.createElement('li');
+            li.className = `message-item`;
+            
+            // Formata data
+            const dataUltima = new Date(conv.updatedAt).toLocaleDateString('pt-BR');
+            
+            li.innerHTML = `
+                <div class="sender-avatar">${paciente.nome ? paciente.nome.charAt(0) : 'P'}</div>
+                <div class="message-info">
+                    <div class="message-top">
+                        <span class="sender-name">${paciente.nome || 'Paciente'}</span>
+                        <span class="message-time">${dataUltima}</span>
+                    </div>
+                    <div class="message-subject" style="font-size:0.8rem; color:#666;">
+                        Clique para ler
+                    </div>
+                </div>
+            `;
+            
+            li.onclick = () => {
+                document.querySelectorAll('.message-item').forEach(i => i.classList.remove('active'));
+                li.classList.add('active');
+                carregarMensagensDaConversa(conv.id, paciente);
+            };
+            listContainer.appendChild(li);
+        });
+    }
+
+    // 2. Busca mensagens de uma conversa específica
+    async function carregarMensagensDaConversa(conversationId, paciente) {
+        contentContainer.innerHTML = '<div style="padding:40px; text-align:center;">Carregando chat...</div>';
+
+        try {
+            // Rota: GET /api/messaging/conversations/:id
+            const res = await apiFetch(`${API_MESSAGING_BASE}/conversations/${conversationId}`); 
+            if (res.ok) {
+                const messages = await res.json();
+                renderChatView(messages, paciente, conversationId);
+            } else {
+                throw new Error('Erro ao carregar mensagens');
+            }
+        } catch (error) {
+            contentContainer.innerHTML = `<div style="padding:20px; color:red; text-align:center;">Erro: ${error.message}</div>`;
+        }
+    }
+
+    // 3. Renderiza a tela de chat
+    function renderChatView(messages, paciente, conversationId) {
+        let html = `
+            <div class="email-wrapper">
+                <div class="email-header">
+                    <div class="email-meta">
+                        <div class="sender-avatar-large" style="overflow:hidden;">
+                            ${paciente.fotoUrl 
+                                ? `<img src="${formatImageUrl(paciente.fotoUrl)}" style="width:100%; height:100%; object-fit:cover;">` 
+                                : (paciente.nome ? paciente.nome.charAt(0) : 'P')}
+                        </div>
+                        <div class="email-meta-text">
+                            <h2>${paciente.nome}</h2>
+                            <p>Chat com Paciente</p>
+                        </div>
+                    </div>
+                    <button id="btn-refresh-chat" class="btn-outline-light" style="color:#555; border-color:#ddd;">Atualizar</button>
+                </div>
+                
+                <div class="email-body" id="chat-scroller" style="display:flex; flex-direction:column; gap:15px; padding-bottom:100px; max-height:400px; overflow-y:auto;">
+        `;
+
+        if (messages.length === 0) {
+            html += `<p style="text-align:center; color:#999; margin-top:20px;">Nenhuma mensagem ainda.</p>`;
+        } else {
+            messages.forEach(msg => {
+                // Se senderType for 'psychologist', fui eu que enviei
+                const souEu = msg.senderType === 'psychologist';
+                
+                const styleBox = souEu 
+                    ? 'align-self: flex-end; background-color: #e8f5e9; border-bottom-right-radius: 2px;' 
+                    : 'align-self: flex-start; background-color: #f8f9fa; border-bottom-left-radius: 2px;';
+
+                const time = new Date(msg.createdAt).toLocaleString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+                html += `
+                    <div style="max-width:75%; padding:12px 16px; border-radius:12px; ${styleBox} border:1px solid #eee; position:relative;">
+                        <p style="margin:0; font-size:0.95rem; color:#333; line-height:1.5;">${msg.content}</p>
+                        <span style="font-size:0.7rem; color:#888; display:block; text-align:right; margin-top:4px;">${time}</span>
+                    </div>
+                `;
+            });
+        }
+
+        html += `</div>`; // Fim do corpo
+
+        // Input Fixo
+        html += `
+            <div style="position:sticky; bottom:0; background:#fff; padding:20px 0; border-top:1px solid #eee; margin-top:auto;">
+                <form id="form-enviar-mensagem" style="display:flex; gap:10px;">
+                    <input type="text" id="input-mensagem" placeholder="Digite sua mensagem..." autocomplete="off"
+                        style="flex:1; padding:12px 15px; border:1px solid #ccc; border-radius:25px; outline:none; font-size:1rem;">
+                    <button type="submit" style="background:var(--verde-escuro); color:#fff; border:none; padding:0 25px; border-radius:25px; font-weight:bold; cursor:pointer; transition:0.2s;">
+                        Enviar
+                    </button>
+                </form>
+            </div>
+            </div>
+        `;
+
+        contentContainer.innerHTML = html;
+
+        // Auto-scroll para o fim
+        const scroller = document.getElementById('chat-scroller');
+        if(scroller) scroller.scrollTop = scroller.scrollHeight;
+
+        // Enviar Mensagem
+        const form = document.getElementById('form-enviar-mensagem');
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('input-mensagem');
+            const texto = input.value.trim();
+            const btn = form.querySelector('button');
+            
+            if(!texto) return;
+
+            btn.disabled = true;
+            btn.style.opacity = "0.7";
+
+            try {
+                // Rota: POST /api/messaging/messages
+                await apiFetch(`${API_MESSAGING_BASE}/messages`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        conversationId: conversationId,
+                        recipientId: paciente.id,
+                        recipientType: 'patient',
+                        content: texto
+                    })
+                });
+                
+                input.value = '';
+                // Recarrega chat
+                carregarMensagensDaConversa(conversationId, paciente);
+            } catch (err) {
+                alert('Erro ao enviar: ' + err.message);
+                btn.disabled = false;
+                btn.style.opacity = "1";
+            }
+        };
+
+        document.getElementById('btn-refresh-chat').onclick = () => carregarMensagensDaConversa(conversationId, paciente);
+    }
+
+    // --- INICIALIZAÇÃO: Busca lista de conversas ---
+    // Rota: GET /api/messaging/conversations
+    apiFetch(`${API_MESSAGING_BASE}/conversations`)
+        .then(async (res) => {
+            if (res.ok) {
+                const convs = await res.json();
+                renderInboxList(convs);
+            } else {
+                throw new Error('Falha ao buscar conversas');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            listContainer.innerHTML = '<li style="padding:20px; text-align:center; color:#d9534f;">Erro ao conectar ao chat.</li>';
+        });
+}
 
     // INIT
     fetchPsychologistData().then(ok => {
