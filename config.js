@@ -4,7 +4,7 @@ const isLocalhost = window.location.hostname.includes("localhost") ||
 
 // Se for local, usa localhost. Se não, usa o link do Render.
 const API_BASE_URL = isLocalhost 
-    ? "http://localhost:3000" 
+    ? "http://localhost:3001" 
     : "https://projeto-girassol.onrender.com"; 
 
 console.log("Ambiente detectado:", isLocalhost ? "Local" : "Produção (Render)");

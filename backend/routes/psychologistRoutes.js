@@ -44,7 +44,7 @@ router.get('/me/unread-count', psychologistController.getUnreadMessageCount);
 router.get('/me/qna-unanswered-count', psychologistController.getUnansweredQuestionsCount);
 router.put('/me/password', psychologistController.updatePsychologistPassword);
 router.delete('/me', psychologistController.deletePsychologistAccount);
-
+ 
 // Adicione junto com as rotas protegidas "me"
 router.post('/me/cancel-subscription', psychologistController.cancelSubscription);
 

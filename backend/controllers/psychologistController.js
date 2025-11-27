@@ -16,7 +16,7 @@ const generateToken = (id) => {
         expiresIn: '30d', // O token expira em 30 dias
     });
 };
-
+ 
 // Função Auxiliar: Gera um slug único (Nome + Sufixo Aleatório)
 const generateSlug = (name) => {
     const baseSlug = name
