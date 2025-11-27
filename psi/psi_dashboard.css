@@ -1,6 +1,9 @@
 /* ==========================================================================
    1. VARIÁVEIS E FONTES GLOBAIS
    ========================================================================== */
+/* IMPORTANTE: Importar a fonte Inter do Google */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 :root {
     --verde-escuro: #1B4332;
     --cor-girassol: #FFEE8C;
@@ -12,26 +15,64 @@
     --coral-quente: #E63946;
 }
 
+/* Fonte Serifada (Títulos) */
 @font-face {
     font-family: 'New Kansas';
+    /* Garante que se a fonte não carregar, usa serif padrão */
     src: url('../assets/fonts/NewKansas-Bold.woff2') format('woff2'),
          url('../assets/fonts/NewKansas-Bold.woff') format('woff');
     font-weight: 700;
     font-style: normal;
     font-display: swap;
 }
-
 /* ==========================================================================
    2. ESTRUTURA DO LAYOUT (DASHBOARD)
    ========================================================================== */
 body.pagina-dashboard {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', sans-serif !important; /* Força a fonte Inter */
     background-color: var(--cinza-fundo);
     color: var(--cinza-texto);
     margin: 0;
-    padding-top: 0;
-    height: 100vh; /* Garante altura total */
-    overflow: hidden; /* Evita rolagem dupla na página inteira */
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden; /* Remove barra de rolagem dupla */
+}
+
+/* Correção para Modais (Garante que fiquem escondidos e sobrepostos) */
+.custom-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none; /* Oculto por padrão */
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Muito acima de tudo */
+    backdrop-filter: blur(3px);
+}
+
+/* Garante que quando tiver a classe flex, ele apareça */
+.custom-modal-overlay[style*="display: flex"] {
+    display: flex !important;
+}
+
+.custom-modal-box {
+    background: #fff;
+    padding: 30px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    position: relative;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
 
 .dashboard-container { 
@@ -754,6 +795,47 @@ button[disabled] { background: #e9ecef !important; color: #adb5bd; cursor: not-a
 .btn-perigo-final:hover {
     background-color: #c9303c;
 }
+
+/* --- ADICIONE ISSO NO FINAL DO ARQUIVO PARA ARRUMAR A COMUNIDADE --- */
+
+/* Loader (Rodinha girando) */
+.loader-wrapper { display: flex; justify-content: center; padding: 40px; }
+.loader-spinner {
+    width: 40px; height: 40px;
+    border: 4px solid #f3f3f3; border-top: 4px solid var(--verde-escuro);
+    border-radius: 50%; animation: spin 1s linear infinite;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* Estilos Específicos do Modal da Comunidade (compatível com seu HTML atual) */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none; /* Controlado pelo JS */
+    justify-content: center; align-items: center;
+    z-index: 10000; backdrop-filter: blur(3px);
+}
+/* Regra para garantir que o JS consiga mostrar o modal */
+.modal-overlay[style*="display: flex"] { display: flex !important; }
+
+.modal-content {
+    background: #fff; padding: 30px; border-radius: 16px;
+    width: 90%; max-width: 600px; position: relative;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+.modal-close {
+    position: absolute; top: 15px; right: 20px;
+    background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;
+}
+.modal-header h2 { margin-top: 0; font-size: 1.5rem; font-family: 'New Kansas', serif; color: var(--verde-escuro); }
+
+.modal-body textarea {
+    width: 100%; height: 150px; padding: 12px;
+    border: 1px solid #ced4da; border-radius: 8px; resize: vertical;
+    font-family: 'Inter', sans-serif;
+}
+.char-counter-modal { text-align: right; font-size: 0.8rem; color: #666; margin-top: 5px; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 /* INPUT COM PREFIXO (Redes Sociais) */
 .input-prefix-group {
     display: flex;

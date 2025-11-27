@@ -1,108 +1,27 @@
 <header class="main-header">
-    <div class="header-text">
+    <div>
         <h1>Caixa de Entrada</h1>
-        <p class="subtitulo-header">Suas mensagens e comunicados oficiais.</p>
+        <p class="subtitulo-header">Gerencie seus contatos e mensagens de pacientes.</p>
     </div>
-    <button id="btn-abrir-feedback" class="btn btn-outline-light">
-        <span style="margin-right: 5px;">✎</span> Enviar Feedback
-    </button>
+    <button class="btn-header-action">Configurar Respostas</button>
 </header>
 
 <div class="inbox-container">
     <aside class="inbox-sidebar">
         <div class="sidebar-search">
-            <input type="text" placeholder="Buscar mensagem..." disabled style="background: #f5f5f5; border: none;">
+            <input type="text" placeholder="Buscar mensagem..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
         </div>
-        <ul class="message-list">
-            <li class="message-item unread active">
-                <div class="sender-avatar">AJ</div>
-                <div class="message-info">
-                    <div class="message-top">
-                        <span class="sender-name">Admin Jano</span>
-                        <span class="message-time">10:30</span>
-                    </div>
-                    <div class="message-subject">Atualização Importante nos Termos de Uso</div>
-                    <div class="message-preview">As mudanças visam garantir maior segurança...</div>
-                </div>
-            </li>
-            
-            <li class="message-item unread">
-                <div class="sender-avatar">AJ</div>
-                <div class="message-info">
-                    <div class="message-top">
-                        <span class="sender-name">Admin Jano</span>
-                        <span class="message-time">Ontem</span>
-                    </div>
-                    <div class="message-subject">Workshop: Técnicas de Marketing</div>
-                    <div class="message-preview">Participe do nosso novo treinamento exclusivo...</div>
-                </div>
-            </li>
-
-            <li class="message-item">
-                <div class="sender-avatar" style="background-color: #ccc;">AJ</div>
-                <div class="message-info">
-                    <div class="message-top">
-                        <span class="sender-name">Admin Jano</span>
-                        <span class="message-time">05/10</span>
-                    </div>
-                    <div class="message-subject">Boas-vindas à Plataforma Jano!</div>
-                    <div class="message-preview">Estamos muito felizes em ter você conosco...</div>
-                </div>
-            </li>
+        <ul class="message-list" id="inbox-message-list">
+            <li style="padding:20px; text-align:center; color:#999;">Carregando mensagens...</li>
         </ul>
     </aside>
 
-    <main class="inbox-content">
-        <button class="btn-voltar-inbox" style="margin-bottom: 20px;">&larr; Voltar</button>
-
-        <div class="email-wrapper">
-            <div class="email-header">
-                <div class="email-meta">
-                    <div class="sender-avatar-large">AJ</div>
-                    <div class="email-meta-text">
-                        <h2>Atualização Importante nos Termos de Uso</h2>
-                        <p>De <strong>Admin Jano</strong> para <strong>Você</strong> &bull; Hoje, 10:30</p>
-                    </div>
-                </div>
-                <div class="email-actions">
-                    <button class="icon-btn" title="Arquivar">📥</button>
-                    <button class="icon-btn" title="Excluir">🗑️</button>
-                </div>
-            </div>
-
-            <div class="email-body">
-                <p>Prezado(a) profissional,</p>
-                <p>Gostaríamos de informar que nossos Termos de Uso foram atualizados para refletir as novas funcionalidades da plataforma. As mudanças visam garantir maior segurança e transparência para todos os usuários.</p>
-                
-                <div class="highlight-box">
-                    <strong>O que mudou?</strong><br>
-                    Novas regras sobre cancelamento e política de privacidade de dados dos pacientes.
-                </div>
-
-                <p>Por favor, revise os novos termos clicando no link abaixo. A continuação do uso da plataforma implica na aceitação das novas condições.</p>
-                
-                <p style="margin-top: 30px;">
-                    <a href="#" class="btn-link">Ler Novos Termos de Uso &rarr;</a>
-                </p>
-
-                <hr style="border: 0; border-top: 1px solid #eee; margin: 40px 0;">
-                <p style="font-size: 0.9rem; color: #888;">Equipe Jano</p>
-            </div>
+    <section class="inbox-content" id="inbox-message-content">
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#999;">
+            <svg width="60" height="60" fill="currentColor" viewBox="0 0 16 16" style="opacity:0.3; margin-bottom:15px;">
+                <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4Zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2Zm13 2.383-4.708 2.825L15 11.105V5.383Zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741ZM1 11.105l4.708-2.897L1 5.383v5.722Z"/>
+            </svg>
+            <p>Selecione uma mensagem para ler</p>
         </div>
-    </main>
-</div>
-
-<div id="modal-feedback" class="modal-overlay hidden">
-    <div class="modal-content">
-        <button id="btn-fechar-modal" class="modal-close-btn">&times;</button>
-        <h2>Enviar Mensagem</h2>
-        <p>Dúvidas ou sugestões? Escreva para nós.</p>
-        <form>
-            <textarea id="feedback-textarea" rows="6" placeholder="Digite sua mensagem..."></textarea>
-            <div class="form-acoes">
-                <button type="button" class="btn btn-secundario modal-cancel">Cancelar</button>
-                <button type="submit" class="btn btn-principal">Enviar</button>
-            </div>
-        </form>
-    </div>
+    </section>
 </div>
