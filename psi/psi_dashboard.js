@@ -230,41 +230,35 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- PÁGINA ASSINATURA (CORREÇÕES VISUAIS) ---
     // Substitua toda a função 'inicializarAssinatura' por esta versão:
 
-function inicializarAssinatura() {
+ function inicializarAssinatura() {
     const cardResumo = document.getElementById('card-resumo-assinatura');
     const areaCancelamento = document.getElementById('area-cancelamento');
     const temPlano = psychologistData && psychologistData.plano;
 
-    // 1. CORREÇÃO DOS PREÇOS (Atualizado)
+    // Tabela de preços atualizada
     const precos = { 'semente': 'R$ 99,00', 'luz': 'R$ 149,00', 'sol': 'R$ 199,00' };
 
     if (temPlano && cardResumo) {
-        // Exibe o banner
         cardResumo.style.display = 'flex';
         
-        // Verifica se está cancelado (backend deve retornar cancel_at_period_end ou status similar)
-        // Se não tiver vindo do backend, assumimos false. O botão de cancelar atualizará isso manualmente abaixo.
+        // Verifica status de cancelamento
         const isCancelado = psychologistData.cancel_at_period_end || psychologistData.status === 'canceled' || psychologistData.cancelado_localmente;
 
+        // Se estiver cancelado, esconde a área de cancelar (danger zone)
         if (areaCancelamento) {
-            // Se já está cancelado, esconde o botão de cancelar (não faz sentido cancelar 2x)
             areaCancelamento.style.display = isCancelado ? 'none' : 'block';
         }
 
-        // --- PREENCHIMENTO DO BANNER ---
-        
-        // Nome do Plano
+        // --- PREENCHE O BANNER SUPERIOR ---
         const elNome = document.getElementById('banner-nome-plano');
         if(elNome) elNome.textContent = `Plano ${psychologistData.plano}`;
         
-        // Preço
         const planoKey = psychologistData.plano.toLowerCase();
         const elPreco = document.getElementById('banner-preco');
         if(elPreco) elPreco.textContent = `${precos[planoKey] || 'R$ --'} / mês`;
 
-        // Lógica da DATA e do BADGE (Ativo vs Cancelado)
         const elData = document.getElementById('banner-renovacao');
-        const elBadge = cardResumo.querySelector('.status-badge'); // Seleciona o container do badge
+        const elBadge = cardResumo.querySelector('.status-badge');
 
         let dataDisplay;
         if (psychologistData.subscription_expires_at) {
@@ -276,44 +270,31 @@ function inicializarAssinatura() {
         const dataFormatada = dataDisplay.toLocaleDateString('pt-BR');
 
         if (isCancelado) {
-            // 2. ESTADO: CANCELADO (Amarelo)
+            // BANNER: Estado Cancelado (Amarelo)
             if (elData) elData.textContent = `Finaliza em: ${dataFormatada}`;
-            
             if (elBadge) {
-                // Reconstrói o badge com a bolinha amarela e texto "Cancelado"
-                elBadge.innerHTML = `
-                    <span style="width: 8px; height: 8px; background: #FFC107; border-radius: 50%;"></span>
-                    Cancelado
-                `;
+                elBadge.innerHTML = `<span style="width: 8px; height: 8px; background: #FFC107; border-radius: 50%;"></span> Cancelado`;
             }
         } else {
-            // ESTADO: ATIVO (Verde - Padrão)
+            // BANNER: Estado Ativo (Verde)
             if (elData) elData.textContent = `Renova em: ${dataFormatada}`;
-            
             if (elBadge) {
-                // Mantém/Restaura o padrão verde
-                elBadge.innerHTML = `
-                    <span style="width: 8px; height: 8px; background: #4ade80; border-radius: 50%;"></span>
-                    Ativo
-                `;
+                elBadge.innerHTML = `<span style="width: 8px; height: 8px; background: #4ade80; border-radius: 50%;"></span> Ativo e Validado`;
             }
         }
 
-        // --- LÓGICA DO BOTÃO DE CANCELAR ---
+        // Lógica do Modal de Cancelamento (Só ativa se NÃO estiver cancelado)
         const btnCancelar = document.getElementById('btn-cancelar-assinatura');
         const modalCancel = document.getElementById('modal-cancelamento');
         
         if(btnCancelar && modalCancel && !isCancelado) {
-            // Clona para limpar eventos antigos
             const novoBtn = btnCancelar.cloneNode(true);
             btnCancelar.parentNode.replaceChild(novoBtn, btnCancelar);
             
             novoBtn.onclick = (e) => { e.preventDefault(); modalCancel.style.display = 'flex'; };
             document.getElementById('btn-fechar-modal-cancel').onclick = () => modalCancel.style.display = 'none';
             
-            // Ação de confirmar cancelamento
             const btnConfirmar = document.getElementById('btn-confirmar-cancelamento');
-            // Clona também para evitar múltiplos listeners acumulados
             const novoConfirmar = btnConfirmar.cloneNode(true);
             btnConfirmar.parentNode.replaceChild(novoConfirmar, btnConfirmar);
 
@@ -321,16 +302,10 @@ function inicializarAssinatura() {
                 this.textContent = "Processando...";
                 try {
                     await apiFetch(`${API_BASE_URL}/api/psychologists/me/cancel-subscription`, { method: 'POST' });
-                    
-                    // 3. ATUALIZAÇÃO DE ESTADO LOCAL
-                    // NÃO removemos o plano (plano = null), pois o user ainda tem acesso até o fim do mês
                     psychologistData.cancel_at_period_end = true; 
-                    psychologistData.cancelado_localmente = true; // Flag forçada para UI reagir imediatamente
-                    
+                    psychologistData.cancelado_localmente = true; 
                     modalCancel.style.display = 'none';
                     showToast('Renovação automática cancelada.', 'info');
-                    
-                    // Recarrega a UI para aplicar as cores amarelas e texto novo
                     inicializarAssinatura(); 
                 } catch(e) {
                     showToast('Erro: ' + e.message, 'error');
@@ -340,12 +315,11 @@ function inicializarAssinatura() {
             };
         }
     } else {
-        // ESCONDE SE NÃO TIVER PLANO
         if(cardResumo) cardResumo.style.display = 'none';
         if(areaCancelamento) areaCancelamento.style.display = 'none';
     }
 
-    // --- ESTADO DOS CARDS DE PLANOS ---
+    // --- LÓGICA DOS CARDS E BOTÕES ---
     document.querySelectorAll('.plano-card').forEach(card => {
         const btn = card.querySelector('.btn-mudar-plano');
         if (!btn) return;
@@ -358,24 +332,43 @@ function inicializarAssinatura() {
             else planoCard = 'sol';
         }
 
+        // Limpa estados anteriores
         card.classList.remove('plano-card--ativo');
         const selo = card.querySelector('.selo-plano-atual');
         if(selo) selo.remove();
 
         const isCurrent = temPlano && psychologistData.plano.toLowerCase() === planoCard.toLowerCase();
+        // Recupera flag de cancelamento definida acima
+        const isCancelado = psychologistData.cancel_at_period_end || psychologistData.status === 'canceled' || psychologistData.cancelado_localmente;
 
         if(isCurrent) {
-            btn.textContent = "Plano Atual";
-            btn.disabled = true; 
-            
+            // Adiciona o selo visual de identificação
             const novoSelo = document.createElement('div');
             novoSelo.className = 'selo-plano-atual';
             novoSelo.textContent = 'Seu Plano Atual';
             novoSelo.style.cssText = "background:#1B4332; color:#fff; padding:5px 10px; border-radius:4px; margin-bottom:10px; font-size:0.8rem; display:inline-block; font-weight:bold;";
             card.insertBefore(novoSelo, card.firstChild);
+
+            if (isCancelado) {
+                // CASO 1: É o plano atual, MAS está cancelado -> Botão REATIVAR
+                btn.textContent = "Reativar Assinatura";
+                btn.disabled = false; // Habilita o clique
+                
+                // Ao clicar, chama o pagamento novamente (reativação via checkout/update)
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    window.iniciarPagamento(planoCard.toLowerCase(), btn);
+                };
+            } else {
+                // CASO 2: É o plano atual e está ativo -> Botão DISABLED
+                btn.textContent = "Plano Atual";
+                btn.disabled = true; // Fica cinza via CSS
+            }
         } else {
+            // CASO 3: Não é o plano atual -> Botão TROCAR
             btn.textContent = temPlano ? "Trocar de Plano" : "Assinar Agora";
             btn.disabled = false;
+            
             btn.onclick = (e) => {
                 e.preventDefault();
                 window.iniciarPagamento(planoCard.toLowerCase(), btn);
