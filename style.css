@@ -51,7 +51,6 @@ h1, h2, h3, h4, h5, h6 {
 header {
     background-color: #1B4332;
     color: white;
-    display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 12px 30px; /* Espaçamento reduzido */
@@ -61,9 +60,20 @@ header {
     margin-top: 0;         /* ESSENCIAL */
     margin-bottom: 0;      /* ESSENCIAL */
     width: 100%;
-    z-index: 1000;
     transition: background-color 0.3s ease, color 0.3s ease;
     box-sizing: border-box;
+
+    /* CORREÇÃO CRÍTICA DE CAMADA */
+    z-index: 10000 !important; /* Tem que ser maior que 9999 (ruído) */
+    
+    /* GARANTIAS DE VISIBILIDADE (Anti-Bug de Cache) */
+    opacity: 1 !important; 
+    visibility: visible !important;
+    display: flex !important; /* Força ele a aparecer mesmo que o JS demore */
+    
+    /* Previne problemas de transformação que criam novos contextos de pilha */
+    transform: translateZ(0); 
+    -webkit-font-smoothing: antialiased;
 }
 
 /* --- ESTILOS DA LOGO DINÂMICA --- */
